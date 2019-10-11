@@ -1,9 +1,9 @@
 package csp
 
 import (
-	"gmidarch/shared/parameters"
+	"newsolution/shared/parameters"
 	"strings"
-	"gmidarch/shared/shared"
+	"newsolution/shared/shared"
 	"errors"
 	"reflect"
 	"gmidarch/development/framework/connectors"

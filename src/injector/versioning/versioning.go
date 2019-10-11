@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 	"time"
-	"gmidarch/shared/parameters"
+	"newsolution/shared/parameters"
 	"gmidarch/development/artefacts/madl"
 	"gmidarch/development/framework/architecturallibrary"
 )

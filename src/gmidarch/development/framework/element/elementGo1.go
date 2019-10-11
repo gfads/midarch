@@ -2,7 +2,7 @@ package element
 
 import (
 	"gmidarch/development/framework/messages"
-	"gmidarch/shared/shared"
+	"newsolution/shared/shared"
 	"reflect"
 	"gmidarch/development/artefacts/graphs"
 	"fmt"

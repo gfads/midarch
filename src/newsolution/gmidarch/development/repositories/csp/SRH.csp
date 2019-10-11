@@ -1,0 +1,5 @@
+datatype PROCNAMES = e1
+channel InvR, TerR : PROCNAMES
+channel I_Receive, I_Send
+
+SRH = I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> SRH

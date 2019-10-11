@@ -7,9 +7,9 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
-	"gmidarch/shared/parameters"
+	"newsolution/shared/parameters"
 	"apps/fibonacci/implrpc"
-	"gmidarch/shared/net"
+	"newsolution/shared/net"
 )
 
 func main() {

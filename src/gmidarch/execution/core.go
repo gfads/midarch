@@ -3,12 +3,12 @@ package execution
 import (
 	"gmidarch/development/framework/element"
 	"strings"
-	"gmidarch/shared/shared"
+	"newsolution/shared/shared"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/artefacts/madl"
 	"gmidarch/development/artefacts/csp"
 	"gmidarch/development/framework/messages"
-	"gmidarch/shared/parameters"
+	"newsolution/shared/parameters"
 )
 
 type Core struct{}

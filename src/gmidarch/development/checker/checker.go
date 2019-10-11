@@ -2,7 +2,7 @@ package checker
 
 import (
 	"errors"
-	"gmidarch/shared/parameters"
+	"newsolution/shared/parameters"
 	"gmidarch/development/framework/configuration/commands"
 	"os/exec"
 	"strings"
@@ -56,7 +56,7 @@ func check(csp csp.CSP) (bool, error) {
 func (Checker) GenerateDotFiles(csp csp.CSP) (error) {
 	r1 := *new(error)
 
-	// Invoke FDR - Generate FDR dots
+	// Invoke FDR - Generate FDR dot
 	// TODO
 
 	return r1
@@ -71,19 +71,19 @@ func (Checker) LoadDotFiles() {
 	dotFiles, err := dotFile.LoadDotFiles(cspMid)
 	shared.CheckError(err, "EE")
 
-	// Create dots
-	dots := map[string]artefacts.DOT{}
+	// Create dot
+	dot := map[string]artefacts.DOT{}
 	for i := range dotFiles {
 		dot := artefacts.DOT{}
 		dot.Create(dotFiles[i])
-		dots[i] = dot
+		dot[i] = dot
 	}
 
 	// Create state machines
 	stateMachines := map[string]artefacts.GraphExecutable{}
 	sm := artefacts.GraphExecutable{}
-	for i := range dots {
-		sm.Create(dots[i])
+	for i := range dot {
+		sm.Create(dot[i])
 		stateMachines[i] = sm
 	}
 }

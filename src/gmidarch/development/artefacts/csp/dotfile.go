@@ -1,11 +1,11 @@
 package csp
 
 import (
-	"gmidarch/shared/parameters"
+	"newsolution/shared/parameters"
 	"os"
 	"bufio"
 	"errors"
-	"gmidarch/shared/shared"
+	"newsolution/shared/shared"
 )
 
 type DOTFile struct {

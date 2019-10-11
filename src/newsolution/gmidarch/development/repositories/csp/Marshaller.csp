@@ -1,0 +1,5 @@
+datatype PROCNAMES = e1
+channel InvP, TerP : PROCNAMES
+channel I_Process
+
+Marshaller = InvP.e1 -> I_Process -> TerP.e1 -> Marshaller

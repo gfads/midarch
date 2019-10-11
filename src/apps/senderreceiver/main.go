@@ -1,14 +1,14 @@
 package main
 
 import (
-	"gmidarch/shared/shared"
+	"newsolution/shared/shared"
 	"gmidarch/development/frontend"
 	"fmt"
 )
 
 func main(){
 
-	err := frontend.FrontEnd{}.Deploy("SenderReceiver.madl")
+	err := frontend.FrontEnd{}.Deploy("SenderReceiver.madls")
 	shared.CheckError(err,"MAIN")
 
 	fmt.Scanln()

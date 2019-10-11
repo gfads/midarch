@@ -1,8 +1,8 @@
 package components
 
 import (
-	"gmidarch/shared/shared"
-	"gmidarch/shared/parameters"
+	"newsolution/shared/shared"
+	"newsolution/shared/parameters"
 	"gmidarch/development/framework/messages"
 	"fmt"
 	"os"

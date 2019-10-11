@@ -1,0 +1,6 @@
+datatype PROCNAMES = e1
+
+channel InvR, TerR : PROCNAMES
+channel I_Setmessage, I_Printmessage
+
+Client = I_Setmessage -> InvR.e1 -> TerR.e1 -> I_Printmessage -> Client

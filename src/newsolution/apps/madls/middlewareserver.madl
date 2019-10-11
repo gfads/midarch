@@ -1,0 +1,19 @@
+Configuration MiddlewareServer :=
+   Components
+      server     : Calculatorserver
+      invoker    : Calculatorinvoker
+      marshaller : Marshaller
+      srh        : SRH
+
+   Connectors
+      t1 : Requestreply
+      t2 : Requestreply
+      t3 : Requestreply
+
+   Attachments
+      srh,t1,invoker
+      invoker,t2,marshaller
+      invoker,t3,server
+   Adaptability
+      None
+EndConf 

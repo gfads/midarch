@@ -2,8 +2,8 @@ package components
 
 import (
 	"time"
-	"gmidarch/shared/parameters"
-	"gmidarch/shared/shared"
+	"newsolution/shared/parameters"
+	"newsolution/shared/shared"
 	"gmidarch/development/framework/messages"
 	"fmt"
 )

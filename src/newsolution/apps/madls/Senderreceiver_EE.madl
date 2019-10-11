@@ -1,0 +1,20 @@
+Configuration Senderreceiver_EE := 
+
+   Components 
+      core : Core 
+      unit1 : Unit 
+      unit2 : Unit 
+      unit3 : Unit 
+
+    Connectors 
+      t1 : OneToN 
+
+    Attachments 
+      core,t1,unit1 
+      core,t1,unit2 
+      core,t1,unit3 
+
+   Adaptability 
+      NONE 
+
+EndConf 

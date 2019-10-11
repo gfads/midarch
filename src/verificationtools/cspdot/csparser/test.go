@@ -2,15 +2,15 @@ package main
 
 import (
 	"os/exec"
-	"gmidarch/shared/parameters"
-	"gmidarch/shared/error"
+	"newsolution/shared/parameters"
+	"newsolution/shared/error"
 )
 
 func main() {
 
-	// createDot("confs.csp", "")
+	// createDot("confs.artefacts", "")
 
-	createDot("confs.csp", "requestor")
+	createDot("confs.artefacts", "requestor")
 
 }
 

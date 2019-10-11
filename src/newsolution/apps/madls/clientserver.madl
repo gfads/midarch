@@ -1,0 +1,15 @@
+Configuration Senderreceiver :=
+
+   Components
+      client : Client
+      server : Server
+
+   Connectors
+      t : Requestreply
+
+   Attachments
+      client,t,server
+
+   Adaptability
+      NONE
+EndConf

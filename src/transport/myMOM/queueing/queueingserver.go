@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	"gmidarch/shared/parameters"
+	"newsolution/shared/parameters"
 	"strconv"
-	"gmidarch/shared/net"
+	"newsolution/shared/net"
 	EE "gmidarch/execution/execution"
 )
 

@@ -1,0 +1,5 @@
+datatype PROCNAMES = e1 | e2 | e3
+channel InvP, TerP, InvR, TerR : PROCNAMES
+channel I_DeserialiseMIOP, I_PrepareToObject, I_SerialiseMIOP, I_PrepareToSRH
+
+Invoker = InvP.e1 -> I_DeserialiseMIOP -> InvR.e2 -> TerR.e2 -> I_PrepareToObject -> InvR.e3 -> TerR.e3 -> I_SerialiseMIOP -> InvR.e2 -> TerR.e2 -> I_PrepareToSRH -> TerP.e1 -> Invoker

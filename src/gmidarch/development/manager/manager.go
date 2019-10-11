@@ -7,7 +7,7 @@ import (
 	"gmidarch/development/checker"
 	"strings"
 	"strconv"
-	"gmidarch/shared/parameters"
+	"newsolution/shared/parameters"
 	"gmidarch/development/generator"
 	"gmidarch/execution"
 	"gmidarch/development/artefacts/madl"
@@ -19,7 +19,7 @@ import (
 	"gmidarch/development/framework/components"
 	"gmidarch/development/framework/element"
 	"injector/versioning"
-	"gmidarch/shared/shared"
+	"newsolution/shared/shared"
 	"gmidarch/development/framework/architecturallibrary"
 )
 
@@ -37,6 +37,8 @@ type Manager struct {
 	StructuralChannelsMid map[string]chan messages.SAMessage
 	StructuralChannelsEE  map[string]chan messages.SAMessage
 }
+
+func NewManager(){}
 
 func (m Manager) Invoke(madlFileName string) (error) {
 	r1 := *new(error)

@@ -2,9 +2,9 @@ package generator
 
 import (
 	"errors"
-	"gmidarch/shared/parameters"
+	"newsolution/shared/parameters"
 	"strings"
-	"gmidarch/shared/shared"
+	"newsolution/shared/shared"
 	"gmidarch/development/artefacts/madl"
 	"gmidarch/development/artefacts/csp"
 	"fmt"

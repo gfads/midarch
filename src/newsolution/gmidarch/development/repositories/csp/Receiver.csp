@@ -1,0 +1,5 @@
+datatype PROCNAMES = e1
+channel InvP : PROCNAMES
+channel I_PrintMessage
+
+Receiver = InvP.e1 -> I_PrintMessage -> Receiver

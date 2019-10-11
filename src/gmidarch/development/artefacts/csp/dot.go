@@ -3,7 +3,7 @@ package csp
 import (
 	"strings"
 	"strconv"
-	"gmidarch/shared/parameters"
+	"newsolution/shared/parameters"
 	"errors"
 	"gmidarch/development/artefacts/graphs"
 )

@@ -3,7 +3,7 @@ package components
 import (
 	"gmidarch/development/framework/messages"
 	"gmidarch/development/framework/element"
-	"gmidarch/shared/shared"
+	"newsolution/shared/shared"
 )
 
 type ExecutionUnit struct {

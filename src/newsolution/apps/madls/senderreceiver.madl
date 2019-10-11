@@ -1,0 +1,15 @@
+Configuration Senderreceiver :=
+
+   Components
+      sender   : Sender
+      receiver : Receiver
+
+   Connectors
+      t5 : Oneway
+
+   Attachments
+      sender,t5,receiver
+
+   Adaptability
+      NONE
+EndConf

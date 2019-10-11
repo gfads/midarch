@@ -7,9 +7,9 @@ import (
 	"framework/element"
 	"os/exec"
 	"framework/configuration/configuration"
-	"gmidarch/shared/shared"
-	"gmidarch/shared/parameters"
-	"gmidarch/shared/error"
+	"newsolution/shared/shared"
+	"newsolution/shared/parameters"
+	"newsolution/shared/error"
 	"framework/configuration/commands"
 	"graph/fdrgraph"
 	"log"
@@ -91,7 +91,7 @@ func (FDR) SaveCSP(conf configuration.Configuration) {
 	}
 
 	// create file if it does not exist && truncate otherwise
-	fileName := conf.Id + ".csp"
+	fileName := conf.Id + ".artefacts"
 	file, err := os.Create(confDir + "/" + fileName)
 	if err != nil {
 		myError := error.MyError{Source: "FDR", Message: "CSP File not created"}
@@ -115,7 +115,7 @@ func (FDR) SaveCSP(conf configuration.Configuration) {
 
 func (FDR) InvokeFDR(conf configuration.Configuration) bool {
 	cmdExp := parameters.DIR_FDR + "/" + commands.FDR_COMMAND
-	fileName := conf.Id + ".csp"
+	fileName := conf.Id + ".artefacts"
 	dirFile := parameters.DIR_CSP + "/" + strings.Replace(conf.Id, ".confs", "", 99)
 	inputFile := dirFile + "/" + fileName
 
