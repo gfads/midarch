@@ -1,0 +1,4 @@
+digraph G {
+  0 -> 1 [ label="I_Collect" ];
+  1 -> 0 [ label="InvR.e1" ];
+}

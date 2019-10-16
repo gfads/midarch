@@ -1,4 +1,4 @@
-Configuration Senderreceiver :=
+Configuration senderreceiver :=
 
    Components
       sender   : Sender
@@ -11,5 +11,5 @@ Configuration Senderreceiver :=
       sender,t5,receiver
 
    Adaptability
-      NONE
+      Evolutive
 EndConf

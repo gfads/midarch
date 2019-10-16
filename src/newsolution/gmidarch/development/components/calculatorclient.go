@@ -1,11 +1,11 @@
 package components
 
 import (
+	"fmt"
 	"newsolution/gmidarch/development/artefacts/graphs"
+	"newsolution/gmidarch/development/element"
 	"newsolution/gmidarch/development/messages"
 	"newsolution/shared/shared"
-	"fmt"
-	"newsolution/gmidarch/development/element"
 )
 
 //var t1 time.Time
@@ -20,7 +20,7 @@ func NewCalculatorclient() Calculatorclient {
 
 	// create a new instance of client
 	r := new(Calculatorclient)
-	r.Behaviour = "Client = I_Setmessage -> InvR.e1 -> TerR.e1 -> I_Printmessage -> Client"
+	r.Behaviour = "B = I_Setmessage -> InvR.e1 -> TerR.e1 -> I_Printmessage -> B"
 
 	return *r
 }

@@ -14,11 +14,12 @@ func NewMonitor() Monitor {
 
 	// create a new instance of Server
 	r := new(Monitor)
-	r.Behaviour = "B = I_Collect -> InvR.e1 -> B"
+	r.Behaviour = "B = InvP.e1 -> I_Process -> InvR.e2 -> B"
 
 	return *r
 }
 
-func (Monitor) I_Collect(msg *messages.SAMessage, info [] *interface{}) {
-	*msg = messages.SAMessage{} // TODO
+func (Monitor) I_Process(msg *messages.SAMessage, info [] *interface{}) {
+	//fmt.Printf("Monitor:: I_Process\n")
+	*msg = messages.SAMessage{Payload:"TODO"}
 }

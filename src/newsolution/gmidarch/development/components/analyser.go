@@ -14,11 +14,12 @@ func NewAnalyser() Analyser {
 
 	// create a new instance of Server
 	r := new(Analyser)
-	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B"
+	r.Behaviour = "B = InvP.e1 -> I_Process -> InvR.e2 -> B"
 
 	return *r
 }
 
 func (Analyser) I_Process(msg *messages.SAMessage,info [] *interface{}) {
-	*msg = messages.SAMessage{} // TODO
+	//fmt.Printf("Analyser:: I_Process \n")
+	*msg = messages.SAMessage{Payload:"TODO"} //TODO
 }

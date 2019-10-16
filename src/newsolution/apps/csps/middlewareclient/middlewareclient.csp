@@ -1,0 +1,15 @@
+datatype PROCNAMES = client | proxy | marshaller | requestor | crh | t1 | t2 | t3 | t4
+channel TerP,InvR,TerR,InvP : PROCNAMES
+channel I_Setmessage,I_Process,I_SerialiseMIOP,I_DeserialiseMIOP,I_PrepareToClient,I_Printmessage,I_ProcessIn,I_ProcessOut,I_PrepareToCRH
+CLIENT = I_Setmessage -> InvR.t1 -> TerR.t1 -> I_Printmessage -> CLIENT
+PROXY = InvP.t1 -> I_ProcessIn -> InvR.t2 -> TerR.t2 -> I_ProcessOut -> TerP.t1 -> PROXY
+MARSHALLER = InvP.t3 -> I_Process -> TerP.t3 -> MARSHALLER
+REQUESTOR = InvP.t2 -> I_SerialiseMIOP -> InvR.t3 -> TerR.t3 -> I_PrepareToCRH -> InvR.t4 -> TerR.t4 -> I_DeserialiseMIOP -> InvR.t3 -> TerR.t3 -> I_PrepareToClient -> TerP.t2 -> REQUESTOR
+CRH = InvP.t4 -> I_Process -> TerP.t4 -> CRH
+T1 = InvP.client -> InvR.proxy -> TerR.proxy -> TerP.client -> T1
+T2 = InvP.proxy -> InvR.requestor -> TerR.requestor -> TerP.proxy -> T2
+T3 = InvP.requestor -> InvR.marshaller -> TerR.marshaller -> TerP.requestor -> T3
+T4 = InvP.requestor -> InvR.crh -> TerR.crh -> TerP.requestor -> T4
+
+middlewareclient = (CLIENT ||| PROXY ||| MARSHALLER ||| REQUESTOR ||| CRH)[|{|TerP,InvR,TerR,InvP|}|](T1[[InvP.client <- InvR.t1,InvR.proxy <- InvP.t1,TerR.proxy <- TerP.t1,TerP.client <- TerR.t1]] ||| T2[[InvP.client <- InvR.t1,InvR.proxy <- InvP.t1,TerR.proxy <- TerP.t1,TerP.client <- TerR.t1,InvP.proxy <- InvR.t2,InvR.requestor <- InvP.t2,TerR.requestor <- TerP.t2,TerP.proxy <- TerR.t2]] ||| T3[[InvP.client <- InvR.t1,InvR.proxy <- InvP.t1,TerR.proxy <- TerP.t1,TerP.client <- TerR.t1,InvP.proxy <- InvR.t2,InvR.requestor <- InvP.t2,TerR.requestor <- TerP.t2,TerP.proxy <- TerR.t2,InvP.requestor <- InvR.t3,InvR.marshaller <- InvP.t3,TerR.marshaller <- TerP.t3,TerP.requestor <- TerR.t3]] ||| T4[[InvP.client <- InvR.t1,InvR.proxy <- InvP.t1,TerR.proxy <- TerP.t1,TerP.client <- TerR.t1,InvP.proxy <- InvR.t2,InvR.requestor <- InvP.t2,TerR.requestor <- TerP.t2,TerP.proxy <- TerR.t2,InvP.requestor <- InvR.t3,InvR.marshaller <- InvP.t3,TerR.marshaller <- TerP.t3,TerP.requestor <- TerR.t3,InvP.requestor <- InvR.t4,InvR.crh <- InvP.t4,TerR.crh <- TerP.t4,TerP.requestor <- TerR.t4]])
+assert middlewareclient :[deadlock free]

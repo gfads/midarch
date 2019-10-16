@@ -14,12 +14,14 @@ import (
 type Marshaller struct {
 	CSP   string
 	Graph graphs.ExecGraph
+	Behaviour string
 }
 
 func NewMarshaller() Marshaller {
 
 	// create a new instance of Server
 	r := new(Marshaller)
+	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B"
 
 	return *r
 }

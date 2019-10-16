@@ -11,12 +11,14 @@ import (
 type Requestor struct {
 	CSP   string
 	Graph graphs.ExecGraph
+	Behaviour string
 }
 
 func NewRequestor() Requestor {
 
 	// create a new instance of Server
 	r := new(Requestor)
+	r.Behaviour = "B = InvP.e1 -> I_SerialiseMIOP -> InvR.e2 -> TerR.e2 -> I_PrepareToCRH -> InvR.e3 -> TerR.e3 -> I_DeserialiseMIOP -> InvR.e2 -> TerR.e2 -> I_PrepareToClient -> TerP.e1 -> B"
 
 	return *r
 }

@@ -1,0 +1,9 @@
+datatype PROCNAMES = client | server | t
+channel InvR,TerR,InvP,TerP : PROCNAMES
+channel I_Printmessage,I_Process,I_Setmessage
+CLIENT = I_Setmessage -> InvR.t -> TerR.t -> I_Printmessage -> CLIENT
+SERVER = InvP.t -> I_Process -> TerP.t -> SERVER
+T = InvP.client -> InvR.server -> TerR.server -> TerP.client -> T
+
+clientserver = (CLIENT ||| SERVER)[|{|TerR,InvP,TerP,InvR|}|](T[[InvP.client <- InvR.t,InvR.server <- InvP.t,TerR.server <- TerP.t,TerP.client <- TerR.t]])
+assert clientserver :[deadlock free]

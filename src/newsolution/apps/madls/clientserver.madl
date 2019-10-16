@@ -1,4 +1,4 @@
-Configuration Senderreceiver :=
+Configuration clientserver :=
 
    Components
       client : Client
@@ -11,5 +11,6 @@ Configuration Senderreceiver :=
       client,t,server
 
    Adaptability
-      NONE
+      Evolutive
+
 EndConf

@@ -1,4 +1,4 @@
-Configuration MiddlewareServer :=
+Configuration middlewareserver :=
    Components
       server     : Calculatorserver
       invoker    : Calculatorinvoker
@@ -14,6 +14,7 @@ Configuration MiddlewareServer :=
       srh,t1,invoker
       invoker,t2,marshaller
       invoker,t3,server
+
    Adaptability
       None
 EndConf 

@@ -11,7 +11,7 @@ import (
 )
 
 type Calculatorserver struct {
-	CSP   string
+	Behaviour   string
 	Graph graphs.ExecGraph
 }
 
@@ -19,6 +19,7 @@ func Newcalculatorserver() Calculatorserver {
 
 	// create a new instance of Server
 	r := new(Calculatorserver)
+	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B"
 
 	return *r
 }

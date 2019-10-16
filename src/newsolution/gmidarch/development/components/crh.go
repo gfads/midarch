@@ -1,14 +1,14 @@
 package components
 
 import (
-	"newsolution/gmidarch/development/artefacts/graphs"
-	"newsolution/gmidarch/development/messages"
-	"net"
-	"strconv"
 	"encoding/binary"
 	"log"
+	"net"
+	"newsolution/gmidarch/development/artefacts/graphs"
 	"newsolution/gmidarch/development/element"
+	"newsolution/gmidarch/development/messages"
 	"newsolution/shared/shared"
+	"strconv"
 )
 
 type CRH struct {

@@ -2,21 +2,22 @@ package components
 
 import (
 	"newsolution/gmidarch/development/artefacts/graphs"
-	"newsolution/gmidarch/development/messages"
-	"newsolution/shared/shared"
 	"newsolution/gmidarch/development/element"
+	"newsolution/gmidarch/development/messages"
 	"newsolution/shared/parameters"
+	"newsolution/shared/shared"
 )
 
 type CalculatorProxy struct {
-	CSP   string
-	Graph graphs.ExecGraph
+	Behaviour string
+	Graph     graphs.ExecGraph
 }
 
 func NewCalculatorProxy() CalculatorProxy {
 
 	// create a new instance of Server
 	r := new(CalculatorProxy)
+	r.Behaviour = "B = InvP.e1 -> I_ProcessIn -> InvR.e2 -> TerR.e2 -> I_ProcessOut -> TerP.e1 -> B"
 
 	return *r
 }
@@ -49,8 +50,8 @@ func (c *CalculatorProxy) Configure(invP, terP, invR, terR *chan messages.SAMess
 
 func (CalculatorProxy) I_Processin(msg *messages.SAMessage, info [] *interface{}) {
 	inv := shared.Invocation{}
-	inv.Host = "localhost" // TODO
-	inv.Port = parameters.CALCULATOR_PORT        // TODO
+	inv.Host = "localhost"                // TODO
+	inv.Port = parameters.CALCULATOR_PORT // TODO
 	inv.Req = msg.Payload.(shared.Request)
 
 	*msg = messages.SAMessage{Payload: inv}

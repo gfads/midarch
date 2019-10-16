@@ -16,7 +16,7 @@ func NewCalculatorinvoker() Invoker {
 
 	// create a new instance of Invoker
 	r := new(Invoker)
-	r.Behaviour = NewInvoker().Behaviour  // Reuse the generic behaviour
+	r.Behaviour = "B = InvP.e1 -> I_DeserialiseMIOP -> InvR.e2 -> TerR.e2 -> I_PrepareToObject -> InvR.e3 -> TerR.e3 -> I_SerialiseMIOP -> InvR.e2 -> TerR.e2 -> I_PrepareToSRH -> TerP.e1 -> B"
 
 	return *r
 }

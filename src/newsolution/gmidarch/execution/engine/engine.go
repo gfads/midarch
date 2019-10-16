@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"newsolution/gmidarch/development/artefacts/graphs"
 	"newsolution/gmidarch/development/messages"
 	"newsolution/shared/parameters"
@@ -9,11 +10,12 @@ import (
 
 type Engine struct{}
 
+
 func (Engine) Execute(elem interface{}, graph graphs.ExecGraph, executionMode bool) {
 
-	// Execute graph
 	node := 0
 
+	// Execute graph
 	for {
 		edges := graph.AdjacentEdges(node)
 		if len(edges) == 1 {
@@ -73,4 +75,8 @@ func choice(elem interface{}, chosen *int, edges []graphs.ExecEdge) {
 
 func send(channel *chan messages.SAMessage, msg messages.SAMessage) {
 	*channel <- msg
+}
+
+func (Engine) ExecuteUnit(elem interface{}, graph interface{}, executionMode bool){
+	fmt.Printf("Engine:: %v\n",graph.(graphs.ExecGraph))
 }

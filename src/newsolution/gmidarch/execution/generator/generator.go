@@ -12,11 +12,11 @@ import (
 
 type Generator struct{}
 
-func (g Generator) CSP(madl madl.MADL, isEE bool) (csp.CSP) {
+func (g Generator) CSP(madl madl.MADL) (csp.CSP) {
 	c := csp.CSP{}
 
 	// Solve RUNTIME behaviours
-	c.ConfigureProcessBehaviours(madl, isEE)
+	c.ConfigureProcessBehaviours(madl)
 
 	// File name
 	c.CompositionName = madl.Configuration
@@ -84,7 +84,7 @@ func (g Generator) CSP(madl madl.MADL, isEE bool) (csp.CSP) {
 		compositionTemp.SyncPorts = append(compositionTemp.SyncPorts, cannonicalNames[i])
 	}
 
-	// Composition Process - Renaming ports
+	// Composition Process - Renaming port
 	eChannels := map[string][]string{}
 	for i := range c.ConnProcesses {
 		tokens := shared.MyTokenize(c.ConnProcesses[i])
@@ -117,13 +117,26 @@ func (g Generator) CSP(madl madl.MADL, isEE bool) (csp.CSP) {
 func (Generator) SaveCSPFile(c csp.CSP) {
 
 	path := parameters.DIR_CSP + "/" + c.CompositionName
-	file := c.CompositionName + parameters.CSP_EXTENSION
+	file := c.CompositionName
 
-	// File content
-	dataTypeExp := "datatype PROCNAMES = " + shared.StringComposition(c.Datatype, "|", true)
+	// Data type
+	dataTypeExp := ""
+	if len(c.Datatype) > 0 {
+		dataTypeExp = "datatype PROCNAMES = " + shared.StringComposition(c.Datatype, "|", true)
+	}
 
-	eChannelExp := "channel " + shared.StringComposition(c.EChannels, ",", false) + " : PROCNAMES"
-	iChannelExp := "channel " + shared.StringComposition(c.IChannels, ",", false)
+	// External channels
+	eChannelExp := ""
+	if len(c.EChannels) > 0 {
+		eChannelExp = "channel " + shared.StringComposition(c.EChannels, ",", false) + " : PROCNAMES"
+	}
+
+	// Internal channels
+	iChannelExp := ""
+	if len(c.IChannels) > 0 {
+		iChannelExp = "channel " + shared.StringComposition(c.IChannels, ",", false)
+	}
+
 	processesExp := ""
 	for i := range c.CompProcesses {
 		processesExp += c.CompProcesses[i] + "\n"
@@ -132,8 +145,14 @@ func (Generator) SaveCSPFile(c csp.CSP) {
 		processesExp += c.ConnProcesses[i] + "\n"
 	}
 
-	compositionExp := c.CompositionName + " = (" + strings.ToUpper(shared.StringComposition(c.Composition.Components, "|||", true)+")")
-	compositionExp += "[|{|" + shared.StringComposition(c.Composition.SyncPorts, ",", false) + "|}|]"
+	compositionExp := ""
+	if len(c.Composition.Components) > 0 {
+		compositionExp = c.CompositionName + " = (" + strings.ToUpper(shared.StringComposition(c.Composition.Components, "|||", true)+")")
+	}
+
+	if len(c.Composition.SyncPorts) > 0 {
+		compositionExp += "[|{|" + shared.StringComposition(c.Composition.SyncPorts, ",", false) + "|}|]"
+	}
 
 	renamings := []string{}
 	conns := []string{}
@@ -144,8 +163,15 @@ func (Generator) SaveCSPFile(c csp.CSP) {
 		}
 		conns = append(conns, strings.ToUpper(i)+"[["+shared.StringComposition(renamings, ",", false)+"]]")
 	}
-	compositionExp += "(" + shared.StringComposition(conns, "|||", true) + ")"
-	propertyExp := shared.StringComposition(c.Property, "\n", false)
+
+	if len(conns) > 0 {
+		compositionExp += "(" + shared.StringComposition(conns, "|||", true) + ")"
+	}
+
+	propertyExp := ""
+	if len(c.Property) > 0 {
+		propertyExp = shared.StringComposition(c.Property, "\n", false)
+	}
 
 	content := []string{}
 	content = append(content, dataTypeExp+"\n")

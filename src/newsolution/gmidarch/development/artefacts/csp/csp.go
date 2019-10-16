@@ -1,17 +1,18 @@
 package csp
 
 import (
+	"errors"
+	"fmt"
 	"newsolution/gmidarch/development/artefacts/madl"
 	"newsolution/gmidarch/development/components"
 	"newsolution/gmidarch/development/connectors"
 	"newsolution/shared/parameters"
-	"strings"
 	"newsolution/shared/shared"
-	"errors"
+	"os"
 	"reflect"
 	"strconv"
-	"fmt"
-	"os"
+	"strings"
+	"time"
 )
 
 type CompositionProcess struct {
@@ -37,7 +38,7 @@ type CSP struct {
 	Property        []string
 }
 
-func (c *CSP) ConfigureProcessBehaviours(madl madl.MADL, isEE bool) {
+func (c *CSP) ConfigureProcessBehaviours(madl madl.MADL) {
 
 	// Components
 	for i := range madl.Components {
@@ -45,7 +46,7 @@ func (c *CSP) ConfigureProcessBehaviours(madl madl.MADL, isEE bool) {
 
 		// The Component has its behaviour defined at runtime
 		if strings.Contains(configuredBehaviour, parameters.RUNTIME_BEHAVIOUR) {
-			configuredBehaviour = updateRuntimeBehaviourComponents(madl.Components[i].ElemId, madl, isEE) // TODO
+			configuredBehaviour = updateRuntimeBehaviourComponents(madl.Components[i].ElemId, madl) // TODO
 		}
 
 		tokens := strings.Split(configuredBehaviour, " ")
@@ -80,17 +81,18 @@ func (c *CSP) ConfigureProcessBehaviours(madl madl.MADL, isEE bool) {
 				key := strings.ToLower(madl.Connectors[i].ElemId) + "." + strings.ToLower(eX)
 				partner, ok := madl.Maps[key]
 				if !ok {
-					fmt.Println("CSP:: Map [" + key + "] of Connectors Not FOUND!")
+					fmt.Printf("CSP:: Map '%v' of Connector '%v' beloging to '%v' Not FOUND!", key, madl.Connectors[i].ElemId, madl.Configuration)
 					os.Exit(0)
 				}
-				configuredBehaviour = strings.Replace(configuredBehaviour, eX, partner, 99)
+				configuredBehaviour = strings.Replace(configuredBehaviour, eX+" ", partner+" ", 99) // TODO
+				time.Sleep(100 * time.Millisecond)
 			}
 		}
 		madl.Connectors[i].Behaviour = configuredBehaviour
 	}
 }
 
-func (CSP) RenameSyncPort(action string, processId string) string {
+func (CSP) RenameSyncPortOld(action string, processId string) string {
 	r1 := ""
 
 	action = action [0:strings.Index(action, ".")]
@@ -103,6 +105,23 @@ func (CSP) RenameSyncPort(action string, processId string) string {
 		r1 = parameters.INVR + "." + strings.ToLower(processId)
 	case parameters.TERR:
 		r1 = parameters.INVR + "." + strings.ToLower(processId)
+	}
+	return r1
+}
+
+func (CSP) RenameSyncPort(action string, processId string) string {
+	r1 := ""
+
+	action = action [0:strings.Index(action, ".")]
+	switch action {
+	case parameters.INVP:
+		r1 = parameters.INVR + "." + strings.ToLower(processId)
+	case parameters.TERP:
+		r1 = parameters.TERR + "." + strings.ToLower(processId)
+	case parameters.INVR:
+		r1 = parameters.INVP + "." + strings.ToLower(processId)
+	case parameters.TERR:
+		r1 = parameters.TERP + "." + strings.ToLower(processId)
 	}
 	return r1
 }
@@ -196,6 +215,26 @@ func (CSP) ToCanonicalName(name string) (string, error) {
 	return r1, r2
 }
 
+func (CSP) RenameSubprocesses(p string) string {
+	subprocesses := strings.Split(p, "\n")
+	r := ""
+	procBaseName := strings.TrimSpace(subprocesses[0][:strings.Index(subprocesses[0], "=")]) // first process
+
+	newProcNames := map[string]string{}
+	for i := 1; i < len(subprocesses); i++ {
+		procName := strings.TrimSpace(subprocesses[i][:strings.Index(subprocesses[i], "=")])
+		newProcNames[procName] = procBaseName + procName
+	}
+
+	for i := 0; i < len(subprocesses); i++ {
+		for j := range newProcNames {
+			subprocesses[i] = strings.Replace(subprocesses[i], j, newProcNames[j], 99)
+		}
+		r += subprocesses[i] + "\n"
+	}
+	return r
+}
+
 func updateRuntimeBehaviourConnectors(connId string, madl madl.MADL) string {
 	r1 := ""
 
@@ -213,7 +252,7 @@ func updateRuntimeBehaviourConnectors(connId string, madl madl.MADL) string {
 	return r1
 }
 
-func updateRuntimeBehaviourComponents(compId string, madl madl.MADL, isEE bool) string {
+func updateRuntimeBehaviourComponents(compId string, madl madl.MADL) string {
 	r1 := ""
 
 	// Define new behaviour
@@ -221,19 +260,19 @@ func updateRuntimeBehaviourComponents(compId string, madl madl.MADL, isEE bool) 
 		comp := madl.Components[i]
 		if strings.ToUpper(comp.ElemId) == strings.ToUpper(compId) {
 			if reflect.TypeOf(comp.Type) == reflect.TypeOf(components.Core{}) {
-				if (strings.ToUpper(madl.Adaptability[0]) == "NONE") { // TODO
+				if (strings.ToUpper(madl.AppAdaptability[0]) == "NONE") { // TODO
 					r1 = "B = InvR.e1 -> B"
 				} else {
-					r1 = "B = InvR.e1 -> P1 \nP1 = InvP.e2 -> InvR.e1 -> P1"
+					r1 = "B = InvR.e1 -> P1 \n P1 = InvP.e2 -> InvR.e1 -> P1"
 				}
 				break
 			}
 
 			if reflect.TypeOf(comp.Type) == reflect.TypeOf(components.Unit{}) {
-				if strings.ToUpper(madl.Adaptability[0]) == "NONE" { // TODO
+				if (strings.ToUpper(madl.AppAdaptability[0]) == "NONE") { // TODO
 					r1 = "B = I_InitialiseUnit -> P1\n P1 = I_Execute -> P1"
 				} else {
-					r1 = "B = InvP.e1 -> I_InitialiseUnit -> P1 \nP1 = I_Execute -> P1 [] InvP.e1 -> I_AdaptUnit -> P1"
+					r1 = "B = InvP.e1 -> I_Initialiseunit -> P1 \nP1 = I_Execute -> P1 [] InvP.e1 -> I_AdaptUnit -> P1"
 				}
 				break
 			}
@@ -246,7 +285,7 @@ func countAttachments(madlGo madl.MADL, connectorId string) int {
 	n := 0
 	for i := range madlGo.Attachments {
 		if madlGo.Attachments[i].T.ElemId == connectorId {
-			n ++
+			n++
 		}
 	}
 	return n
@@ -266,25 +305,6 @@ func defineNewBehaviour(n int, elem interface{}, elemId string) string {
 		fmt.Println("Configuration:: Impossible to define the new behaviour of " + reflect.TypeOf(elem).String())
 		os.Exit(0)
 	}
+
 	return baseBehaviour
-}
-
-func (CSP) RenameSubprocesses(p string) string {
-	subprocesses := strings.Split(p, "\n")
-	r := ""
-	procBaseName := strings.TrimSpace(subprocesses[0][:strings.Index(subprocesses[0], "=")]) // first process
-
-	newProcNames := map[string]string{}
-	for i := 1; i < len(subprocesses); i++ {
-		procName := strings.TrimSpace(subprocesses[i][:strings.Index(subprocesses[i], "=")])
-		newProcNames[procName] = procBaseName + procName
-	}
-
-	for i := 0; i < len(subprocesses); i++ {
-		for j := range newProcNames {
-			subprocesses[i] = strings.Replace(subprocesses[i], j, newProcNames[j], 99)
-		}
-		r += subprocesses[i] + "\n"
-	}
-	return r
 }

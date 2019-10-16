@@ -1,0 +1,10 @@
+--datatype PROCNAMES = e1
+datatype PROCNAMES = e1 | e2
+--channel InvR : PROCNAMES
+channel InvR, InvP : PROCNAMES
+channel I_Debug
+
+-- Non-adaptive Core = InvR.e1 -> I_Debug -> Core
+-- Adaptive
+Core = InvR.e1 -> P1
+P1 = InvP.e2 -> InvR.e1 -> P1
