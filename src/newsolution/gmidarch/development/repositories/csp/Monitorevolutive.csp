@@ -1,5 +1,5 @@
 datatype PROCNAMES = e1
 channel InvR : PROCNAMES
-channel I_Collect
+channel I_Checkplugins
 
-Monitorevolutive = I_Collect -> InvR.e1 -> Monitorevolutive
+Monitorevolutive = I_Checkplugins -> InvR.e1 -> Monitorevolutive

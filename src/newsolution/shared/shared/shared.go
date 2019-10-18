@@ -238,18 +238,25 @@ func InvokeOld(any interface{}, name string, args [] reflect.Value) {
 	return
 }
 
-func LoadPlugins(confName string) map[string]time.Time {
+//func LoadPlugins(confName string) map[string]time.Time {
+func LoadPlugins() map[string]time.Time {
 	listOfPlugins := make(map[string]time.Time)
 
-	pluginsDir := parameters.DIR_PLUGINS + "/" + confName
+	pluginsDir := parameters.DIR_PLUGINS
 	OSDir, err := ioutil.ReadDir(pluginsDir)
-	CheckError(err, "Shared:: Folder '"+pluginsDir+"' not read")
+	if err != nil{
+		fmt.Printf("Shared:: Folder '%v' is unreadeable\n",pluginsDir)
+		os.Exit(0)
+	}
 	for i := range OSDir {
 		fileName := OSDir[i].Name()
 		if strings.Contains(fileName, "_plugin") {
 			pluginFile := pluginsDir + "/" + fileName
 			info, err := os.Stat(pluginFile)
-			CheckError(err, "Shared:: Plugin '"+pluginFile+"'not read")
+			if err != nil {
+				fmt.Printf("Shared:: Plugin '%v' not readeable\n", pluginFile)
+				os.Exit(0)
+			}
 			listOfPlugins[fileName] = info.ModTime()
 		}
 	}
