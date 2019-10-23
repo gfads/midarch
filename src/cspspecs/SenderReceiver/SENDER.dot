@@ -1,6 +1,0 @@
-digraph G {
-  0 -> 1 [ label="I_PreInvR1" ];
-  0 -> 2 [ label="I_PreInvR2" ];
-  1 -> 0 [ label="InvR.t5" ];
-  2 -> 0 [ label="InvR.t5" ];
-}

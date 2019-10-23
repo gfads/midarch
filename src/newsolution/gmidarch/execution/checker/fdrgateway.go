@@ -2,7 +2,6 @@ package checker
 
 import (
 	"fmt"
-	"gmidarch/development/framework/configuration/commands"
 	"newsolution/gmidarch/development/artefacts/csp"
 	"newsolution/shared/parameters"
 	"os"
@@ -13,7 +12,7 @@ import (
 type FDRGateway struct{}
 
 func (FDRGateway) Check(csp csp.CSP) {
-	cmdExp := parameters.DIR_FDR + "/" + commands.FDR_COMMAND
+	cmdExp := parameters.DIR_FDR + "/" + parameters.FDR_COMMAND
 	filePath := parameters.DIR_CSP + "/" + csp.CompositionName
 	fileName := csp.CompositionName + parameters.CSP_EXTENSION
 	inputFile := filePath + "/" + fileName

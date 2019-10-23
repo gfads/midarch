@@ -1,4 +1,0 @@
-digraph G {
-  0 -> 1 [ label="InvP.t1" ];
-  1 -> 0 [ label="I_PosInvP" ];
-}

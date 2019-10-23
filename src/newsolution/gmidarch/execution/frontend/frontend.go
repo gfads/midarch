@@ -6,7 +6,7 @@ import (
 	"newsolution/gmidarch/execution/ee"
 	"newsolution/gmidarch/execution/generator"
 	"newsolution/gmidarch/execution/loader"
-	"newsolution/injector/versioning"
+	"newsolution/injector/evolutive"
 	"newsolution/shared/parameters"
 )
 
@@ -17,7 +17,7 @@ func (f FrontEnd) Deploy(file string) {
 	crt := creator.Creator{}
 	gen := generator.Generator{}
 	chk := checker.Checker{}
-	inj := versioning.VersioningInjector{}
+	inj := evolutive.EvolutiveInjector{}
 
 	// Read MADL and generate architectural artifacts (App)
 	mapp := l.Load(file)
@@ -54,6 +54,6 @@ func (f FrontEnd) Deploy(file string) {
 	//eeApp.Deploy(mapp)
 	//eeApp.Start()
 
-	// Start versioning injector
+	// Start evolutive injector
 	inj.Start("receiver")
 }

@@ -1,5 +1,0 @@
-digraph G {
-  0 -> 1 [ label="InvP.t3" ];
-  1 -> 2 [ label="I_Analyse" ];
-  2 -> 0 [ label="InvR.t4" ];
-}

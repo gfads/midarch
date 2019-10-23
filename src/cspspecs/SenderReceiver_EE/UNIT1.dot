@@ -1,4 +1,0 @@
-digraph G {
-  0 -> 1 [ label="I_InitialiseUnit" ];
-  1 -> 1 [ label="I_Execute" ];
-}

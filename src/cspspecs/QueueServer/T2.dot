@@ -1,6 +1,0 @@
-digraph G {
-  0 -> 1 [ label="InvP.invoker" ];
-  1 -> 2 [ label="InvR.engine" ];
-  2 -> 3 [ label="TerR.engine" ];
-  3 -> 0 [ label="TerP.invoker" ];
-}

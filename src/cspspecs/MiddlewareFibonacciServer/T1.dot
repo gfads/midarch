@@ -1,6 +1,0 @@
-digraph G {
-  0 -> 1 [ label="InvP.namingproxy" ];
-  1 -> 2 [ label="InvR.requestor" ];
-  2 -> 3 [ label="TerR.requestor" ];
-  3 -> 0 [ label="TerP.namingproxy" ];
-}

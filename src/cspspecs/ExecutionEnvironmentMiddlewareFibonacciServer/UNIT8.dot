@@ -1,7 +1,0 @@
-digraph G {
-  0 -> 1 [ label="InvP.t1" ];
-  1 -> 2 [ label="I_InitialiseUnit" ];
-  2 -> 2 [ label="I_Execute" ];
-  2 -> 3 [ label="InvP.t1" ];
-  3 -> 2 [ label="I_AdaptUnit" ];
-}

@@ -1,2 +1,0 @@
-export PATH=$PATH:/Users/nsr/Dropbox/go/grpc/bin:/Users/nsr/Dropbox/go/grpc/bin:/Users/nsr/go/bin
-protoc -I fibonacci/ fibonacci/fibonacci.proto --go_out=plugins=grpc:fibonacci
