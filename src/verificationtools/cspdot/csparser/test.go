@@ -2,8 +2,8 @@ package main
 
 import (
 	"os/exec"
-	"newsolution/shared/parameters"
-	"newsolution/shared/error"
+	"shared/error"
+	"shared/parameters"
 )
 
 func main() {

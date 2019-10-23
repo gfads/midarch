@@ -1,22 +1,22 @@
 package fdr
 
 import (
-	"strings"
-	"strconv"
-	"os"
-	"framework/element"
-	"os/exec"
-	"framework/configuration/configuration"
-	"newsolution/shared/shared"
-	"newsolution/shared/parameters"
-	"newsolution/shared/error"
+	"bufio"
+	"fmt"
+	"framework/architecturallibrary"
 	"framework/configuration/commands"
+	"framework/configuration/configuration"
+	"framework/element"
 	"graph/fdrgraph"
 	"log"
-	"bufio"
-	"framework/architecturallibrary"
+	"os"
+	"os/exec"
 	"reflect"
-	"fmt"
+	"shared/error"
+	"shared/parameters"
+	"shared/shared"
+	"strconv"
+	"strings"
 )
 
 type FDR struct{}
