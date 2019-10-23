@@ -13,7 +13,7 @@ import (
 	"sync"
 )
 
-var allGraphs sync.Map
+var allUnits sync.Map
 
 type Unit struct {
 	UnitId      string
@@ -32,12 +32,16 @@ func NewUnit() Unit {
 }
 
 func (u Unit) I_Initialiseunit(msg *messages.SAMessage, info [] *interface{}) {
-	allGraphs.Store(u.UnitId, u.GraphOfElem)
+	allUnits.Store(u.UnitId, u.ElemOfUnit)
 }
 
 func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}) {
-	temp, _ := allGraphs.Load(u.UnitId)
-	u.GraphOfElem = temp.(graphs.ExecGraph)
+	newElem, ok := allUnits.Load(u.UnitId)
+	if !ok {
+		fmt.Printf("Unit:: Element '%v' is not a Unit")
+		os.Exit(0)
+	}
+	u.ElemOfUnit = newElem
 	engine.Engine{}.Execute(u.ElemOfUnit, u.GraphOfElem, !parameters.EXECUTE_FOREVER)
 }
 
@@ -45,18 +49,15 @@ func (u Unit) I_Adaptunit(msg *messages.SAMessage, info [] *interface{}) {
 	cmd := msg.Payload.(shared.UnitCommand)
 
 	// Check if the command is to this unit - check by type, i.e., all elements of a given type are adapted
-	if cmd.Cmd == "STOP" { // TODO
-		s := strings.Split(reflect.TypeOf(u.ElemOfUnit).String(),".")
+	if cmd.Cmd == parameters.REPLACE_COMPONENT { // TODO
+		s := strings.Split(reflect.TypeOf(u.ElemOfUnit).String(), ".")
 		unitElemType := s[len(s)-1]
-		s = strings.Split(reflect.TypeOf(cmd.Type).String(),".")
-		cmdType := s[len(s)-1]
+		s = strings.Split(reflect.TypeOf(cmd.Type).String(), ".")
+		cmdElemType := s[len(s)-1]
 
-		if unitElemType == cmdType {
-			eg := graphs.ExecGraph{}
-			newGraph := eg.UpdateGraph(u.GraphOfElem,cmd.Params)
-			fmt.Printf("Unit:: %v %v\n", u.GraphOfElem,newGraph)
-			os.Exit(0)
-			//allGraphs.Store(u.UnitId, u.GraphOfElem)
+		if unitElemType == cmdElemType {
+			allUnits.Delete(u.UnitId)
+			allUnits.Store(u.UnitId, cmd.Type)
 		}
 	} else {
 		return

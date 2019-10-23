@@ -3,6 +3,7 @@ package components
 import (
 	"newsolution/gmidarch/development/artefacts/graphs"
 	"newsolution/gmidarch/development/messages"
+	"newsolution/shared/parameters"
 	"newsolution/shared/shared"
 )
 
@@ -29,10 +30,11 @@ func (Executor) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	    pluginName := plan.Params[plan.Operations[0]][0]
 		plg := shared.LoadPlugin(pluginName)
 		tp,_ := plg.Lookup("Gettype")
+		elemType := tp.(func()interface{})()
 
-		unitCommand.Cmd = "STOP"
+		unitCommand.Cmd = parameters.REPLACE_COMPONENT
 		unitCommand.Params = plg
-		unitCommand.Type = tp
+		unitCommand.Type = elemType
 	}
 	*msg = messages.SAMessage{Payload:unitCommand}
 }

@@ -11,7 +11,7 @@ type Receiver struct {
 	Graph     graphs.ExecGraph
 }
 
-func Gettype() Receiver{
+func Gettype() interface{} {
 	return Receiver{}
 }
 
@@ -24,10 +24,10 @@ func NewReceiver() Receiver {
 	return *r
 }
 
-func I_Printmessage(msg *messages.SAMessage, info [] *interface{}) {
-	fmt.Printf("Receiver:: %v  \n",*msg)
+func (Receiver) I_Printmessage(msg *messages.SAMessage, info [] *interface{}) {
+	fmt.Printf("Receiver:: Plugin:: %v  \n", *msg)
 }
 
-func FX(x int){
+func (Receiver) FX(x int) {
 	fmt.Printf("Receiver_Plugin")
 }
