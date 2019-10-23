@@ -1,5 +1,5 @@
 digraph G {
   0 -> 1 [ label="InvP.e1" ];
-  1 -> 2 [ label="I_Process" ];
+  1 -> 2 [ label="I_Createplan" ];
   2 -> 0 [ label="InvR.e2" ];
 }

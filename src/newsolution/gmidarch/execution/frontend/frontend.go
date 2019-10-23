@@ -6,6 +6,7 @@ import (
 	"newsolution/gmidarch/execution/ee"
 	"newsolution/gmidarch/execution/generator"
 	"newsolution/gmidarch/execution/loader"
+	"newsolution/injector/versioning"
 	"newsolution/shared/parameters"
 )
 
@@ -16,8 +17,9 @@ func (f FrontEnd) Deploy(file string) {
 	crt := creator.Creator{}
 	gen := generator.Generator{}
 	chk := checker.Checker{}
+	inj := versioning.VersioningInjector{}
 
-	// Read madl and generate architectural artefacts (App)
+	// Read MADL and generate architectural artifacts (App)
 	mapp := l.Load(file)
 
 	// Create architecture of the execution environment
@@ -26,10 +28,10 @@ func (f FrontEnd) Deploy(file string) {
 	meeTemp := crt.Create(mapp,appKindOfAdaptability)
 	crt.Save(meeTemp)
 
-	// Load madl and generate architectural artefacts (EE)
+	// Load MADL and generate architectural artefacts (EE)
 	mee := l.Load(meeTemp.Configuration+parameters.MADL_EXTENSION)
 
-	// Condigure adaptability of EE - according to the adaptability of the hosted App
+	// Configure adaptability of EE - according to the adaptability of the hosted App
 	mee.AppAdaptability = mapp.Adaptability
 
 	// Generate & save CSPs
@@ -47,8 +49,11 @@ func (f FrontEnd) Deploy(file string) {
 	eeEE.DeployApp(mee,mapp)
 	eeEE.Start()
 
-	// Start application only
+	// Start application only - without execution environment
 	//eeApp := ee.NewEE()
 	//eeApp.Deploy(mapp)
 	//eeApp.Start()
+
+	// Start versioning injector
+	inj.Start(mapp.Configuration,"receiver")
 }

@@ -3,6 +3,7 @@ package components
 import (
 	"newsolution/gmidarch/development/artefacts/graphs"
 	"newsolution/gmidarch/development/messages"
+	"newsolution/shared/shared"
 )
 
 type Executor struct {
@@ -20,6 +21,18 @@ func NewExecutor() Executor {
 }
 
 func (Executor) I_Process(msg *messages.SAMessage, info [] *interface{}) {
-	*msg = messages.SAMessage{Payload:"TODO"}
-	//fmt.Printf("Executor:: I_Process \n")
+	plan := msg.Payload.(shared.AdaptationPlan)
+
+	unitCommand := shared.UnitCommand{}
+
+	if len(plan.Operations) > 0 { // TODO
+	    pluginName := plan.Params[plan.Operations[0]][0]
+		plg := shared.LoadPlugin(pluginName)
+		tp,_ := plg.Lookup("Gettype")
+
+		unitCommand.Cmd = "STOP"
+		unitCommand.Params = plg
+		unitCommand.Type = tp
+	}
+	*msg = messages.SAMessage{Payload:unitCommand}
 }

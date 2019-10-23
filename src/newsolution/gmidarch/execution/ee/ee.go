@@ -26,6 +26,7 @@ func (e EE) Start() {
 		if e.MADLX.Components[i].TypeName == "Unit" { // TODO - Generalise for any component having 'Info'
 			tempElem := *e.MADLX.Components[i].Info[0]
 			unit := elem.(components.Unit)
+			unit.UnitId = e.MADLX.Components[i].ElemId
 			unit.ElemOfUnit= tempElem.(madl.Element).Type
 			unit.GraphOfElem = tempElem.(madl.Element).Graph
 			elem = unit

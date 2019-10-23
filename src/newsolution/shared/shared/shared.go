@@ -15,24 +15,25 @@ import (
 	"time"
 )
 
-//type Invocation struct {
-//	Method  reflect.Value
-//	InArgs  []reflect.Value
-//	OutArgs [] reflect.Value
-//}
-
 // MAPE-K Types
 type MonitoredCorrectiveData string   // used in channel Monitor -> Analyser (Corrective)
 type MonitoredEvolutiveData [] string // used in channel Monitor -> Analyser (Evolutive)
 type MonitoredProactiveData [] string // used in channel Monitor -> Analyser (Proactive)
 
-type AnalysisResult struct {
-	Result   interface{}
-	Analysis int
+type EvolutiveAnalysisResult struct {
+	NeedAdaptation         bool
+	MonitoredEvolutiveData MonitoredEvolutiveData
+}
+
+type UnitCommand struct {
+	Cmd    string
+	Params plugin.Plugin
+	Type   interface{}
 }
 
 type AdaptationPlan struct {
-	Plan string
+	Operations [] string
+	Params     map[string][]string
 }
 
 var ValidActions = map[string]bool{
@@ -167,41 +168,6 @@ func Log(args ...string) {
 	}
 }
 
-/*
-func Invoke(any interface{}, name string, args ... interface{}) {
-	inputs := make([]reflect.Value, len(args))
-
-	for i, _ := range args {
-		inputs[i] = reflect.ValueOf(args[i])
-	}
-
-	fmt.Println(any)
-	fmt.Println(name)
-	fmt.Println(len(inputs))
-
-	reflect.ValueOf(any).MethodByName(name).Call(inputs)
-
-	os.Exit(0)
-	inputs = nil
-	return
-}
-*/
-
-func InvokeOld1(any interface{}, name string, args [] *interface{}) {
-	inputs := make([]reflect.Value, len(args))
-
-	for i, _ := range args {
-		inputs[i] = reflect.ValueOf(*args[i])
-	}
-
-	fmt.Printf("Shared:: %v %v %v\n", reflect.TypeOf(any), name, inputs)
-
-	reflect.ValueOf(any).MethodByName(name).Call(inputs)
-
-	inputs = nil
-	return
-}
-
 func Invoke(any interface{}, name string, msg *messages.SAMessage, info [] *interface{}) {
 	inputs := make([]reflect.Value, 2)
 	inputs[0] = reflect.ValueOf(msg)
@@ -215,50 +181,24 @@ func Invoke(any interface{}, name string, msg *messages.SAMessage, info [] *inte
 	return
 }
 
-func InvokeNew(any interface{}, name string, args [] reflect.Value) {
-	inputs := make([]reflect.Value, len(args))
-
-	for i, _ := range args {
-		inputs[i] = reflect.ValueOf(args[i])
-	}
-
-	fmt.Printf("Shared:: %v %v %v\n", reflect.TypeOf(any), name, inputs)
-
-	reflect.ValueOf(any).MethodByName(name).Call(inputs)
-
-	inputs = nil
-	return
-}
-
-func InvokeOld(any interface{}, name string, args [] reflect.Value) {
-
-	//fmt.Printf("Shared:: %v %v %vn",reflect.TypeOf(any),name, args)
-	reflect.ValueOf(any).MethodByName(name).Call(args)
-
-	return
-}
-
-//func LoadPlugins(confName string) map[string]time.Time {
 func LoadPlugins() map[string]time.Time {
 	listOfPlugins := make(map[string]time.Time)
 
 	pluginsDir := parameters.DIR_PLUGINS
 	OSDir, err := ioutil.ReadDir(pluginsDir)
-	if err != nil{
-		fmt.Printf("Shared:: Folder '%v' is unreadeable\n",pluginsDir)
+	if err != nil {
+		fmt.Printf("Shared:: Folder '%v' is unreadeable\n", pluginsDir)
 		os.Exit(0)
 	}
 	for i := range OSDir {
 		fileName := OSDir[i].Name()
-		if strings.Contains(fileName, "_plugin") {
-			pluginFile := pluginsDir + "/" + fileName
-			info, err := os.Stat(pluginFile)
-			if err != nil {
-				fmt.Printf("Shared:: Plugin '%v' not readeable\n", pluginFile)
-				os.Exit(0)
-			}
-			listOfPlugins[fileName] = info.ModTime()
+		pluginFile := pluginsDir + "/" + fileName
+		info, err := os.Stat(pluginFile)
+		if err != nil {
+			fmt.Printf("Shared:: Plugin '%v' not readeable\n", pluginFile)
+			os.Exit(0)
 		}
+		listOfPlugins[fileName] = info.ModTime()
 	}
 	return listOfPlugins
 }
@@ -281,19 +221,22 @@ func CheckForNewPlugins(listOfOldPlugins map[string]time.Time, listOfNewPlugins 
 	return newPlugins
 }
 
-func LoadPlugin(confName string, pluginName string, symbolName string) (plugin.Symbol) {
+//func LoadPlugin(pluginName string, symbolName string) (plugin.Symbol) {
+func LoadPlugin(pluginName string) (plugin.Plugin) {
 
-	var lib *plugin.Plugin
+	var plg *plugin.Plugin
 	var err error
 
-	pluginFile := parameters.DIR_PLUGINS + "/" + confName + "/" + pluginName
+	// Open and load plugin
+	pluginFile := parameters.DIR_PLUGINS + "/" + pluginName
 	attempts := 0
 	for {
-		lib, err = plugin.Open(pluginFile)
+		plg, err = plugin.Open(pluginFile)
 
 		if err != nil {
-			if attempts >= 3 {
-				CheckError(err, "Shared:: Error on trying open plugin "+pluginFile+" "+strconv.Itoa(attempts)+" times")
+			if attempts >= 100 { // TODO
+				fmt.Printf("Shared:: Error on trying open plugin '%v' \n", pluginFile)
+				os.Exit(0)
 			} else {
 				attempts++
 				time.Sleep(10 * time.Millisecond)
@@ -303,10 +246,15 @@ func LoadPlugin(confName string, pluginName string, symbolName string) (plugin.S
 		}
 	}
 
-	fx, err := lib.Lookup(symbolName)
-	CheckError(err, "Shared:: Message: Function "+symbolName+" not found in plugin")
+	// look for a exportable function/variable within the plugin
+	//fx, err := lib.Lookup(symbolName)
+	//if err != nil {
+	//	fmt.Printf( "Shared:: Function '%v' not found in plugin '%v'\n",symbolName,pluginName)
+	//	os.Exit(0)
+	//}
+	//return fx
 
-	return fx
+	return *plg
 }
 
 func CheckError(err error, msg string) {
@@ -462,4 +410,3 @@ func SaveFile(path, name, ext string, content []string) {
 	}
 	defer file.Close()
 }
-

@@ -10,7 +10,6 @@ import (
 
 type Engine struct{}
 
-
 func (Engine) Execute(elem interface{}, graph graphs.ExecGraph, executionMode bool) {
 
 	node := 0
@@ -77,6 +76,6 @@ func send(channel *chan messages.SAMessage, msg messages.SAMessage) {
 	*channel <- msg
 }
 
-func (Engine) ExecuteUnit(elem interface{}, graph interface{}, executionMode bool){
-	fmt.Printf("Engine:: %v\n",graph.(graphs.ExecGraph))
+func (Engine) ExecuteUnit(elem interface{}, graph interface{}, executionMode bool) {
+	fmt.Printf("Engine:: %v\n", graph.(graphs.ExecGraph))
 }

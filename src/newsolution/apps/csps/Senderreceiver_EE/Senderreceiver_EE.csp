@@ -1,6 +1,12 @@
 datatype PROCNAMES = core | monevolutive | monitor | analyser | planner | executor | unit1 | unit2 | unit3 | t1 | t2 | t3 | t4 | t5 | t6
 channel InvR,InvP : PROCNAMES
 channel I_Collect,I_Process,I_Initialiseunit,I_Execute,I_AdaptUnit
+ANALYSER = InvP.t3 -> I_Process -> InvR.t4 -> ANALYSER
+PLANNER = InvP.t4 -> I_Process -> InvR.t5 -> PLANNER
+EXECUTOR = InvP.t5 -> I_Process -> InvR.t6 -> EXECUTOR
+UNIT1 = InvP.t1 -> I_Initialiseunit -> UNIT1P1 
+UNIT1P1 = I_Execute -> UNIT1P1 [] InvP.t1 -> I_AdaptUnit -> UNIT1P1
+
 UNIT2 = InvP.t1 -> I_Initialiseunit -> UNIT2P1 
 UNIT2P1 = I_Execute -> UNIT2P1 [] InvP.t1 -> I_AdaptUnit -> UNIT2P1
 
@@ -11,13 +17,7 @@ CORE = InvR.t1 -> COREP1
  COREP1 = InvP.t6 -> InvR.t1 -> COREP1
 
 MONITOR = InvP.t2 -> I_Process -> InvR.t3 -> MONITOR
-ANALYSER = InvP.t3 -> I_Process -> InvR.t4 -> ANALYSER
-UNIT1 = InvP.t1 -> I_Initialiseunit -> UNIT1P1 
-UNIT1P1 = I_Execute -> UNIT1P1 [] InvP.t1 -> I_AdaptUnit -> UNIT1P1
-
 MONEVOLUTIVE = I_Collect -> InvR.t2 -> MONEVOLUTIVE
-PLANNER = InvP.t4 -> I_Process -> InvR.t5 -> PLANNER
-EXECUTOR = InvP.t5 -> I_Process -> InvR.t6 -> EXECUTOR
 T5 = InvP.planner -> InvR.executor -> T5
 T6 = InvP.executor -> InvR.core -> T6
 T1 = InvP.core -> InvR.unit1 -> InvR.unit2 -> InvR.unit3 -> T1

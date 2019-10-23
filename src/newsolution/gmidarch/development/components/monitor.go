@@ -20,6 +20,5 @@ func NewMonitor() Monitor {
 }
 
 func (Monitor) I_Process(msg *messages.SAMessage, info [] *interface{}) {
-	//fmt.Printf("Monitor:: I_Process\n")
-	*msg = messages.SAMessage{Payload:"TODO"}
+	*msg = messages.SAMessage{Payload: msg.Payload}
 }
