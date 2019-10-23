@@ -13,7 +13,7 @@ type EvolutiveInjector struct{}
 
 func (EvolutiveInjector) Start(elem string) {
 
-	// remove old plugins
+	// Remove old plugins
 	outputLS, err := exec.Command("/bin/ls", shared2.DIR_PLUGINS).CombinedOutput()
 	if err != nil {
 		fmt.Printf("Injector:: Something wrong in dir '%v'", shared2.DIR_PLUGINS)

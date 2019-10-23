@@ -415,8 +415,8 @@ func SaveFile(path, name, ext string, content []string) {
 // Dirs
 //const BASE_DIR  = "/go/midarch-go"  // docker
 const BASE_DIR = "/Users/nsr/Dropbox/go/midarch-go-v13"
-const DIR_PLUGINS = BASE_DIR + "/src/gmidarch/execution/plugins"
-const DIR_PLUGINS_SOURCE = BASE_DIR + "/src/gmidarch/development/repositories/pluginsource"
+const DIR_PLUGINS = BASE_DIR + "/src/gmidarch/execution/repositories/plugins"
+const DIR_PLUGINS_SOURCE = BASE_DIR + "/src/gmidarch/development/repositories/plugins"
 const DIR_CSP = BASE_DIR + "/src/apps/csps"
 const DIR_MADL = BASE_DIR + "/src/apps/madls"
 const DIR_GO = "/usr/local/go/bin"
