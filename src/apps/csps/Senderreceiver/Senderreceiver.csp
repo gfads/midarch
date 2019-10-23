@@ -1,6 +1,6 @@
 datatype PROCNAMES = sender | receiver | t5
 channel InvP,InvR : PROCNAMES
-channel I_Setmessage3,I_PrintMessage,I_Setmessagt5,I_Setmessage2
+channel I_Setmessage2,I_Setmessage3,I_PrintMessage,I_Setmessagt5
 SENDER = I_Setmessagt5 -> InvR.t5 -> SENDER [] I_Setmessage2 -> InvR.t5 -> SENDER [] I_Setmessage3 -> InvR.t5 -> SENDER
 RECEIVER = InvP.t5 -> I_PrintMessage -> RECEIVER
 T5 = InvP.sender -> InvR.receiver -> T5
