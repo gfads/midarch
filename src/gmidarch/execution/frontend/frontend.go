@@ -7,7 +7,7 @@ import (
 	"gmidarch/execution/generator"
 	"gmidarch/execution/loader"
 	"injector/evolutive"
-	"shared/shared"
+	shared2 "shared"
 )
 
 type FrontEnd struct{}
@@ -29,7 +29,7 @@ func (f FrontEnd) Deploy(file string) {
 	crt.Save(meeTemp)
 
 	// Load MADL and generate architectural artefacts (EE)
-	mee := l.Load(meeTemp.Configuration+ shared.MADL_EXTENSION)
+	mee := l.Load(meeTemp.Configuration+ shared2.MADL_EXTENSION)
 
 	// Configure adaptability of EE - according to the adaptability of the hosted App
 	mee.AppAdaptability = mapp.Adaptability

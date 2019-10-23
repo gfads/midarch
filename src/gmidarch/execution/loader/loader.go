@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"gmidarch/development/artefacts/madl"
 	"os"
-	"shared/shared"
+	shared2 "shared"
 )
 
 type Loader struct{}
@@ -39,7 +39,7 @@ func (Loader) read(file string) madl.MADL {
 	m := madl.MADL{}
 
 	// Check file name
-	err := shared.CheckFileName(file)
+	err := shared2.CheckFileName(file)
 	if err != nil {
 		fmt.Println("MADL:: " + err.Error())
 		os.Exit(0)
@@ -47,7 +47,7 @@ func (Loader) read(file string) madl.MADL {
 
 	// Configure File & Path
 	m.File = file
-	m.Path = shared.DIR_MADL
+	m.Path = shared2.DIR_MADL
 	fullPathAdlFileName := m.Path + "/" + m.File
 
 	// Read file

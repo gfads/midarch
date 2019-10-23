@@ -7,7 +7,7 @@ import (
 	messages2 "gmidarch/development/messages"
 	"log"
 	"net"
-	"shared/shared"
+	shared2 "shared"
 	"strconv"
 )
 
@@ -38,7 +38,7 @@ func (c *CRH) Configure(invP, terP *chan messages2.SAMessage) {
 
 	newEdgeInfo := graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.InvP, ActionType: 2, ActionChannel: invP, Message: msg}
 	c.Graph.AddEdge(0, 1, newEdgeInfo)
-	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared.Invoke, ActionName: "I_Process", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info}
+	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_Process", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info}
 	c.Graph.AddEdge(1, 2, newEdgeInfo)
 	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.TerP, ActionType: 2, ActionChannel: terP, Message: msg}
 	c.Graph.AddEdge(2, 0, newEdgeInfo)

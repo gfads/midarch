@@ -6,7 +6,7 @@ import (
 	"os"
 	"plugin"
 	"reflect"
-	"shared/shared"
+	shared2 "shared"
 )
 
 type ExecGraph struct {
@@ -55,7 +55,7 @@ func (ExecGraph) UpdateGraph(oldGraph ExecGraph, plg plugin.Plugin) ExecGraph {
 	for e1 := range newGraph.ExecEdges {
 		for e2 := range newGraph.ExecEdges [e1] {
 			action := newGraph.ExecEdges[e1][e2].Info.ActionName
-			if shared.IsInternal(action) {
+			if shared2.IsInternal(action) {
 				//fx, err := plg.Lookup(action)
 				getType,err := plg.Lookup("Gettype")
 				//fx,_ := plg.Lookup("FX")

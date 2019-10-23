@@ -12,9 +12,9 @@ import (
 	"os"
 	"os/exec"
 	"reflect"
+	shared2 "shared"
 	"shared/error"
 	"shared/parameters"
-	"shared/shared"
 	"strconv"
 	"strings"
 )
@@ -162,7 +162,7 @@ func configureBehaviours(conf *configuration.Configuration) {
 		standardBehaviour := architecturallibrary.Repository[reflect.TypeOf(conf.Components[c].TypeElem).String()].CSP
 		tokens := strings.Split(standardBehaviour, " ")
 		for j := range tokens {
-			if shared.IsExternal(tokens[j]) {
+			if shared2.IsExternal(tokens[j]) {
 				eX := tokens[j][strings.Index(tokens[j], ".")+1:]
 				key := conf.Components[c].Id + "." + eX
 				partner := conf.Maps[key]
@@ -178,7 +178,7 @@ func configureBehaviours(conf *configuration.Configuration) {
 		standardBehaviour := architecturallibrary.Repository[reflect.TypeOf(conf.Connectors[t].TypeElem).String()].CSP
 		tokens := strings.Split(standardBehaviour, " ")
 		for j := range tokens {
-			if shared.IsExternal(tokens[j]) {
+			if shared2.IsExternal(tokens[j]) {
 				eX := tokens[j][strings.Index(tokens[j], ".")+1:]
 				key := conf.Connectors[t].Id + "." + eX
 				partner := conf.Maps[key]
@@ -197,7 +197,7 @@ func renameSyncPorts(conf *configuration.Configuration, elem element.Element) st
 
 	for i := range tokens {
 		token := strings.TrimSpace(tokens[i])
-		if shared.IsExternal(token) {
+		if shared2.IsExternal(token) {
 			action := token[0:strings.Index(token, ".")]
 			switch action {
 			case parameters.INVP:
@@ -288,7 +288,7 @@ func createInternalChannelExp(conf configuration.Configuration) (string, map[str
 		//tokens := strings.Split(conf.Components[i].CSP, " ")
 		tokens := myTokenize(conf.Components[i].CSP)
 		for i := range tokens {
-			if shared.IsInternal(tokens[i]) {
+			if shared2.IsInternal(tokens[i]) {
 				iAction := strings.TrimSpace(tokens[i])
 				internalChannels[iAction] = iAction
 			}
@@ -298,7 +298,7 @@ func createInternalChannelExp(conf configuration.Configuration) (string, map[str
 	for i := range conf.Connectors {
 		tokens := myTokenize(conf.Connectors[i].CSP)
 		for i := range tokens {
-			if shared.IsInternal(tokens[i]) {
+			if shared2.IsInternal(tokens[i]) {
 				iAction := strings.TrimSpace(tokens[i])
 				internalChannels[iAction] = iAction
 			}

@@ -5,7 +5,7 @@ import (
 	graphs2 "gmidarch/development/artefacts/graphs"
 	messages2 "gmidarch/development/messages"
 	"os"
-	"shared/shared"
+	shared2 "shared"
 )
 
 var count int
@@ -19,7 +19,7 @@ func NewCore() Core {
 
 	// create a new instance of Server
 	r := new(Core)
-	r.Behaviour = "B = "+ shared.RUNTIME_BEHAVIOUR
+	r.Behaviour = "B = "+ shared2.RUNTIME_BEHAVIOUR
 	//r.Behaviour = "B = InvR.e1 -> P1\n P1 = InvP.e2 -> P1"
 
 	return *r

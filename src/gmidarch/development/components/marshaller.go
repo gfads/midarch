@@ -7,7 +7,7 @@ import (
 	messages2 "gmidarch/development/messages"
 	miop2 "gmidarch/development/miop"
 	"os"
-	"shared/shared"
+	shared2 "shared"
 )
 
 type Marshaller struct {
@@ -26,7 +26,7 @@ func NewMarshaller() Marshaller {
 }
 
 func (Marshaller) I_Process(msg *messages2.SAMessage, info [] *interface{}) {
-	req := msg.Payload.(shared.Request)
+	req := msg.Payload.(shared2.Request)
 	op := req.Op
 
 	switch op {

@@ -4,7 +4,7 @@ import (
 	graphs2 "gmidarch/development/artefacts/graphs"
 	messages2 "gmidarch/development/messages"
 	miop2 "gmidarch/development/miop"
-	"shared/shared"
+	shared2 "shared"
 )
 
 type Calculatorinvoker struct {
@@ -66,7 +66,7 @@ func (Calculatorinvoker) I_DeserialiseMIOP(msg *messages2.SAMessage, info [] *in
 
 	argsTemp := make([]interface{}, 1)
 	argsTemp[0] = msg.Payload
-	msgToMarhsaller := shared.Request{Op: "unmarshall", Args: argsTemp}
+	msgToMarhsaller := shared2.Request{Op: "unmarshall", Args: argsTemp}
 
 	*msg = messages2.SAMessage{Payload: msgToMarhsaller}
 }
@@ -74,7 +74,7 @@ func (Calculatorinvoker) I_DeserialiseMIOP(msg *messages2.SAMessage, info [] *in
 func (Calculatorinvoker) I_PrepareToObject(msg *messages2.SAMessage) {
 	miopPacket := msg.Payload.(miop2.Packet)
 	argsTemp := miopPacket.Bd.ReqBody.Body
-	inv := shared.Request{Op: miopPacket.Bd.ReqHeader.Operation, Args: argsTemp}
+	inv := shared2.Request{Op: miopPacket.Bd.ReqHeader.Operation, Args: argsTemp}
 	*msg = messages2.SAMessage{Payload: inv}
 }
 
@@ -93,7 +93,7 @@ func (Calculatorinvoker) I_SerialiseMIOP(msg *messages2.SAMessage, info [] *inte
 	// configure message
 	argsTemp := make([]interface{}, 1)
 	argsTemp[0] = miopPacket
-	msgToMarhsaller := shared.Request{Op: "marshall", Args: argsTemp}
+	msgToMarhsaller := shared2.Request{Op: "marshall", Args: argsTemp}
 
 	*msg = messages2.SAMessage{Payload: msgToMarhsaller}
 }

@@ -3,7 +3,7 @@ package components
 import (
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
-	"shared/shared"
+	shared2 "shared"
 )
 
 type Executor struct {
@@ -21,17 +21,17 @@ func NewExecutor() Executor {
 }
 
 func (Executor) I_Process(msg *messages.SAMessage, info [] *interface{}) {
-	plan := msg.Payload.(shared.AdaptationPlan)
+	plan := msg.Payload.(shared2.AdaptationPlan)
 
-	unitCommand := shared.UnitCommand{}
+	unitCommand := shared2.UnitCommand{}
 
 	if len(plan.Operations) > 0 { // TODO
 	    pluginName := plan.Params[plan.Operations[0]][0]
-		plg := shared.LoadPlugin(pluginName)
+		plg := shared2.LoadPlugin(pluginName)
 		tp,_ := plg.Lookup("Gettype")
 		elemType := tp.(func()interface{})()
 
-		unitCommand.Cmd = shared.REPLACE_COMPONENT
+		unitCommand.Cmd = shared2.REPLACE_COMPONENT
 		unitCommand.Params = plg
 		unitCommand.Type = elemType
 	}

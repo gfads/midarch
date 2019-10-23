@@ -7,7 +7,7 @@ import (
 	impl2 "gmidarch/development/impl"
 	messages2 "gmidarch/development/messages"
 	"os"
-	"shared/shared"
+	shared2 "shared"
 )
 
 type Calculatorserver struct {
@@ -37,14 +37,14 @@ func (c *Calculatorserver) Configure(invP *chan messages2.SAMessage, terP *chan 
 	actionChannel := make(chan messages2.SAMessage)
 	newEdgeInfo := graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.InvP, ActionType: 2, ActionChannel: invP, Message: msg}
 	c.Graph.AddEdge(0, 1, newEdgeInfo)
-	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared.Invoke,ActionName:"I_Process", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info}
+	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared2.Invoke,ActionName:"I_Process", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info}
 	c.Graph.AddEdge(1, 2, newEdgeInfo)
 	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.TerP, ActionType: 2, ActionChannel: terP, Message: msg}
 	c.Graph.AddEdge(2, 0, newEdgeInfo)
 }
 
 func (Calculatorserver) I_Process(msg *messages2.SAMessage, info [] *interface{}) {
-	req := msg.Payload.(shared.Request)
+	req := msg.Payload.(shared2.Request)
 	op := req.Op
 	p1 := int(req.Args[0].(float64))
 	p2 := int(req.Args[1].(float64))

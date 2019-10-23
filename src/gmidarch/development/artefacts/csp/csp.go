@@ -8,7 +8,7 @@ import (
 	connectors2 "gmidarch/development/connectors"
 	"os"
 	"reflect"
-	"shared/shared"
+	shared2 "shared"
 	"strconv"
 	"strings"
 	"time"
@@ -44,13 +44,13 @@ func (c *CSP) ConfigureProcessBehaviours(madl madl2.MADL) {
 		configuredBehaviour := madl.Components[i].Behaviour
 
 		// The Component has its behaviour defined at runtime
-		if strings.Contains(configuredBehaviour, shared.RUNTIME_BEHAVIOUR) {
+		if strings.Contains(configuredBehaviour, shared2.RUNTIME_BEHAVIOUR) {
 			configuredBehaviour = updateRuntimeBehaviourComponents(madl.Components[i].ElemId, madl) // TODO
 		}
 
 		tokens := strings.Split(configuredBehaviour, " ")
 		for j := range tokens {
-			if shared.IsExternal(tokens[j]) {
+			if shared2.IsExternal(tokens[j]) {
 				eX := tokens[j][strings.Index(tokens[j], ".")+1:]
 				key := strings.ToLower(madl.Components[i].ElemId) + "." + strings.ToLower(eX)
 				partner, ok := madl.Maps[key]
@@ -69,13 +69,13 @@ func (c *CSP) ConfigureProcessBehaviours(madl madl2.MADL) {
 		configuredBehaviour := madl.Connectors[i].Behaviour
 
 		// The connector has its behaviour defined dynamically
-		if strings.Contains(configuredBehaviour, shared.RUNTIME_BEHAVIOUR) { // TODO
+		if strings.Contains(configuredBehaviour, shared2.RUNTIME_BEHAVIOUR) { // TODO
 			configuredBehaviour = updateRuntimeBehaviourConnectors(madl.Connectors[i].ElemId, madl)
 		}
 
 		tokens := strings.Split(configuredBehaviour, " ")
 		for j := range tokens {
-			if shared.IsExternal(tokens[j]) {
+			if shared2.IsExternal(tokens[j]) {
 				eX := tokens[j][strings.Index(tokens[j], ".")+1:]
 				key := strings.ToLower(madl.Connectors[i].ElemId) + "." + strings.ToLower(eX)
 				partner, ok := madl.Maps[key]
@@ -96,14 +96,14 @@ func (CSP) RenameSyncPortOld(action string, processId string) string {
 
 	action = action [0:strings.Index(action, ".")]
 	switch action {
-	case shared.INVP:
-		r1 = shared.INVR + "." + strings.ToLower(processId)
-	case shared.TERP:
-		r1 = shared.INVR + "." + strings.ToLower(processId)
-	case shared.INVR:
-		r1 = shared.INVR + "." + strings.ToLower(processId)
-	case shared.TERR:
-		r1 = shared.INVR + "." + strings.ToLower(processId)
+	case shared2.INVP:
+		r1 = shared2.INVR + "." + strings.ToLower(processId)
+	case shared2.TERP:
+		r1 = shared2.INVR + "." + strings.ToLower(processId)
+	case shared2.INVR:
+		r1 = shared2.INVR + "." + strings.ToLower(processId)
+	case shared2.TERR:
+		r1 = shared2.INVR + "." + strings.ToLower(processId)
 	}
 	return r1
 }
@@ -113,14 +113,14 @@ func (CSP) RenameSyncPort(action string, processId string) string {
 
 	action = action [0:strings.Index(action, ".")]
 	switch action {
-	case shared.INVP:
-		r1 = shared.INVR + "." + strings.ToLower(processId)
-	case shared.TERP:
-		r1 = shared.TERR + "." + strings.ToLower(processId)
-	case shared.INVR:
-		r1 = shared.INVP + "." + strings.ToLower(processId)
-	case shared.TERR:
-		r1 = shared.TERP + "." + strings.ToLower(processId)
+	case shared2.INVP:
+		r1 = shared2.INVR + "." + strings.ToLower(processId)
+	case shared2.TERP:
+		r1 = shared2.TERR + "." + strings.ToLower(processId)
+	case shared2.INVR:
+		r1 = shared2.INVP + "." + strings.ToLower(processId)
+	case shared2.TERR:
+		r1 = shared2.TERP + "." + strings.ToLower(processId)
 	}
 	return r1
 }
@@ -130,9 +130,9 @@ func (CSP) IdentifyInternalChannels(madl madl2.MADL) []string {
 	r1Temp := map[string]string{}
 
 	for i := range madl.Components {
-		tokens := shared.MyTokenize(madl.Components[i].Behaviour)
+		tokens := shared2.MyTokenize(madl.Components[i].Behaviour)
 		for j := range tokens {
-			if shared.IsInternal(tokens[j]) {
+			if shared2.IsInternal(tokens[j]) {
 				iAction := strings.TrimSpace(tokens[j])
 				r1Temp[iAction] = iAction
 			}
@@ -140,9 +140,9 @@ func (CSP) IdentifyInternalChannels(madl madl2.MADL) []string {
 	}
 
 	for i := range madl.Connectors {
-		tokens := shared.MyTokenize(madl.Connectors[i].Behaviour)
+		tokens := shared2.MyTokenize(madl.Connectors[i].Behaviour)
 		for i := range tokens {
-			if shared.IsInternal(tokens[i]) {
+			if shared2.IsInternal(tokens[i]) {
 				iAction := strings.TrimSpace(tokens[i])
 				r1Temp[iAction] = iAction
 			}
@@ -160,25 +160,25 @@ func (c CSP) IdentifyExternalChannels(madl madl2.MADL) []string {
 	r1Temp := map[string]string{}
 
 	for i := range madl.Components {
-		tokens := shared.MyTokenize(madl.Components[i].Behaviour)
+		tokens := shared2.MyTokenize(madl.Components[i].Behaviour)
 		for j := range tokens {
-			if shared.IsExternal(tokens[j]) {
+			if shared2.IsExternal(tokens[j]) {
 				iAction := strings.TrimSpace(tokens[j])
 				iCannonicalAction, err := c.ToCanonicalName(iAction)
-				shared.CheckError(err, "CSP")
+				shared2.CheckError(err, "CSP")
 				r1Temp[iCannonicalAction] = iCannonicalAction
 			}
 		}
 	}
 
 	for i := range madl.Connectors {
-		tokens := shared.MyTokenize(madl.Connectors[i].Behaviour)
+		tokens := shared2.MyTokenize(madl.Connectors[i].Behaviour)
 
 		for j := range tokens {
-			if shared.IsExternal(tokens[j]) {
+			if shared2.IsExternal(tokens[j]) {
 				iAction := strings.TrimSpace(tokens[j])
 				iCannonicalAction, err := c.ToCanonicalName(iAction)
-				shared.CheckError(err, "CSP")
+				shared2.CheckError(err, "CSP")
 				r1Temp[iCannonicalAction] = iCannonicalAction
 			}
 		}
@@ -194,17 +194,17 @@ func (CSP) ToCanonicalName(name string) (string, error) {
 	r1 := ""
 	r2 := *new(error)
 
-	if strings.Contains(name, shared.INVR) {
-		r1 = shared.INVR
+	if strings.Contains(name, shared2.INVR) {
+		r1 = shared2.INVR
 	}
-	if strings.Contains(name, shared.TERR) {
-		r1 = shared.TERR
+	if strings.Contains(name, shared2.TERR) {
+		r1 = shared2.TERR
 	}
-	if strings.Contains(name, shared.INVP) {
-		r1 = shared.INVP
+	if strings.Contains(name, shared2.INVP) {
+		r1 = shared2.INVP
 	}
-	if strings.Contains(name, shared.TERP) {
-		r1 = shared.TERP
+	if strings.Contains(name, shared2.TERP) {
+		r1 = shared2.TERP
 	}
 
 	if r1 == "" {

@@ -2,7 +2,7 @@ package connectors
 
 import (
 	graphs2 "gmidarch/development/artefacts/graphs"
-	"shared/shared"
+	shared2 "shared"
 )
 
 type OnetoN struct {
@@ -14,7 +14,7 @@ func NewOnetoN() OnetoN {
 
 	// create a new instance of client
 	r := new(OnetoN)
-	r.Behaviour = "B = "+ shared.RUNTIME_BEHAVIOUR
+	r.Behaviour = "B = "+ shared2.RUNTIME_BEHAVIOUR
 
 	return *r
 }

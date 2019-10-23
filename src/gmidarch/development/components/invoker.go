@@ -5,7 +5,7 @@ import (
 	element2 "gmidarch/development/element"
 	messages2 "gmidarch/development/messages"
 	miop2 "gmidarch/development/miop"
-	"shared/shared"
+	shared2 "shared"
 )
 
 type Invoker struct {
@@ -35,28 +35,28 @@ func (i *Invoker) Configure(invP, terP, invR1, terR1, invR2, terR2, invR3, terR3
 	newEdgeInfo := graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.InvP, ActionType: 2, ActionChannel: invP, Message: msg}
 	i.Graph.AddEdge(0, 1, newEdgeInfo)
 	actionChannel := make(chan messages2.SAMessage)
-	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared.Invoke, ActionName: "I_DeserialiseMIOP", Message: msg, ActionType: 1, ActionChannel: &actionChannel, Info: info}
+	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_DeserialiseMIOP", Message: msg, ActionType: 1, ActionChannel: &actionChannel, Info: info}
 	i.Graph.AddEdge(1, 2, newEdgeInfo)
 	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.InvR, ActionType: 2, ActionChannel: invR1, Message: msg}
 	i.Graph.AddEdge(2, 3, newEdgeInfo)
 	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.TerR, ActionType: 2, ActionChannel: terR1, Message: msg}
 	i.Graph.AddEdge(3, 4, newEdgeInfo)
 	actionChannel = make(chan messages2.SAMessage)
-	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared.Invoke, ActionName: "I_Preparetoobject", Message: msg, ActionType: 1, ActionChannel: &actionChannel, Info: info}
+	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_Preparetoobject", Message: msg, ActionType: 1, ActionChannel: &actionChannel, Info: info}
 	i.Graph.AddEdge(4, 5, newEdgeInfo)
 	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.InvR, ActionType: 2, ActionChannel: invR2, Message: msg}
 	i.Graph.AddEdge(5, 6, newEdgeInfo)
 	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.TerR, ActionType: 2, ActionChannel: terR2, Message: msg}
 	i.Graph.AddEdge(6, 7, newEdgeInfo)
 	actionChannel = make(chan messages2.SAMessage)
-	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared.Invoke, ActionName: "I_SerialiseMIOP", Message: msg, ActionType: 1, ActionChannel: &actionChannel, Info: info}
+	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_SerialiseMIOP", Message: msg, ActionType: 1, ActionChannel: &actionChannel, Info: info}
 	i.Graph.AddEdge(7, 8, newEdgeInfo)
 	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.InvR, ActionType: 2, ActionChannel: invR3, Message: msg}
 	i.Graph.AddEdge(8, 9, newEdgeInfo)
 	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.TerR, ActionType: 2, ActionChannel: terR3, Message: msg}
 	i.Graph.AddEdge(9, 10, newEdgeInfo)
 	actionChannel = make(chan messages2.SAMessage)
-	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared.Invoke, ActionName: "I_PreparetoSRH", Message: msg, ActionType: 1, ActionChannel: &actionChannel, Info: info}
+	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_PreparetoSRH", Message: msg, ActionType: 1, ActionChannel: &actionChannel, Info: info}
 	i.Graph.AddEdge(10, 11, newEdgeInfo)
 	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.TerP, ActionType: 2, ActionChannel: terP, Message: msg}
 	i.Graph.AddEdge(11, 0, newEdgeInfo)
@@ -66,7 +66,7 @@ func (Invoker) I_DeserialiseMIOP(msg *messages2.SAMessage, info [] *interface{})
 
 	argsTemp := make([]interface{}, 1)
 	argsTemp[0] = msg.Payload
-	msgToMarhsaller := shared.Request{Op: "unmarshall", Args: argsTemp}
+	msgToMarhsaller := shared2.Request{Op: "unmarshall", Args: argsTemp}
 
 	*msg = messages2.SAMessage{Payload: msgToMarhsaller}
 }
@@ -74,7 +74,7 @@ func (Invoker) I_DeserialiseMIOP(msg *messages2.SAMessage, info [] *interface{})
 func (Invoker) I_PrepareToObject(msg *messages2.SAMessage, info [] *interface{}) {
 	miopPacket := msg.Payload.(miop2.Packet)
 	argsTemp := miopPacket.Bd.ReqBody.Body
-	inv := shared.Request{Op: miopPacket.Bd.ReqHeader.Operation, Args: argsTemp}
+	inv := shared2.Request{Op: miopPacket.Bd.ReqHeader.Operation, Args: argsTemp}
 	*msg = messages2.SAMessage{Payload: inv}
 }
 
@@ -93,7 +93,7 @@ func (Invoker) I_SerialiseMIOP(msg *messages2.SAMessage, info [] *interface{}) {
 	// configure message
 	argsTemp := make([]interface{}, 1)
 	argsTemp[0] = miopPacket
-	msgToMarhsaller := shared.Request{Op: "marshall", Args: argsTemp}
+	msgToMarhsaller := shared2.Request{Op: "marshall", Args: argsTemp}
 
 	*msg = messages2.SAMessage{Payload: msgToMarhsaller}
 }

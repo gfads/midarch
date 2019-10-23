@@ -5,7 +5,7 @@ import (
 	graphs2 "gmidarch/development/artefacts/graphs"
 	element2 "gmidarch/development/element"
 	messages2 "gmidarch/development/messages"
-	"shared/shared"
+	shared2 "shared"
 )
 
 type Client struct {
@@ -33,13 +33,13 @@ func (c *Client) Configure(invR, terR *chan messages2.SAMessage) {
 	info[0] = new(interface{})
 	*info[0] = msg
 
-	newEdgeInfo := graphs2.ExecEdgeInfo{InternalAction: shared.Invoke, ActionName: "I_Setmessage", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info}
+	newEdgeInfo := graphs2.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_Setmessage", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info}
 	c.Graph.AddEdge(0, 1, newEdgeInfo)
 	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.InvR, ActionName: "InvR", ActionType: 2, ActionChannel: invR, Message:msg}
 	c.Graph.AddEdge(1, 2, newEdgeInfo)
 	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.TerR, ActionName: "TerR", ActionType: 2, ActionChannel: terR, Message:msg}
 	c.Graph.AddEdge(2, 3, newEdgeInfo)
-	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared.Invoke, ActionName: "I_Printmessage", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info}
+	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_Printmessage", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info}
 	c.Graph.AddEdge(3, 0, newEdgeInfo)
 }
 

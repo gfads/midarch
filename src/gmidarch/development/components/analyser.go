@@ -3,7 +3,7 @@ package components
 import (
 	graphs2 "gmidarch/development/artefacts/graphs"
 	messages2 "gmidarch/development/messages"
-	"shared/shared"
+	shared2 "shared"
 )
 
 type Analyser struct {
@@ -21,8 +21,8 @@ func NewAnalyser() Analyser {
 }
 
 func (Analyser) I_Process(msg *messages2.SAMessage, info [] *interface{}) {
-	monitoredEvolutiveData := msg.Payload.(shared.MonitoredEvolutiveData)
-	evolutiveAnalysisResult := shared.EvolutiveAnalysisResult{}
+	monitoredEvolutiveData := msg.Payload.(shared2.MonitoredEvolutiveData)
+	evolutiveAnalysisResult := shared2.EvolutiveAnalysisResult{}
 
 	if len(monitoredEvolutiveData) > 0 { // New plugins available
 		evolutiveAnalysisResult.NeedAdaptation = true

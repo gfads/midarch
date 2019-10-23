@@ -4,7 +4,7 @@ import (
 	madl2 "gmidarch/development/artefacts/madl"
 	components2 "gmidarch/development/components"
 	"gmidarch/execution/engine"
-	"shared/shared"
+	shared2 "shared"
 )
 
 type EE struct {
@@ -31,11 +31,11 @@ func (e EE) Start() {
 			unit.GraphOfElem = tempElem.(madl2.Element).Graph
 			elem = unit
 		}
-		go engine.Engine{}.Execute(elem, graph, shared.EXECUTE_FOREVER)
+		go engine.Engine{}.Execute(elem, graph, shared2.EXECUTE_FOREVER)
 	}
 
 	for i := range e.MADLX.Connectors {
-		go engine.Engine{}.Execute(e.MADLX.Connectors[i].Type, e.MADLX.Connectors[i].Graph, shared.EXECUTE_FOREVER)
+		go engine.Engine{}.Execute(e.MADLX.Connectors[i].Type, e.MADLX.Connectors[i].Graph, shared2.EXECUTE_FOREVER)
 	}
 }
 

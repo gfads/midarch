@@ -3,7 +3,7 @@ package components
 import (
 	graphs2 "gmidarch/development/artefacts/graphs"
 	messages2 "gmidarch/development/messages"
-	"shared/shared"
+	shared2 "shared"
 	"time"
 )
 
@@ -29,13 +29,13 @@ func (Monevolutive) I_Checkplugins(msg *messages2.SAMessage, info [] *interface{
 
 	if isFirstTime {
 		isFirstTime = false
-		listOfOldPlugins = shared.LoadPlugins()
+		listOfOldPlugins = shared2.LoadPlugins()
 	} else {
-		listOfNewPlugins = shared.LoadPlugins()
-		newPlugins = shared.CheckForNewPlugins(listOfOldPlugins, listOfNewPlugins)
+		listOfNewPlugins = shared2.LoadPlugins()
+		newPlugins = shared2.CheckForNewPlugins(listOfOldPlugins, listOfNewPlugins)
 	}
 
-	evolutiveMonitoredData := shared.MonitoredEvolutiveData{}
+	evolutiveMonitoredData := shared2.MonitoredEvolutiveData{}
 	evolutiveMonitoredData = newPlugins
 	*msg = messages2.SAMessage{evolutiveMonitoredData}
 

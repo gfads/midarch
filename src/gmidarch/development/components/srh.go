@@ -8,7 +8,7 @@ import (
 	"gmidarch/development/messages"
 	"log"
 	"net"
-	"shared/shared"
+	shared2 "shared"
 	"strconv"
 )
 
@@ -54,7 +54,7 @@ func (s *SRH) Configure(invR, terR *chan messages.SAMessage) {
 	args1HostPort[1] = 1313
 	*info1[1] = args1HostPort
 
-	newEdgeInfo := graphs.ExecEdgeInfo{InternalAction: shared.Invoke, ActionName: "I_Receive", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info1}
+	newEdgeInfo := graphs.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_Receive", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info1}
 	s.Graph.AddEdge(0, 1, newEdgeInfo)
 	newEdgeInfo = graphs.ExecEdgeInfo{ExternalAction: element.Element{}.InvR, ActionType: 2, ActionChannel: invR, Message: msg}
 	s.Graph.AddEdge(1, 2, newEdgeInfo)
@@ -64,14 +64,14 @@ func (s *SRH) Configure(invR, terR *chan messages.SAMessage) {
 	info2 := make([]*interface{}, 1)
 	info2[0] = new(interface{})
 	*info2[0] = msg
-	newEdgeInfo = graphs.ExecEdgeInfo{InternalAction: shared.Invoke, ActionName: "I_Send", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info2}
+	newEdgeInfo = graphs.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_Send", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info2}
 	s.Graph.AddEdge(3, 0, newEdgeInfo)
 }
 
 func (SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO
 
-	host := "localhost"                // TODO
-	port := shared.CALCULATOR_PORT // TODO
+	host := "localhost"             // TODO
+	port := shared2.CALCULATOR_PORT // TODO
 
 	// create listener
 	ln, err = net.Listen("tcp", host+":"+strconv.Itoa(port))

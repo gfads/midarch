@@ -5,7 +5,7 @@ import (
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"reflect"
-	"shared/shared"
+	shared2 "shared"
 )
 
 type Engine struct{}
@@ -31,7 +31,7 @@ func (Engine) Execute(elem interface{}, graph graphs.ExecGraph, executionMode bo
 			choice(elem, &chosen, edges)
 			node = edges[chosen].To
 		}
-		if node == 0 && executionMode != shared.EXECUTE_FOREVER {
+		if node == 0 && executionMode != shared2.EXECUTE_FOREVER {
 			break
 		}
 	}
