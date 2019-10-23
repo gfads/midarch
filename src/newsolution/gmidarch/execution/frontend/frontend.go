@@ -55,5 +55,5 @@ func (f FrontEnd) Deploy(file string) {
 	//eeApp.Start()
 
 	// Start versioning injector
-	inj.Start(mapp.Configuration,"receiver")
+	inj.Start("receiver")
 }

@@ -25,9 +25,5 @@ func NewReceiver() Receiver {
 }
 
 func (Receiver) I_Printmessage(msg *messages.SAMessage, info [] *interface{}) {
-	fmt.Printf("Receiver:: Plugin:: %v  \n", *msg)
-}
-
-func (Receiver) FX(x int) {
-	fmt.Printf("Receiver_Plugin")
+	fmt.Printf("Receiver:: Plugin [V2]:: %v  \n", *msg)
 }
