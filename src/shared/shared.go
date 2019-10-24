@@ -263,7 +263,7 @@ func LoadPlugin(pluginName string) (plugin.Plugin) {
 		plg, err = plugin.Open(pluginFile)
 
 		if err != nil {
-			if attempts >= 100 { // TODO
+			if attempts >= 1000 { // TODO
 				fmt.Printf("Shared:: Error on trying open plugin '%v' \n", pluginFile)
 				os.Exit(0)
 			} else {
@@ -435,8 +435,8 @@ func SaveFile(path, name, ext string, content []string) {
 const BASE_DIR = "/Users/nsr/Dropbox/go/midarch-go-v13"
 const DIR_PLUGINS = BASE_DIR + "/src/gmidarch/execution/repositories/plugins"
 const DIR_PLUGINS_SOURCE = BASE_DIR + "/src/gmidarch/development/repositories/plugins"
-const DIR_CSP = BASE_DIR + "/src/apps/csps"
-const DIR_MADL = BASE_DIR + "/src/apps/madls"
+const DIR_CSP = BASE_DIR + "/src/apps/artefacts/csps"
+const DIR_MADL = BASE_DIR + "/src/apps/artefacts/madls"
 const DIR_GO = "/usr/local/go/bin"
 const DIR_FDR = "/Volumes/Macintosh HD/Applications/FDR4-2.app/Contents/MacOS"
 const DIR_CSPARSER = BASE_DIR + "/src/verificationtools/cspdot/csparser"

@@ -2,19 +2,19 @@ package checker
 
 import (
 	"fmt"
-	csp2 "gmidarch/development/artefacts/csp"
+	"gmidarch/development/artefacts/csp"
 	"os"
 	"os/exec"
-	shared2 "shared"
+	"shared"
 	"strings"
 )
 
 type FDRGateway struct{}
 
-func (FDRGateway) Check(csp csp2.CSP) {
-	cmdExp := shared2.DIR_FDR + "/" + shared2.FDR_COMMAND
-	filePath := shared2.DIR_CSP + "/" + csp.CompositionName
-	fileName := csp.CompositionName + shared2.CSP_EXTENSION
+func (FDRGateway) Check(csp csp.CSP) {
+	cmdExp := shared.DIR_FDR + "/" + shared.FDR_COMMAND
+	filePath := shared.DIR_CSP + "/" + csp.CompositionName
+	fileName := csp.CompositionName + shared.CSP_EXTENSION
 	inputFile := filePath + "/" + fileName
 
 	out, err := exec.Command(cmdExp, inputFile).Output()

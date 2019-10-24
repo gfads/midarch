@@ -1,4 +1,4 @@
-package ee
+package env
 
 import (
 	"gmidarch/development/artefacts/madl"
@@ -7,16 +7,16 @@ import (
 	"shared"
 )
 
-type EE struct {
+type Env struct {
 	MADLX madl.MADL
 }
 
-func NewEE() EE {
-	r := new(EE)
+func NewEE() Env {
+	r := new(Env)
 	return *r
 }
 
-func (e EE) Start() {
+func (e Env) Start() {
 
 	for i := range e.MADLX.Components {
 		elem := e.MADLX.Components[i].Type
@@ -39,7 +39,7 @@ func (e EE) Start() {
 	}
 }
 
-func (ee *EE) DeployApp(mee madl.MADL, mapp madl.MADL) {
+func (ee *Env) DeployApp(mee madl.MADL, mapp madl.MADL) {
 
 	elems := []madl.Element{}
 	for i := range mapp.Components {
@@ -63,7 +63,7 @@ func (ee *EE) DeployApp(mee madl.MADL, mapp madl.MADL) {
 	ee.MADLX = mee
 }
 
-func (ee *EE) Deploy(m madl.MADL) {
+func (ee *Env) Deploy(m madl.MADL) {
 
 	ee.MADLX = m
 }

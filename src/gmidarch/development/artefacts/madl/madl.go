@@ -9,7 +9,7 @@ import (
 	"gmidarch/development/repositories/architectural"
 	"os"
 	"reflect"
-	shared2 "shared"
+	"shared"
 	"strconv"
 	"strings"
 )
@@ -40,7 +40,7 @@ func (m *MADL) ConfigureComponents() {
 		}
 		m.Components[i].Type = record.Type
 		m.Components[i].Behaviour = record.Behaviour
-		dotgraph := dot.DOT{}.Read(m.Components[i].TypeName + shared2.DOT_EXTENSION)
+		dotgraph := dot.DOT{}.Read(m.Components[i].TypeName + shared.DOT_EXTENSION)
 		execgraph := graphs.Exec{}.Create(m.Components[i].ElemId, m.Components[i].Type, m.Components[i].TypeName, dotgraph, m.Maps, m.Channels)
 
 		m.Components[i].Graph = execgraph
@@ -60,7 +60,7 @@ func (m *MADL) ConfigureConnectors() {
 		}
 		m.Connectors[i].Type = record.Type
 		m.Connectors[i].Behaviour = record.Behaviour
-		dotgraph := dot.DOT{}.Read(m.Connectors[i].TypeName + shared2.DOT_EXTENSION)
+		dotgraph := dot.DOT{}.Read(m.Connectors[i].TypeName + shared.DOT_EXTENSION)
 		execgraph := graphs.Exec{}.Create(m.Connectors[i].ElemId, m.Connectors[i].Type, m.Connectors[i].TypeName, dotgraph, m.Maps, m.Channels)
 
 		m.Connectors[i].Graph = execgraph
@@ -77,23 +77,23 @@ func (madl *MADL) ConfigureChannelsAndMaps() {
 		tId := madl.Attachments[i].T.ElemId
 
 		// c1 -> t
-		key01 := c1Id + "." + shared2.INVR + "." + tId
-		key02 := tId + "." + shared2.INVP + "." + c1Id
-		key03 := tId + "." + shared2.TERP + "." + c1Id
-		key04 := c1Id + "." + shared2.TERR + "." + tId
-		structuralChannels[key01] = make(chan messages.SAMessage, shared2.CHAN_BUFFER_SIZE)
+		key01 := c1Id + "." + shared.INVR + "." + tId
+		key02 := tId + "." + shared.INVP + "." + c1Id
+		key03 := tId + "." + shared.TERP + "." + c1Id
+		key04 := c1Id + "." + shared.TERR + "." + tId
+		structuralChannels[key01] = make(chan messages.SAMessage, shared.CHAN_BUFFER_SIZE)
 		structuralChannels[key02] = structuralChannels[key01]
-		structuralChannels[key03] = make(chan messages.SAMessage, shared2.CHAN_BUFFER_SIZE)
+		structuralChannels[key03] = make(chan messages.SAMessage, shared.CHAN_BUFFER_SIZE)
 		structuralChannels[key04] = structuralChannels[key03]
 
 		// t -> c2
-		key01 = tId + "." + shared2.INVR + "." + c2Id
-		key02 = c2Id + "." + shared2.INVP + "." + tId
-		key03 = c2Id + "." + shared2.TERP + "." + tId
-		key04 = tId + "." + shared2.TERR + "." + c2Id
-		structuralChannels[key01] = make(chan messages.SAMessage, shared2.CHAN_BUFFER_SIZE)
+		key01 = tId + "." + shared.INVR + "." + c2Id
+		key02 = c2Id + "." + shared.INVP + "." + tId
+		key03 = c2Id + "." + shared.TERP + "." + tId
+		key04 = tId + "." + shared.TERR + "." + c2Id
+		structuralChannels[key01] = make(chan messages.SAMessage, shared.CHAN_BUFFER_SIZE)
 		structuralChannels[key02] = structuralChannels[key01]
-		structuralChannels[key03] = make(chan messages.SAMessage, shared2.CHAN_BUFFER_SIZE)
+		structuralChannels[key03] = make(chan messages.SAMessage, shared.CHAN_BUFFER_SIZE)
 		structuralChannels[key04] = structuralChannels[key03]
 	}
 	madl.Channels = structuralChannels
@@ -160,14 +160,14 @@ func (MADL) IdentifyComponents(content []string) ([]Element, error) {
 		if strings.Contains(strings.ToUpper(tempLine), "COMPONENTS") {
 			foundComponents = true
 		} else {
-			if foundComponents && !shared2.SkipLine(tempLine) && strings.Contains(tempLine, ":") {
+			if foundComponents && !shared.SkipLine(tempLine) && strings.Contains(tempLine, ":") {
 				temp := strings.Split(tempLine, ":")
 				compId := strings.TrimSpace(temp[0])
 				compType := ""
 				compType = strings.TrimSpace(temp[1])
 				r1 = append(r1, Element{ElemId: compId, TypeName: compType})
 			} else {
-				if foundComponents && !shared2.SkipLine(tempLine) && !strings.Contains(tempLine, ":") {
+				if foundComponents && !shared.SkipLine(tempLine) && !strings.Contains(tempLine, ":") {
 					break
 				}
 			}
@@ -191,7 +191,7 @@ func (MADL) IdentifyConnectors(content []string) ([]Element, error) {
 		if strings.Contains(strings.ToUpper(tempLine), "CONNECTORS") {
 			foundConnectors = true
 		} else {
-			if foundConnectors && !shared2.SkipLine(tempLine) && strings.Contains(tempLine, ":") {
+			if foundConnectors && !shared.SkipLine(tempLine) && strings.Contains(tempLine, ":") {
 				temp := strings.Split(tempLine, ":")
 				connId := strings.TrimSpace(temp[0])
 				connType := strings.TrimSpace(temp[1])
@@ -223,7 +223,7 @@ func (MADL) IdentifyAttachments(content []string) ([]Attachment, error) {
 		if strings.Contains(strings.ToUpper(tempLine), "ATTACHMENTS") {
 			foundAttachments = true
 		} else {
-			if foundAttachments && !shared2.SkipLine(tempLine) && strings.Contains(tempLine, ",") {
+			if foundAttachments && !shared.SkipLine(tempLine) && strings.Contains(tempLine, ",") {
 				atts := strings.Split(strings.TrimSpace(tempLine), ",")
 				c1Temp := atts[0]
 				tTemp := atts[1]
@@ -260,10 +260,10 @@ func (MADL) IdentifyAdaptability(content []string) ([]string, error) {
 		if strings.Contains(strings.ToUpper(tempLine), "ADAPTABILITY") {
 			foundAdaptability = true
 		} else {
-			if foundAdaptability && !shared2.SkipLine(tempLine) && shared2.IsAdaptationType(tempLine) {
+			if foundAdaptability && !shared.SkipLine(tempLine) && shared.IsAdaptationType(tempLine) {
 				r1 = append(r1, strings.ToUpper(strings.TrimSpace(tempLine)))
 			} else {
-				if foundAdaptability && !shared2.SkipLine(tempLine) && !shared2.IsAdaptationType(tempLine) {
+				if foundAdaptability && !shared.SkipLine(tempLine) && !shared.IsAdaptationType(tempLine) {
 					break
 				}
 			}

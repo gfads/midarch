@@ -3,7 +3,7 @@ package frontend
 import (
 	"gmidarch/execution/checker"
 	"gmidarch/execution/creator"
-	"gmidarch/execution/ee"
+	"gmidarch/execution/env"
 	"gmidarch/execution/generator"
 	"gmidarch/execution/loader"
 	"injector/evolutive"
@@ -45,12 +45,12 @@ func (f FrontEnd) Deploy(file string) {
 	chk.Check(cspee)
 
 	// Deploy App into EE & start EE
-	eeEE := ee.NewEE()
+	eeEE := env.NewEE()
 	eeEE.DeployApp(mee,mapp)
 	eeEE.Start()
 
 	// Start application only - without execution environment
-	//eeApp := ee.NewEE()
+	//eeApp := env.NewEE()
 	//eeApp.Deploy(mapp)
 	//eeApp.Start()
 
