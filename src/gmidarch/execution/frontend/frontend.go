@@ -6,7 +6,6 @@ import (
 	"gmidarch/execution/deployer"
 	"gmidarch/execution/generator"
 	"gmidarch/execution/loader"
-	"injector/evolutive"
 	"shared"
 )
 
@@ -17,7 +16,6 @@ func (f FrontEnd) Deploy(file string) {
 	crt := creator.Creator{}
 	gen := generator.Generator{}
 	chk := checker.Checker{}
-	inj := evolutive.EvolutiveInjector{}
 	dep := deployer.NewEE()
 
 	// Read MADL and generate architectural artifacts (App)
@@ -53,7 +51,4 @@ func (f FrontEnd) Deploy(file string) {
 	//eeApp := deployer.NewEE()
 	//eeApp.Deploy(mapp)
 	//eeApp.Start()
-
-	// Start evolutive injector
-	inj.Start("receiver")
 }

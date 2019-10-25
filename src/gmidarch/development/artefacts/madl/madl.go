@@ -35,7 +35,7 @@ func (m *MADL) ConfigureComponents() {
 	for i := range m.Components {
 		record, ok := lib.Library[m.Components[i].TypeName]
 		if !ok {
-			fmt.Println("MADL:: Component type '" + m.Components[i].TypeName + "'not in Library")
+			fmt.Printf("MADL:: Component type '%v' not in Library", m.Components[i].TypeName)
 			os.Exit(0)
 		}
 		m.Components[i].Type = record.Type

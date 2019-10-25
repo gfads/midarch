@@ -1,14 +1,14 @@
 Configuration senderreceiver :=
 
    Components
-      sender   : Sender
-      receiver : Receiver
+      s : Sender
+      r : Receiver
 
    Connectors
-      t1 : Oneway
+      t : Oneway
 
    Attachments
-      sender, t1,receiver
+      s,t,r
 
    Adaptability
       Evolutive

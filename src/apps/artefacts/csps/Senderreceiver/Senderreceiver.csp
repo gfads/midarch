@@ -1,9 +1,9 @@
-datatype PROCNAMES = sender | receiver | t1
-channel InvR,InvP : PROCNAMES
-channel I_Setmessagt1,I_Setmessage2,I_Setmessage3,I_PrintMessage
-RECEIVER = InvP.t1 -> I_PrintMessage -> RECEIVER
-SENDER = I_Setmessagt1 -> InvR.t1 -> SENDER [] I_Setmessage2 -> InvR.t1 -> SENDER [] I_Setmessage3 -> InvR.t1 -> SENDER
-T1 = InvP.sender -> InvR.receiver -> T1
+datatype PROCNAMES = client | server | t1
+channel InvR,TerR,InvP,TerP : PROCNAMES
+channel I_Printmessage,I_Process,I_Setmessage
+CLIENT = I_Setmessage -> InvR.t1 -> TerR.t1 -> I_Printmessage -> CLIENT
+SERVER = InvP.t1 -> I_Process -> TerP.t1 -> SERVER
+T1 = InvP.client -> InvR.server -> TerR.server -> TerP.client -> T1
 
-senderreceiver = (SENDER ||| RECEIVER)[|{|InvR,InvP|}|](T1[[InvP.sender <- InvR.t1,InvR.receiver <- InvP.t1]])
+senderreceiver = (CLIENT ||| SERVER)[|{|InvR,TerR,InvP,TerP|}|](T1[[InvP.client <- InvR.t1,InvR.server <- InvP.t1,TerR.server <- TerP.t1,TerP.client <- TerR.t1]])
 assert senderreceiver :[deadlock free]
