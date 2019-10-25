@@ -3,6 +3,9 @@ package creator
 import (
 	"fmt"
 	"gmidarch/development/artefacts/madl"
+	"gmidarch/development/components"
+	"gmidarch/development/connectors"
+	"reflect"
 	shared2 "shared"
 	"strconv"
 	"strings"
@@ -14,7 +17,7 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 	mEE := madl.MADL{}
 	appIsAdaptive := true
 
-	if len(appKindOfAdaptability) == 1 && appKindOfAdaptability[0] == "NONE" {
+	if len(appKindOfAdaptability) == 1 && appKindOfAdaptability[0] == "NONE" { // TODO
 		appIsAdaptive = false
 	}
 
@@ -26,14 +29,14 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 
 	// Components
 	comps := []madl.Element{}
-	comps = append(comps, madl.Element{ElemId: "core", TypeName: "Core"})
+	comps = append(comps, madl.Element{ElemId: "core", TypeName: reflect.TypeOf(components.Core{}).Name()})
 
 	if appIsAdaptive {
-		comps = append(comps, madl.Element{ElemId: "monevolutive", TypeName: "Monevolutive"}) //TODO
-		comps = append(comps, madl.Element{ElemId: "monitor", TypeName: "Monitor"})
-		comps = append(comps, madl.Element{ElemId: "analyser", TypeName: "Analyser"})
-		comps = append(comps, madl.Element{ElemId: "planner", TypeName: "Planner"})
-		comps = append(comps, madl.Element{ElemId: "executor", TypeName: "Executor"})
+		comps = append(comps, madl.Element{ElemId: "monevolutive", TypeName: reflect.TypeOf(components.Monevolutive{}).Name()})
+		comps = append(comps, madl.Element{ElemId: "monitor", TypeName: reflect.TypeOf(components.Monitor{}).Name()})
+		comps = append(comps, madl.Element{ElemId: "analyser", TypeName: reflect.TypeOf(components.Analyser{}).Name()})
+		comps = append(comps, madl.Element{ElemId: "planner", TypeName: reflect.TypeOf(components.Planner{}).Name()})
+		comps = append(comps, madl.Element{ElemId: "executor", TypeName: reflect.TypeOf(components.Executor{}).Name()})
 	}
 
 	units := []string{}
@@ -41,7 +44,7 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 		units = append(units, "unit"+strconv.Itoa(i+1))
 	}
 	for i := 0; i < len(units); i++ {
-		comps = append(comps, madl.Element{ElemId: units[i], TypeName: "Unit"})
+		comps = append(comps, madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()})
 	}
 
 	// Connectors
@@ -49,50 +52,50 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 
 	params := make([]interface{},1)
 	params[0] = len(units)
-	conns = append(conns, madl.Element{ElemId: "t1", TypeName: "OnetoN", Params:params}) // TODO
+	conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.OnetoN{}).Name(), Params:params})
 
 	if appIsAdaptive {
-		conns = append(conns, madl.Element{ElemId: "t2", TypeName: "Oneway"})
-		conns = append(conns, madl.Element{ElemId: "t3", TypeName: "Oneway"})
-		conns = append(conns, madl.Element{ElemId: "t4", TypeName: "Oneway"})
-		conns = append(conns, madl.Element{ElemId: "t5", TypeName: "Oneway"})
-		conns = append(conns, madl.Element{ElemId: "t6", TypeName: "Oneway"})
+		conns = append(conns, madl.Element{ElemId: "t2", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()})
+		conns = append(conns, madl.Element{ElemId: "t3", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()})
+		conns = append(conns, madl.Element{ElemId: "t4", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()})
+		conns = append(conns, madl.Element{ElemId: "t5", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()})
+		conns = append(conns, madl.Element{ElemId: "t6", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()})
 	}
 
 	// Attachments
 	atts := []madl.Attachment{}
 
 	for i := 0; i < len(units); i++ {
-		attC1 := madl.Element{ElemId: "core", TypeName: "Core"}
-		attT := madl.Element{ElemId: "t1", TypeName: "OnetoN"}
-		attC2 := madl.Element{ElemId: units[i], TypeName: "ExecutionUnit"}
+		attC1 := madl.Element{ElemId: "core", TypeName: reflect.TypeOf(components.Core{}).Name()}
+		attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
+		attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
 		atts = append(atts, madl.Attachment{attC1, attT, attC2})
 	}
 
 	if appIsAdaptive {
-		attC1 := madl.Element{ElemId: "monevolutive", TypeName: "Monevolutive"}
-		attT := madl.Element{ElemId: "t2", TypeName: "Oneway"}
-		attC2 := madl.Element{ElemId: "monitor", TypeName: "Monitor"}
+		attC1 := madl.Element{ElemId: "monevolutive", TypeName: reflect.TypeOf(components.Monevolutive{}).Name()}
+		attT := madl.Element{ElemId: "t2", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
+		attC2 := madl.Element{ElemId: "monitor", TypeName:  reflect.TypeOf(components.Monitor{}).Name()}
 		atts = append(atts, madl.Attachment{attC1, attT, attC2})
 
-		attC1 = madl.Element{ElemId: "monitor", TypeName: "Monitor"}
-		attT = madl.Element{ElemId: "t3", TypeName: "Oneway"}
-		attC2 = madl.Element{ElemId: "analyser", TypeName: "Analyser"}
+		attC1 = madl.Element{ElemId: "monitor", TypeName:  reflect.TypeOf(components.Monitor{}).Name()}
+		attT = madl.Element{ElemId: "t3", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
+		attC2 = madl.Element{ElemId: "analyser", TypeName:  reflect.TypeOf(components.Analyser{}).Name()}
 		atts = append(atts, madl.Attachment{attC1, attT, attC2})
 
-		attC1 = madl.Element{ElemId: "analyser", TypeName: "Analyser"}
-		attT = madl.Element{ElemId: "t4", TypeName: "OneWay"}
-		attC2 = madl.Element{ElemId: "planner", TypeName: "Planner"}
+		attC1 = madl.Element{ElemId: "analyser", TypeName:  reflect.TypeOf(components.Analyser{}).Name()}
+		attT = madl.Element{ElemId: "t4", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
+		attC2 = madl.Element{ElemId: "planner", TypeName:  reflect.TypeOf(components.Planner{}).Name()}
 		atts = append(atts, madl.Attachment{attC1, attT, attC2})
 
-		attC1 = madl.Element{ElemId: "planner", TypeName: "Planner"}
-		attT = madl.Element{ElemId: "t5", TypeName: "Oneway"}
-		attC2 = madl.Element{ElemId: "executor", TypeName: "Executor"}
+		attC1 = madl.Element{ElemId: "planner", TypeName:  reflect.TypeOf(components.Planner{}).Name()}
+		attT = madl.Element{ElemId: "t5", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
+		attC2 = madl.Element{ElemId: "executor", TypeName:  reflect.TypeOf(components.Executor{}).Name()}
 		atts = append(atts, madl.Attachment{attC1, attT, attC2})
 
-		attC1 = madl.Element{ElemId: "executor", TypeName: "Executor"}
-		attT = madl.Element{ElemId: "t6", TypeName: "Oneway"}
-		attC2 = madl.Element{ElemId: "core", TypeName: "Core"}
+		attC1 = madl.Element{ElemId: "executor", TypeName:  reflect.TypeOf(components.Executor{}).Name()}
+		attT = madl.Element{ElemId: "t6", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
+		attC2 = madl.Element{ElemId: "core", TypeName:  reflect.TypeOf(components.Core{}).Name()}
 		atts = append(atts, madl.Attachment{attC1, attT, attC2})
 	}
 

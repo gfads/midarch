@@ -55,5 +55,5 @@ func (f FrontEnd) Deploy(file string) {
 	//eeApp.Start()
 
 	// Start evolutive injector
-	inj.Start("calculatorclient")
+	inj.Start("receiver")
 }
