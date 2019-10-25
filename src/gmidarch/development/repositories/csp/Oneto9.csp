@@ -1,0 +1,5 @@
+datatype PROCNAMES = e1 | e2 | e3 | e4 | e5 | e6 | e7 | e8 | e9 | e10
+
+channel InvP, InvR : PROCNAMES
+
+Oneto9 = InvP.e1 -> InvR.e2 -> InvR.e3 -> InvR.e4 -> InvR.e5 -> InvR.e6 -> InvR.e7 -> InvR.e8 -> InvR.e9 -> InvR.e10 -> Oneto9

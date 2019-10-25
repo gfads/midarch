@@ -37,8 +37,6 @@ func NewSRH() SRH {
 
 func (SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO
 
-	fmt.Printf("SRH:: I_Receive")
-
 	host := "localhost"             // TODO
 	port := shared.CALCULATOR_PORT  // TODO
 

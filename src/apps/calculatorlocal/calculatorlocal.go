@@ -8,6 +8,7 @@ import (
 
 func main() {
 
+	// start frontend
 	fe := frontend.FrontEnd{}
 	fe.Deploy("calculatorlocal.madl")
 

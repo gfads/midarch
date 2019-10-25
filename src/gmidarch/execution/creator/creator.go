@@ -5,6 +5,7 @@ import (
 	"gmidarch/development/artefacts/madl"
 	"gmidarch/development/components"
 	"gmidarch/development/connectors"
+	"os"
 	"reflect"
 	"shared"
 	"strconv"
@@ -50,9 +51,25 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 	// Connectors
 	conns := [] madl.Element{}
 
-	params := make([]interface{},1)
+	params := make([]interface{}, 1)
 	params[0] = len(units)
-	conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.OnetoN{}).Name(), Params:params})
+
+	// TODO
+	switch mapp.Configuration {
+	case "senderreceiver":
+		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.OnetoN{}).Name(), Params: params})
+	case "middlewareclient":
+		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto9{}).Name(), Params: params})
+	case "middlewareserver":
+		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto7{}).Name(), Params: params})
+	case "clientserverlocal":
+		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.OnetoN{}).Name(), Params: params})
+	case "calculatorlocal":
+		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.OnetoN{}).Name(), Params: params})
+	default:
+		fmt.Printf("Creator:: Configuration '%v' cannot be executed because 'OnetoN.dot' is not ok ")
+		os.Exit(0)
+	}
 
 	if appIsAdaptive {
 		conns = append(conns, madl.Element{ElemId: "t2", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()})
@@ -67,35 +84,63 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 
 	for i := 0; i < len(units); i++ {
 		attC1 := madl.Element{ElemId: "core", TypeName: reflect.TypeOf(components.Core{}).Name()}
-		attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
-		attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
-		atts = append(atts, madl.Attachment{attC1, attT, attC2})
+
+		// TODO
+		switch mapp.Configuration {
+		case "senderreceiver":
+			attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.OnetoN{}).Name(), Params: params}
+			attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
+			atts = append(atts, madl.Attachment{attC1, attT, attC2})
+		case "middlewareclient":
+			attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto9{}).Name(), Params: params}
+			attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
+			atts = append(atts, madl.Attachment{attC1, attT, attC2})
+		case "middlewareserver":
+			attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto7{}).Name(), Params: params}
+			attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
+			atts = append(atts, madl.Attachment{attC1, attT, attC2})
+		case "clientserverlocal":
+			attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.OnetoN{}).Name(), Params: params}
+			attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
+			atts = append(atts, madl.Attachment{attC1, attT, attC2})
+		case "calculatorlocal":
+			attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.OnetoN{}).Name(), Params: params}
+			attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
+			atts = append(atts, madl.Attachment{attC1, attT, attC2})
+		default:
+			fmt.Printf("Creator:: Configuration '%v' cannot be executed because 'OnetoN.dot' is not ok ")
+			os.Exit(0)
+		}
+
+		//attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
+		//attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
+		//atts = append(atts, madl.Attachment{attC1, attT, attC2})
 	}
 
 	if appIsAdaptive {
 		attC1 := madl.Element{ElemId: "monevolutive", TypeName: reflect.TypeOf(components.Monevolutive{}).Name()}
 		attT := madl.Element{ElemId: "t2", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
-		attC2 := madl.Element{ElemId: "monitor", TypeName:  reflect.TypeOf(components.Monitor{}).Name()}
+		attC2 := madl.Element{ElemId: "monitor", TypeName: reflect.TypeOf(components.Monitor{}).Name()}
 		atts = append(atts, madl.Attachment{attC1, attT, attC2})
 
-		attC1 = madl.Element{ElemId: "monitor", TypeName:  reflect.TypeOf(components.Monitor{}).Name()}
+		attC1 = madl.Element{ElemId: "monitor", TypeName: reflect.TypeOf(components.Monitor{}).Name()}
 		attT = madl.Element{ElemId: "t3", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
-		attC2 = madl.Element{ElemId: "analyser", TypeName:  reflect.TypeOf(components.Analyser{}).Name()}
+		attC2 = madl.Element{ElemId: "analyser", TypeName: reflect.TypeOf(components.Analyser{}).Name()}
 		atts = append(atts, madl.Attachment{attC1, attT, attC2})
 
-		attC1 = madl.Element{ElemId: "analyser", TypeName:  reflect.TypeOf(components.Analyser{}).Name()}
+		attC1 = madl.Element{ElemId: "analyser", TypeName: reflect.TypeOf(components.Analyser{}).Name()}
 		attT = madl.Element{ElemId: "t4", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
-		attC2 = madl.Element{ElemId: "planner", TypeName:  reflect.TypeOf(components.Planner{}).Name()}
+		attC2 = madl.Element{ElemId: "planner", TypeName: reflect.TypeOf(components.Planner{}).Name()}
 		atts = append(atts, madl.Attachment{attC1, attT, attC2})
 
-		attC1 = madl.Element{ElemId: "planner", TypeName:  reflect.TypeOf(components.Planner{}).Name()}
+		attC1 = madl.Element{ElemId: "planner", TypeName: reflect.TypeOf(components.Planner{}).Name()}
 		attT = madl.Element{ElemId: "t5", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
-		attC2 = madl.Element{ElemId: "executor", TypeName:  reflect.TypeOf(components.Executor{}).Name()}
+		attC2 = madl.Element{ElemId: "executor", TypeName: reflect.TypeOf(components.Executor{}).Name()}
 		atts = append(atts, madl.Attachment{attC1, attT, attC2})
 
-		attC1 = madl.Element{ElemId: "executor", TypeName:  reflect.TypeOf(components.Executor{}).Name()}
+		attC1 = madl.Element{ElemId: "executor", TypeName: reflect.TypeOf(components.Executor{}).Name()}
 		attT = madl.Element{ElemId: "t6", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
-		attC2 = madl.Element{ElemId: "core", TypeName:  reflect.TypeOf(components.Core{}).Name()}
+		attC2 = madl.Element{ElemId: "core", TypeName: reflect.TypeOf(components.Core{}).Name()}
 		atts = append(atts, madl.Attachment{attC1, attT, attC2})
 	}
 

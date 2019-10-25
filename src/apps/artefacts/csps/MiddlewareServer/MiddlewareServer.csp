@@ -1,13 +1,13 @@
 datatype PROCNAMES = server | invoker | marshaller | srh | t1 | t2 | t3
 channel InvP,TerP,InvR,TerR : PROCNAMES
-channel I_Send,I_Process,I_DeserialiseMIOP,I_PrepareToObject,I_SerialiseMIOP,I_PrepareToSRH,I_Receive
-SERVER = InvP.t3 -> I_Process -> TerP.t3 -> SERVER
+channel I_PrepareToObject,I_SerialiseMIOP,I_PrepareToSRH,I_Receive,I_Send,I_Process,I_DeserialiseMIOP
 INVOKER = InvP.t1 -> I_DeserialiseMIOP -> InvR.t2 -> TerR.t2 -> I_PrepareToObject -> InvR.t3 -> TerR.t3 -> I_SerialiseMIOP -> InvR.t2 -> TerR.t2 -> I_PrepareToSRH -> TerP.t1 -> INVOKER
 MARSHALLER = InvP.t2 -> I_Process -> TerP.t2 -> MARSHALLER
 SRH = I_Receive -> InvR.t1 -> TerR.t1 -> I_Send -> SRH
+SERVER = InvP.t3 -> I_Process -> TerP.t3 -> SERVER
+T3 = InvP.invoker -> InvR.server -> TerR.server -> TerP.invoker -> T3
 T1 = InvP.srh -> InvR.invoker -> TerR.invoker -> TerP.srh -> T1
 T2 = InvP.invoker -> InvR.marshaller -> TerR.marshaller -> TerP.invoker -> T2
-T3 = InvP.invoker -> InvR.server -> TerR.server -> TerP.invoker -> T3
 
-middlewareserver = (SERVER ||| INVOKER ||| MARSHALLER ||| SRH)[|{|InvP,TerP,InvR,TerR|}|](T1[[InvP.srh <- InvR.t1,InvR.invoker <- InvP.t1,TerR.invoker <- TerP.t1,TerP.srh <- TerR.t1]] ||| T2[[InvP.srh <- InvR.t1,InvR.invoker <- InvP.t1,TerR.invoker <- TerP.t1,TerP.srh <- TerR.t1,InvP.invoker <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.invoker <- TerR.t2]] ||| T3[[InvP.srh <- InvR.t1,InvR.invoker <- InvP.t1,TerR.invoker <- TerP.t1,TerP.srh <- TerR.t1,InvP.invoker <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.invoker <- TerR.t2,InvP.invoker <- InvR.t3,InvR.server <- InvP.t3,TerR.server <- TerP.t3,TerP.invoker <- TerR.t3]])
+middlewareserver = (SERVER ||| INVOKER ||| MARSHALLER ||| SRH)[|{|TerR,InvP,TerP,InvR|}|](T1[[InvP.srh <- InvR.t1,InvR.invoker <- InvP.t1,TerR.invoker <- TerP.t1,TerP.srh <- TerR.t1]] ||| T2[[InvP.srh <- InvR.t1,InvR.invoker <- InvP.t1,TerR.invoker <- TerP.t1,TerP.srh <- TerR.t1,InvP.invoker <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.invoker <- TerR.t2]] ||| T3[[InvP.srh <- InvR.t1,InvR.invoker <- InvP.t1,TerR.invoker <- TerP.t1,TerP.srh <- TerR.t1,InvP.invoker <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.invoker <- TerR.t2,InvP.invoker <- InvR.t3,InvR.server <- InvP.t3,TerR.server <- TerP.t3,TerP.invoker <- TerR.t3]])
 assert middlewareserver :[deadlock free]
