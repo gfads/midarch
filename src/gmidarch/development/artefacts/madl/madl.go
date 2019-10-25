@@ -67,6 +67,7 @@ func (m *MADL) ConfigureConnectors() {
 	}
 }
 
+// Configure channels and Maps - basic to the execution
 func (madl *MADL) ConfigureChannelsAndMaps() {
 	structuralChannels := make(map[string]chan messages.SAMessage)
 
@@ -133,6 +134,7 @@ func (madl *MADL) ConfigureChannelsAndMaps() {
 	madl.Maps = elemMaps
 }
 
+// Indentify Configuration Name
 func (MADL) IdentifyConfigurationName(content []string) (string, error) {
 	r1 := ""
 	r2 := *new(error)
@@ -150,6 +152,7 @@ func (MADL) IdentifyConfigurationName(content []string) (string, error) {
 	return r1, r2
 }
 
+// Indentify Components
 func (MADL) IdentifyComponents(content []string) ([]Element, error) {
 	foundComponents := false
 	r1 := []Element{}
@@ -225,9 +228,9 @@ func (MADL) IdentifyAttachments(content []string) ([]Attachment, error) {
 		} else {
 			if foundAttachments && !shared.SkipLine(tempLine) && strings.Contains(tempLine, ",") {
 				atts := strings.Split(strings.TrimSpace(tempLine), ",")
-				c1Temp := atts[0]
-				tTemp := atts[1]
-				c2Temp := atts[2]
+				c1Temp := strings.TrimSpace(atts[0])
+				tTemp := strings.TrimSpace(atts[1])
+				c2Temp := strings.TrimSpace(atts[2])
 
 				c1 := Element{ElemId: c1Temp}
 				t := Element{ElemId: tTemp}

@@ -8,7 +8,7 @@ Configuration senderreceiver :=
       t1 : Oneway
 
    Attachments
-      sender,t1,receiver
+      sender, t1,receiver
 
    Adaptability
       Evolutive

@@ -6,7 +6,7 @@ import (
 	"gmidarch/development/components"
 	"gmidarch/development/connectors"
 	"reflect"
-	shared2 "shared"
+	"shared"
 	"strconv"
 	"strings"
 )
@@ -22,7 +22,7 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 	}
 
 	// configuration
-	mEE.Configuration = mapp.Configuration + "_EE"
+	mEE.Configuration = mapp.Configuration + "_ee"
 
 	// adaptability of app
 	mEE.AppAdaptability = mapp.Adaptability
@@ -104,7 +104,7 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 	eeKindOfAdaptability = append(eeKindOfAdaptability, "NONE")
 
 	// configure MADL EE
-	mEE.File = strings.Replace(mapp.File, shared2.MADL_EXTENSION, "", 99) + "_EE" + shared2.MADL_EXTENSION
+	mEE.File = strings.Replace(mapp.File, shared.MADL_EXTENSION, "", 99) + "_ee" + shared.MADL_EXTENSION
 	mEE.Path = mapp.Path
 	mEE.Components = comps
 	mEE.Connectors = conns
@@ -141,9 +141,9 @@ func (Creator) Print(madl madl.MADL) {
 func (Creator) Save(m madl.MADL) {
 	content := []string{}
 
-	path := shared2.DIR_MADL
+	path := shared.DIR_MADL
 	name := m.Configuration
-	ext := shared2.MADL_EXTENSION
+	ext := shared.MADL_EXTENSION
 
 	// Configuration
 	content = append(content, "Configuration "+m.Configuration+" := \n\n")
@@ -167,5 +167,5 @@ func (Creator) Save(m madl.MADL) {
 
 	content = append(content, "EndConf \n")
 
-	shared2.SaveFile(path, name, ext, content)
+	shared.SaveFile(path, name, ext, content)
 }
