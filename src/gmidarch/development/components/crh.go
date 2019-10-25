@@ -2,18 +2,16 @@ package components
 
 import (
 	"encoding/binary"
-	graphs2 "gmidarch/development/artefacts/graphs"
-	element2 "gmidarch/development/element"
-	messages2 "gmidarch/development/messages"
+	"gmidarch/development/artefacts/graphs"
+	"gmidarch/development/messages"
 	"log"
 	"net"
-	shared2 "shared"
 	"strconv"
 )
 
 type CRH struct {
 	Behaviour string
-	Graph     graphs2.ExecGraph
+	Graph     graphs.ExecGraph
 }
 
 func NewCRH() CRH {
@@ -25,27 +23,7 @@ func NewCRH() CRH {
 	return *r
 }
 
-func (c *CRH) Configure(invP, terP *chan messages2.SAMessage) {
-
-	// configure the state machine
-	c.Graph = *graphs2.NewExecGraph(3)
-	actionChannel := make(chan messages2.SAMessage)
-
-	msg := new(messages2.SAMessage)
-	info := make([]*interface{}, 1)
-	info[0] = new(interface{})
-	*info[0] = msg
-
-	newEdgeInfo := graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.InvP, ActionType: 2, ActionChannel: invP, Message: msg}
-	c.Graph.AddEdge(0, 1, newEdgeInfo)
-	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_Process", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info}
-	c.Graph.AddEdge(1, 2, newEdgeInfo)
-	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.TerP, ActionType: 2, ActionChannel: terP, Message: msg}
-	c.Graph.AddEdge(2, 0, newEdgeInfo)
-
-}
-
-func (CRH) I_Process(msg *messages2.SAMessage, info [] *interface{}) {
+func (CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	// check message
 	argsTemp := msg.Payload.([]interface{})
@@ -96,5 +74,5 @@ func (CRH) I_Process(msg *messages2.SAMessage, info [] *interface{}) {
 		log.Fatalf("SRH:: %s", err)
 	}
 
-	*msg = messages2.SAMessage{Payload: msgFromServer}
+	*msg = messages.SAMessage{Payload: msgFromServer}
 }

@@ -8,7 +8,7 @@ import (
 func main() {
 
 	fe := frontend.FrontEnd{}
-	fe.Deploy("senderreceiver.madl")
+	fe.Deploy("calculatorlocal.madl")
 
 	fmt.Scanln()
 }

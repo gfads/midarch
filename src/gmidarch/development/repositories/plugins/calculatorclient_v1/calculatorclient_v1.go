@@ -1,4 +1,4 @@
-package components
+package main
 
 import (
 	"fmt"
@@ -7,12 +7,13 @@ import (
 	"shared"
 )
 
-//var t1 time.Time
-//var idx int
-
 type Calculatorclient struct {
 	Behaviour string
 	Graph     graphs.ExecGraph
+}
+
+func Gettype() interface{} {
+	return Calculatorclient{}
 }
 
 func NewCalculatorclient() Calculatorclient {

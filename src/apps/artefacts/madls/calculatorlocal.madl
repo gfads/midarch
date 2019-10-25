@@ -1,14 +1,14 @@
 Configuration senderreceiver :=
 
    Components
-      sender   : Sender
-      receiver : Receiver
+      client : Calculatorclient
+      server : Calculatorserver
 
    Connectors
-      t1 : Oneway
+      t1 : Requestreply
 
    Attachments
-      sender,t1,receiver
+      client,t1,server
 
    Adaptability
       Evolutive

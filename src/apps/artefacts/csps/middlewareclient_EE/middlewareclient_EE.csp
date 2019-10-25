@@ -1,6 +1,21 @@
 datatype PROCNAMES = core | unit1 | unit2 | unit3 | unit4 | unit5 | unit6 | unit7 | unit8 | unit9 | t1
 channel InvR,InvP : PROCNAMES
 channel I_InitialiseUnit,I_Execute
+UNIT4 = I_InitialiseUnit -> UNIT4P1
+ UNIT4P1 = I_Execute -> UNIT4P1
+
+UNIT5 = I_InitialiseUnit -> UNIT5P1
+ UNIT5P1 = I_Execute -> UNIT5P1
+
+UNIT6 = I_InitialiseUnit -> UNIT6P1
+ UNIT6P1 = I_Execute -> UNIT6P1
+
+UNIT7 = I_InitialiseUnit -> UNIT7P1
+ UNIT7P1 = I_Execute -> UNIT7P1
+
+UNIT8 = I_InitialiseUnit -> UNIT8P1
+ UNIT8P1 = I_Execute -> UNIT8P1
+
 CORE = InvR.t1 -> CORE
 UNIT1 = I_InitialiseUnit -> UNIT1P1
  UNIT1P1 = I_Execute -> UNIT1P1
@@ -11,23 +26,8 @@ UNIT2 = I_InitialiseUnit -> UNIT2P1
 UNIT3 = I_InitialiseUnit -> UNIT3P1
  UNIT3P1 = I_Execute -> UNIT3P1
 
-UNIT4 = I_InitialiseUnit -> UNIT4P1
- UNIT4P1 = I_Execute -> UNIT4P1
-
-UNIT5 = I_InitialiseUnit -> UNIT5P1
- UNIT5P1 = I_Execute -> UNIT5P1
-
-UNIT7 = I_InitialiseUnit -> UNIT7P1
- UNIT7P1 = I_Execute -> UNIT7P1
-
 UNIT9 = I_InitialiseUnit -> UNIT9P1
  UNIT9P1 = I_Execute -> UNIT9P1
-
-UNIT6 = I_InitialiseUnit -> UNIT6P1
- UNIT6P1 = I_Execute -> UNIT6P1
-
-UNIT8 = I_InitialiseUnit -> UNIT8P1
- UNIT8P1 = I_Execute -> UNIT8P1
 
 T1 = InvP.core -> InvR.unit1 -> InvR.unit2 -> InvR.unit3 -> InvR.unit4 -> InvR.unit5 -> InvR.unit6 -> InvR.unit7 -> InvR.unit8 -> InvR.unit9 -> T1
 

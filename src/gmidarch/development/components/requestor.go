@@ -1,16 +1,15 @@
 package components
 
 import (
-	graphs2 "gmidarch/development/artefacts/graphs"
-	element2 "gmidarch/development/element"
-	messages2 "gmidarch/development/messages"
-	miop2 "gmidarch/development/miop"
-	shared2 "shared"
+	"gmidarch/development/artefacts/graphs"
+	"gmidarch/development/messages"
+	"gmidarch/development/miop"
+	"shared"
 )
 
 type Requestor struct {
 	CSP       string
-	Graph     graphs2.ExecGraph
+	Graph     graphs.ExecGraph
 	Behaviour string
 }
 
@@ -23,6 +22,7 @@ func NewRequestor() Requestor {
 	return *r
 }
 
+/*
 func (r *Requestor) Configure(invP, terP, invR1, terR1, invR2, terR2, invR3, terR3 *chan messages2.SAMessage) {
 
 	// configure the state machine
@@ -85,16 +85,17 @@ func (r *Requestor) Configure(invP, terP, invR1, terR1, invR2, terR2, invR3, ter
 	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.TerP, ActionType: 2, ActionChannel: terP, Message: msg}
 	r.Graph.AddEdge(11, 0, newEdgeInfo)
 }
+*/
 
-func (Requestor) I_SerialiseMIOP(msg *messages2.SAMessage, info [] *interface{}) { // TODO
-	inv := msg.Payload.(shared2.Invocation)
+func (Requestor) I_SerialiseMIOP(msg *messages.SAMessage, info [] *interface{}) { // TODO
+	inv := msg.Payload.(shared.Invocation)
 
 	// assembly packet
-	reqHeader := miop2.RequestHeader{Context: "TODO", RequestId: 13, ResponseExpected: true, Key: 131313, Operation: inv.Req.Op}
-	reqBody := miop2.RequestBody{Body: inv.Req.Args}
-	miopHeader := miop2.Header{Magic: "M.I.O.P.", Version: "version", MessageType: 1, Size: 131313, ByteOrder: true}
-	miopBody := miop2.Body{ReqHeader: reqHeader, ReqBody: reqBody}
-	miopPacket := miop2.Packet{Hdr: miopHeader, Bd: miopBody}
+	reqHeader := miop.RequestHeader{Context: "TODO", RequestId: 13, ResponseExpected: true, Key: 131313, Operation: inv.Req.Op}
+	reqBody := miop.RequestBody{Body: inv.Req.Args}
+	miopHeader := miop.Header{Magic: "M.I.O.P.", Version: "version", MessageType: 1, Size: 131313, ByteOrder: true}
+	miopBody := miop.Body{ReqHeader: reqHeader, ReqBody: reqBody}
+	miopPacket := miop.Packet{Hdr: miopHeader, Bd: miopBody}
 
 	// store host & port
 	hostTemp := new(interface{})
@@ -107,21 +108,21 @@ func (Requestor) I_SerialiseMIOP(msg *messages2.SAMessage, info [] *interface{})
 	// configure message
 	argsTemp := make([]interface{}, 1)
 	argsTemp[0] = miopPacket
-	msgToMarhsaller := shared2.Request{Op: "marshall", Args: argsTemp}
+	msgToMarhsaller := shared.Request{Op: "marshall", Args: argsTemp}
 
-	*msg = messages2.SAMessage{Payload: msgToMarhsaller}
+	*msg = messages.SAMessage{Payload: msgToMarhsaller}
 }
 
-func (Requestor) I_DeserialiseMIOP(msg *messages2.SAMessage, info [] *interface{}) {
+func (Requestor) I_DeserialiseMIOP(msg *messages.SAMessage, info [] *interface{}) {
 
 	argsTemp := make([]interface{}, 1)
 	argsTemp[0] = msg.Payload
-	msgToMarhsaller := shared2.Request{Op: "unmarshall", Args: argsTemp}
+	msgToMarhsaller := shared.Request{Op: "unmarshall", Args: argsTemp}
 
-	*msg = messages2.SAMessage{Payload: msgToMarhsaller}
+	*msg = messages.SAMessage{Payload: msgToMarhsaller}
 }
 
-func (Requestor) I_PrepareToCRH(msg *messages2.SAMessage, info [] *interface{}) {
+func (Requestor) I_PrepareToCRH(msg *messages.SAMessage, info [] *interface{}) {
 
 	hostTemp1:= *info[0]
 	hostTemp2 := *hostTemp1.(*interface{})
@@ -136,12 +137,12 @@ func (Requestor) I_PrepareToCRH(msg *messages2.SAMessage, info [] *interface{}) 
 	toCRH[1] = portTemp3 // port
 	toCRH[2] = msg.Payload.([]uint8)
 
-	*msg = messages2.SAMessage{Payload: toCRH}
+	*msg = messages.SAMessage{Payload: toCRH}
 }
 
-func (Requestor) I_PrepareToClient(msg *messages2.SAMessage, info [] *interface{}) {
-	miopPacket := msg.Payload.(miop2.Packet)
+func (Requestor) I_PrepareToClient(msg *messages.SAMessage, info [] *interface{}) {
+	miopPacket := msg.Payload.(miop.Packet)
 	operationResult := miopPacket.Bd.RepBody.OperationResult
 
-	*msg = messages2.SAMessage{Payload: operationResult}
+	*msg = messages.SAMessage{Payload: operationResult}
 }

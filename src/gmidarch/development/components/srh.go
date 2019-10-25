@@ -4,11 +4,10 @@ import (
 	"encoding/binary"
 	"fmt"
 	"gmidarch/development/artefacts/graphs"
-	"gmidarch/development/element"
 	"gmidarch/development/messages"
 	"log"
 	"net"
-	shared2 "shared"
+	"shared"
 	"strconv"
 )
 
@@ -36,42 +35,12 @@ func NewSRH() SRH {
 	return *r
 }
 
-func (s *SRH) Configure(invR, terR *chan messages.SAMessage) {
-
-	// configure the state machine
-	s.Graph = *graphs.NewExecGraph(4)
-	actionChannel := make(chan messages.SAMessage)
-	msg := new(messages.SAMessage)
-
-	info1 := make([]*interface{}, 3) // host, port, msg
-	info1[0] = new(interface{})
-	info1[1] = new(interface{})
-
-	*info1[0] = msg
-	*info1[1] = make([] interface{}, 3)
-	args1HostPort := make([]interface{}, 2)
-	args1HostPort[0] = "localhost"
-	args1HostPort[1] = 1313
-	*info1[1] = args1HostPort
-
-	newEdgeInfo := graphs.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_Receive", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info1}
-	s.Graph.AddEdge(0, 1, newEdgeInfo)
-	newEdgeInfo = graphs.ExecEdgeInfo{ExternalAction: element.Element{}.InvR, ActionType: 2, ActionChannel: invR, Message: msg}
-	s.Graph.AddEdge(1, 2, newEdgeInfo)
-	newEdgeInfo = graphs.ExecEdgeInfo{ExternalAction: element.Element{}.TerR, ActionType: 2, ActionChannel: terR, Message: msg}
-	s.Graph.AddEdge(2, 3, newEdgeInfo)
-
-	info2 := make([]*interface{}, 1)
-	info2[0] = new(interface{})
-	*info2[0] = msg
-	newEdgeInfo = graphs.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_Send", ActionType: 1, ActionChannel: &actionChannel, Message: msg, Info: info2}
-	s.Graph.AddEdge(3, 0, newEdgeInfo)
-}
-
 func (SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO
 
+	fmt.Printf("SRH:: I_Receive")
+
 	host := "localhost"             // TODO
-	port := shared2.CALCULATOR_PORT // TODO
+	port := shared.CALCULATOR_PORT  // TODO
 
 	// create listener
 	ln, err = net.Listen("tcp", host+":"+strconv.Itoa(port))
@@ -101,7 +70,6 @@ func (SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO
 	}
 
 	*msg = messages.SAMessage{Payload: msgTemp} // TODO
-
 }
 
 func (SRH) I_Send(msg *messages.SAMessage, info [] *interface{}) {

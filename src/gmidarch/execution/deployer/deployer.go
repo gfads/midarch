@@ -1,4 +1,4 @@
-package env
+package deployer
 
 import (
 	"gmidarch/development/artefacts/madl"
@@ -7,26 +7,26 @@ import (
 	"shared"
 )
 
-type Env struct {
+type Deployer struct {
 	MADLX madl.MADL
 }
 
-func NewEE() Env {
-	r := new(Env)
+func NewEE() Deployer {
+	r := new(Deployer)
 	return *r
 }
 
-func (e Env) Start() {
+func (d Deployer) Start() {
 
-	for i := range e.MADLX.Components {
-		elem := e.MADLX.Components[i].Type
-		graph := e.MADLX.Components[i].Graph
+	for i := range d.MADLX.Components {
+		elem := d.MADLX.Components[i].Type
+		graph := d.MADLX.Components[i].Graph
 
 		// Configure Unit's Info with Element's Info (Only components)
-		if e.MADLX.Components[i].TypeName == "Unit" { // TODO - Generalise for any component having 'Info'
-			tempElem := *e.MADLX.Components[i].Info[0]
+		if d.MADLX.Components[i].TypeName == "Unit" { // TODO - Generalise for any component having 'Info'
+			tempElem := *d.MADLX.Components[i].Info[0]
 			unit := elem.(components.Unit)
-			unit.UnitId = e.MADLX.Components[i].ElemId
+			unit.UnitId = d.MADLX.Components[i].ElemId
 			unit.ElemOfUnit= tempElem.(madl.Element).Type
 			unit.GraphOfElem = tempElem.(madl.Element).Graph
 			elem = unit
@@ -34,12 +34,12 @@ func (e Env) Start() {
 		go engine.Engine{}.Execute(elem, graph, shared.EXECUTE_FOREVER)
 	}
 
-	for i := range e.MADLX.Connectors {
-		go engine.Engine{}.Execute(e.MADLX.Connectors[i].Type, e.MADLX.Connectors[i].Graph, shared.EXECUTE_FOREVER)
+	for i := range d.MADLX.Connectors {
+		go engine.Engine{}.Execute(d.MADLX.Connectors[i].Type, d.MADLX.Connectors[i].Graph, shared.EXECUTE_FOREVER)
 	}
 }
 
-func (ee *Env) DeployApp(mee madl.MADL, mapp madl.MADL) {
+func (d *Deployer) DeployApp(mee madl.MADL, mapp madl.MADL) {
 
 	elems := []madl.Element{}
 	for i := range mapp.Components {
@@ -60,10 +60,10 @@ func (ee *Env) DeployApp(mee madl.MADL, mapp madl.MADL) {
 		}
 	}
 
-	ee.MADLX = mee
+	d.MADLX = mee
 }
 
-func (ee *Env) Deploy(m madl.MADL) {
+func (d *Deployer) Deploy(m madl.MADL) {
 
-	ee.MADLX = m
+	d.MADLX = m
 }

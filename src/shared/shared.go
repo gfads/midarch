@@ -164,7 +164,7 @@ func ShowExecutionParameters(s bool) {
 	if s {
 		fmt.Println("******************************************")
 		fmt.Println("Sample size                : " + strconv.Itoa(SAMPLE_SIZE))
-		fmt.Println("Direrctory of base code    : " + BASE_DIR)
+		fmt.Println("Direrctory of base code    : " + DIR_BASE)
 		fmt.Println("Directory of plugins       : " + DIR_PLUGINS)
 		fmt.Println("Directory of CSP specs     : " + DIR_CSP)
 		fmt.Println("Directory of Configurations: " + DIR_MADL)
@@ -432,15 +432,15 @@ func SaveFile(path, name, ext string, content []string) {
 // ******************* PARAMETERS
 
 //const BASE_DIR  = "/go/midarch-go"  // docker
-const BASE_DIR = "/Users/nsr/Dropbox/go/midarch-go-v13"
-const DIR_PLUGINS = BASE_DIR + "/src/gmidarch/execution/repositories/plugins"
-const DIR_PLUGINS_SOURCE = BASE_DIR + "/src/gmidarch/development/repositories/plugins"
-const DIR_CSP = BASE_DIR + "/src/apps/artefacts/csps"
-const DIR_MADL = BASE_DIR + "/src/apps/artefacts/madls"
+const DIR_BASE = "/Users/nsr/Dropbox/go/midarch-go-v13"
+const DIR_PLUGINS = DIR_BASE + "/src/gmidarch/execution/repositories/plugins"
+const DIR_PLUGINS_SOURCE = DIR_BASE + "/src/gmidarch/development/repositories/plugins"
+const DIR_CSP = DIR_BASE + "/src/apps/artefacts/csps"
+const DIR_MADL = DIR_BASE + "/src/apps/artefacts/madls"
 const DIR_GO = "/usr/local/go/bin"
 const DIR_FDR = "/Volumes/Macintosh HD/Applications/FDR4-2.app/Contents/MacOS"
-const DIR_CSPARSER = BASE_DIR + "/src/verificationtools/cspdot/csparser"
-const DIR_DOT = BASE_DIR + "/src/gmidarch/development/repositories/dot"
+const DIR_CSPARSER = DIR_BASE + "/src/verification/cspdot/csparser"
+const DIR_DOT = DIR_BASE + "/src/gmidarch/development/repositories/dot"
 const MADL_EXTENSION = ".madl"
 const CSP_EXTENSION = ".csp"
 const DOT_EXTENSION = ".dot"

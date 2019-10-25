@@ -3,7 +3,7 @@ package components
 import (
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
-	shared2 "shared"
+	"shared"
 )
 
 type Planner struct {
@@ -21,14 +21,14 @@ func NewPlanner() Planner {
 }
 
 func (Planner) I_Createplan (msg *messages.SAMessage, info [] *interface{}) {
-	evolutiveAnalysisResult := msg.Payload.(shared2.EvolutiveAnalysisResult)
+	evolutiveAnalysisResult := msg.Payload.(shared.EvolutiveAnalysisResult)
 
-	plan := shared2.AdaptationPlan{}
+	plan := shared.AdaptationPlan{}
 	plan.Operations = []string{}
 	plan.Params = make(map[string][]string)
 
 	if evolutiveAnalysisResult.NeedAdaptation { // Adaptation is necessary // TODO
-		plan.Operations = append(plan.Operations, shared2.REPLACE_COMPONENT)
+		plan.Operations = append(plan.Operations, shared.REPLACE_COMPONENT)
 		plan.Params[plan.Operations[0]] = evolutiveAnalysisResult.MonitoredEvolutiveData
 	}
 

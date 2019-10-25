@@ -1,13 +1,13 @@
 package components
 
 import (
-	graphs2 "gmidarch/development/artefacts/graphs"
-	messages2 "gmidarch/development/messages"
+	"gmidarch/development/artefacts/graphs"
+	"gmidarch/development/messages"
 )
 
 type Monitor struct {
 	Behaviour string
-	Graph     graphs2.ExecGraph
+	Graph     graphs.ExecGraph
 }
 
 func NewMonitor() Monitor {
@@ -19,6 +19,6 @@ func NewMonitor() Monitor {
 	return *r
 }
 
-func (Monitor) I_Process(msg *messages2.SAMessage, info [] *interface{}) {
-	*msg = messages2.SAMessage{Payload: msg.Payload}
+func (Monitor) I_Process(msg *messages.SAMessage, info [] *interface{}) {
+	*msg = messages.SAMessage{Payload: msg.Payload}
 }

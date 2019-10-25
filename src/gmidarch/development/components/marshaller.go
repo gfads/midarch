@@ -1,18 +1,19 @@
 package components
 
 import (
+	"encoding/json"
 	"fmt"
-	graphs2 "gmidarch/development/artefacts/graphs"
-	impl2 "gmidarch/development/impl"
-	messages2 "gmidarch/development/messages"
-	miop2 "gmidarch/development/miop"
+	"gmidarch/development/artefacts/graphs"
+	"gmidarch/development/messages"
+	"gmidarch/development/miop"
+	"log"
 	"os"
-	shared2 "shared"
+	"shared"
 )
 
 type Marshaller struct {
 	CSP       string
-	Graph     graphs2.ExecGraph
+	Graph     graphs.ExecGraph
 	Behaviour string
 }
 
@@ -25,19 +26,26 @@ func NewMarshaller() Marshaller {
 	return *r
 }
 
-func (Marshaller) I_Process(msg *messages2.SAMessage, info [] *interface{}) {
-	req := msg.Payload.(shared2.Request)
+func (Marshaller) I_Process(msg *messages.SAMessage, info [] *interface{}) {
+	req := msg.Payload.(shared.Request)
 	op := req.Op
 
 	switch op {
 	case "marshall":
-		p1 := req.Args[0].(miop2.Packet)
-		r := impl2.MarshallerImpl{}.Marshall(p1)
-		*msg = messages2.SAMessage{Payload: r}
+		p1 := req.Args[0].(miop.Packet)
+		r, err := json.Marshal(p1)
+		if err != nil {
+			log.Fatalf("Marshaller:: Marshall:: %s", err)
+		}
+		*msg = messages.SAMessage{Payload: r}
 	case "unmarshall":
 		p1 := req.Args[0].([]byte)
-		r := impl2.MarshallerImpl{}.Unmarshall(p1)
-		*msg = messages2.SAMessage{Payload: r}
+		r := miop.Packet{}
+		err := json.Unmarshal(p1, &r)
+		if err != nil {
+			log.Fatalf("Marshaller:: Unmarshall:: %s", err)
+		}
+		*msg = messages.SAMessage{Payload: r}
 	default:
 		fmt.Println("Marshaller:: Operation '" + op + "' not supported!!")
 		os.Exit(0)

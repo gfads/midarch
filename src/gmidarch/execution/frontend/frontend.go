@@ -3,11 +3,11 @@ package frontend
 import (
 	"gmidarch/execution/checker"
 	"gmidarch/execution/creator"
-	"gmidarch/execution/env"
+	"gmidarch/execution/deployer"
 	"gmidarch/execution/generator"
 	"gmidarch/execution/loader"
 	"injector/evolutive"
-	shared2 "shared"
+	"shared"
 )
 
 type FrontEnd struct{}
@@ -18,6 +18,7 @@ func (f FrontEnd) Deploy(file string) {
 	gen := generator.Generator{}
 	chk := checker.Checker{}
 	inj := evolutive.EvolutiveInjector{}
+	dep := deployer.NewEE()
 
 	// Read MADL and generate architectural artifacts (App)
 	mapp := l.Load(file)
@@ -29,7 +30,7 @@ func (f FrontEnd) Deploy(file string) {
 	crt.Save(meeTemp)
 
 	// Load MADL and generate architectural artefacts (EE)
-	mee := l.Load(meeTemp.Configuration+ shared2.MADL_EXTENSION)
+	mee := l.Load(meeTemp.Configuration+ shared.MADL_EXTENSION)
 
 	// Configure adaptability of EE - according to the adaptability of the hosted App
 	mee.AppAdaptability = mapp.Adaptability
@@ -45,15 +46,14 @@ func (f FrontEnd) Deploy(file string) {
 	chk.Check(cspee)
 
 	// Deploy App into EE & start EE
-	eeEE := env.NewEE()
-	eeEE.DeployApp(mee,mapp)
-	eeEE.Start()
+	dep.DeployApp(mee,mapp)
+	dep.Start()
 
 	// Start application only - without execution environment
-	//eeApp := env.NewEE()
+	//eeApp := deployer.NewEE()
 	//eeApp.Deploy(mapp)
 	//eeApp.Start()
 
 	// Start evolutive injector
-	inj.Start("receiver")
+	inj.Start("calculatorclient")
 }

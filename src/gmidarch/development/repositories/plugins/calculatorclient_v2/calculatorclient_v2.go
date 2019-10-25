@@ -1,4 +1,4 @@
-package components
+package main
 
 import (
 	"fmt"
@@ -7,12 +7,13 @@ import (
 	"shared"
 )
 
-//var t1 time.Time
-//var idx int
-
 type Calculatorclient struct {
 	Behaviour string
 	Graph     graphs.ExecGraph
+}
+
+func Gettype() interface{} {
+	return Calculatorclient{}
 }
 
 func NewCalculatorclient() Calculatorclient {
@@ -26,9 +27,9 @@ func NewCalculatorclient() Calculatorclient {
 func (Calculatorclient) I_Setmessage(msg *messages.SAMessage, info [] *interface{}) {
 
 	argsTemp := make([]interface{}, 2)
-	argsTemp[0] = 1
-	argsTemp[1] = 2
-	*msg = messages.SAMessage{Payload: shared.Request{Op: "add", Args: argsTemp}}
+	argsTemp[0] = 10
+	argsTemp[1] = 20
+	*msg = messages.SAMessage{Payload: shared.Request{Op: "mul", Args: argsTemp}}
 
 }
 

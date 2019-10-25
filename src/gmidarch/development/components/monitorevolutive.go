@@ -1,9 +1,9 @@
 package components
 
 import (
-	graphs2 "gmidarch/development/artefacts/graphs"
-	messages2 "gmidarch/development/messages"
-	shared2 "shared"
+	"gmidarch/development/artefacts/graphs"
+	"gmidarch/development/messages"
+	"shared"
 	"time"
 )
 
@@ -12,7 +12,7 @@ var listOfOldPlugins map[string]time.Time
 
 type Monevolutive struct {
 	Behaviour string
-	Graph     graphs2.ExecGraph
+	Graph     graphs.ExecGraph
 }
 
 func NewMonevolutive() Monevolutive {
@@ -23,21 +23,21 @@ func NewMonevolutive() Monevolutive {
 	return *r
 }
 
-func (Monevolutive) I_Checkplugins(msg *messages2.SAMessage, info [] *interface{}) {
+func (Monevolutive) I_Checkplugins(msg *messages.SAMessage, info [] *interface{}) {
 	newPlugins := []string{}
 	listOfNewPlugins := make(map[string]time.Time)
 
 	if isFirstTime {
 		isFirstTime = false
-		listOfOldPlugins = shared2.LoadPlugins()
+		listOfOldPlugins = shared.LoadPlugins()
 	} else {
-		listOfNewPlugins = shared2.LoadPlugins()
-		newPlugins = shared2.CheckForNewPlugins(listOfOldPlugins, listOfNewPlugins)
+		listOfNewPlugins = shared.LoadPlugins()
+		newPlugins = shared.CheckForNewPlugins(listOfOldPlugins, listOfNewPlugins)
 	}
 
-	evolutiveMonitoredData := shared2.MonitoredEvolutiveData{}
+	evolutiveMonitoredData := shared.MonitoredEvolutiveData{}
 	evolutiveMonitoredData = newPlugins
-	*msg = messages2.SAMessage{evolutiveMonitoredData}
+	*msg = messages.SAMessage{evolutiveMonitoredData}
 
 	listOfOldPlugins = listOfNewPlugins
 
