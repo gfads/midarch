@@ -32,7 +32,6 @@ func NewUnit() Unit {
 
 func (u Unit) I_Initialiseunit(msg *messages.SAMessage, info [] *interface{}) {
 	allUnits.Store(u.UnitId, u.ElemOfUnit)
-	fmt.Printf("Unit:: Unit '%v' hosts element '%v' initialised \n",u.UnitId,reflect.TypeOf(u.ElemOfUnit))
 }
 
 func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}) {

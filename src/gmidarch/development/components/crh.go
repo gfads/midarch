@@ -39,7 +39,6 @@ func (CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		if err == nil {
 			break
 		}
-
 	}
 
 	defer conn.Close()
@@ -63,7 +62,7 @@ func (CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	sizeMsgFromServer := make([]byte, 4)
 	_, err = conn.Read(sizeMsgFromServer)
 	if err != nil {
-		log.Fatalf("SRH:: %s", err)
+		log.Fatalf("CRH:: %s", err)
 	}
 	sizeFromServerInt := binary.LittleEndian.Uint32(sizeMsgFromServer)
 
@@ -71,7 +70,7 @@ func (CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	msgFromServer := make([]byte, sizeFromServerInt)
 	_, err = conn.Read(msgFromServer)
 	if err != nil {
-		log.Fatalf("SRH:: %s", err)
+		log.Fatalf("CRH:: %s", err)
 	}
 
 	*msg = messages.SAMessage{Payload: msgFromServer}

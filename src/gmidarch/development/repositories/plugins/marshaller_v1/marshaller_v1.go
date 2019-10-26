@@ -1,4 +1,4 @@
-package components
+package main
 
 import (
 	"encoding/json"
@@ -12,16 +12,19 @@ import (
 )
 
 type Marshaller struct {
-	CSP       string
-	Graph     graphs.ExecGraph
 	Behaviour string
+	Graph     graphs.ExecGraph
 }
 
-func NewMarshaller() Marshaller {
+func Gettype() interface{} {
+	return Marshaller{}
+}
 
-	// create a new instance of Server
+func NewReceiver() Marshaller {
+
+	// create a new instance of client
 	r := new(Marshaller)
-	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B"
+	r.Behaviour = "B = InvP.e1 -> I_PrintMessage -> B"
 
 	return *r
 }
@@ -47,7 +50,7 @@ func (Marshaller) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		}
 		*msg = messages.SAMessage{Payload: r}
 	default:
-		fmt.Printf("Marshaller:: Operation '%v' not supported!",op)
+		fmt.Println("Marshaller:: Operation '" + op + "' not supported!!")
 		os.Exit(0)
 	}
 }

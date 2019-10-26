@@ -5,10 +5,12 @@ import (
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"shared"
+	"time"
 )
 
-//var t1 time.Time
-//var idx int
+var times [1000] time.Duration
+var idx int
+var t1 time.Time
 
 type Calculatorclient struct {
 	Behaviour string
@@ -25,13 +27,24 @@ func NewCalculatorclient() Calculatorclient {
 
 func (Calculatorclient) I_Setmessage(msg *messages.SAMessage, info [] *interface{}) {
 
-	argsTemp := make([]interface{}, 2)
-	argsTemp[0] = 1
-	argsTemp[1] = 2
-	*msg = messages.SAMessage{Payload: shared.Request{Op: "add", Args: argsTemp}}
+	time.Sleep(0)
 
+	//if idx < 100 {
+		t1 = time.Now()
+		argsTemp := make([]interface{}, 2)
+		argsTemp[0] = 1
+		argsTemp[1] = 2
+		*msg = messages.SAMessage{Payload: shared.Request{Op: "add", Args: argsTemp}}
+	//}
 }
 
 func (Calculatorclient) I_Printmessage(msg *messages.SAMessage, info [] *interface{}) {
-	fmt.Println(msg.Payload)
+	fmt.Printf("Calculatorclient:: %v [%v]\n",msg.Payload,idx)
+	//times[idx] = time.Now().Sub(t1)
+
+	//if idx >= 100{
+	//	fmt.Printf("CalculatorClient:: Experiment finished!")
+		//os.Exit(0)
+	//}
+	idx++
 }

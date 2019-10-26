@@ -2,7 +2,6 @@ package components
 
 import (
 	"encoding/binary"
-	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"log"
@@ -41,11 +40,12 @@ func (SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO
 	port := shared.CALCULATOR_PORT  // TODO
 
 	// create listener
-	ln, err = net.Listen("tcp", host+":"+strconv.Itoa(port))
-	if err != nil {
-		log.Fatalf("SRH:: %s", err)
+	for {
+		ln, err = net.Listen("tcp", host+":"+strconv.Itoa(port))
+		if err == nil {
+			break
+		}
 	}
-
 	// accept connections
 	conn, err = ln.Accept()
 	if err != nil {
@@ -89,18 +89,13 @@ func (SRH) I_Send(msg *messages.SAMessage, info [] *interface{}) {
 	}
 
 	// close connection
-	conn.Close()
+	err = conn.Close()
+	if err != nil {
+		log.Fatalf("SRH:: %v\n",err)
+	}
 	ln.Close()
-}
+	if err != nil {
+		log.Fatalf("SRH:: %v\n",err)
+	}
 
-func (SRH) I_Test1(msg *messages.SAMessage, info [] *interface{}) {
-	*msg = messages.SAMessage{Payload: "Teste 1"}
-	*info[0] = 3
-	fmt.Printf("SRH:: %v\n", *msg)
-}
-
-func (SRH) I_Test2(msg *messages.SAMessage, info [] *interface{}) {
-	*msg = messages.SAMessage{Payload: "Teste 2"}
-	*info[0] = 13
-	fmt.Printf("SRH:: %v\n", *msg)
 }
