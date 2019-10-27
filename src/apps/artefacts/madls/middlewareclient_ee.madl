@@ -2,11 +2,6 @@ Configuration middlewareclient_ee :=
 
    Components 
       core : Core 
-      monevolutive : Monevolutive 
-      monitor : Monitor 
-      analyser : Analyser 
-      planner : Planner 
-      executor : Executor 
       unit1 : Unit 
       unit2 : Unit 
       unit3 : Unit 
@@ -19,11 +14,6 @@ Configuration middlewareclient_ee :=
 
     Connectors 
       t1 : Oneto9 
-      t2 : Oneway 
-      t3 : Oneway 
-      t4 : Oneway 
-      t5 : Oneway 
-      t6 : Oneway 
 
     Attachments 
       core,t1,unit1 
@@ -35,11 +25,6 @@ Configuration middlewareclient_ee :=
       core,t1,unit7 
       core,t1,unit8 
       core,t1,unit9 
-      monevolutive,t2,monitor 
-      monitor,t3,analyser 
-      analyser,t4,planner 
-      planner,t5,executor 
-      executor,t6,core 
 
    Adaptability 
       NONE 

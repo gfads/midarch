@@ -19,5 +19,5 @@ Configuration middlewareclient :=
       requestor,t4,crh
 
    Adaptability
-      Evolutive
+      None
 EndConf

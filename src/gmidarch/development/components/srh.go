@@ -17,9 +17,9 @@ type SRH struct {
 	Port      int
 }
 
-var ln net.Listener
-var conn net.Conn
-var err error
+var lnSRH net.Listener
+var connSRH net.Conn
+var firstListenerSRH bool
 
 func NewSRH() SRH {
 
@@ -31,30 +31,35 @@ func NewSRH() SRH {
 	r.Port = 1313        // TODO
 	r.Behaviour = "B = I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> B"
 
+	firstListenerSRH = true
+
 	return *r
 }
 
 func (SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO
 
-	host := "localhost"             // TODO
-	port := shared.CALCULATOR_PORT  // TODO
+	host := "localhost"            // TODO
+	port := shared.CALCULATOR_PORT // TODO
 
 	// create listener
-	for {
-		ln, err = net.Listen("tcp", host+":"+strconv.Itoa(port))
-		if err == nil {
-			break
+	err := *new(error)
+	if firstListenerSRH {
+		firstListenerSRH = false
+		lnSRH, err = net.Listen("tcp", host+":"+strconv.Itoa(port))
+		if err != nil {
+			log.Fatalf("SRH:: %v\n",err)
 		}
 	}
+
 	// accept connections
-	conn, err = ln.Accept()
+	connSRH, err = lnSRH.Accept()
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
 
 	// receive message's size
 	size := make([]byte, 4)
-	_, err = conn.Read(size)
+	_, err = connSRH.Read(size)
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
@@ -62,7 +67,7 @@ func (SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO
 
 	// receive message
 	msgTemp := make([]byte, sizeInt)
-	_, err = conn.Read(msgTemp)
+	_, err = connSRH.Read(msgTemp)
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
@@ -77,25 +82,16 @@ func (SRH) I_Send(msg *messages.SAMessage, info [] *interface{}) {
 	size := make([]byte, 4)
 	l := uint32(len(msgTemp))
 	binary.LittleEndian.PutUint32(size, l)
-	conn.Write(size)
+	connSRH.Write(size)
+
+	err := *new(error)
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
 
 	// send message
-	_, err = conn.Write(msgTemp)
+	_, err = connSRH.Write(msgTemp)
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
-
-	// close connection
-	err = conn.Close()
-	if err != nil {
-		log.Fatalf("SRH:: %v\n",err)
-	}
-	ln.Close()
-	if err != nil {
-		log.Fatalf("SRH:: %v\n",err)
-	}
-
 }

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
+	"os"
 	"shared"
 	"time"
 )
@@ -27,14 +28,14 @@ func NewCalculatorclient() Calculatorclient {
 
 func (Calculatorclient) I_Setmessage(msg *messages.SAMessage, info [] *interface{}) {
 
-	time.Sleep(0)
+	time.Sleep(100 * time.Millisecond)
 
 	//if idx < 100 {
-		t1 = time.Now()
-		argsTemp := make([]interface{}, 2)
-		argsTemp[0] = 1
-		argsTemp[1] = 2
-		*msg = messages.SAMessage{Payload: shared.Request{Op: "add", Args: argsTemp}}
+	t1 = time.Now()
+	argsTemp := make([]interface{}, 2)
+	argsTemp[0] = 1
+	argsTemp[1] = 2
+	*msg = messages.SAMessage{Payload: shared.Request{Op: "add", Args: argsTemp}}
 	//}
 }
 
@@ -42,9 +43,9 @@ func (Calculatorclient) I_Printmessage(msg *messages.SAMessage, info [] *interfa
 	fmt.Printf("Calculatorclient:: %v [%v]\n",msg.Payload,idx)
 	//times[idx] = time.Now().Sub(t1)
 
-	//if idx >= 100{
-	//	fmt.Printf("CalculatorClient:: Experiment finished!")
-		//os.Exit(0)
-	//}
+	if idx >= 10000 {
+		fmt.Printf("CalculatorClient:: Experiment finished!")
+		os.Exit(0)
+	}
 	idx++
 }

@@ -14,6 +14,8 @@ type CRH struct {
 	Graph     graphs.ExecGraph
 }
 
+var connCRH net.Conn
+
 func NewCRH() CRH {
 
 	// create a new instance of Server
@@ -32,35 +34,36 @@ func (CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	msgToServer := argsTemp[2].([]byte)
 
 	// connect to server
-	var conn net.Conn
 	var err error
-	for {
-		conn, err = net.Dial("tcp", host+":"+strconv.Itoa(int(port)))
-		if err == nil {
-			break
-		}
+	servAddr := host + ":" + strconv.Itoa(port) // TODO
+	tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
+	if err != nil {
+		log.Fatalf("Client:: %v\n", err)
 	}
 
-	defer conn.Close()
+	connCRH, err = net.DialTCP("tcp", nil, tcpAddr)
+	if err != nil {
+		log.Fatalf("Client:: %v\n", err)
+	}
 
 	// send message's size
 	sizeMsgToServer := make([]byte, 4)
 	l := uint32(len(msgToServer))
 	binary.LittleEndian.PutUint32(sizeMsgToServer, l)
-	conn.Write(sizeMsgToServer)
+	connCRH.Write(sizeMsgToServer)
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)
 	}
 
 	// send message
-	_, err = conn.Write(msgToServer)
+	_, err = connCRH.Write(msgToServer)
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)
 	}
 
 	// receive message's size
 	sizeMsgFromServer := make([]byte, 4)
-	_, err = conn.Read(sizeMsgFromServer)
+	_, err = connCRH.Read(sizeMsgFromServer)
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)
 	}
@@ -68,7 +71,7 @@ func (CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	// receive reply
 	msgFromServer := make([]byte, sizeFromServerInt)
-	_, err = conn.Read(msgFromServer)
+	_, err = connCRH.Read(msgFromServer)
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)
 	}

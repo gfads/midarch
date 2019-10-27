@@ -1,41 +1,29 @@
-datatype PROCNAMES = core | monevolutive | monitor | analyser | planner | executor | unit1 | unit2 | unit3 | unit4 | unit5 | unit6 | unit7 | t1 | t2 | t3 | t4 | t5 | t6
+datatype PROCNAMES = core | unit1 | unit2 | unit3 | unit4 | unit5 | unit6 | unit7 | t1
 channel InvR,InvP : PROCNAMES
-channel I_Collect,I_Process,I_Initialiseunit,I_Execute,I_AdaptUnit
-CORE = InvR.t1 -> COREP1 
- COREP1 = InvP.t6 -> InvR.t1 -> COREP1
+channel I_InitialiseUnit,I_Execute
+UNIT4 = I_InitialiseUnit -> UNIT4P1
+ UNIT4P1 = I_Execute -> UNIT4P1
 
-ANALYSER = InvP.t3 -> I_Process -> InvR.t4 -> ANALYSER
-UNIT1 = InvP.t1 -> I_Initialiseunit -> UNIT1P1 
-UNIT1P1 = I_Execute -> UNIT1P1 [] InvP.t1 -> I_AdaptUnit -> UNIT1P1
+UNIT5 = I_InitialiseUnit -> UNIT5P1
+ UNIT5P1 = I_Execute -> UNIT5P1
 
-UNIT2 = InvP.t1 -> I_Initialiseunit -> UNIT2P1 
-UNIT2P1 = I_Execute -> UNIT2P1 [] InvP.t1 -> I_AdaptUnit -> UNIT2P1
+UNIT6 = I_InitialiseUnit -> UNIT6P1
+ UNIT6P1 = I_Execute -> UNIT6P1
 
-UNIT4 = InvP.t1 -> I_Initialiseunit -> UNIT4P1 
-UNIT4P1 = I_Execute -> UNIT4P1 [] InvP.t1 -> I_AdaptUnit -> UNIT4P1
+UNIT7 = I_InitialiseUnit -> UNIT7P1
+ UNIT7P1 = I_Execute -> UNIT7P1
 
-UNIT6 = InvP.t1 -> I_Initialiseunit -> UNIT6P1 
-UNIT6P1 = I_Execute -> UNIT6P1 [] InvP.t1 -> I_AdaptUnit -> UNIT6P1
+CORE = InvR.t1 -> CORE
+UNIT1 = I_InitialiseUnit -> UNIT1P1
+ UNIT1P1 = I_Execute -> UNIT1P1
 
-UNIT7 = InvP.t1 -> I_Initialiseunit -> UNIT7P1 
-UNIT7P1 = I_Execute -> UNIT7P1 [] InvP.t1 -> I_AdaptUnit -> UNIT7P1
+UNIT2 = I_InitialiseUnit -> UNIT2P1
+ UNIT2P1 = I_Execute -> UNIT2P1
 
-MONEVOLUTIVE = I_Collect -> InvR.t2 -> MONEVOLUTIVE
-MONITOR = InvP.t2 -> I_Process -> InvR.t3 -> MONITOR
-PLANNER = InvP.t4 -> I_Process -> InvR.t5 -> PLANNER
-EXECUTOR = InvP.t5 -> I_Process -> InvR.t6 -> EXECUTOR
-UNIT3 = InvP.t1 -> I_Initialiseunit -> UNIT3P1 
-UNIT3P1 = I_Execute -> UNIT3P1 [] InvP.t1 -> I_AdaptUnit -> UNIT3P1
+UNIT3 = I_InitialiseUnit -> UNIT3P1
+ UNIT3P1 = I_Execute -> UNIT3P1
 
-UNIT5 = InvP.t1 -> I_Initialiseunit -> UNIT5P1 
-UNIT5P1 = I_Execute -> UNIT5P1 [] InvP.t1 -> I_AdaptUnit -> UNIT5P1
-
-T2 = InvP.monevolutive -> InvR.monitor -> T2
-T3 = InvP.monitor -> InvR.analyser -> T3
-T4 = InvP.analyser -> InvR.planner -> T4
-T5 = InvP.planner -> InvR.executor -> T5
-T6 = InvP.executor -> InvR.core -> T6
 T1 = InvP.core -> InvR.unit1 -> InvR.unit2 -> InvR.unit3 -> InvR.unit4 -> InvR.unit5 -> InvR.unit6 -> InvR.unit7 -> T1
 
-middlewareserver_ee = (CORE ||| MONEVOLUTIVE ||| MONITOR ||| ANALYSER ||| PLANNER ||| EXECUTOR ||| UNIT1 ||| UNIT2 ||| UNIT3 ||| UNIT4 ||| UNIT5 ||| UNIT6 ||| UNIT7)[|{|InvR,InvP|}|](T2[[InvP.monevolutive <- InvR.t2,InvR.monitor <- InvP.t2]] ||| T3[[InvP.monevolutive <- InvR.t2,InvR.monitor <- InvP.t2,InvP.monitor <- InvR.t3,InvR.analyser <- InvP.t3]] ||| T4[[InvP.monevolutive <- InvR.t2,InvR.monitor <- InvP.t2,InvP.monitor <- InvR.t3,InvR.analyser <- InvP.t3,InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4]] ||| T5[[InvP.monevolutive <- InvR.t2,InvR.monitor <- InvP.t2,InvP.monitor <- InvR.t3,InvR.analyser <- InvP.t3,InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4,InvP.planner <- InvR.t5,InvR.executor <- InvP.t5]] ||| T6[[InvP.monevolutive <- InvR.t2,InvR.monitor <- InvP.t2,InvP.monitor <- InvR.t3,InvR.analyser <- InvP.t3,InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4,InvP.planner <- InvR.t5,InvR.executor <- InvP.t5,InvP.executor <- InvR.t6,InvR.core <- InvP.t6]] ||| T1[[InvP.monevolutive <- InvR.t2,InvR.monitor <- InvP.t2,InvP.monitor <- InvR.t3,InvR.analyser <- InvP.t3,InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4,InvP.planner <- InvR.t5,InvR.executor <- InvP.t5,InvP.executor <- InvR.t6,InvR.core <- InvP.t6,InvP.core <- InvR.t1,InvR.unit1 <- InvP.t1,InvR.unit2 <- InvP.t1,InvR.unit3 <- InvP.t1,InvR.unit4 <- InvP.t1,InvR.unit5 <- InvP.t1,InvR.unit6 <- InvP.t1,InvR.unit7 <- InvP.t1]])
+middlewareserver_ee = (CORE ||| UNIT1 ||| UNIT2 ||| UNIT3 ||| UNIT4 ||| UNIT5 ||| UNIT6 ||| UNIT7)[|{|InvR,InvP|}|](T1[[InvP.core <- InvR.t1,InvR.unit1 <- InvP.t1,InvR.unit2 <- InvP.t1,InvR.unit3 <- InvP.t1,InvR.unit4 <- InvP.t1,InvR.unit5 <- InvP.t1,InvR.unit6 <- InvP.t1,InvR.unit7 <- InvP.t1]])
 assert middlewareserver_ee :[deadlock free]
