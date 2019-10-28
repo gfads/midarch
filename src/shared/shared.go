@@ -34,7 +34,7 @@ var MONITOR_TIME time.Duration   // seconds
 var INJECTION_TIME time.Duration // seconds
 var REQUEST_TIME time.Duration   // milliseconds
 var STRATEGY = 0                 // 1 - no change 2 - change once 3 - change same plugin 4 - alternate plugins
-var SAMPLE_SIZE = 0
+const SAMPLE_SIZE = 10000
 var NAMING_HOST = ""
 var QUEUEING_HOST = ""
 
@@ -129,6 +129,7 @@ func IsExternal(action string) bool {
 	return r
 }
 
+/*
 func LoadParameters(args []string) {
 	for i := range args {
 		variable := strings.Split(args[i], "=")
@@ -159,6 +160,7 @@ func LoadParameters(args []string) {
 		}
 	}
 }
+*/
 
 func ShowExecutionParameters(s bool) {
 	if s {

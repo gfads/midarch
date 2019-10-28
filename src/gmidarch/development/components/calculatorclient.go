@@ -9,9 +9,9 @@ import (
 	"time"
 )
 
-var times [1000] time.Duration
 var idx int
 var t1 time.Time
+var times [shared.SAMPLE_SIZE] time.Duration
 
 type Calculatorclient struct {
 	Behaviour string
@@ -28,24 +28,24 @@ func NewCalculatorclient() Calculatorclient {
 
 func (Calculatorclient) I_Setmessage(msg *messages.SAMessage, info [] *interface{}) {
 
-	time.Sleep(100 * time.Millisecond)
-
-	//if idx < 100 {
 	t1 = time.Now()
 	argsTemp := make([]interface{}, 2)
 	argsTemp[0] = 1
 	argsTemp[1] = 2
 	*msg = messages.SAMessage{Payload: shared.Request{Op: "add", Args: argsTemp}}
-	//}
 }
 
 func (Calculatorclient) I_Printmessage(msg *messages.SAMessage, info [] *interface{}) {
-	fmt.Printf("Calculatorclient:: %v [%v]\n",msg.Payload,idx)
-	//times[idx] = time.Now().Sub(t1)
+	//fmt.Printf("Calculatorclient:: %v [%v]\n",msg.Payload,idx)
 
-	if idx >= 10000 {
-		fmt.Printf("CalculatorClient:: Experiment finished!")
+	if idx >= shared.SAMPLE_SIZE {
+		totalTime := time.Duration(0)
+		for i:= range times{
+			totalTime += times[i]
+		}
+		fmt.Printf("Total Time [%v]: %v\n",shared.SAMPLE_SIZE,totalTime)
 		os.Exit(0)
 	}
+	times[idx] = time.Now().Sub(t1)
 	idx++
 }

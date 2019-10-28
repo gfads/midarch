@@ -24,11 +24,11 @@ func (f FrontEnd) Deploy(file string) {
 	// Create architecture of the execution environment
 	appKindOfAdaptability := make([]string, 1)
 	appKindOfAdaptability = mapp.Adaptability
-	meeTemp := crt.Create(mapp,appKindOfAdaptability)
+	meeTemp := crt.Create(mapp, appKindOfAdaptability)
 	crt.Save(meeTemp)
 
 	// Load MADL and generate architectural artefacts (EE)
-	mee := l.Load(meeTemp.Configuration+ shared.MADL_EXTENSION)
+	mee := l.Load(meeTemp.Configuration + shared.MADL_EXTENSION)
 
 	// Configure adaptability of EE - according to the adaptability of the hosted App
 	mee.AppAdaptability = mapp.Adaptability
@@ -44,7 +44,7 @@ func (f FrontEnd) Deploy(file string) {
 	//chk.Check(cspee)  // TODO think about as it takes a long time and may be correct by construction
 
 	// Deploy App into EE & start EE
-	dep.DeployApp(mee,mapp)
+	dep.DeployApp(mee, mapp)
 	dep.Start()
 
 	// Start application only - without execution environment

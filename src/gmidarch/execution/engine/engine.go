@@ -5,7 +5,7 @@ import (
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"reflect"
-	shared2 "shared"
+	"shared"
 )
 
 type Engine struct{}
@@ -19,10 +19,9 @@ func (Engine) Execute(elem interface{}, graph graphs.ExecGraph, executionMode bo
 		edges := graph.AdjacentEdges(node)
 		if len(edges) == 1 {
 			edge := edges[0]
-			switch edge.Info.ActionType {
-			case 1:
+			if edge.Info.ActionType == 1 { // Internal action
 				edge.Info.InternalAction(elem, edge.Info.ActionName, edge.Info.Message, edge.Info.Info)
-			case 2:
+			} else {
 				edge.Info.ExternalAction(edge.Info.ActionChannel, edge.Info.Message)
 			}
 			node = edge.To
@@ -31,7 +30,7 @@ func (Engine) Execute(elem interface{}, graph graphs.ExecGraph, executionMode bo
 			choice(elem, &chosen, edges)
 			node = edges[chosen].To
 		}
-		if node == 0 && executionMode != shared2.EXECUTE_FOREVER {
+		if node == 0 && executionMode != shared.EXECUTE_FOREVER {
 			break
 		}
 	}
@@ -44,14 +43,12 @@ func choice(elem interface{}, chosen *int, edges []graphs.ExecEdge) {
 
 	// Assembly cases
 	for i := 0; i < len(edges); i++ {
-		switch edges[i].Info.ActionType {
-		case 1: // Internal
+		if edges[i].Info.ActionType == 1 { // Internal
 			casesInternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(*edges[i].Info.ActionChannel)}
 			casesExternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv}
 			edges[i].Info.InternalAction(elem, edges[i].Info.ActionName, edges[i].Info.Message, edges[i].Info.Info)
 			go send(edges[i].Info.ActionChannel, *edges[i].Info.Message)
-
-		case 2: // External
+		} else {
 			casesExternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(*edges[i].Info.ActionChannel)}
 			casesInternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv}
 		}
