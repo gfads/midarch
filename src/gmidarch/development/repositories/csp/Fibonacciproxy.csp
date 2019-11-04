@@ -1,0 +1,5 @@
+datatype PROCNAMES = e1 | e2
+channel InvP, TerP, InvR, TerR : PROCNAMES
+channel I_ProcessIn, I_ProcessOut
+
+Proxy = InvP.e1 -> I_ProcessIn -> InvR.e2 -> TerR.e2 -> I_ProcessOut -> TerP.e1 -> Proxy

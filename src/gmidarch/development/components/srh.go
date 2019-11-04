@@ -28,7 +28,7 @@ func NewSRH() SRH {
 
 	// configure the new instance
 	r.Host = "localhost" // TODO
-	r.Port = 1313        // TODO
+	r.Port = shared.FIBONACCI_PORT        // TODO
 	r.Behaviour = "B = I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> B"
 
 	firstListenerSRH = true
@@ -36,10 +36,10 @@ func NewSRH() SRH {
 	return *r
 }
 
-func (SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO
+func (s SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO
 
-	host := "localhost"            // TODO
-	port := shared.CALCULATOR_PORT // TODO
+	host := s.Host            // TODO
+	port := s.Port // TODO
 
 	// create listener
 	err := *new(error)

@@ -15,77 +15,11 @@ type Requestor struct {
 
 func NewRequestor() Requestor {
 
-	// create a new instance of Server
 	r := new(Requestor)
 	r.Behaviour = "B = InvP.e1 -> I_SerialiseMIOP -> InvR.e2 -> TerR.e2 -> I_PrepareToCRH -> InvR.e3 -> TerR.e3 -> I_DeserialiseMIOP -> InvR.e2 -> TerR.e2 -> I_PrepareToClient -> TerP.e1 -> B"
 
 	return *r
 }
-
-/*
-func (r *Requestor) Configure(invP, terP, invR1, terR1, invR2, terR2, invR3, terR3 *chan messages2.SAMessage) {
-
-	// configure the state machine
-	r.Graph = *graphs2.NewExecGraph(12)
-
-	msg := new(messages2.SAMessage)
-	newEdgeInfo := graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.InvP, ActionType: 2, ActionChannel: invP, Message: msg}
-	r.Graph.AddEdge(0, 1, newEdgeInfo)
-
-	info1 := make([]*interface{}, 2) // message, (host+port)
-	info1[0] = new(interface{})      // message
-	info1[1] = new(interface{})      // host+port
-	*info1[0] = msg
-	*info1[1] = make([]interface{}, 2)
-
-	actionChannel := make(chan messages2.SAMessage)
-	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_SerialiseMIOP", Message: msg, ActionType: 1, ActionChannel: &actionChannel, Info: info1}
-	r.Graph.AddEdge(1, 2, newEdgeInfo)
-	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.InvR, ActionType: 2, ActionChannel: invR1, Message: msg}
-	r.Graph.AddEdge(2, 3, newEdgeInfo)
-	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.TerR, ActionType: 2, ActionChannel: terR1, Message: msg}
-	r.Graph.AddEdge(3, 4, newEdgeInfo)
-	actionChannel = make(chan messages2.SAMessage)
-
-	info2 := make([]*interface{}, 2) // host, port, msg
-	info2[0] = new(interface{})
-	info2[1] = new(interface{})
-	*info2[0] = msg
-	*info2[1] = make([] interface{}, 3)
-	args2HostPort := make([]interface{}, 2)
-	args2HostPort[0] = "localhost"
-	args2HostPort[1] = 1313
-	*info2[1] = args2HostPort
-	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_PreparetoCRH", Message: msg, ActionType: 1, ActionChannel: &actionChannel, Info: info2}
-	r.Graph.AddEdge(4, 5, newEdgeInfo)
-
-	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.InvR, ActionType: 2, ActionChannel: invR2, Message: msg}
-	r.Graph.AddEdge(5, 6, newEdgeInfo)
-	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.TerR, ActionType: 2, ActionChannel: terR2, Message: msg}
-	r.Graph.AddEdge(6, 7, newEdgeInfo)
-
-	actionChannel = make(chan messages2.SAMessage)
-	info3 := make([]*interface{}, 1)
-	info3[0] = new(interface{})
-	*info3[0] = msg
-	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_DeserialiseMIOP", Message: msg, ActionType: 1, ActionChannel: &actionChannel, Info: info3}
-	r.Graph.AddEdge(7, 8, newEdgeInfo)
-
-	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.InvR, ActionType: 2, ActionChannel: invR3, Message: msg}
-	r.Graph.AddEdge(8, 9, newEdgeInfo)
-	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.TerR, ActionType: 2, ActionChannel: terR3, Message: msg}
-	r.Graph.AddEdge(9, 10, newEdgeInfo)
-
-	actionChannel = make(chan messages2.SAMessage)
-	info4 := make([]*interface{}, 1)
-	info4[0] = new(interface{})
-	*info4[0] = msg
-	newEdgeInfo = graphs2.ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: "I_PrepareToClient", Message: msg, ActionType: 1, ActionChannel: &actionChannel, Info: info4}
-	r.Graph.AddEdge(10, 11, newEdgeInfo)
-	newEdgeInfo = graphs2.ExecEdgeInfo{ExternalAction: element2.Element{}.TerP, ActionType: 2, ActionChannel: terP, Message: msg}
-	r.Graph.AddEdge(11, 0, newEdgeInfo)
-}
-*/
 
 func (Requestor) I_SerialiseMIOP(msg *messages.SAMessage, info [] *interface{}) { // TODO
 	inv := msg.Payload.(shared.Invocation)
@@ -113,15 +47,6 @@ func (Requestor) I_SerialiseMIOP(msg *messages.SAMessage, info [] *interface{}) 
 	*msg = messages.SAMessage{Payload: msgToMarhsaller}
 }
 
-func (Requestor) I_DeserialiseMIOP(msg *messages.SAMessage, info [] *interface{}) {
-
-	argsTemp := make([]interface{}, 1)
-	argsTemp[0] = msg.Payload
-	msgToMarhsaller := shared.Request{Op: "unmarshall", Args: argsTemp}
-
-	*msg = messages.SAMessage{Payload: msgToMarhsaller}
-}
-
 func (Requestor) I_PrepareToCRH(msg *messages.SAMessage, info [] *interface{}) {
 
 	hostTemp1:= *info[0]
@@ -138,6 +63,15 @@ func (Requestor) I_PrepareToCRH(msg *messages.SAMessage, info [] *interface{}) {
 	toCRH[2] = msg.Payload.([]uint8)
 
 	*msg = messages.SAMessage{Payload: toCRH}
+}
+
+func (Requestor) I_DeserialiseMIOP(msg *messages.SAMessage, info [] *interface{}) {
+
+	argsTemp := make([]interface{}, 1)
+	argsTemp[0] = msg.Payload
+	msgToMarhsaller := shared.Request{Op: "unmarshall", Args: argsTemp}
+
+	*msg = messages.SAMessage{Payload: msgToMarhsaller}
 }
 
 func (Requestor) I_PrepareToClient(msg *messages.SAMessage, info [] *interface{}) {

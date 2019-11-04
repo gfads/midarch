@@ -9,11 +9,9 @@ Configuration middlewareclient_ee :=
       unit5 : Unit 
       unit6 : Unit 
       unit7 : Unit 
-      unit8 : Unit 
-      unit9 : Unit 
 
     Connectors 
-      t1 : Oneto9 
+      t1 : Oneto7 
 
     Attachments 
       core,t1,unit1 
@@ -23,8 +21,6 @@ Configuration middlewareclient_ee :=
       core,t1,unit5 
       core,t1,unit6 
       core,t1,unit7 
-      core,t1,unit8 
-      core,t1,unit9 
 
    Adaptability 
       NONE 

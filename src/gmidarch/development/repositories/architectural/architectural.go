@@ -22,8 +22,9 @@ func (al *ArchitecturalRepository) Load() error {
 	// load
 	al.Library["Analyser"] = Record{Type: components.NewAnalyser(), Behaviour: components.NewAnalyser().Behaviour}
 	al.Library["OnetoN"] = Record{Type: connectors.NewOnetoN(), Behaviour: connectors.NewOnetoN().Behaviour}
-	al.Library["Oneto7"] = Record{Type: connectors.NewOnetoN(), Behaviour: connectors.NewOneto7().Behaviour}
-	al.Library["Oneto9"] = Record{Type: connectors.NewOnetoN(), Behaviour: connectors.NewOneto9().Behaviour}
+	al.Library["Oneto5"] = Record{Type: connectors.NewOneto5(), Behaviour: connectors.NewOneto5().Behaviour}
+	al.Library["Oneto7"] = Record{Type: connectors.NewOneto7(), Behaviour: connectors.NewOneto7().Behaviour}
+	al.Library["Oneto9"] = Record{Type: connectors.NewOneto9(), Behaviour: connectors.NewOneto9().Behaviour}
 	al.Library["Oneway"] = Record{Type: connectors.NewOneway(), Behaviour: connectors.NewOneway().Behaviour}
 	al.Library["Receiver"] = Record{Type: components.NewReceiver(), Behaviour: components.NewReceiver().Behaviour}
 	al.Library["Requestreply"] = Record{Type: connectors.NewRequestReply(), Behaviour: connectors.NewRequestReply().Behaviour}
@@ -33,6 +34,7 @@ func (al *ArchitecturalRepository) Load() error {
 	al.Library["Calculatorproxy"] = Record{Type: components.NewCalculatorProxy(), Behaviour: components.NewCalculatorProxy().Behaviour}
 	al.Library["Marshaller"] = Record{Type: components.NewMarshaller(), Behaviour: components.NewMarshaller().Behaviour}
 	al.Library["Requestor"] = Record{Type: components.NewRequestor(), Behaviour: components.NewRequestor().Behaviour}
+	al.Library["RequestorWithMarshaller"] = Record{Type: components.NewRequestorWithMarhsaller(), Behaviour: components.NewRequestorWithMarhsaller().Behaviour}
 	al.Library["CRH"] = Record{Type: components.NewCRH(), Behaviour: components.NewCRH().Behaviour}
 	al.Library["SRH"] = Record{Type: components.NewSRH(), Behaviour: components.NewSRH().Behaviour}
 	al.Library["Calculatorserver"] = Record{Type: components.Newcalculatorserver(), Behaviour: components.Newcalculatorserver().Behaviour}
@@ -44,6 +46,11 @@ func (al *ArchitecturalRepository) Load() error {
 	al.Library["Monitor"] = Record{Type: components.NewMonitor(), Behaviour: components.NewMonitor().Behaviour}
 	al.Library["Planner"] = Record{Type: components.NewPlanner(), Behaviour: components.NewPlanner().Behaviour}
 	al.Library["Executor"] = Record{Type: components.NewExecutor(), Behaviour: components.NewExecutor().Behaviour}
+	al.Library["Fibonacciserver"] = Record{Type: components.Newfibonacciserver(), Behaviour: components.Newfibonacciserver().Behaviour}
+	al.Library["Fibonacciclient"] = Record{Type: components.NewFibonacciclient(), Behaviour: components.NewFibonacciclient().Behaviour}
+	al.Library["Fibonacciinvoker"] = Record{Type: components.NewFibonacciinvoker(), Behaviour: components.NewFibonacciinvoker().Behaviour}
+	al.Library["Fibonacciinvokerwithmarshaller"] = Record{Type: components.NewFibonacciInvokerWithMarshaller(), Behaviour: components.NewFibonacciInvokerWithMarshaller().Behaviour}
+	al.Library["Fibonacciproxy"] = Record{Type: components.NewFibonacciproxy(), Behaviour: components.NewFibonacciproxy().Behaviour}
 
 	return r1
 }

@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"reflect"
@@ -21,7 +20,7 @@ func (Engine) Execute(elem interface{}, graph graphs.ExecGraph, executionMode bo
 			edge := edges[0]
 			if edge.Info.ActionType == 1 { // Internal action
 				edge.Info.InternalAction(elem, edge.Info.ActionName, edge.Info.Message, edge.Info.Info)
-			} else {
+			} else {                       // External action
 				edge.Info.ExternalAction(edge.Info.ActionChannel, edge.Info.Message)
 			}
 			node = edge.To
@@ -42,28 +41,29 @@ func choice(elem interface{}, chosen *int, edges []graphs.ExecEdge) {
 	casesInternal := make([]reflect.SelectCase, len(edges))
 
 	// Assembly cases
-	for i := 0; i < len(edges); i++ {
-		if edges[i].Info.ActionType == 1 { // Internal
+	//for i := 0; i < len(edges); i++ {
+	for i := range edges {
+		if edges[i].Info.ActionType == 1 { // Internal action
 			casesInternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(*edges[i].Info.ActionChannel)}
 			casesExternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv}
 			edges[i].Info.InternalAction(elem, edges[i].Info.ActionName, edges[i].Info.Message, edges[i].Info.Info)
 			go send(edges[i].Info.ActionChannel, *edges[i].Info.Message)
-		} else {
+		} else {                          // External action
 			casesExternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(*edges[i].Info.ActionChannel)}
 			casesInternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv}
 		}
 	}
-	// default case
+
+	// add default case to choice options
 	casesExternal[len(edges)] = reflect.SelectCase{Dir: reflect.SelectDefault}
 
 	// select external first
 	var value reflect.Value
 	*chosen, value, _ = reflect.Select(casesExternal)
 
-	if *chosen != (len(edges)) { // NOT DEFAULT
+	if *chosen != (len(edges)) { // NOT DEFAULT, i.e., no external action executed
 		*edges[*chosen].Info.Message = value.Interface().(messages.SAMessage)
-		return
-	} else {
+	} else {                    // DEFAULT
 		*chosen, value, _ = reflect.Select(casesInternal)
 		*edges[*chosen].Info.Message = value.Interface().(messages.SAMessage)
 	}
@@ -71,8 +71,4 @@ func choice(elem interface{}, chosen *int, edges []graphs.ExecEdge) {
 
 func send(channel *chan messages.SAMessage, msg messages.SAMessage) {
 	*channel <- msg
-}
-
-func (Engine) ExecuteUnit(elem interface{}, graph interface{}, executionMode bool) {
-	fmt.Printf("Engine:: %v\n", graph.(graphs.ExecGraph))
 }

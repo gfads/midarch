@@ -7,12 +7,12 @@ import (
 	"shared"
 )
 
-type Invoker struct {
+type Fibonacciinvoker struct {
 	Behaviour string
 	Graph     graphs.ExecGraph
 }
 
-func NewInvoker() Invoker {
+func NewFibonacciinvoker() Invoker {
 
 	r := new(Invoker)
 	r.Behaviour = "B = InvP.e1 -> I_DeserialiseMIOP -> InvR.e2 -> TerR.e2 -> I_PrepareToObject -> InvR.e3 -> TerR.e3 -> I_SerialiseMIOP -> InvR.e2 -> TerR.e2 -> I_PrepareToSRH -> TerP.e1 -> B"
@@ -20,7 +20,7 @@ func NewInvoker() Invoker {
 	return *r
 }
 
-func (Invoker) I_DeserialiseMIOP(msg *messages.SAMessage, info [] *interface{}) {
+func (Fibonacciinvoker) I_DeserialiseMIOP(msg *messages.SAMessage, info [] *interface{}) {
 
 	argsTemp := make([]interface{}, 1)
 	argsTemp[0] = msg.Payload
@@ -29,17 +29,14 @@ func (Invoker) I_DeserialiseMIOP(msg *messages.SAMessage, info [] *interface{}) 
 	*msg = messages.SAMessage{Payload: msgToMarhsaller}
 }
 
-func (Invoker) I_PrepareToObject(msg *messages.SAMessage, info [] *interface{}) {
+func (Fibonacciinvoker) I_PrepareToObject(msg *messages.SAMessage) {
 	miopPacket := msg.Payload.(miop.Packet)
-	p0 := int(miopPacket.Bd.ReqBody.Body[0].(float64))   // JSON
-	//p0 := int(miopPacket.Bd.ReqBody.Body[0].(int64))       // Messagepack
-	argsTemp := make([]interface{},2)
-	argsTemp[0] = p0
+	argsTemp := miopPacket.Bd.ReqBody.Body
 	inv := shared.Request{Op: miopPacket.Bd.ReqHeader.Operation, Args: argsTemp}
 	*msg = messages.SAMessage{Payload: inv}
 }
 
-func (Invoker) I_SerialiseMIOP(msg *messages.SAMessage, info [] *interface{}) {
+func (Fibonacciinvoker) I_SerialiseMIOP(msg *messages.SAMessage, info [] *interface{}) {
 	r := msg.Payload.(int) // TODO
 
 	// assembly packet
@@ -59,7 +56,7 @@ func (Invoker) I_SerialiseMIOP(msg *messages.SAMessage, info [] *interface{}) {
 	*msg = messages.SAMessage{Payload: msgToMarhsaller}
 }
 
-func (Invoker) I_PrepareToSRH(msg *messages.SAMessage, info [] *interface{}) {
+func (Fibonacciinvoker) I_PrepareToSRH(msg *messages.SAMessage, info [] *interface{}) {
 	toSRH := make([]interface{}, 1)
 	toSRH[0] = msg.Payload.([]uint8)
 

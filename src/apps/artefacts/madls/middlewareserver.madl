@@ -1,18 +1,19 @@
 Configuration middlewareserver :=
    Components
-      server     : Calculatorserver
-      invoker    : Calculatorinvoker
-      marshaller : Marshaller
+      server     : Fibonacciserver
+//      invoker    : Fibonacciinvoker
+      invoker    : Fibonacciinvokerwithmarshaller
+//      marshaller : Marshaller
       srh        : SRH
 
    Connectors
       t1 : Requestreply
-      t2 : Requestreply
+//      t2 : Requestreply
       t3 : Requestreply
 
    Attachments
       srh,t1,invoker
-      invoker,t2,marshaller
+//      invoker,t2,marshaller
       invoker,t3,server
 
    Adaptability

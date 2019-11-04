@@ -34,12 +34,13 @@ var MONITOR_TIME time.Duration   // seconds
 var INJECTION_TIME time.Duration // seconds
 var REQUEST_TIME time.Duration   // milliseconds
 var STRATEGY = 0                 // 1 - no change 2 - change once 3 - change same plugin 4 - alternate plugins
-const SAMPLE_SIZE = 10000
+const SAMPLE_SIZE = 2500
+
 var NAMING_HOST = ""
 var QUEUEING_HOST = ""
 
 // MAPE-K Types
-type MonitoredCorrectiveData string   // used in channel Monitor -> Analyser (Corrective)
+type MonitoredCorrectiveData string // used in channel Monitor -> Analyser (Corrective)
 
 type MonitoredEvolutiveData [] string // used in channel Monitor -> Analyser (Evolutive)
 

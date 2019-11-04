@@ -9,31 +9,34 @@ import (
 	"time"
 )
 
-type Calculatorclient struct {
+var idx int
+var t1 time.Time
+var durations [shared.SAMPLE_SIZE] time.Duration
+
+type Fibonacciclient struct {
 	Behaviour string
 	Graph     graphs.ExecGraph
 }
 
-func NewCalculatorclient() Calculatorclient {
+func NewFibonacciclient() Fibonacciclient {
 
-	r := new(Calculatorclient)
+	r := new(Fibonacciclient)
 	r.Behaviour = "B = I_Setmessage -> InvR.e1 -> TerR.e1 -> I_Printmessage -> B"
 
 	return *r
 }
 
-func (Calculatorclient) I_Setmessage(msg *messages.SAMessage, info [] *interface{}) {
+func (Fibonacciclient) I_Setmessage(msg *messages.SAMessage, info [] *interface{}) {
 
 	t1 = time.Now()  // start time
 
-	argsTemp := make([]interface{}, 2)
-	argsTemp[0] = 1
-	argsTemp[1] = 2
-	*msg = messages.SAMessage{Payload: shared.Request{Op: "add", Args: argsTemp}}
+	argsTemp := make([]interface{}, 1)
+	argsTemp[0] = 20
+	*msg = messages.SAMessage{Payload: shared.Request{Op: "fibo", Args: argsTemp}}
 }
 
-func (Calculatorclient) I_Printmessage(msg *messages.SAMessage, info [] *interface{}) {
-	//fmt.Printf("Calculatorclient:: %v [%v]\n",msg.Payload,idx)
+func (Fibonacciclient) I_Printmessage(msg *messages.SAMessage, info [] *interface{}) {
+	//fmt.Printf("Fibonacciclient:: %v [%v]\n",msg.Payload,idx)
 
 	t2 := time.Now()   // finish time
 
