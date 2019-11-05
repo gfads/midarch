@@ -1,13 +1,13 @@
 datatype PROCNAMES = client | proxy | requestor | crh | t1 | t2 | t4
 channel InvR,TerR,InvP,TerP : PROCNAMES
-channel I_PrepareToCRH,I_PrepareToClient,I_Process,I_Setmessage,I_Printmessage,I_ProcessIn,I_ProcessOut
-PROXY = InvP.t1 -> I_ProcessIn -> InvR.t2 -> TerR.t2 -> I_ProcessOut -> TerP.t1 -> PROXY
-REQUESTOR = InvP.t2 -> I_PrepareToCRH -> InvR.t4 -> TerR.t4 -> I_PrepareToClient -> TerP.t2 -> REQUESTOR
+channel I_Process,I_Setmessage,I_Printmessage,I_ProcessIn,I_ProcessOut,I_PrepareToCRH,I_PrepareToClient
 CRH = InvP.t4 -> I_Process -> TerP.t4 -> CRH
 CLIENT = I_Setmessage -> InvR.t1 -> TerR.t1 -> I_Printmessage -> CLIENT
+PROXY = InvP.t1 -> I_ProcessIn -> InvR.t2 -> TerR.t2 -> I_ProcessOut -> TerP.t1 -> PROXY
+REQUESTOR = InvP.t2 -> I_PrepareToCRH -> InvR.t4 -> TerR.t4 -> I_PrepareToClient -> TerP.t2 -> REQUESTOR
+T1 = InvP.client -> InvR.proxy -> TerR.proxy -> TerP.client -> T1
 T2 = InvP.proxy -> InvR.requestor -> TerR.requestor -> TerP.proxy -> T2
 T4 = InvP.requestor -> InvR.crh -> TerR.crh -> TerP.requestor -> T4
-T1 = InvP.client -> InvR.proxy -> TerR.proxy -> TerP.client -> T1
 
 middlewareclient = (CLIENT ||| PROXY ||| REQUESTOR ||| CRH)[|{|InvR,TerR,InvP,TerP|}|](T1[[InvP.client <- InvR.t1,InvR.proxy <- InvP.t1,TerR.proxy <- TerP.t1,TerP.client <- TerR.t1]] ||| T2[[InvP.client <- InvR.t1,InvR.proxy <- InvP.t1,TerR.proxy <- TerP.t1,TerP.client <- TerR.t1,InvP.proxy <- InvR.t2,InvR.requestor <- InvP.t2,TerR.requestor <- TerP.t2,TerP.proxy <- TerR.t2]] ||| T4[[InvP.client <- InvR.t1,InvR.proxy <- InvP.t1,TerR.proxy <- TerP.t1,TerP.client <- TerR.t1,InvP.proxy <- InvR.t2,InvR.requestor <- InvP.t2,TerR.requestor <- TerP.t2,TerP.proxy <- TerR.t2,InvP.requestor <- InvR.t4,InvR.crh <- InvP.t4,TerR.crh <- TerP.t4,TerP.requestor <- TerR.t4]])
 assert middlewareclient :[deadlock free]

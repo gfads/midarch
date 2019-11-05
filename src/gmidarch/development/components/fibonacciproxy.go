@@ -28,6 +28,6 @@ func (Fibonacciproxy) I_Processin(msg *messages.SAMessage, info [] *interface{})
 func (Fibonacciproxy) I_Processout(msg *messages.SAMessage, info [] *interface{}) {
 
 	result := msg.Payload.([]interface{})
-	*msg = messages.SAMessage{Payload: int(result[0].(float64))} // JSON
-	//*msg = messages.SAMessage{Payload: int(result[0].(int64))}  // Messagepack
+	//*msg = messages.SAMessage{Payload: int(result[0].(float64))} // JSON
+	*msg = messages.SAMessage{Payload: int(result[0].(int64))}  // Messagepack
 }

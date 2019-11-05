@@ -1,6 +1,6 @@
 datatype PROCNAMES = server | invoker | srh | t1 | t3
 channel InvP,TerP,InvR,TerR : PROCNAMES
-channel I_Process,I_PrepareToObject,I_PrepareToSRH,I_Receive,I_Send
+channel I_Receive,I_Send,I_Process,I_PrepareToObject,I_PrepareToSRH
 SERVER = InvP.t3 -> I_Process -> TerP.t3 -> SERVER
 INVOKER = InvP.t1 -> I_PrepareToObject -> InvR.t3 -> TerR.t3 -> I_PrepareToSRH -> TerP.t1 -> INVOKER
 SRH = I_Receive -> InvR.t1 -> TerR.t1 -> I_Send -> SRH

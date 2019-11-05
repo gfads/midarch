@@ -1,7 +1,7 @@
 package components
 
 import (
-	"encoding/json"
+	"github.com/vmihailenco/msgpack"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"gmidarch/development/miop"
@@ -60,7 +60,8 @@ func (RequestorWithMarhsaller) I_PrepareToCRH(msg *messages.SAMessage, info [] *
 	miopPacket := miop.Packet{Hdr: miopHeader, Bd: miopBody}
 
 	// marshall packet
-	miopPacketSerialised, err := json.Marshal(miopPacket)
+	//miopPacketSerialised, err := json.Marshal(miopPacket)    // JSON
+	miopPacketSerialised, err := msgpack.Marshal(miopPacket)   // Msgpack
 	if err != nil {
 		log.Fatalf("Marshaller:: Marshall:: %s", err)
 	}
@@ -92,7 +93,10 @@ func (RequestorWithMarhsaller) I_DeserialiseMIOP(msg *messages.SAMessage, info [
 
 func (RequestorWithMarhsaller) I_PrepareToClient(msg *messages.SAMessage, info [] *interface{}) {
 	miopPacket := miop.Packet{}
-	err := json.Unmarshal(msg.Payload.([]byte), &miopPacket)
+
+	//err := json.Unmarshal(msg.Payload.([]byte), &miopPacket)   // JSON
+	err := msgpack.Unmarshal(msg.Payload.([]byte), &miopPacket)     // Msgpack
+
 	if err != nil {
 		log.Fatalf("Marshaller:: Unmarshall:: %s", err)
 	}

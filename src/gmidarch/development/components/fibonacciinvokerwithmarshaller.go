@@ -1,7 +1,7 @@
 package components
 
 import (
-	"encoding/json"
+	"github.com/vmihailenco/msgpack"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"gmidarch/development/miop"
@@ -27,13 +27,14 @@ func (FibonacciInvokerWithMarshaller) I_PrepareToObject(msg *messages.SAMessage,
 	// unmarshall
 	p1 := msg.Payload.([]byte)
 	miopPacket := miop.Packet{}
-	err := json.Unmarshal(p1, &miopPacket)
+	//err := json.Unmarshal(p1, &miopPacket)    // JSON
+	err := msgpack.Unmarshal(p1, &miopPacket)   // Msgpack
 	if err != nil {
 		log.Fatalf("Marshaller:: Unmarshall:: %s", err)
 	}
 
-	p0 := int(miopPacket.Bd.ReqBody.Body[0].(float64))   // JSON
-	//p0 := int(miopPacket.Bd.ReqBody.Body[0].(int64))   // Messagepack
+	//p0 := int(miopPacket.Bd.ReqBody.Body[0].(float64))   // JSON
+	p0 := int(miopPacket.Bd.ReqBody.Body[0].(int64))   // Messagepack
 
 	argsTemp := make([]interface{},2)
 	argsTemp[0] = p0
@@ -54,7 +55,8 @@ func (FibonacciInvokerWithMarshaller) I_PrepareToSRH(msg *messages.SAMessage, in
 	miopPacket := miop.Packet{Hdr: miopHeader, Bd: miopBody}
 
 	// configure message
-	r2, err := json.Marshal(miopPacket)
+	//r2, err := json.Marshal(miopPacket)     // JSON
+	r2, err := msgpack.Marshal(miopPacket)    // Msgpack
 	if err != nil {
 		log.Fatalf("Marshaller:: Marshall:: %s", err)
 	}
