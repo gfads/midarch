@@ -16,29 +16,8 @@ type SRH struct {
 	Host      string
 	Port      int
 	Conns     map[string]net.Conn
-	Lns       map[string] net.Listener
+	Lns       map[string]net.Listener
 }
-
-//var lnSRH net.Listener
-//var connSRH net.Conn
-//var firstListenerSRH bool
-
-/*
-func NewSRHOld() SRH {
-
-	// create a new instance of Server
-	r := new(SRH)
-
-	// configure the new instance
-	r.Host = "localhost"                  // TODO
-	r.Port = shared.FIBONACCI_PORT        // TODO
-	r.Behaviour = "B = I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> B"
-
-	firstListenerSRH = true
-
-	return *r
-}
-*/
 
 func NewSRH() SRH {
 
@@ -46,8 +25,8 @@ func NewSRH() SRH {
 	r := new(SRH)
 
 	// configure the new instance
-	r.Host = "localhost"                  // TODO
-	r.Port = shared.FIBONACCI_PORT        // TODO
+	r.Host = "localhost"           // TODO
+	r.Port = shared.FIBONACCI_PORT // TODO
 	r.Behaviour = "B = I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> B"
 	r.Conns = make(map[string]net.Conn)
 	r.Lns = make(map[string]net.Listener)
@@ -58,15 +37,19 @@ func NewSRH() SRH {
 func (s SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO
 
 	host := s.Host // TODO
-	port := s.Port // TODO
+	port := strconv.Itoa(s.Port) // TODO
 
-	// create listener
+	// create listener if necessary
+	key := host + port
 	err := *new(error)
-	key := host+strconv.Itoa(port)
-	if _,ok := s.Lns[key]; !ok {
-		s.Lns[key], err = net.Listen("tcp", host+":"+strconv.Itoa(port))
+	if _, ok := s.Lns[key]; !ok { // listener was not created yet
+		servAddr, err := net.ResolveTCPAddr("tcp", host+":"+port)
 		if err != nil {
-			log.Fatalf("SRH:: %v\n",err)
+			log.Fatalf("SRH:: %v\n", err)
+		}
+		s.Lns[key], err = net.ListenTCP("tcp", servAddr)
+		if err != nil {
+			log.Fatalf("SRH:: %v\n", err)
 		}
 
 		// accept connections
@@ -76,106 +59,43 @@ func (s SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO
 		}
 	}
 
-	// receive message's size
-	size := make([]byte, 4)
-	_, err = s.Conns[key].Read(size)
-	if err != nil {
-		log.Fatalf("SRH:: %s", err)
-	}
-	sizeInt := binary.LittleEndian.Uint32(size)
+	// configure conn to be used
+	conn := s.Conns[key]
 
-	// receive message
-	msgTemp := make([]byte, sizeInt)
-	_, err = s.Conns[key].Read(msgTemp)
+	// receive size & message
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE)
+	_, err = conn.Read(size)
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
 
-	*msg = messages.SAMessage{Payload: msgTemp} // TODO
-}
-
-/*
-func (s SRH) I_ReceiveOld(msg *messages.SAMessage, info [] *interface{}) { // TODO
-
-	host := s.Host            // TODO
-	port := s.Port // TODO
-
-	// create listener
-	err := *new(error)
-	if firstListenerSRH {
-		firstListenerSRH = false
-		lnSRH, err = net.Listen("tcp", host+":"+strconv.Itoa(port))
-		if err != nil {
-			log.Fatalf("SRH:: %v\n",err)
-		}
-	}
-
-	// accept connections
-	connSRH, err = lnSRH.Accept()
-	if err != nil {
-		log.Fatalf("SRH:: %s", err)
-	}
-
-	// receive message's size
-	size := make([]byte, 4)
-	_, err = connSRH.Read(size)
-	if err != nil {
-		log.Fatalf("SRH:: %s", err)
-	}
-	sizeInt := binary.LittleEndian.Uint32(size)
-
-	// receive message
-	msgTemp := make([]byte, sizeInt)
-	_, err = connSRH.Read(msgTemp)
+	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
+	_, err = conn.Read(msgTemp)
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
 
 	*msg = messages.SAMessage{Payload: msgTemp} // TODO
 }
-*/
 
 func (s SRH) I_Send(msg *messages.SAMessage, info [] *interface{}) {
 	msgTemp := msg.Payload.([]interface{})[0].([]byte)
 
-	// send message's size
-	key := s.Host+strconv.Itoa(s.Port)
-	size := make([]byte, 4)
-	l := uint32(len(msgTemp))
-	binary.LittleEndian.PutUint32(size, l)
-	s.Conns[key].Write(size)
+	// configure conn to be used
+	key := s.Host + strconv.Itoa(s.Port)
+	conn := s.Conns[key]
 
-	err := *new(error)
+	// send message's size
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE)
+	binary.LittleEndian.PutUint32(size, uint32(len(msgTemp)))
+	_, err := conn.Write(size)
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
 
 	// send message
-	_, err = s.Conns[key].Write(msgTemp)
+	_, err = conn.Write(msgTemp)
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
 }
-
-/*
-func (SRH) I_SendOld(msg *messages.SAMessage, info [] *interface{}) {
-	msgTemp := msg.Payload.([]interface{})[0].([]byte)
-
-	// send message's size
-	size := make([]byte, 4)
-	l := uint32(len(msgTemp))
-	binary.LittleEndian.PutUint32(size, l)
-	connSRH.Write(size)
-
-	err := *new(error)
-	if err != nil {
-		log.Fatalf("SRH:: %s", err)
-	}
-
-	// send message
-	_, err = connSRH.Write(msgTemp)
-	if err != nil {
-		log.Fatalf("SRH:: %s", err)
-	}
-}
- */
