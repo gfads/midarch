@@ -2,7 +2,7 @@ Configuration middlewareserver :=
    Components
       server     : Fibonacciserver
 //      invoker    : Fibonacciinvoker
-      invoker    : Fibonacciinvokerwithmarshaller
+      invoker    : FibonacciinvokerM
 //      marshaller : Marshaller
       srh        : SRH
 

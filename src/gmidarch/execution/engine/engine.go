@@ -20,7 +20,7 @@ func (Engine) Execute(elem interface{}, graph graphs.ExecGraph, executionMode bo
 			edge := edges[0]
 			if edge.Info.ActionType == 1 { // Internal action
 				edge.Info.InternalAction(elem, edge.Info.ActionName, edge.Info.Message, edge.Info.Info)
-			} else {                       // External action
+			} else {                      // External action
 				edge.Info.ExternalAction(edge.Info.ActionChannel, edge.Info.Message)
 			}
 			node = edge.To
@@ -37,8 +37,8 @@ func (Engine) Execute(elem interface{}, graph graphs.ExecGraph, executionMode bo
 }
 
 func choice(elem interface{}, chosen *int, edges []graphs.ExecEdge) {
-	casesExternal := make([]reflect.SelectCase, len(edges)+1)
-	casesInternal := make([]reflect.SelectCase, len(edges))
+	casesExternal := make([]reflect.SelectCase, len(edges)+1, shared.NUM_MAX_EDGES)
+	casesInternal := make([]reflect.SelectCase, len(edges), shared.NUM_MAX_EDGES)
 
 	// Assembly cases
 	//for i := 0; i < len(edges); i++ {
@@ -48,7 +48,7 @@ func choice(elem interface{}, chosen *int, edges []graphs.ExecEdge) {
 			casesExternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv}
 			edges[i].Info.InternalAction(elem, edges[i].Info.ActionName, edges[i].Info.Message, edges[i].Info.Info)
 			go send(edges[i].Info.ActionChannel, *edges[i].Info.Message)
-		} else {                          // External action
+		} else { // External action
 			casesExternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(*edges[i].Info.ActionChannel)}
 			casesInternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv}
 		}
@@ -63,7 +63,7 @@ func choice(elem interface{}, chosen *int, edges []graphs.ExecEdge) {
 
 	if *chosen != (len(edges)) { // NOT DEFAULT, i.e., no external action executed
 		*edges[*chosen].Info.Message = value.Interface().(messages.SAMessage)
-	} else {                    // DEFAULT
+	} else { // DEFAULT
 		*chosen, value, _ = reflect.Select(casesInternal)
 		*edges[*chosen].Info.Message = value.Interface().(messages.SAMessage)
 	}

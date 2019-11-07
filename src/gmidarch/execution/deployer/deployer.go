@@ -4,6 +4,7 @@ import (
 	"gmidarch/development/artefacts/madl"
 	"gmidarch/development/components"
 	"gmidarch/execution/engine"
+	"reflect"
 	"shared"
 )
 
@@ -23,7 +24,7 @@ func (d Deployer) Start() {
 		graph := d.MADLX.Components[i].Graph
 
 		// Configure Unit's Info with Element's Info (Only components)
-		if d.MADLX.Components[i].TypeName == "Unit" { // TODO - Generalise for any component having 'Info'
+		if d.MADLX.Components[i].TypeName == reflect.TypeOf(components.Unit{}).Name() { // TODO - Generalise for any component having 'Info'
 			tempElem := *d.MADLX.Components[i].Info[0]
 			unit := elem.(components.Unit)
 			unit.UnitId = d.MADLX.Components[i].ElemId
@@ -51,7 +52,7 @@ func (d *Deployer) DeployApp(mee madl.MADL, mapp madl.MADL) {
 
 	idx := 0
 	for i := range mee.Components {
-		if mee.Components[i].TypeName == "Unit" { // TODO
+		if mee.Components[i].TypeName == reflect.TypeOf(components.Unit{}).Name() {
 			infoTemp := make([]*interface{}, 1)
 			infoTemp[0] = new(interface{})
 			*infoTemp[0] = elems[idx]

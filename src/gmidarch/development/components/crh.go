@@ -7,7 +7,6 @@ import (
 	"log"
 	"net"
 	"shared"
-	"strconv"
 )
 
 type CRH struct {
@@ -16,13 +15,11 @@ type CRH struct {
 	Conns     map[string]net.Conn
 }
 
-//var connCRH net.Conn
-
 func NewCRH() CRH {
 
 	r := new(CRH)
 	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B"
-	r.Conns = make(map[string]net.Conn)
+	r.Conns = make(map[string]net.Conn, shared.NUM_MAX_CONNECTIONS)
 
 	return *r
 }
@@ -30,16 +27,18 @@ func NewCRH() CRH {
 func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	// check message
-	argsTemp := msg.Payload.([]interface{})
-	host := argsTemp[0].(string)         // host
-	port := argsTemp[1].(int)            // port
-	msgToServer := argsTemp[2].([]byte)  // message
+	payload := msg.Payload.([]interface{})
+	host := payload[0].(string)        // host
+	port := payload[1].(string)        // port
+	msgToServer := payload[2].([]byte) // message
 
 	// connect to server
 	var err error
-	var key = host + strconv.Itoa(port)
+
+	key := host + port
+
 	if _, ok := c.Conns[key]; !ok { // no connection open yet
-		servAddr := host + ":" + strconv.Itoa(port) // TODO
+		servAddr := host + ":" + port // TODO
 		tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
 		if err != nil {
 			log.Fatalf("Client:: %v\n", err)
@@ -51,11 +50,10 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		}
 	}
 
-	// configure conn to be used
 	conn := c.Conns[key]
 
 	// send message's size
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE)
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	binary.LittleEndian.PutUint32(size, uint32(len(msgToServer)))
 	_, err = conn.Write(size)
 	if err != nil {
@@ -75,7 +73,7 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	}
 
 	// receive reply
-	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size))
+	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
 	_, err = conn.Read(msgFromServer)
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)

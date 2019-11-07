@@ -20,7 +20,7 @@ var ValidActions = map[string]bool{
 	INVR: true,
 	TERR: true}
 
-var SetOfPorts = map[string]int{
+var SetOfPorts = map[string]string{
 	"NAMING_PORT":     NAMING_PORT,
 	"CALCULATOR_PORT": CALCULATOR_PORT,
 	"FIBONACCI_PORT":  FIBONACCI_PORT,
@@ -69,7 +69,7 @@ type Request struct {
 
 type Invocation struct {
 	Host string
-	Port int
+	Port string
 	Req  Request
 }
 
@@ -175,10 +175,10 @@ func ShowExecutionParameters(s bool) {
 		fmt.Println("Directory of FDR           : " + DIR_FDR)
 		fmt.Println("------------------------------------------")
 		fmt.Println("Naming Host     : " + NAMING_HOST)
-		fmt.Println("Naming Port     : " + strconv.Itoa(NAMING_PORT))
-		fmt.Println("Calculator Port : " + strconv.Itoa(CALCULATOR_PORT))
-		fmt.Println("Fibonacci Port  : " + strconv.Itoa(FIBONACCI_PORT))
-		fmt.Println("Queueing Port   : " + strconv.Itoa(QUEUEING_PORT))
+		fmt.Println("Naming Port     : " + NAMING_PORT)
+		fmt.Println("Calculator Port : " + CALCULATOR_PORT)
+		fmt.Println("Fibonacci Port  : " + FIBONACCI_PORT)
+		fmt.Println("Queueing Port   : " + QUEUEING_PORT)
 		fmt.Println("------------------------------------------")
 		fmt.Println("Plugin Base Name: " + PLUGIN_BASE_NAME)
 		fmt.Println("Max Graph Size  : " + strconv.Itoa(GRAPH_SIZE))
@@ -202,7 +202,7 @@ func Log(args ...string) {
 }
 
 func Invoke(any interface{}, name string, msg *messages.SAMessage, info [] *interface{}) {
-	inputs := make([]reflect.Value, 2)
+	inputs := make([]reflect.Value, 2,2)
 	inputs[0] = reflect.ValueOf(msg)
 	inputs[1] = reflect.ValueOf(info)
 
@@ -455,10 +455,10 @@ const CORINGA = "XXX"
 const ADL_COMMENT = "//"
 
 // Ports
-const NAMING_PORT = 4040
-const CALCULATOR_PORT = 2020
-const FIBONACCI_PORT = 2030
-const QUEUEING_PORT = 2040
+const NAMING_PORT = "4040"
+const CALCULATOR_PORT = "2020"
+const FIBONACCI_PORT = "2030"
+const QUEUEING_PORT = "2040"
 
 const CHAN_BUFFER_SIZE = 1
 const PLUGIN_BASE_NAME = "receiver"
@@ -480,3 +480,10 @@ const REPLACE_COMPONENT = "REPLACE_COMPONENT"
 const FDR_COMMAND = "refines"
 
 const SIZE_OF_MESSAGE_SIZE = 4
+
+// Optimization
+
+const NUM_MAX_EDGES int = 5
+const NUM_MAX_CONNECTIONS int = 5
+const NUM_MAX_MESSAGE_BYTES int = 1024
+const NUM_MAX_NODES int = 50

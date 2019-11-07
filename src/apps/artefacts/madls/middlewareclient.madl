@@ -3,7 +3,7 @@ Configuration middlewareclient :=
       client     : Fibonacciclient
       proxy      : Fibonacciproxy
 //      marshaller : Marshaller
-      requestor  : RequestorWithMarshaller
+      requestor  : RequestorM
 //      requestor  : Requestor
       crh        : CRH
 

@@ -22,7 +22,7 @@ func (f FrontEnd) Deploy(file string) {
 	mapp := l.Load(file)
 
 	// Create architecture of the execution environment
-	appKindOfAdaptability := make([]string, 1)
+	appKindOfAdaptability := make([]string, 1,1)
 	appKindOfAdaptability = mapp.Adaptability
 	meeTemp := crt.Create(mapp, appKindOfAdaptability)
 	crt.Save(meeTemp)

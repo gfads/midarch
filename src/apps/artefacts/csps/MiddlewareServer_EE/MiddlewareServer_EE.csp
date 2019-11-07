@@ -1,9 +1,6 @@
 datatype PROCNAMES = core | unit1 | unit2 | unit3 | unit4 | unit5 | t1
 channel InvR,InvP : PROCNAMES
 channel I_InitialiseUnit,I_Execute
-UNIT3 = I_InitialiseUnit -> UNIT3P1
- UNIT3P1 = I_Execute -> UNIT3P1
-
 UNIT4 = I_InitialiseUnit -> UNIT4P1
  UNIT4P1 = I_Execute -> UNIT4P1
 
@@ -16,6 +13,9 @@ UNIT1 = I_InitialiseUnit -> UNIT1P1
 
 UNIT2 = I_InitialiseUnit -> UNIT2P1
  UNIT2P1 = I_Execute -> UNIT2P1
+
+UNIT3 = I_InitialiseUnit -> UNIT3P1
+ UNIT3P1 = I_Execute -> UNIT3P1
 
 T1 = InvP.core -> InvR.unit1 -> InvR.unit2 -> InvR.unit3 -> InvR.unit4 -> InvR.unit5 -> T1
 

@@ -30,7 +30,7 @@ func (Fibonacciclient) I_Setmessage(msg *messages.SAMessage, info [] *interface{
 
 	t1 = time.Now() // start time
 	argsTemp := make([]interface{}, 1)
-	argsTemp[0] = 20
+	argsTemp[0] = 0
 	*msg = messages.SAMessage{Payload: shared.Request{Op: "fibo", Args: argsTemp}}
 }
 
@@ -44,6 +44,7 @@ func (Fibonacciclient) I_Printmessage(msg *messages.SAMessage, info [] *interfac
 		for i := range durations {
 			totalTime += durations[i]
 		}
+
 		fmt.Printf("Total   Time [%v]: %v \n", shared.SAMPLE_SIZE, totalTime)
 		fmt.Printf("Average Time [%v]: %v \n", shared.SAMPLE_SIZE, totalTime/shared.SAMPLE_SIZE)
 

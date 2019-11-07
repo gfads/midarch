@@ -1,10 +1,8 @@
 package components
 
 import (
-	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
-	"os"
 	"shared"
 )
 
@@ -23,17 +21,9 @@ func Newfibonacciserver() Fibonacciserver {
 
 func (Fibonacciserver) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	req := msg.Payload.(shared.Request)
-	op := req.Op
-	p1 := req.Args[0].(int)
-	r := 0
 
-	switch op {
-	case "fibo":
-		r = fibo(p1) // TODO
-	default:
-		fmt.Printf("Fibonacci Server:: Operation '%v' not supported!!",op)
-		os.Exit(0)
-	}
+	r := fibo(req.Args[0].(int))
+
 	*msg = messages.SAMessage{Payload: r}
 }
 
