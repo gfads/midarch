@@ -7,7 +7,7 @@ import (
 	"gmidarch/development/messages"
 	"os"
 	"reflect"
-	shared2 "shared"
+	"shared"
 	"strings"
 )
 
@@ -37,34 +37,34 @@ func (Exec) Create(id string, elem interface{}, typeName string, dot dot.DOTGrap
 			if strings.Contains(actionNameFDR, ".") {
 				actionNameExec = actionNameFDR[:strings.Index(actionNameFDR, ".")]
 			}
-			if shared2.IsExternal(actionNameExec) { // External action
+			if shared.IsExternal(actionNameExec) { // External action
 				actionNameTemp := strings.Split(actionNameFDR, ".")
 				key1 := id + "." + actionNameTemp[1]
 				key2 := id + "." + actionNameTemp[0] + "." + maps[key1]
 				channel, _ := channels[key2]
 				params := ExecEdgeInfo{}
 				switch actionNameExec {
-				case shared2.INVR:
+				case shared.INVR:
 					invr := channel
-					params = ExecEdgeInfo{ExternalAction: element.Element{}.InvR, ActionName: "InvR", ActionType: 2, Message: msg, ActionChannel: &invr}
-				case shared2.TERR:
+					params = ExecEdgeInfo{ExternalAction: element.Element{}.InvR, ActionName: "InvR", IsInternal: false, Message: msg, ActionChannel: &invr}
+				case shared.TERR:
 					terr := channel
-					params = ExecEdgeInfo{ExternalAction: element.Element{}.TerR, ActionName: "TerR", ActionType: 2, Message: msg, ActionChannel: &terr}
-				case shared2.INVP:
+					params = ExecEdgeInfo{ExternalAction: element.Element{}.TerR, ActionName: "TerR", IsInternal: false, Message: msg, ActionChannel: &terr}
+				case shared.INVP:
 					invp := channel
-					params = ExecEdgeInfo{ExternalAction: element.Element{}.InvP, ActionName: "InvP", ActionType: 2, Message: msg, ActionChannel: &invp}
-				case shared2.TERP:
+					params = ExecEdgeInfo{ExternalAction: element.Element{}.InvP, ActionName: "InvP", IsInternal: false, Message: msg, ActionChannel: &invp}
+				case shared.TERP:
 					terp := channel
-					params = ExecEdgeInfo{ExternalAction: element.Element{}.TerP, ActionName: "TerP", ActionType: 2, Message: msg, ActionChannel: &terp}
+					params = ExecEdgeInfo{ExternalAction: element.Element{}.TerP, ActionName: "TerP", IsInternal: false, Message: msg, ActionChannel: &terp}
 				}
 				mapType := ExecEdgeInfo{}
 				mapType = params
 				eActions = mapType
 			}
 
-			if shared2.IsInternal(actionNameFDR) { // Internal action
+			if shared.IsInternal(actionNameFDR) { // Internal action
 				channel := make(chan messages.SAMessage)
-				params := ExecEdgeInfo{InternalAction: shared2.Invoke, ActionName: actionNameFDR, ActionType: 1, ActionChannel: &channel, Message: msg, Info: info}
+				params := ExecEdgeInfo{InternalAction: shared.Invoke, ActionName: actionNameFDR, IsInternal: true, ActionChannel: &channel, Message: msg, Info: info}
 				mapType := params
 				eActions = mapType
 			}
@@ -83,7 +83,7 @@ func checkInterface(elem interface{}, id string, dot dot.DOTGraph) {
 		for e2 := range dot.EdgesDot [e1] {
 			edgeTemp := dot.EdgesDot[e1][e2]
 			actionNameFDR := edgeTemp.Action
-			if shared2.IsInternal(actionNameFDR) {
+			if shared.IsInternal(actionNameFDR) {
 				dotActions = append(dotActions, actionNameFDR)
 			}
 		}

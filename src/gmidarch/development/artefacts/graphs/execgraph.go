@@ -20,12 +20,12 @@ type TypeInternalAction func(any interface{}, name string, msg *messages.SAMessa
 type TypeExternalAction func(*chan messages.SAMessage, *messages.SAMessage)
 
 type ExecEdgeInfo struct {
-	ActionType     int // Internal & External
-	ActionName     string
-	ActionChannel  *chan messages.SAMessage // Channel
-	Message        *messages.SAMessage      // Message
-	ExternalAction func(*chan messages.SAMessage, *messages.SAMessage)
-	InternalAction func(any interface{}, name string, msg *messages.SAMessage, info [] *interface{})
+	IsInternal           bool // Internal & External
+	ActionName           string
+	ActionChannel        *chan messages.SAMessage // Channel
+	Message              *messages.SAMessage      // Message
+	ExternalAction       func(*chan messages.SAMessage, *messages.SAMessage)
+	InternalAction       func(any interface{}, name string, msg *messages.SAMessage, info [] *interface{})
 	Info [] *interface{}
 }
 

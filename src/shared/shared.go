@@ -202,7 +202,7 @@ func Log(args ...string) {
 }
 
 func Invoke(any interface{}, name string, msg *messages.SAMessage, info [] *interface{}) {
-	inputs := make([]reflect.Value, 2,2)
+	inputs := make([]reflect.Value, 2, 2)
 	inputs[0] = reflect.ValueOf(msg)
 	inputs[1] = reflect.ValueOf(info)
 
@@ -474,7 +474,7 @@ const CORRECTIVE = "REACTIVE"
 const PROACTIVE = "PROACTIVE"
 const EMPTY_LINE = "NONE"
 
-const EXECUTE_FOREVER = true
+const EXECUTE_FOREVER bool = true
 
 const REPLACE_COMPONENT = "REPLACE_COMPONENT"
 const FDR_COMMAND = "refines"

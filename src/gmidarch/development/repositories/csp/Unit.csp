@@ -4,9 +4,11 @@ channel InvP : PROCNAMES
 channel I_Initialiseunit, I_Execute
 channel I_Adaptunit
 
---Unit = InvP.e1 -> I_Initialiseunit -> P1
---P1 = I_Execute -> P1
-
+-- Non-adaptble version
 Unit = InvP.e1 -> I_Initialiseunit -> P1
-P1 = I_Execute -> P1 [] InvP.e1 -> I_Adaptunit -> P1
+P1 = I_Execute -> P1
+
+-- Adaptable version
+--Unit = InvP.e1 -> I_Initialiseunit -> P1
+--P1 = I_Execute -> P1 [] InvP.e1 -> I_Adaptunit -> P1
 

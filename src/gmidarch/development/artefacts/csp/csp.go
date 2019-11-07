@@ -3,12 +3,12 @@ package csp
 import (
 	"errors"
 	"fmt"
-	madl2 "gmidarch/development/artefacts/madl"
-	components2 "gmidarch/development/components"
-	connectors2 "gmidarch/development/connectors"
+	"gmidarch/development/artefacts/madl"
+	"gmidarch/development/components"
+	"gmidarch/development/connectors"
 	"os"
 	"reflect"
-	shared2 "shared"
+	"shared"
 	"strconv"
 	"strings"
 	"time"
@@ -37,20 +37,20 @@ type CSP struct {
 	Property        []string
 }
 
-func (c *CSP) ConfigureProcessBehaviours(madl madl2.MADL) {
+func (c *CSP) ConfigureProcessBehaviours(madl madl.MADL) {
 
 	// Components
 	for i := range madl.Components {
 		configuredBehaviour := madl.Components[i].Behaviour
 
 		// The Component has its behaviour defined at runtime
-		if strings.Contains(configuredBehaviour, shared2.RUNTIME_BEHAVIOUR) {
+		if strings.Contains(configuredBehaviour, shared.RUNTIME_BEHAVIOUR) {
 			configuredBehaviour = updateRuntimeBehaviourComponents(madl.Components[i].ElemId, madl) // TODO
 		}
 
 		tokens := strings.Split(configuredBehaviour, " ")
 		for j := range tokens {
-			if shared2.IsExternal(tokens[j]) {
+			if shared.IsExternal(tokens[j]) {
 				eX := tokens[j][strings.Index(tokens[j], ".")+1:]
 				key := strings.ToLower(madl.Components[i].ElemId) + "." + strings.ToLower(eX)
 				partner, ok := madl.Maps[key]
@@ -69,13 +69,13 @@ func (c *CSP) ConfigureProcessBehaviours(madl madl2.MADL) {
 		configuredBehaviour := madl.Connectors[i].Behaviour
 
 		// The connector has its behaviour defined dynamically
-		if strings.Contains(configuredBehaviour, shared2.RUNTIME_BEHAVIOUR) { // TODO
+		if strings.Contains(configuredBehaviour, shared.RUNTIME_BEHAVIOUR) { // TODO
 			configuredBehaviour = updateRuntimeBehaviourConnectors(madl.Connectors[i].ElemId, madl)
 		}
 
 		tokens := strings.Split(configuredBehaviour, " ")
 		for j := range tokens {
-			if shared2.IsExternal(tokens[j]) {
+			if shared.IsExternal(tokens[j]) {
 				eX := tokens[j][strings.Index(tokens[j], ".")+1:]
 				key := strings.ToLower(madl.Connectors[i].ElemId) + "." + strings.ToLower(eX)
 				partner, ok := madl.Maps[key]
@@ -96,14 +96,14 @@ func (CSP) RenameSyncPortOld(action string, processId string) string {
 
 	action = action [0:strings.Index(action, ".")]
 	switch action {
-	case shared2.INVP:
-		r1 = shared2.INVR + "." + strings.ToLower(processId)
-	case shared2.TERP:
-		r1 = shared2.INVR + "." + strings.ToLower(processId)
-	case shared2.INVR:
-		r1 = shared2.INVR + "." + strings.ToLower(processId)
-	case shared2.TERR:
-		r1 = shared2.INVR + "." + strings.ToLower(processId)
+	case shared.INVP:
+		r1 = shared.INVR + "." + strings.ToLower(processId)
+	case shared.TERP:
+		r1 = shared.INVR + "." + strings.ToLower(processId)
+	case shared.INVR:
+		r1 = shared.INVR + "." + strings.ToLower(processId)
+	case shared.TERR:
+		r1 = shared.INVR + "." + strings.ToLower(processId)
 	}
 	return r1
 }
@@ -113,26 +113,26 @@ func (CSP) RenameSyncPort(action string, processId string) string {
 
 	action = action [0:strings.Index(action, ".")]
 	switch action {
-	case shared2.INVP:
-		r1 = shared2.INVR + "." + strings.ToLower(processId)
-	case shared2.TERP:
-		r1 = shared2.TERR + "." + strings.ToLower(processId)
-	case shared2.INVR:
-		r1 = shared2.INVP + "." + strings.ToLower(processId)
-	case shared2.TERR:
-		r1 = shared2.TERP + "." + strings.ToLower(processId)
+	case shared.INVP:
+		r1 = shared.INVR + "." + strings.ToLower(processId)
+	case shared.TERP:
+		r1 = shared.TERR + "." + strings.ToLower(processId)
+	case shared.INVR:
+		r1 = shared.INVP + "." + strings.ToLower(processId)
+	case shared.TERR:
+		r1 = shared.TERP + "." + strings.ToLower(processId)
 	}
 	return r1
 }
 
-func (CSP) IdentifyInternalChannels(madl madl2.MADL) []string {
+func (CSP) IdentifyInternalChannels(madl madl.MADL) []string {
 	r1 := []string{}
 	r1Temp := map[string]string{}
 
 	for i := range madl.Components {
-		tokens := shared2.MyTokenize(madl.Components[i].Behaviour)
+		tokens := shared.MyTokenize(madl.Components[i].Behaviour)
 		for j := range tokens {
-			if shared2.IsInternal(tokens[j]) {
+			if shared.IsInternal(tokens[j]) {
 				iAction := strings.TrimSpace(tokens[j])
 				r1Temp[iAction] = iAction
 			}
@@ -140,9 +140,9 @@ func (CSP) IdentifyInternalChannels(madl madl2.MADL) []string {
 	}
 
 	for i := range madl.Connectors {
-		tokens := shared2.MyTokenize(madl.Connectors[i].Behaviour)
+		tokens := shared.MyTokenize(madl.Connectors[i].Behaviour)
 		for i := range tokens {
-			if shared2.IsInternal(tokens[i]) {
+			if shared.IsInternal(tokens[i]) {
 				iAction := strings.TrimSpace(tokens[i])
 				r1Temp[iAction] = iAction
 			}
@@ -155,30 +155,30 @@ func (CSP) IdentifyInternalChannels(madl madl2.MADL) []string {
 	return r1
 }
 
-func (c CSP) IdentifyExternalChannels(madl madl2.MADL) []string {
+func (c CSP) IdentifyExternalChannels(madl madl.MADL) []string {
 	r1 := []string{}
 	r1Temp := map[string]string{}
 
 	for i := range madl.Components {
-		tokens := shared2.MyTokenize(madl.Components[i].Behaviour)
+		tokens := shared.MyTokenize(madl.Components[i].Behaviour)
 		for j := range tokens {
-			if shared2.IsExternal(tokens[j]) {
+			if shared.IsExternal(tokens[j]) {
 				iAction := strings.TrimSpace(tokens[j])
 				iCannonicalAction, err := c.ToCanonicalName(iAction)
-				shared2.CheckError(err, "CSP")
+				shared.CheckError(err, "CSP")
 				r1Temp[iCannonicalAction] = iCannonicalAction
 			}
 		}
 	}
 
 	for i := range madl.Connectors {
-		tokens := shared2.MyTokenize(madl.Connectors[i].Behaviour)
+		tokens := shared.MyTokenize(madl.Connectors[i].Behaviour)
 
 		for j := range tokens {
-			if shared2.IsExternal(tokens[j]) {
+			if shared.IsExternal(tokens[j]) {
 				iAction := strings.TrimSpace(tokens[j])
 				iCannonicalAction, err := c.ToCanonicalName(iAction)
-				shared2.CheckError(err, "CSP")
+				shared.CheckError(err, "CSP")
 				r1Temp[iCannonicalAction] = iCannonicalAction
 			}
 		}
@@ -194,17 +194,17 @@ func (CSP) ToCanonicalName(name string) (string, error) {
 	r1 := ""
 	r2 := *new(error)
 
-	if strings.Contains(name, shared2.INVR) {
-		r1 = shared2.INVR
+	if strings.Contains(name, shared.INVR) {
+		r1 = shared.INVR
 	}
-	if strings.Contains(name, shared2.TERR) {
-		r1 = shared2.TERR
+	if strings.Contains(name, shared.TERR) {
+		r1 = shared.TERR
 	}
-	if strings.Contains(name, shared2.INVP) {
-		r1 = shared2.INVP
+	if strings.Contains(name, shared.INVP) {
+		r1 = shared.INVP
 	}
-	if strings.Contains(name, shared2.TERP) {
-		r1 = shared2.TERP
+	if strings.Contains(name, shared.TERP) {
+		r1 = shared.TERP
 	}
 
 	if r1 == "" {
@@ -234,16 +234,16 @@ func (CSP) RenameSubprocesses(p string) string {
 	return r
 }
 
-func updateRuntimeBehaviourConnectors(connId string, madl madl2.MADL) string {
+func updateRuntimeBehaviourConnectors(connId string, madl madl.MADL) string {
 	r1 := ""
 
 	// Define new behaviour
 	for i := range madl.Connectors {
 		conn := madl.Connectors[i]
 		if strings.ToUpper(connId) == strings.ToUpper(conn.ElemId) {
-			if reflect.TypeOf(conn.Type) == reflect.TypeOf(connectors2.OnetoN{}) {
+			if reflect.TypeOf(conn.Type) == reflect.TypeOf(connectors.OnetoN{}) {
 				n := countAttachments(madl, conn.ElemId)
-				r1 = defineNewBehaviour(n, connectors2.OnetoN{}, conn.ElemId)
+				r1 = defineNewBehaviour(n, connectors.OnetoN{}, conn.ElemId)
 				break
 			}
 		}
@@ -251,14 +251,14 @@ func updateRuntimeBehaviourConnectors(connId string, madl madl2.MADL) string {
 	return r1
 }
 
-func updateRuntimeBehaviourComponents(compId string, madl madl2.MADL) string {
+func updateRuntimeBehaviourComponents(compId string, madl madl.MADL) string {
 	r1 := ""
 
 	// Define new behaviour
 	for i := range madl.Components {
 		comp := madl.Components[i]
 		if strings.ToUpper(comp.ElemId) == strings.ToUpper(compId) {
-			if reflect.TypeOf(comp.Type) == reflect.TypeOf(components2.Core{}) {
+			if reflect.TypeOf(comp.Type) == reflect.TypeOf(components.Core{}) {
 				if (strings.ToUpper(madl.AppAdaptability[0]) == "NONE") { // TODO
 					r1 = "B = InvR.e1 -> B"
 				} else {
@@ -267,7 +267,7 @@ func updateRuntimeBehaviourComponents(compId string, madl madl2.MADL) string {
 				break
 			}
 
-			if reflect.TypeOf(comp.Type) == reflect.TypeOf(components2.Unit{}) {
+			if reflect.TypeOf(comp.Type) == reflect.TypeOf(components.Unit{}) {
 				if (strings.ToUpper(madl.AppAdaptability[0]) == "NONE") { // TODO
 					r1 = "B = I_InitialiseUnit -> P1\n P1 = I_Execute -> P1"
 				} else {
@@ -280,7 +280,7 @@ func updateRuntimeBehaviourComponents(compId string, madl madl2.MADL) string {
 	return r1
 }
 
-func countAttachments(madlGo madl2.MADL, connectorId string) int {
+func countAttachments(madlGo madl.MADL, connectorId string) int {
 	n := 0
 	for i := range madlGo.Attachments {
 		if madlGo.Attachments[i].T.ElemId == connectorId {
@@ -294,7 +294,7 @@ func defineNewBehaviour(n int, elem interface{}, elemId string) string {
 	baseBehaviour := ""
 
 	switch reflect.TypeOf(elem).String() {
-	case reflect.TypeOf(connectors2.OnetoN{}).String():
+	case reflect.TypeOf(connectors.OnetoN{}).String():
 		baseBehaviour = strings.ToUpper(elemId) + " = InvP.e1"
 		for i := 0; i < n; i++ {
 			baseBehaviour += " -> InvR.e" + strconv.Itoa(i+2)

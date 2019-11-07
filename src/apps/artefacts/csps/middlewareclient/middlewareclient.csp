@@ -1,6 +1,6 @@
 datatype PROCNAMES = client | proxy | requestor | crh | t1 | t2 | t4
 channel InvR,TerR,InvP,TerP : PROCNAMES
-channel I_Out,I_Process,I_Setmessage,I_Printmessage,I_ProcessIn,I_ProcessOut,I_In
+channel I_ProcessOut,I_In,I_Out,I_Process,I_Setmessage,I_Printmessage,I_ProcessIn
 REQUESTOR = InvP.t2 -> I_In -> InvR.t4 -> TerR.t4 -> I_Out -> TerP.t2 -> REQUESTOR
 CRH = InvP.t4 -> I_Process -> TerP.t4 -> CRH
 CLIENT = I_Setmessage -> InvR.t1 -> TerR.t1 -> I_Printmessage -> CLIENT

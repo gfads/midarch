@@ -18,9 +18,9 @@ func (Engine) Execute(elem interface{}, graph graphs.ExecGraph, executionMode bo
 		edges := graph.AdjacentEdges(node)
 		if len(edges) == 1 {
 			edge := edges[0]
-			if edge.Info.ActionType == 1 { // Internal action
+			if edge.Info.IsInternal { // Internal action
 				edge.Info.InternalAction(elem, edge.Info.ActionName, edge.Info.Message, edge.Info.Info)
-			} else {                      // External action
+			} else { // External action
 				edge.Info.ExternalAction(edge.Info.ActionChannel, edge.Info.Message)
 			}
 			node = edge.To
@@ -29,8 +29,10 @@ func (Engine) Execute(elem interface{}, graph graphs.ExecGraph, executionMode bo
 			choice(elem, &chosen, edges)
 			node = edges[chosen].To
 		}
-		if node == 0 && executionMode != shared.EXECUTE_FOREVER {
-			break
+		if node == 0 {
+			if !shared.EXECUTE_FOREVER {
+				break
+			}
 		}
 	}
 	return
@@ -43,7 +45,7 @@ func choice(elem interface{}, chosen *int, edges []graphs.ExecEdge) {
 	// Assembly cases
 	//for i := 0; i < len(edges); i++ {
 	for i := range edges {
-		if edges[i].Info.ActionType == 1 { // Internal action
+		if edges[i].Info.IsInternal { // Internal action
 			casesInternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(*edges[i].Info.ActionChannel)}
 			casesExternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv}
 			edges[i].Info.InternalAction(elem, edges[i].Info.ActionName, edges[i].Info.Message, edges[i].Info.Info)
