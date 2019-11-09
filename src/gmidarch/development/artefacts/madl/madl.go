@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"gmidarch/development/artefacts/dot"
-	"gmidarch/development/artefacts/graphs"
+	"gmidarch/development/artefacts/exec"
 	"gmidarch/development/messages"
 	"gmidarch/development/repositories/architectural"
 	"os"
@@ -41,7 +41,9 @@ func (m *MADL) ConfigureComponents() {
 		m.Components[i].Type = record.Type
 		m.Components[i].Behaviour = record.Behaviour
 		dotgraph := dot.DOT{}.Read(m.Components[i].TypeName + shared.DOT_EXTENSION)
-		execgraph := graphs.Exec{}.Create(m.Components[i].ElemId, m.Components[i].Type, m.Components[i].TypeName, dotgraph, m.Maps, m.Channels)
+
+		// Create the executable graph of a given component from dot file
+		execgraph := exec.Exec{}.Create(m.Components[i].ElemId, m.Components[i].Type, m.Components[i].TypeName, dotgraph, m.Maps, m.Channels)
 
 		m.Components[i].Graph = execgraph
 	}
@@ -61,7 +63,9 @@ func (m *MADL) ConfigureConnectors() {
 		m.Connectors[i].Type = record.Type
 		m.Connectors[i].Behaviour = record.Behaviour
 		dotgraph := dot.DOT{}.Read(m.Connectors[i].TypeName + shared.DOT_EXTENSION)
-		execgraph := graphs.Exec{}.Create(m.Connectors[i].ElemId, m.Connectors[i].Type, m.Connectors[i].TypeName, dotgraph, m.Maps, m.Channels)
+
+		// Create the executable graph of a given connector from dot file
+		execgraph := exec.Exec{}.Create(m.Connectors[i].ElemId, m.Connectors[i].Type, m.Connectors[i].TypeName, dotgraph, m.Maps, m.Channels)
 
 		m.Connectors[i].Graph = execgraph
 	}
@@ -69,7 +73,7 @@ func (m *MADL) ConfigureConnectors() {
 
 // Configure channels and Maps - basic to the execution
 func (madl *MADL) ConfigureChannelsAndMaps() {
-	structuralChannels := make(map[string]chan messages.SAMessage)
+	structuralChannels := make(map[string]chan messages.SAMessage,shared.CHAN_BUFFER_SIZE)
 
 	// Configure structural channels
 	for i := range madl.Attachments {

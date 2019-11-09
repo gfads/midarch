@@ -24,6 +24,13 @@ func NewCRH() CRH {
 	return *r
 }
 
+func (CRH) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
+
+	return  func(msg *messages.SAMessage, info []*interface{}) {
+		elem.(CRH).I_Process(msg, info)
+	}
+}
+
 func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	// check message

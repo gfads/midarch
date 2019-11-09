@@ -15,11 +15,23 @@ type FibonacciInvokerM struct {
 }
 
 func NewFibonacciInvokerM() FibonacciInvokerM {
-
 	r := new(FibonacciInvokerM)
 	r.Behaviour = "B = InvP.e1 -> I_In -> InvR.e2 -> TerR.e2 -> I_Out -> TerP.e1 -> B"
 
 	return *r
+}
+
+func (FibonacciInvokerM) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
+
+	if op == "I_In" {
+		return func(msg *messages.SAMessage, info []*interface{}) {
+			elem.(FibonacciInvokerM).I_In(msg, info)
+		}
+	} else { //"I_Out":
+		return func(msg *messages.SAMessage, info []*interface{}) {
+			elem.(FibonacciInvokerM).I_Out(msg, info)
+		}
+	}
 }
 
 func (FibonacciInvokerM) I_In(msg *messages.SAMessage, info [] *interface{}) {

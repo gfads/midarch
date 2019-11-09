@@ -16,7 +16,7 @@ func (f FrontEnd) Deploy(file string) {
 	crt := creator.Creator{}
 	gen := generator.Generator{}
 	chk := checker.Checker{}
-	//dep := deployer.NewEE()
+	dep := deployer.NewEE()
 
 	// Read MADL and generate architectural artifacts (App)
 	mapp := l.Load(file)
@@ -44,11 +44,11 @@ func (f FrontEnd) Deploy(file string) {
 	//chk.Check(cspee)  // TODO think about as it takes a long time and may be correct by construction
 
 	// Deploy App into EE & start EE
-	//dep.DeployApp(mee, mapp)
-	//dep.Start()
+	dep.DeployApp(mee, mapp)
+	dep.Start()
 
 	// Start application only - without execution environment
-	eeApp := deployer.NewEE()
-	eeApp.Deploy(mapp)
-	eeApp.Start()
+	//eeApp := deployer.NewEE()
+	//eeApp.Deploy(mapp)
+	//eeApp.Start()
 }

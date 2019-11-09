@@ -30,12 +30,36 @@ func NewUnit() Unit {
 	return *r
 }
 
+func (u Unit) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}){
+
+	var f func(*messages.SAMessage,[]*interface{})
+	switch op {
+	case "I_Initialiseunit":
+		f = func(msg *messages.SAMessage, info []*interface{}){
+			elem.(Unit).I_Initialiseunit(msg,info)
+		}
+	case "I_Execute":
+		f = func(msg *messages.SAMessage, info []*interface{}){
+			elem.(Unit).I_Execute(msg,info)
+		}
+	case "I_Adaptunit":
+		f = func(msg *messages.SAMessage, info []*interface{}){
+			elem.(Unit).I_Adaptunit(msg,info)
+		}
+	default:
+		fmt.Printf("Unit:: operation '%v' not implemented ",op)
+		os.Exit(0)
+	}
+	return f
+}
+
 func (u Unit) I_Initialiseunit(msg *messages.SAMessage, info [] *interface{}) {
 	allUnits.Store(u.UnitId, u.ElemOfUnit)
 }
 
 func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}) {
 	newElem, ok := allUnits.Load(u.UnitId)
+
 	if !ok {
 		fmt.Printf("Unit:: Element '%v' is not a Unit")
 		os.Exit(0)

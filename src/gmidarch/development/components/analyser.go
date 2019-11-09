@@ -1,14 +1,14 @@
 package components
 
 import (
-	graphs2 "gmidarch/development/artefacts/graphs"
-	messages2 "gmidarch/development/messages"
-	shared2 "shared"
+	"gmidarch/development/artefacts/graphs"
+	"gmidarch/development/messages"
+	"shared"
 )
 
 type Analyser struct {
 	Behaviour string
-	Graph     graphs2.ExecGraph
+	Graph     graphs.ExecGraph
 }
 
 func NewAnalyser() Analyser {
@@ -20,9 +20,9 @@ func NewAnalyser() Analyser {
 	return *r
 }
 
-func (Analyser) I_Process(msg *messages2.SAMessage, info [] *interface{}) {
-	monitoredEvolutiveData := msg.Payload.(shared2.MonitoredEvolutiveData)
-	evolutiveAnalysisResult := shared2.EvolutiveAnalysisResult{}
+func (Analyser) I_Process(msg *messages.SAMessage, info [] *interface{}) {
+	monitoredEvolutiveData := msg.Payload.(shared.MonitoredEvolutiveData)
+	evolutiveAnalysisResult := shared.EvolutiveAnalysisResult{}
 
 	if len(monitoredEvolutiveData) > 0 { // New plugins available
 		evolutiveAnalysisResult.NeedAdaptation = true
@@ -31,5 +31,5 @@ func (Analyser) I_Process(msg *messages2.SAMessage, info [] *interface{}) {
 		evolutiveAnalysisResult.NeedAdaptation = false
 		evolutiveAnalysisResult.MonitoredEvolutiveData = monitoredEvolutiveData
 	}
-	*msg = messages2.SAMessage{Payload: evolutiveAnalysisResult}
+	*msg = messages.SAMessage{Payload: evolutiveAnalysisResult}
 }

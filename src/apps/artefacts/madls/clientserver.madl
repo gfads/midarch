@@ -11,6 +11,6 @@ Configuration clientserver :=
       client,t,server
 
    Adaptability
-      Evolutive
+      None
 
 EndConf

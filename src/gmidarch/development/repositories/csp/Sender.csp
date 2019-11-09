@@ -3,4 +3,5 @@ datatype PROCNAMES = e1
 channel InvR : PROCNAMES
 channel I_Setmessage1, I_Setmessage2, I_Setmessage3
 
-Sender = I_Setmessage1 -> InvR.e1 -> sender [] I_Setmessage2 -> InvR.e1 -> sender [] I_Setmessage3 -> InvR.e1 -> Sender
+Sender = I_Setmessage1 -> InvR.e1 -> Sender [] I_Setmessage2 -> InvR.e1 -> Sender [] I_Setmessage3 -> InvR.e1 -> Sender
+--Sender = I_Setmessage1 -> InvR.e1 -> Sender

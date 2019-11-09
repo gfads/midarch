@@ -1,18 +1,14 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"gmidarch/execution/frontend"
 	"injector/evolutive"
-	"log"
-	"os"
-	"runtime/pprof"
-	"time"
 )
 
 func main() {
 
+	/*
 	// profiling
 	var cpuprofile = flag.String("cpuprofile", "", "write cpu profile to `file`")
 	flag.Parse()
@@ -27,7 +23,7 @@ func main() {
 		}
 		defer pprof.StopCPUProfile()
 	}
-
+*/
 	fe := frontend.FrontEnd{}
 	fe.Deploy("senderreceiver.madl")
 
@@ -35,7 +31,5 @@ func main() {
 	inj := evolutive.EvolutiveInjector{}
 	inj.Start("receiver")
 
-	time.Sleep(100 * time.Millisecond)
-	os.Exit(0)
 	fmt.Scanln()
 }

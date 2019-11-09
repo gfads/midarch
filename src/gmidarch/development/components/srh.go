@@ -27,10 +27,23 @@ func NewSRH() SRH {
 	r.Host = "localhost"           // TODO
 	r.Port = shared.FIBONACCI_PORT // TODO
 	r.Behaviour = "B = I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> B"
-	r.Conns = make(map[string]net.Conn,shared.NUM_MAX_CONNECTIONS)
-	r.Lns = make(map[string]net.Listener,shared.NUM_MAX_CONNECTIONS)
+	r.Conns = make(map[string]net.Conn, shared.NUM_MAX_CONNECTIONS)
+	r.Lns = make(map[string]net.Listener, shared.NUM_MAX_CONNECTIONS)
 
 	return *r
+}
+
+func (SRH) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
+
+	if op == "I_Receive" {
+		return func(msg *messages.SAMessage, info []*interface{}) {
+			elem.(SRH).I_Receive(msg, info)
+		}
+	} else { // "I_Send"
+		return func(msg *messages.SAMessage, info []*interface{}) {
+			elem.(SRH).I_Send(msg, info)
+		}
+	}
 }
 
 func (s SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO Host & Port
@@ -58,7 +71,7 @@ func (s SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO 
 	conn := s.Conns[key]
 
 	// receive size & message
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE,shared.SIZE_OF_MESSAGE_SIZE)
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	_, err := conn.Read(size)
 	if err == io.EOF {
 		os.Exit(0)
@@ -83,7 +96,7 @@ func (s SRH) I_Send(msg *messages.SAMessage, info [] *interface{}) {
 	conn := s.Conns[key]
 
 	// send message's size
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE,shared.SIZE_OF_MESSAGE_SIZE)
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	binary.LittleEndian.PutUint32(size, uint32(len(msgTemp)))
 	_, err := conn.Write(size)
 	if err != nil {

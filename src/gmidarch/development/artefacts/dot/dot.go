@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	shared2 "shared"
+	"shared"
 	"strconv"
 	"strings"
 )
@@ -21,7 +21,7 @@ func (DOT) Read(file string) DOTGraph {
 		os.Exit(0)
 	}
 
-	fullPathFileName := shared2.DIR_DOT + "/" + file
+	fullPathFileName := shared.DIR_DOT + "/" + file
 
 	// Read DOT file
 	fileContent := []string{}
@@ -39,7 +39,7 @@ func (DOT) Read(file string) DOTGraph {
 	}
 
 	// Configure DOT digraph
-	dotGraph := NewDOTGraph(shared2.GRAPH_SIZE)
+	dotGraph := NewDOTGraph(shared.GRAPH_SIZE)
 
 	for l := range fileContent {
 		line := fileContent[l]
@@ -58,10 +58,10 @@ func checkfilename(file string) error {
 
 	l := len(file)
 
-	if l <= len(shared2.DOT_EXTENSION) {
+	if l <= len(shared.DOT_EXTENSION) {
 		r1 = errors.New("File Name Invalid")
 	} else {
-		if file[l-len(shared2.DOT_EXTENSION):] != shared2.DOT_EXTENSION {
+		if file[l-len(shared.DOT_EXTENSION):] != shared.DOT_EXTENSION {
 			r1 = errors.New("Invalid extension of '" + file + "'")
 		} else {
 			r1 = nil

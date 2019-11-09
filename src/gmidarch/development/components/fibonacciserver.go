@@ -19,11 +19,16 @@ func Newfibonacciserver() Fibonacciserver {
 	return *r
 }
 
+func (Fibonacciserver) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
+	return func(msg *messages.SAMessage, info []*interface{}) {
+		elem.(Fibonacciserver).I_Process(msg, info)
+	}
+}
+
 func (Fibonacciserver) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	req := msg.Payload.(shared.Request)
 
 	r := fibo(req.Args[0].(int))
-
 	*msg = messages.SAMessage{Payload: r}
 }
 

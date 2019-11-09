@@ -12,12 +12,30 @@ type Sender struct {
 }
 
 func NewSender() Sender {
-
 	r := new(Sender)
 	r.Behaviour = "B = I_Setmessage1 -> InvR.e1 -> B [] I_Setmessage2 -> InvR.e1 -> B [] I_Setmessage3 -> InvR.e1 -> B"
-
+	//r.Behaviour = "B = I_Setmessage1 -> InvR.e1 -> B"
 	return *r
+}
 
+func (s Sender) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
+
+	var f func(*messages.SAMessage, []*interface{})
+	switch op {
+	case "I_Setmessage1":
+		f = func(msg *messages.SAMessage, info []*interface{}) {
+			elem.(Sender).I_Setmessage1(msg, info)
+		}
+	case "I_Setmessage2":
+		f = func(msg *messages.SAMessage, info []*interface{}) {
+			elem.(Sender).I_Setmessage2(msg, info)
+		}
+	case "I_Setmessage3":
+		f = func(msg *messages.SAMessage, info []*interface{}) {
+			elem.(Sender).I_Setmessage3(msg, info)
+		}
+	}
+	return f
 }
 
 func (Sender) I_Setmessage1(msg *messages.SAMessage, info [] *interface{}) {

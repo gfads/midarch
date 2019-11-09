@@ -23,6 +23,18 @@ func NewCore() Core {
 	return *r
 }
 
+func (Core) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}){
+
+	var f func(*messages.SAMessage,[]*interface{})
+	switch op {
+	case "I_Debug":
+		f = func(msg *messages.SAMessage, info []*interface{}){
+			elem.(Core).I_Debug(msg,info)
+		}
+	}
+	return f
+}
+
 func (Core) I_Debug(msg *messages.SAMessage, info [] *interface{}) {
 	fmt.Printf("******************* Core:: I_Debug ****************** \n")
 

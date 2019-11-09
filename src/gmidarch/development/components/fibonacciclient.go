@@ -26,6 +26,19 @@ func NewFibonacciclient() Fibonacciclient {
 	return *r
 }
 
+func (Fibonacciclient) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
+
+	if op == "I_Setmessage" {
+		return func(msg *messages.SAMessage, info []*interface{}) {
+			elem.(Fibonacciclient).I_Setmessage(msg, info)
+		}
+	} else { // "I_Printmessage":
+		return func(msg *messages.SAMessage, info []*interface{}) {
+			elem.(Fibonacciclient).I_Printmessage(msg, info)
+		}
+	}
+}
+
 func (Fibonacciclient) I_Setmessage(msg *messages.SAMessage, info [] *interface{}) {
 
 	t1 = time.Now() // start time

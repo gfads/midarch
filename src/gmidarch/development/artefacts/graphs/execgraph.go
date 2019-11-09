@@ -19,13 +19,14 @@ type ExecEdge struct {
 type TypeInternalAction func(any interface{}, name string, msg *messages.SAMessage, info [] *interface{})
 type TypeExternalAction func(*chan messages.SAMessage, *messages.SAMessage)
 
-type ExecEdgeInfo struct {
-	IsInternal           bool // Internal & External
-	ActionName           string
-	ActionChannel        *chan messages.SAMessage // Channel
-	Message              *messages.SAMessage      // Message
-	ExternalAction       func(*chan messages.SAMessage, *messages.SAMessage)
-	InternalAction       func(any interface{}, name string, msg *messages.SAMessage, info [] *interface{})
+type ExecEdgeInfo struct {  // TODO define a Action type
+	IsInternal     bool // Internal & External
+	ActionName     string
+	ActionChannel  *chan messages.SAMessage // Channel
+	Message        *messages.SAMessage      // Message
+	ExternalAction func(*chan messages.SAMessage, *messages.SAMessage)
+	//InternalAction func(any interface{}, name string, msg *messages.SAMessage, info [] *interface{})
+	InternalAction func(interface{},string) func(*messages.SAMessage,[]*interface{})
 	Info [] *interface{}
 }
 

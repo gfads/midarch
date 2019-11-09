@@ -23,6 +23,19 @@ func NewRequestorM() RequestorM {
 	return *r
 }
 
+func (RequestorM) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
+
+	if op == "I_In" {
+		return func(msg *messages.SAMessage, info []*interface{}) {
+			elem.(RequestorM).I_In(msg, info)
+		}
+	} else { // "I_Out"
+		return func(msg *messages.SAMessage, info []*interface{}) {
+			elem.(RequestorM).I_Out(msg, info)
+		}
+	}
+}
+
 func (RequestorM) I_In(msg *messages.SAMessage, info [] *interface{}) {
 	inv := msg.Payload.(shared.Invocation)
 
