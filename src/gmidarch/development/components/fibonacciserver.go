@@ -26,12 +26,7 @@ func (e Fibonacciserver) Selector(elem interface{}, op string, msg *messages.SAM
 func (Fibonacciserver) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	req := msg.Payload.(shared.Request)
 
-	r := fibo(req.Args[0].(int))
-	*msg = messages.SAMessage{Payload: r}
-}
-
-func fibo(n int) int {
-	return f(n)
+		*msg = messages.SAMessage{Payload: f(req.Args[0].(int))}
 }
 
 func f(n int) int {

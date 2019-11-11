@@ -479,7 +479,7 @@ const EXECUTE_FOREVER bool = true
 const REPLACE_COMPONENT = "REPLACE_COMPONENT"
 const FDR_COMMAND = "refines"
 
-const SIZE_OF_MESSAGE_SIZE = 4
+const SIZE_OF_MESSAGE_SIZE = 10
 
 // Optimization
 

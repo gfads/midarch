@@ -2,8 +2,11 @@ package components
 
 import (
 	"encoding/binary"
+	"fmt"
+	"github.com/vmihailenco/msgpack"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
+	"gmidarch/development/miop"
 	"io"
 	"log"
 	"net"
@@ -34,7 +37,7 @@ func NewSRH() SRH {
 }
 
 func (e SRH) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
-	if op == "I_Receive" {
+	if op[2] == 'R' { // I_Receive
 		elem.(SRH).I_Receive(msg, info)
 	} else { // "I_Send"
 		elem.(SRH).I_Send(msg, info)
@@ -102,5 +105,55 @@ func (e SRH) I_Send(msg *messages.SAMessage, info [] *interface{}) {
 	_, err = conn.Write(msgTemp)
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
+	}
+}
+
+
+// Used in *_*EncDec
+var encSRH msgpack.Encoder
+var decSRH msgpack.Decoder
+func (e SRH) I_ReceiveEncDec(msg *messages.SAMessage, info [] *interface{}) { // TODO Host & Port
+
+	// create listener if necessary
+	key := e.Host + e.Port
+	if _, ok := e.Lns[key]; !ok { // listener was not created yet
+		servAddr, err := net.ResolveTCPAddr("tcp", e.Host+":"+e.Port)
+		if err != nil {
+			log.Fatalf("SRH:: %v\n", err)
+		}
+		e.Lns[key], err = net.ListenTCP("tcp", servAddr)
+		if err != nil {
+			log.Fatalf("SRH:: %v\n", err)
+		}
+
+		// accept connections
+		e.Conns[key], err = e.Lns[key].Accept()
+		if err != nil {
+			log.Fatalf("SRH:: %s", err)
+		}
+		encSRH = *msgpack.NewEncoder(e.Conns[key])
+		decSRH = *msgpack.NewDecoder(e.Conns[key])
+	}
+
+	// configure conn to be used
+	//conn := e.Conns[key]
+
+	msgFromClient := &miop.Packet{}
+	//dec := msgpack.NewDecoder(conn)
+	err := decSRH.Decode(&msgFromClient)
+	if err != nil {
+		fmt.Printf("SRH:: %v\n", err)
+		os.Exit(0)
+	}
+
+	*msg = messages.SAMessage{Payload: msgFromClient} // TODO
+}
+func (e SRH) I_SendEncDec(msg *messages.SAMessage, info [] *interface{}) {
+	msgToClient := msg.Payload.([]interface{})[0].(miop.Packet)
+
+	err := encSRH.Encode(&msgToClient)
+	if err != nil {
+		fmt.Printf("SRH:: %v\n", err)
+		os.Exit(0)
 	}
 }

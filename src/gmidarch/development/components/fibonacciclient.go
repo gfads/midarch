@@ -10,7 +10,7 @@ import (
 )
 
 var idx int
-var t1 time.Time
+var t1, t2 time.Time
 var durations [shared.SAMPLE_SIZE] time.Duration
 
 type Fibonacciclient struct {
@@ -27,7 +27,7 @@ func NewFibonacciclient() Fibonacciclient {
 }
 
 func (e Fibonacciclient) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
-	if op == "I_Setmessage" {
+	if op[2] == 'S' { // Set message
 		e.I_Setmessage(msg, info)
 	} else { // "I_Printmessage":
 		e.I_Printmessage(msg, info)
@@ -38,14 +38,18 @@ func (Fibonacciclient) I_Setmessage(msg *messages.SAMessage, info [] *interface{
 	argsTemp := make([]interface{}, 1, 1)
 
 	t1 = time.Now() // start time
-	argsTemp[0] = 10
+	argsTemp[0] = 1
 	*msg = messages.SAMessage{Payload: shared.Request{Op: "fibo", Args: argsTemp}}
 }
 
 func (Fibonacciclient) I_Printmessage(msg *messages.SAMessage, info [] *interface{}) {
 	//fmt.Printf("Fibonacciclient:: %v [%v]\n",msg.Payload,idx)
 
-	t2 := time.Now() // finish time
+	t2 = time.Now() // finish time
+
+//	if idx > 1500 {
+//		fmt.Println(float64(t2.Sub(t1).Nanoseconds()) / float64(1000000))
+//	}
 
 	if idx == shared.SAMPLE_SIZE {
 		totalTime := time.Duration(0)
@@ -59,5 +63,7 @@ func (Fibonacciclient) I_Printmessage(msg *messages.SAMessage, info [] *interfac
 		os.Exit(0)
 	}
 	durations[idx] = t2.Sub(t1)
+
+	//fmt.Printf("%v\n",durations[idx])
 	idx++
 }

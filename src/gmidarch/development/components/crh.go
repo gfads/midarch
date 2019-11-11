@@ -2,10 +2,14 @@ package components
 
 import (
 	"encoding/binary"
+	"fmt"
+	"github.com/vmihailenco/msgpack"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
+	"gmidarch/development/miop"
 	"log"
 	"net"
+	"os"
 	"shared"
 )
 
@@ -37,10 +41,9 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	msgToServer := payload[2].([]byte) // message
 
 	// connect to server
-	key := host + port
-
+	key := host + ":"+port
 	if _, ok := c.Conns[key]; !ok { // no connection open yet
-		servAddr := host + ":" + port // TODO
+		servAddr := key // TODO
 		tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
 		if err != nil {
 			log.Fatalf("Client:: %v\n", err)
@@ -79,6 +82,55 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	_, err = conn.Read(msgFromServer)
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)
+	}
+
+	*msg = messages.SAMessage{Payload: msgFromServer}
+}
+
+// only used in I_ProcessEncDec
+var encCRH msgpack.Encoder
+var decCRH msgpack.Decoder
+
+// Use of Encode/Decode - inefficient
+func (c CRH) I_ProcessEncDec(msg *messages.SAMessage, info [] *interface{}) {
+
+	// check message
+	payload := msg.Payload.([]interface{})
+	host := payload[0].(string)        // host
+	port := payload[1].(string)        // port
+	msgToServer := &miop.Packet{}
+	*msgToServer = payload[2].(miop.Packet) // message
+
+	// connect to server
+	key := host + port
+
+	if _, ok := c.Conns[key]; !ok { // no connection open yet
+		servAddr := host + ":" + port // TODO
+		tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
+		if err != nil {
+			log.Fatalf("Client:: %v\n", err)
+		}
+
+		c.Conns[key], err = net.DialTCP("tcp", nil, tcpAddr)
+		if err != nil {
+			log.Fatalf("Client:: %v\n", err)
+		}
+		encCRH = *msgpack.NewEncoder(c.Conns[key])
+		decCRH = *msgpack.NewDecoder(c.Conns[key])
+	}
+
+	err := encCRH.Encode(&msgToServer)
+	if err != nil {
+		fmt.Printf("CRH:: %v\n",err)
+		os.Exit(0)
+	}
+
+	msgFromServer := &miop.Packet{}
+
+	err = decCRH.Decode(&msgFromServer)
+	if err != nil {
+		fmt.Printf("CRH:: %v\n",err)
+		os.Exit(0)
 	}
 
 	*msg = messages.SAMessage{Payload: msgFromServer}

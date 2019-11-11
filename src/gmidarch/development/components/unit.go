@@ -30,47 +30,16 @@ func NewUnit() Unit {
 	return *r
 }
 
-func (u Unit) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}){
+func (u Unit) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
 
-	switch op {
-	case "I_Initialiseunit":
-
-			elem.(Unit).I_Initialiseunit(msg,info)
-
-	case "I_Execute":
-
-			elem.(Unit).I_Execute(msg,info)
-
-	case "I_Adaptunit":
-
-			elem.(Unit).I_Adaptunit(msg,info)
-	default:
-		fmt.Printf("Unit:: operation '%v' not implemented ",op)
-		os.Exit(0)
+	switch op[2] {
+	case 'E':    //"I_Execute":
+		elem.(Unit).I_Execute(msg, info)
+	case 'I':  //"I_Initialiseunit":
+		elem.(Unit).I_Initialiseunit(msg, info)
+	case 'A':  //"I_Adaptunit":
+		elem.(Unit).I_Adaptunit(msg, info)
 	}
-}
-
-func (u Unit) OldSelector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}){
-
-	var f func(*messages.SAMessage,[]*interface{})
-	switch op {
-	case "I_Initialiseunit":
-		return func(msg *messages.SAMessage, info []*interface{}){
-			elem.(Unit).I_Initialiseunit(msg,info)
-		}
-	case "I_Execute":
-		return func(msg *messages.SAMessage, info []*interface{}){
-			elem.(Unit).I_Execute(msg,info)
-		}
-	case "I_Adaptunit":
-		return func(msg *messages.SAMessage, info []*interface{}){
-			elem.(Unit).I_Adaptunit(msg,info)
-		}
-	default:
-		fmt.Printf("Unit:: operation '%v' not implemented ",op)
-		os.Exit(0)
-	}
-	return f
 }
 
 func (u Unit) I_Initialiseunit(msg *messages.SAMessage, info [] *interface{}) {

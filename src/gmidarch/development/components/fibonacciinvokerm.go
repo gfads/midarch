@@ -21,12 +21,41 @@ func NewFibonacciInvokerM() FibonacciInvokerM {
 	return *r
 }
 
-func (FibonacciInvokerM) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
-	if op == "I_In" {
-		elem.(FibonacciInvokerM).I_In(msg, info)
-	} else { //"I_Out":
-		elem.(FibonacciInvokerM).I_Out(msg, info)
+func (e FibonacciInvokerM) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+	if op[2] == 'I' {  // I_In
+		e.I_In(msg, info)
+	} else {          // I_Out
+		e.I_Out(msg, info)
 	}
+}
+
+func (FibonacciInvokerM) I_InEncDec(msg *messages.SAMessage, info [] *interface{}) {
+    msgFromClient := msg.Payload.(*miop.Packet)
+
+	// prepare invocation to object
+	argsTemp := make([]interface{}, 1, 1)
+	argsTemp[0] = int(msgFromClient.Bd.ReqBody.Body[0].(int64))
+	inv := shared.Request{Op: msgFromClient.Bd.ReqHeader.Operation, Args: argsTemp}
+
+	*msg = messages.SAMessage{Payload: inv}
+}
+
+func (FibonacciInvokerM) I_OutEncDEc(msg *messages.SAMessage, info [] *interface{}) {
+	payload := msg.Payload.(int) // TODO - depends on the parameter return
+
+	// assembly packet
+	result := make([]interface{}, 1, 1)
+	result[0] = payload
+	repHeader := miop.ReplyHeader{Context: "TODO", RequestId: 13, Status: 131313}
+	repBody := miop.ReplyBody{OperationResult: result}
+	miopHeader := miop.Header{Magic: "M.I.O.P.", Version: "version", MessageType: 2, Size: 131313, ByteOrder: true}
+	miopBody := miop.Body{RepHeader: repHeader, RepBody: repBody}
+	miopPacket := miop.Packet{Hdr: miopHeader, Bd: miopBody}
+
+	toSRH := make([]interface{}, 1, 1)
+	toSRH[0] = miopPacket
+
+	*msg = messages.SAMessage{Payload: toSRH}
 }
 
 func (FibonacciInvokerM) I_In(msg *messages.SAMessage, info [] *interface{}) {
