@@ -33,42 +33,37 @@ func NewSRH() SRH {
 	return *r
 }
 
-func (SRH) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
-
+func (e SRH) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
 	if op == "I_Receive" {
-		return func(msg *messages.SAMessage, info []*interface{}) {
-			elem.(SRH).I_Receive(msg, info)
-		}
+		elem.(SRH).I_Receive(msg, info)
 	} else { // "I_Send"
-		return func(msg *messages.SAMessage, info []*interface{}) {
-			elem.(SRH).I_Send(msg, info)
-		}
+		elem.(SRH).I_Send(msg, info)
 	}
 }
 
-func (s SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO Host & Port
+func (e SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO Host & Port
 
 	// create listener if necessary
-	key := s.Host + s.Port
-	if _, ok := s.Lns[key]; !ok { // listener was not created yet
-		servAddr, err := net.ResolveTCPAddr("tcp", s.Host+":"+s.Port)
+	key := e.Host + e.Port
+	if _, ok := e.Lns[key]; !ok { // listener was not created yet
+		servAddr, err := net.ResolveTCPAddr("tcp", e.Host+":"+e.Port)
 		if err != nil {
 			log.Fatalf("SRH:: %v\n", err)
 		}
-		s.Lns[key], err = net.ListenTCP("tcp", servAddr)
+		e.Lns[key], err = net.ListenTCP("tcp", servAddr)
 		if err != nil {
 			log.Fatalf("SRH:: %v\n", err)
 		}
 
 		// accept connections
-		s.Conns[key], err = s.Lns[key].Accept()
+		e.Conns[key], err = e.Lns[key].Accept()
 		if err != nil {
 			log.Fatalf("SRH:: %s", err)
 		}
 	}
 
 	// configure conn to be used
-	conn := s.Conns[key]
+	conn := e.Conns[key]
 
 	// receive size & message
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
@@ -88,12 +83,12 @@ func (s SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}) { // TODO 
 	*msg = messages.SAMessage{Payload: msgTemp} // TODO
 }
 
-func (s SRH) I_Send(msg *messages.SAMessage, info [] *interface{}) {
+func (e SRH) I_Send(msg *messages.SAMessage, info [] *interface{}) {
 	msgTemp := msg.Payload.([]interface{})[0].([]byte)
 
 	// configure conn to be used
-	key := s.Host + s.Port
-	conn := s.Conns[key]
+	key := e.Host + e.Port
+	conn := e.Conns[key]
 
 	// send message's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)

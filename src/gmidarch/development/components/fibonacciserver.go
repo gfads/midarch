@@ -19,10 +19,8 @@ func Newfibonacciserver() Fibonacciserver {
 	return *r
 }
 
-func (Fibonacciserver) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
-	return func(msg *messages.SAMessage, info []*interface{}) {
-		elem.(Fibonacciserver).I_Process(msg, info)
-	}
+func (e Fibonacciserver) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+	e.I_Process(msg, info)
 }
 
 func (Fibonacciserver) I_Process(msg *messages.SAMessage, info [] *interface{}) {

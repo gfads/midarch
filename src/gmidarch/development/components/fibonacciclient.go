@@ -26,24 +26,19 @@ func NewFibonacciclient() Fibonacciclient {
 	return *r
 }
 
-func (Fibonacciclient) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
-
+func (e Fibonacciclient) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
 	if op == "I_Setmessage" {
-		return func(msg *messages.SAMessage, info []*interface{}) {
-			elem.(Fibonacciclient).I_Setmessage(msg, info)
-		}
+		e.I_Setmessage(msg, info)
 	} else { // "I_Printmessage":
-		return func(msg *messages.SAMessage, info []*interface{}) {
-			elem.(Fibonacciclient).I_Printmessage(msg, info)
-		}
+		e.I_Printmessage(msg, info)
 	}
 }
 
 func (Fibonacciclient) I_Setmessage(msg *messages.SAMessage, info [] *interface{}) {
+	argsTemp := make([]interface{}, 1, 1)
 
 	t1 = time.Now() // start time
-	argsTemp := make([]interface{}, 1)
-	argsTemp[0] = 0
+	argsTemp[0] = 10
 	*msg = messages.SAMessage{Payload: shared.Request{Op: "fibo", Args: argsTemp}}
 }
 

@@ -3,5 +3,5 @@ package components
 import "gmidarch/development/messages"
 
 type Selector interface {
-	Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{})
+	Selector(interface{}, string, *messages.SAMessage, []*interface{})
 }

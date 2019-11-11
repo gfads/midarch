@@ -18,7 +18,13 @@ func NewReceiver() Receiver {
 	return *r
 }
 
-func (Receiver) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}){
+func (Receiver) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}){
+
+
+			elem.(Receiver).I_Printmessage(msg, info)
+}
+
+func (Receiver) OldSelector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}){
 
 	var f func(*messages.SAMessage,[]*interface{})
 	switch op {

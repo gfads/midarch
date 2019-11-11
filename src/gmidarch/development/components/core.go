@@ -23,7 +23,13 @@ func NewCore() Core {
 	return *r
 }
 
-func (Core) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}){
+func (Core) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}){
+
+
+			elem.(Core).I_Debug(msg,info)
+}
+
+func (Core) OldSelector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}){
 
 	var f func(*messages.SAMessage,[]*interface{})
 	switch op {

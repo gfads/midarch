@@ -23,16 +23,11 @@ func NewRequestorM() RequestorM {
 	return *r
 }
 
-func (RequestorM) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
-
+func (e RequestorM) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
 	if op == "I_In" {
-		return func(msg *messages.SAMessage, info []*interface{}) {
-			elem.(RequestorM).I_In(msg, info)
-		}
+		e.I_In(msg, info)
 	} else { // "I_Out"
-		return func(msg *messages.SAMessage, info []*interface{}) {
-			elem.(RequestorM).I_Out(msg, info)
-		}
+		e.I_Out(msg, info)
 	}
 }
 

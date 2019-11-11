@@ -20,7 +20,13 @@ func NewServer() Server {
 	return *r
 }
 
-func (Server) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}){
+func (Server) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}){
+
+
+			elem.(Server).I_Process(msg,info)
+}
+
+func (Server) OldSelector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}){
 
 	var f func(*messages.SAMessage,[]*interface{})
 	switch op {

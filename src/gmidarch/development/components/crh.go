@@ -24,11 +24,8 @@ func NewCRH() CRH {
 	return *r
 }
 
-func (CRH) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
-
-	return  func(msg *messages.SAMessage, info []*interface{}) {
-		elem.(CRH).I_Process(msg, info)
-	}
+func (CRH) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+	elem.(CRH).I_Process(msg, info)
 }
 
 func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
@@ -40,8 +37,6 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	msgToServer := payload[2].([]byte) // message
 
 	// connect to server
-	var err error
-
 	key := host + port
 
 	if _, ok := c.Conns[key]; !ok { // no connection open yet
@@ -62,7 +57,7 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	// send message's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	binary.LittleEndian.PutUint32(size, uint32(len(msgToServer)))
-	_, err = conn.Write(size)
+	_, err := conn.Write(size)
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)
 	}

@@ -1,6 +1,6 @@
 datatype PROCNAMES = client | server | t
 channel TerP,InvR,TerR,InvP : PROCNAMES
-channel I_Setmessage,I_Printmessage,I_Process
+channel I_Printmessage,I_Process,I_Setmessage
 CLIENT = I_Setmessage -> InvR.t -> TerR.t -> I_Printmessage -> CLIENT
 SERVER = InvP.t -> I_Process -> TerP.t -> SERVER
 T = InvP.client -> InvR.server -> TerR.server -> TerP.client -> T

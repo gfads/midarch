@@ -21,16 +21,11 @@ func NewFibonacciInvokerM() FibonacciInvokerM {
 	return *r
 }
 
-func (FibonacciInvokerM) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
-
+func (FibonacciInvokerM) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
 	if op == "I_In" {
-		return func(msg *messages.SAMessage, info []*interface{}) {
-			elem.(FibonacciInvokerM).I_In(msg, info)
-		}
+		elem.(FibonacciInvokerM).I_In(msg, info)
 	} else { //"I_Out":
-		return func(msg *messages.SAMessage, info []*interface{}) {
-			elem.(FibonacciInvokerM).I_Out(msg, info)
-		}
+		elem.(FibonacciInvokerM).I_Out(msg, info)
 	}
 }
 

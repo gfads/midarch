@@ -18,7 +18,19 @@ func NewSender() Sender {
 	return *r
 }
 
-func (s Sender) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
+func (s Sender) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+
+	switch op {
+	case "I_Setmessage1":
+		elem.(Sender).I_Setmessage1(msg, info)
+	case "I_Setmessage2":
+		elem.(Sender).I_Setmessage2(msg, info)
+	case "I_Setmessage3":
+		elem.(Sender).I_Setmessage3(msg, info)
+	}
+}
+
+func (s Sender) OldSelector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}) {
 
 	var f func(*messages.SAMessage, []*interface{})
 	switch op {

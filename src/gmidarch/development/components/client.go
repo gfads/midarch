@@ -22,7 +22,21 @@ func NewClient() Client {
 	return *r
 }
 
-func (Client) Selector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}){
+func (Client) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}){
+
+	switch op {
+	case "I_Setmessage":
+
+			elem.(Client).I_Setmessage(msg,info)
+
+	case "I_Printmessage":
+
+			elem.(Client).I_Printmessage(msg,info)
+
+	}
+}
+
+func (Client) OldSelector(elem interface{}, op string) func(*messages.SAMessage, []*interface{}){
 
 	var f func(*messages.SAMessage,[]*interface{})
 	switch op {

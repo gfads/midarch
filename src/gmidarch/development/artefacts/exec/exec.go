@@ -74,7 +74,7 @@ func (Exec) Create(id string, elem interface{}, typeName string, dot dot.DOTGrap
 				case "Receiver":
 					s = components.NewReceiver()
 				case "Unit":
-					s = elem.(components.Unit)
+					s = components.NewUnit()
 				case "Core":
 					s = components.NewCore()
 				case "Client":
