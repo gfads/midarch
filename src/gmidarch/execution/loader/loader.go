@@ -12,7 +12,7 @@ type Loader struct{}
 
 func (l Loader) Load(file string) madl.MADL {
 
-	// read file
+	// read file and create go information
 	m := l.read(file)
 
 	// Syntatic Check of configuration

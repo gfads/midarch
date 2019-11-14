@@ -83,7 +83,7 @@ func (Exec) Create(id string, elem interface{}, typeName string, dot dot.DOTGrap
 					s = components.NewServer()
 				case "Fibonacciserver":
 					s = components.Newfibonacciserver()
-				case "FibonacciInvokerM":
+				case "FibonacciinvokerM":
 					s = components.NewFibonacciInvokerM()
 				case "SRH":
 					s = components.NewSRH()
@@ -95,8 +95,14 @@ func (Exec) Create(id string, elem interface{}, typeName string, dot dot.DOTGrap
 					s = components.NewRequestorM()
 				case "CRH":
 					s = components.NewCRH()
+				case "Namingserver":
+					s = components.Newnamingserver()
+				case "NaminginvokerM":
+					s = components.NewnaminginvokerM()
+				case "Namingproxy":
+					s = components.NewNamingproxy()
 				default:
-					fmt.Printf("Exec:: Element '%v' not in library!!\n", reflect.TypeOf(elem).Name())
+					fmt.Printf("Exec:: Element '%v' not visible in Engine!!\n", reflect.TypeOf(elem).Name())
 					os.Exit(0)
 				}
 				//params := graphs.ExecEdgeInfo{InternalAction: shared.Invoke, ActionName: actionNameFDR, IsInternal: true, ActionChannel: &channel, Message: msg, Info: info}

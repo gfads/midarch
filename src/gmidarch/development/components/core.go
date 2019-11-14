@@ -21,5 +21,5 @@ func NewCore() Core {
 	return *r
 }
 
-func (Core) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (Core) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
 }

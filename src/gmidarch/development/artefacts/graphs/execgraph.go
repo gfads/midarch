@@ -27,7 +27,7 @@ type ExecEdgeInfo struct { // TODO define a Action type
 	ExternalAction func(*chan messages.SAMessage, *messages.SAMessage)
 	//InternalAction func(any interface{}, name string, msg *messages.SAMessage, info [] *interface{})
 	//InternalAction func(interface{},string) func(*messages.SAMessage,[]*interface{})
-	InternalAction func(interface{}, string, *messages.SAMessage, []*interface{})
+	InternalAction func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{})
 	Info [] *interface{}
 }
 

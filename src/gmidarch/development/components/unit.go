@@ -1,11 +1,9 @@
 package components
 
 import (
-	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"gmidarch/execution/engine"
-	"os"
 	"reflect"
 	"shared"
 	"strings"
@@ -15,11 +13,12 @@ import (
 var allUnits sync.Map
 
 type Unit struct {
-	UnitId      string
-	Behaviour   string
-	Graph       graphs.ExecGraph
-	ElemOfUnit  interface{}
-	GraphOfElem graphs.ExecGraph
+	UnitId              string
+	Behaviour           string
+	Graph               graphs.ExecGraph
+	ElemOfUnitInfo      [] *interface{}
+	ElemOfUnit          interface{}
+	GraphOfElem         graphs.ExecGraph
 }
 
 func NewUnit() Unit {
@@ -30,14 +29,14 @@ func NewUnit() Unit {
 	return *r
 }
 
-func (u Unit) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (u Unit) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
 
 	switch op[2] {
-	case 'E':    //"I_Execute":
+	case 'E': //"I_Execute":
 		elem.(Unit).I_Execute(msg, info)
-	case 'I':  //"I_Initialiseunit":
+	case 'I': //"I_Initialiseunit":
 		elem.(Unit).I_Initialiseunit(msg, info)
-	case 'A':  //"I_Adaptunit":
+	case 'A': //"I_Adaptunit":
 		elem.(Unit).I_Adaptunit(msg, info)
 	}
 }
@@ -47,14 +46,8 @@ func (u Unit) I_Initialiseunit(msg *messages.SAMessage, info [] *interface{}) {
 }
 
 func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}) {
-	newElem, ok := allUnits.Load(u.UnitId)
-
-	if !ok {
-		fmt.Printf("Unit:: Element '%v' is not a Unit")
-		os.Exit(0)
-	}
-	u.ElemOfUnit = newElem
-	engine.Engine{}.Execute(u.ElemOfUnit, u.GraphOfElem, !shared.EXECUTE_FOREVER)
+	u.ElemOfUnit,_ = allUnits.Load(u.UnitId)
+	engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, !shared.EXECUTE_FOREVER)
 }
 
 func (u Unit) I_Adaptunit(msg *messages.SAMessage, info [] *interface{}) {

@@ -22,6 +22,8 @@ func (al *ArchitecturalRepository) Load() error {
 	// load
 	al.Library["Analyser"] = Record{Type: components.NewAnalyser(), Behaviour: components.NewAnalyser().Behaviour}
 	al.Library["OnetoN"] = Record{Type: connectors.NewOnetoN(), Behaviour: connectors.NewOnetoN().Behaviour}
+	al.Library["Oneto2"] = Record{Type: connectors.NewOneto2(), Behaviour: connectors.NewOneto2().Behaviour}
+	al.Library["Oneto8"] = Record{Type: connectors.NewOneto8(), Behaviour: connectors.NewOneto8().Behaviour}
 	al.Library["Oneto5"] = Record{Type: connectors.NewOneto5(), Behaviour: connectors.NewOneto5().Behaviour}
 	al.Library["Oneto7"] = Record{Type: connectors.NewOneto7(), Behaviour: connectors.NewOneto7().Behaviour}
 	al.Library["Oneto9"] = Record{Type: connectors.NewOneto9(), Behaviour: connectors.NewOneto9().Behaviour}
@@ -51,6 +53,9 @@ func (al *ArchitecturalRepository) Load() error {
 	al.Library["Fibonacciinvoker"] = Record{Type: components.NewFibonacciinvoker(), Behaviour: components.NewFibonacciinvoker().Behaviour}
 	al.Library["FibonacciinvokerM"] = Record{Type: components.NewFibonacciInvokerM(), Behaviour: components.NewFibonacciInvokerM().Behaviour}
 	al.Library["Fibonacciproxy"] = Record{Type: components.NewFibonacciproxy(), Behaviour: components.NewFibonacciproxy().Behaviour}
+	al.Library["Namingserver"] = Record{Type: components.Newnamingserver(), Behaviour: components.Newnamingserver().Behaviour}
+	al.Library["NaminginvokerM"] = Record{Type: components.NewnaminginvokerM(), Behaviour: components.NewnaminginvokerM().Behaviour}
+	al.Library["Namingproxy"] = Record{Type: components.NewNamingproxy(), Behaviour: components.NewNamingproxy().Behaviour}
 
 	return r1
 }

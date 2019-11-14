@@ -18,9 +18,7 @@ func NewReceiver() Receiver {
 	return *r
 }
 
-func (Receiver) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}){
-
-
+func (Receiver) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}){
 			elem.(Receiver).I_Printmessage(msg, info)
 }
 

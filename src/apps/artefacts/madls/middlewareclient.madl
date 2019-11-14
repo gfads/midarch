@@ -1,23 +1,16 @@
 Configuration middlewareclient :=
    Components
-      client     : Fibonacciclient
-      proxy      : Fibonacciproxy
-//      marshaller : Marshaller
-      requestor  : RequestorM
-//      requestor  : Requestor
-      crh        : CRH
+      proxy     : Namingproxy
+      requestor : RequestorM
+      crh       : CRH
 
    Connectors
       t1 : Requestreply
       t2 : Requestreply
-//      t3 : Requestreply
-      t4 : Requestreply
 
    Attachments
-      client,t1,proxy
-      proxy,t2,requestor
-//      requestor,t3,marshaller
-      requestor,t4,crh
+      proxy,t1,requestor
+      requestor,t2,crh
 
    Adaptability
       None

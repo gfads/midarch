@@ -24,19 +24,23 @@ func (d Deployer) Start() {
 		graph := d.MADLX.Components[i].Graph
 
 		// Configure Unit's Info with Element's Info (Only components)
-		if d.MADLX.Components[i].TypeName == reflect.TypeOf(components.Unit{}).Name() { // TODO - Generalise for any component having 'Info'
+		switch d.MADLX.Components[i].TypeName {
+		case reflect.TypeOf(components.Unit{}).Name():
 			tempElem := *d.MADLX.Components[i].Info[0]
 			unit := elem.(components.Unit)
 			unit.UnitId = d.MADLX.Components[i].ElemId
-			unit.ElemOfUnit= tempElem.(madl.Element).Type
+			unit.ElemOfUnit = tempElem.(madl.Element).Type
 			unit.GraphOfElem = tempElem.(madl.Element).Graph
+			unit.ElemOfUnitInfo = tempElem.(madl.Element).Info
 			elem = unit
+			go engine.Engine{}.Execute(elem, unit.ElemOfUnitInfo, graph, shared.EXECUTE_FOREVER)
+		default:
+			go engine.Engine{}.Execute(elem, d.MADLX.Components[i].Info, graph, shared.EXECUTE_FOREVER)
 		}
-		go engine.Engine{}.Execute(elem, graph, shared.EXECUTE_FOREVER)
 	}
 
 	for i := range d.MADLX.Connectors {
-		go engine.Engine{}.Execute(d.MADLX.Connectors[i].Type, d.MADLX.Connectors[i].Graph, shared.EXECUTE_FOREVER)
+		go engine.Engine{}.Execute(d.MADLX.Connectors[i].Type, d.MADLX.Components[i].Info, d.MADLX.Connectors[i].Graph, shared.EXECUTE_FOREVER)
 	}
 }
 
@@ -60,7 +64,6 @@ func (d *Deployer) DeployApp(mee madl.MADL, mapp madl.MADL) {
 			idx++
 		}
 	}
-
 	d.MADLX = mee
 }
 

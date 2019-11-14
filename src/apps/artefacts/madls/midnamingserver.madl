@@ -1,0 +1,17 @@
+Configuration middlewareserver :=
+   Components
+      naming     : Namingserver
+      invoker    : NaminginvokerM
+      srh        : SRH @NAMING_PORT
+
+   Connectors
+      t1 : Requestreply
+      t2 : Requestreply
+
+   Attachments
+      srh,t1,invoker
+      invoker,t2,naming
+
+   Adaptability
+      None
+EndConf 

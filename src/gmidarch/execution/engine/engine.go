@@ -9,7 +9,7 @@ import (
 
 type Engine struct{}
 
-func (Engine) Execute(elem interface{}, graph graphs.ExecGraph, executionMode bool) {
+func (Engine) Execute(elem interface{}, elemInfo []*interface{}, graph graphs.ExecGraph, executionMode bool) {
 
 	node := 0
 
@@ -18,14 +18,18 @@ func (Engine) Execute(elem interface{}, graph graphs.ExecGraph, executionMode bo
 		edges := graph.AdjacentEdges(node)
 		if len(edges) == 1 {
 			if edges[0].Info.IsInternal { // Internal action
-				edges[0].Info.InternalAction(elem, edges[0].Info.ActionName, edges[0].Info.Message, edges[0].Info.Info)
+				//fmt.Printf("Engine:: %v :: %v :: BEFORE\n",reflect.TypeOf(elem),edges[0].Info.ActionName)
+				edges[0].Info.InternalAction(elem, elemInfo, edges[0].Info.ActionName, edges[0].Info.Message, edges[0].Info.Info)
+				//fmt.Printf("Engine:: %v :: %v :: AFTER\n",reflect.TypeOf(elem),edges[0].Info.ActionName)
 			} else { // External action
+				//fmt.Printf("Engine:: %v :: %v :: BEFORE\n",reflect.TypeOf(elem),edges[0].Info.ActionName)
 				edges[0].Info.ExternalAction(edges[0].Info.ActionChannel, edges[0].Info.Message)
+				//fmt.Printf("Engine:: %v :: %v :: AFTER\n",reflect.TypeOf(elem),edges[0].Info.ActionName)
 			}
 			node = edges[0].To
 		} else {
 			chosen := 0
-			choice(elem, &chosen, edges)
+			choice(elem, elemInfo, &chosen, edges)
 			node = edges[chosen].To
 		}
 		if node == 0 {
@@ -37,7 +41,7 @@ func (Engine) Execute(elem interface{}, graph graphs.ExecGraph, executionMode bo
 	return
 }
 
-func choice(elem interface{}, chosen *int, edges []graphs.ExecEdge) {
+func choice(elem interface{}, elemInfo [] *interface{}, chosen *int, edges []graphs.ExecEdge) {
 	casesExternal := make([]reflect.SelectCase, len(edges)+1, shared.NUM_MAX_EDGES)
 	casesInternal := make([]reflect.SelectCase, len(edges), shared.NUM_MAX_EDGES)
 
@@ -47,8 +51,7 @@ func choice(elem interface{}, chosen *int, edges []graphs.ExecEdge) {
 		if edges[i].Info.IsInternal { // Internal action
 			casesInternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(*edges[i].Info.ActionChannel)}
 			casesExternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv}
-			//edges[i].Info.InternalAction(elem, edges[i].Info.ActionName, edges[i].Info.Message, edges[i].Info.Info)
-			edges[i].Info.InternalAction(elem, edges[i].Info.ActionName, edges[i].Info.Message, edges[i].Info.Info)
+			edges[i].Info.InternalAction(elem, elemInfo, edges[i].Info.ActionName, edges[i].Info.Message, edges[i].Info.Info)
 			go send(edges[i].Info.ActionChannel, *edges[i].Info.Message)
 		} else { // External action
 			casesExternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(*edges[i].Info.ActionChannel)}

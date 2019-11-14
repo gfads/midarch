@@ -73,7 +73,7 @@ func (m *MADL) ConfigureConnectors() {
 
 // Configure channels and Maps - basic to the execution
 func (madl *MADL) ConfigureChannelsAndMaps() {
-	structuralChannels := make(map[string]chan messages.SAMessage,shared.CHAN_BUFFER_SIZE)
+	structuralChannels := make(map[string]chan messages.SAMessage, shared.CHAN_BUFFER_SIZE)
 
 	// Configure structural channels
 	for i := range madl.Attachments {
@@ -168,11 +168,22 @@ func (MADL) IdentifyComponents(content []string) ([]Element, error) {
 			foundComponents = true
 		} else {
 			if foundComponents && !shared.SkipLine(tempLine) && strings.Contains(tempLine, ":") {
+				compType := *new(string)
 				temp := strings.Split(tempLine, ":")
-				compId := strings.TrimSpace(temp[0])
-				compType := ""
-				compType = strings.TrimSpace(temp[1])
-				r1 = append(r1, Element{ElemId: compId, TypeName: compType})
+				if strings.Contains(tempLine, "@") {
+					compId := strings.TrimSpace(temp[0])
+					compType = strings.TrimSpace(temp[1][:strings.Index(temp[1], "@")])
+					paramPort := strings.TrimSpace(tempLine[strings.Index(tempLine, "@")+1:])
+					tempPort := shared.SetOfPorts[paramPort]                     // TODO
+					infoTemp := make([]*interface{},1,1)
+					infoTemp[0] = new(interface{})
+					*infoTemp[0] = tempPort
+					r1 = append(r1, Element{ElemId: compId, TypeName: compType, Info:infoTemp})
+				} else {
+					compId := strings.TrimSpace(temp[0])
+					compType = strings.TrimSpace(temp[1])
+					r1 = append(r1, Element{ElemId: compId, TypeName: compType})
+				}
 			} else {
 				if foundComponents && !shared.SkipLine(tempLine) && !strings.Contains(tempLine, ":") {
 					break

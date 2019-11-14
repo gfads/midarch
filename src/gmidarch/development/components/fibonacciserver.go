@@ -19,14 +19,12 @@ func Newfibonacciserver() Fibonacciserver {
 	return *r
 }
 
-func (e Fibonacciserver) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e Fibonacciserver) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
 	e.I_Process(msg, info)
 }
 
 func (Fibonacciserver) I_Process(msg *messages.SAMessage, info [] *interface{}) {
-	req := msg.Payload.(shared.Request)
-
-		*msg = messages.SAMessage{Payload: f(req.Args[0].(int))}
+	*msg = messages.SAMessage{Payload: f(msg.Payload.(shared.Request).Args[0].(int))}
 }
 
 func f(n int) int {

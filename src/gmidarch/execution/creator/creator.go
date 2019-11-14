@@ -59,7 +59,7 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 	case "senderreceiver":
 		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.OnetoN{}).Name(), Params: params})
 	case "middlewareclient":
-		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto7{}).Name(), Params: params})
+		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto5{}).Name(), Params: params})
 	case "middlewareserver":
 		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto5{}).Name(), Params: params})
 	case "clientserverlocal":
@@ -68,6 +68,8 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.OnetoN{}).Name(), Params: params})
 	case "calculatorlocal":
 		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.OnetoN{}).Name(), Params: params})
+	case "midfibonacciserver":
+		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto8{}).Name(), Params: params})
 	default:
 		fmt.Printf("Creator:: Configuration '%v' cannot be executed because 'OnetoN.dot' is not ok!!",mapp.Configuration)
 		os.Exit(0)
@@ -94,7 +96,7 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 			attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
 			atts = append(atts, madl.Attachment{attC1, attT, attC2})
 		case "middlewareclient":
-			attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto7{}).Name(), Params: params}
+			attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto5{}).Name(), Params: params}
 			attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
 			atts = append(atts, madl.Attachment{attC1, attT, attC2})
 		case "middlewareserver":
@@ -113,8 +115,13 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 			attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.OnetoN{}).Name(), Params: params}
 			attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
 			atts = append(atts, madl.Attachment{attC1, attT, attC2})
+		case "midfibonacciserver":
+			attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto8{}).Name(), Params: params}
+			attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
+			atts = append(atts, madl.Attachment{attC1, attT, attC2})
+
 		default:
-			fmt.Printf("Creator:: Configuration '%v' cannot be executed because 'OnetoN.dot' is not ok ")
+			fmt.Printf("Creator:: Configuration '%v' cannot be executed because 'OnetoN.dot' is not ok ", mapp.Configuration)
 			os.Exit(0)
 		}
 

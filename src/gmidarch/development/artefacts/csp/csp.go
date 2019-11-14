@@ -49,6 +49,7 @@ func (c *CSP) ConfigureProcessBehaviours(madl madl.MADL) {
 		}
 
 		tokens := strings.Split(configuredBehaviour, " ")
+
 		for j := range tokens {
 			if shared.IsExternal(tokens[j]) {
 				eX := tokens[j][strings.Index(tokens[j], ".")+1:]

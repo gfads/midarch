@@ -1,0 +1,21 @@
+Configuration midfibonacciserver :=
+  Components
+      namingproxy      : Namingproxy
+      fibonacciinvoker : FibonacciinvokerM
+      requestor        : RequestorM
+      crh              : CRH    @NAMING_PORT
+      srh              : SRH    @FIBONACCI_PORT
+
+   Connectors
+      t1 : Requestreply
+      t2 : Requestreply
+      t3 : Requestreply
+
+   Attachments
+      namingproxy,t1,requestor
+      requestor,t2,crh
+      srh,t3,fibonacciinvoker
+
+   Adaptability
+      None
+EndConf 

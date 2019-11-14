@@ -1,11 +1,11 @@
-datatype PROCNAMES = server | invoker | srh | t1 | t3
+datatype PROCNAMES = naming | invoker | srh | t1 | t2
 channel InvP,TerP,InvR,TerR : PROCNAMES
 channel I_Process,I_In,I_Out,I_Receive,I_Send
-SERVER = InvP.t3 -> I_Process -> TerP.t3 -> SERVER
-INVOKER = InvP.t1 -> I_In -> InvR.t3 -> TerR.t3 -> I_Out -> TerP.t1 -> INVOKER
+NAMING = InvP.t2 -> I_Process -> TerP.t2 -> NAMING
+INVOKER = InvP.t1 -> I_In -> InvR.t2 -> TerR.t2 -> I_Out -> TerP.t1 -> INVOKER
 SRH = I_Receive -> InvR.t1 -> TerR.t1 -> I_Send -> SRH
 T1 = InvP.srh -> InvR.invoker -> TerR.invoker -> TerP.srh -> T1
-T3 = InvP.invoker -> InvR.server -> TerR.server -> TerP.invoker -> T3
+T2 = InvP.invoker -> InvR.naming -> TerR.naming -> TerP.invoker -> T2
 
-middlewareserver = (SERVER ||| INVOKER ||| SRH)[|{|InvP,TerP,InvR,TerR|}|](T1[[InvP.srh <- InvR.t1,InvR.invoker <- InvP.t1,TerR.invoker <- TerP.t1,TerP.srh <- TerR.t1]] ||| T3[[InvP.srh <- InvR.t1,InvR.invoker <- InvP.t1,TerR.invoker <- TerP.t1,TerP.srh <- TerR.t1,InvP.invoker <- InvR.t3,InvR.server <- InvP.t3,TerR.server <- TerP.t3,TerP.invoker <- TerR.t3]])
+middlewareserver = (NAMING ||| INVOKER ||| SRH)[|{|TerR,InvP,TerP,InvR|}|](T2[[InvP.invoker <- InvR.t2,InvR.naming <- InvP.t2,TerR.naming <- TerP.t2,TerP.invoker <- TerR.t2]] ||| T1[[InvP.invoker <- InvR.t2,InvR.naming <- InvP.t2,TerR.naming <- TerP.t2,TerP.invoker <- TerR.t2,InvP.srh <- InvR.t1,InvR.invoker <- InvP.t1,TerR.invoker <- TerP.t1,TerP.srh <- TerR.t1]])
 assert middlewareserver :[deadlock free]

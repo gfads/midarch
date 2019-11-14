@@ -22,7 +22,7 @@ func NewClient() Client {
 	return *r
 }
 
-func (Client) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}){
+func (Client) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}){
 
 	switch op {
 	case "I_Setmessage":

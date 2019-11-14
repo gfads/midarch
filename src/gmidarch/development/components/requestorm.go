@@ -6,7 +6,6 @@ import (
 	"gmidarch/development/messages"
 	"gmidarch/development/miop"
 	"log"
-	"shared"
 )
 
 type RequestorM struct {
@@ -22,7 +21,7 @@ func NewRequestorM() RequestorM {
 	return *r
 }
 
-func (e RequestorM) Selector(elem interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e RequestorM) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
 	if op[2] == 'I' {  // I_In
 		e.I_In(msg, info)
 	} else { // "I_Out"
@@ -31,11 +30,11 @@ func (e RequestorM) Selector(elem interface{}, op string, msg *messages.SAMessag
 }
 
 func (RequestorM) I_In(msg *messages.SAMessage, info [] *interface{}) {
-	inv := msg.Payload.(shared.Invocation)
+	inv := msg.Payload.(messages.Invocation)
 
 	// assembly packet
-	reqHeader := miop.RequestHeader{Context: "TODO", RequestId: 13, ResponseExpected: true, Key: 131313, Operation: inv.Req.Op}
-	reqBody := miop.RequestBody{Body: inv.Req.Args}
+	reqHeader := miop.RequestHeader{Context: "TODO", RequestId: 13, ResponseExpected: true, Key: 131313, Operation: inv.Op}
+	reqBody := miop.RequestBody{Body: inv.Args}
 	miopHeader := miop.Header{Magic: "M.I.O.P.", Version: "version", MessageType: 1, Size: 131313, ByteOrder: true}
 	miopBody := miop.Body{ReqHeader: reqHeader, ReqBody: reqBody}
 	miopPacket := miop.Packet{Hdr: miopHeader, Bd: miopBody}
@@ -69,30 +68,3 @@ func (RequestorM) I_Out(msg *messages.SAMessage, info [] *interface{}) {
 	*msg = messages.SAMessage{Payload: miopPacket.Bd.RepBody.OperationResult}
 }
 
-func (RequestorM) I_InEncDec(msg *messages.SAMessage, info [] *interface{}) {
-	inv := msg.Payload.(shared.Invocation)
-
-	// assembly packet
-	reqHeader := miop.RequestHeader{Context: "TODO", RequestId: 13, ResponseExpected: true, Key: 131313, Operation: inv.Req.Op}
-	reqBody := miop.RequestBody{Body: inv.Req.Args}
-	miopHeader := miop.Header{Magic: "M.I.O.P.", Version: "version", MessageType: 1, Size: 131313, ByteOrder: true}
-	miopBody := miop.Body{ReqHeader: reqHeader, ReqBody: reqBody}
-	miopPacket := miop.Packet{Hdr: miopHeader, Bd: miopBody}
-
-	// store host & port in 'info'
-	*info[0] = inv.Host
-	*info[1] = inv.Port
-
-	toCRH := make([]interface{}, 3, 3)
-	toCRH[0] = inv.Host
-	toCRH[1] = inv.Port
-	toCRH[2] = miopPacket
-
-	*msg = messages.SAMessage{Payload: toCRH}
-}
-
-func (RequestorM) I_OutEncDec(msg *messages.SAMessage, info [] *interface{}) {
-	miopPacket := msg.Payload.(*miop.Packet)
-
-	*msg = messages.SAMessage{Payload: miopPacket.Bd.RepBody.OperationResult}
-}
