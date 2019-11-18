@@ -1,12 +1,13 @@
 package components
 
 import (
+	"fmt"
 	"github.com/vmihailenco/msgpack"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"gmidarch/development/miop"
 	"log"
-	"shared"
+	"os"
 )
 
 type FibonacciinvokerM struct {
@@ -16,39 +17,18 @@ type FibonacciinvokerM struct {
 
 func NewFibonacciInvokerM() FibonacciinvokerM {
 	r := new(FibonacciinvokerM)
-//	r.Behaviour = "B = InvP.e1 -> I_In -> InvR.e2 -> TerR.e2 -> I_Out -> TerP.e1 -> B"
 	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B"
 
 	return *r
 }
 
 func (e FibonacciinvokerM) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
-		e.I_In(msg, info)
+	e.I_Process(msg, info)
 }
 
 func (FibonacciinvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}) { // TODO
-/*
-	// unmarshall
-	payload := msg.Payload.([]byte)
 
-	miopPacket := miop.Packet{}
-	err := msgpack.Unmarshal(payload, &miopPacket)
-	if err != nil {
-		log.Fatalf("FibonacciinvokerM:: %s", err)
-	}
-
-	n := miopPacket.Bd.ReqBody.Body[0].(int64)
-
-	// prepare invocation to object
-	argsTemp := make([]interface{}, 1, 1)
-	argsTemp[0] = int(n)
-	inv := shared.Request{Op: miopPacket.Bd.ReqHeader.Operation, Args: argsTemp}
-
-	*msg = messages.SAMessage{Payload: inv}
-*/
-}
-
-func (FibonacciinvokerM) I_In(msg *messages.SAMessage, info [] *interface{}) {
+	fmt.Printf("FibonacciInvoker:: HERE \n")
 
 	// unmarshall
 	payload := msg.Payload.([]byte)
@@ -56,39 +36,36 @@ func (FibonacciinvokerM) I_In(msg *messages.SAMessage, info [] *interface{}) {
 	miopPacket := miop.Packet{}
 	err := msgpack.Unmarshal(payload, &miopPacket)
 	if err != nil {
-		log.Fatalf("Fibonacciinvokerwithmarshaller:: %s", err)
+		log.Fatalf("NamingInvokerM:: %s", err)
 	}
 
-	n := miopPacket.Bd.ReqBody.Body[0].(int64)
+	//var inv shared.Request
+	op := miopPacket.Bd.ReqHeader.Operation
+	switch op {
+	case "Fibo":
+		_p0 := int(miopPacket.Bd.ReqBody.Body[0].(int64))
 
-	// prepare invocation to object
-	argsTemp := make([]interface{}, 1, 1)
-	argsTemp[0] = int(n)
-	inv := shared.Request{Op: miopPacket.Bd.ReqHeader.Operation, Args: argsTemp}
+		_r := Fibonacci{}.F(_p0)
 
-	*msg = messages.SAMessage{Payload: inv}
-}
+		// assembly packet
+		repHeader := miop.ReplyHeader{Context: "TODO", RequestId: 13, Status: 131313}
+		repBody := miop.ReplyBody{OperationResult: _r}
+		miopHeader := miop.Header{Magic: "M.I.O.P.", Version: "version", MessageType: 2, Size: 131313, ByteOrder: true}
+		miopBody := miop.Body{RepHeader: repHeader, RepBody: repBody}
+		miopPacket := miop.Packet{Hdr: miopHeader, Bd: miopBody}
 
-func (FibonacciinvokerM) I_Out(msg *messages.SAMessage, info [] *interface{}) {
-	payload := msg.Payload.(int) // TODO - depends on the parameter return
+		// configure message
+		r, err := msgpack.Marshal(miopPacket)
+		if err != nil {
+			log.Fatalf("NamingInvokerM:: %s", err)
+		}
 
-	// assembly packet
-	result := make([]interface{}, 1, 1)
-	result[0] = payload
-	repHeader := miop.ReplyHeader{Context: "TODO", RequestId: 13, Status: 131313}
-	repBody := miop.ReplyBody{OperationResult: result}
-	miopHeader := miop.Header{Magic: "M.I.O.P.", Version: "version", MessageType: 2, Size: 131313, ByteOrder: true}
-	miopBody := miop.Body{RepHeader: repHeader, RepBody: repBody}
-	miopPacket := miop.Packet{Hdr: miopHeader, Bd: miopBody}
+		toSRH := make([]interface{}, 1, 1)
+		toSRH[0] = r
 
-	// configure message
-	r, err := msgpack.Marshal(miopPacket)
-	if err != nil {
-		log.Fatalf("Fibonacciinvokerwithmarshaller:: %s", err)
+		*msg = messages.SAMessage{Payload: toSRH}
+	default:
+		fmt.Printf("FibonacciInvokerM:: Operation '%v' not implemented by Fibonacci Service\n", op)
+		os.Exit(0)
 	}
-
-	toSRH := make([]interface{}, 1, 1)
-	toSRH[0] = r
-
-	*msg = messages.SAMessage{Payload: toSRH}
 }

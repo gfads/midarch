@@ -7,5 +7,5 @@ SRH = I_Receive -> InvR.t1 -> TerR.t1 -> I_Send -> SRH
 T1 = InvP.srh -> InvR.invoker -> TerR.invoker -> TerP.srh -> T1
 T2 = InvP.invoker -> InvR.naming -> TerR.naming -> TerP.invoker -> T2
 
-middlewareserver = (NAMING ||| INVOKER ||| SRH)[|{|TerR,InvP,TerP,InvR|}|](T2[[InvP.invoker <- InvR.t2,InvR.naming <- InvP.t2,TerR.naming <- TerP.t2,TerP.invoker <- TerR.t2]] ||| T1[[InvP.invoker <- InvR.t2,InvR.naming <- InvP.t2,TerR.naming <- TerP.t2,TerP.invoker <- TerR.t2,InvP.srh <- InvR.t1,InvR.invoker <- InvP.t1,TerR.invoker <- TerP.t1,TerP.srh <- TerR.t1]])
+middlewareserver = (NAMING ||| INVOKER ||| SRH)[|{|InvP,TerP,InvR,TerR|}|](T2[[InvP.invoker <- InvR.t2,InvR.naming <- InvP.t2,TerR.naming <- TerP.t2,TerP.invoker <- TerR.t2]] ||| T1[[InvP.invoker <- InvR.t2,InvR.naming <- InvP.t2,TerR.naming <- TerP.t2,TerP.invoker <- TerR.t2,InvP.srh <- InvR.t1,InvR.invoker <- InvP.t1,TerR.invoker <- TerP.t1,TerP.srh <- TerR.t1]])
 assert middlewareserver :[deadlock free]

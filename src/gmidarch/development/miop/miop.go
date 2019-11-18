@@ -39,7 +39,8 @@ type ReplyHeader struct {
 }
 
 type ReplyBody struct {
-	OperationResult [] interface{}
+	//OperationResult [] interface{}
+	OperationResult interface{}
 }
 
 

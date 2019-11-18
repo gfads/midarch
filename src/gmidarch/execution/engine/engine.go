@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"reflect"
@@ -42,13 +43,18 @@ func (Engine) Execute(elem interface{}, elemInfo []*interface{}, graph graphs.Ex
 }
 
 func choice(elem interface{}, elemInfo [] *interface{}, chosen *int, edges []graphs.ExecEdge) {
-	casesExternal := make([]reflect.SelectCase, len(edges)+1, shared.NUM_MAX_EDGES)
+	//casesExternal := make([]reflect.SelectCase, len(edges)+1, shared.NUM_MAX_EDGES)
+	casesExternal := make([]reflect.SelectCase, len(edges), shared.NUM_MAX_EDGES)
 	casesInternal := make([]reflect.SelectCase, len(edges), shared.NUM_MAX_EDGES)
+	hasInternalAction := false
+
+	fmt.Printf("Engine:: Choice:: %v \n", edges)
 
 	// Assembly cases
-	//for i := 0; i < len(edges); i++ {
-	for i := range edges {
+	for i := 0; i < len(edges); i++ {
+//	for i := range edges {
 		if edges[i].Info.IsInternal { // Internal action
+		    hasInternalAction = true
 			casesInternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(*edges[i].Info.ActionChannel)}
 			casesExternal[i] = reflect.SelectCase{Dir: reflect.SelectRecv}
 			edges[i].Info.InternalAction(elem, elemInfo, edges[i].Info.ActionName, edges[i].Info.Message, edges[i].Info.Info)
@@ -59,14 +65,21 @@ func choice(elem interface{}, elemInfo [] *interface{}, chosen *int, edges []gra
 		}
 	}
 
-	// add default case to choice options
-	casesExternal[len(edges)] = reflect.SelectCase{Dir: reflect.SelectDefault}
+	fmt.Printf("Engine:: Choice::: %v \n", len(casesInternal))
 
+	// add default case to choice options if necessary (mix of internal/external actions in choice)
+	if hasInternalAction { // TODO - it is not working with mix
+		casesExternal[len(edges)] = reflect.SelectCase{Dir: reflect.SelectDefault}
+	}
+
+	fmt.Printf("Engine:: Choice:: Externalcases:: %v\n",casesExternal)
 	// select external first
 	var value reflect.Value
 	*chosen, value, _ = reflect.Select(casesExternal)
 
-	if *chosen != (len(edges)) { // NOT DEFAULT, i.e., no external action executed
+	fmt.Printf("Engine:: Choice:: Selected:: %v %v\n", casesExternal[*chosen],*chosen)
+
+	if *chosen != (len(edges)) { // NOT DEFAULT, i.e., external action executed
 		*edges[*chosen].Info.Message = value.Interface().(messages.SAMessage)
 	} else { // DEFAULT
 		*chosen, value, _ = reflect.Select(casesInternal)

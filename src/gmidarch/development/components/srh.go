@@ -2,6 +2,7 @@ package components
 
 import (
 	"encoding/binary"
+	"fmt"
 	"github.com/vmihailenco/msgpack"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
@@ -49,6 +50,8 @@ func (e SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [
 	port := tempPort.(string)
 	host := "localhost"
 	key := host + ":" + port
+
+	var err error
 	if _, ok := e.Lns[key]; !ok { // listener was not created yet
 		servAddr, err := net.ResolveTCPAddr("tcp", key)
 		if err != nil {
@@ -60,18 +63,26 @@ func (e SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [
 		}
 
 		// accept connections
-		e.Conns[key], err = e.Lns[key].Accept()
-		if err != nil {
-			log.Fatalf("SRH:: %s", err)
-		}
+		// e.Conns[key], err = e.Lns[key].Accept()
+		// if err != nil {
+		//	log.Fatalf("SRH:: %s", err)
+		//}
+	}
+
+	// accept connections
+	e.Conns[key], err = e.Lns[key].Accept()
+	if err != nil {
+		log.Fatalf("SRH:: %s", err)
 	}
 
 	// configure conn to be used
 	conn := e.Conns[key]
 
+	fmt.Printf("SRH:: Waiting for data at Port: LocalAddr: %v RemoteAddr: %v\n",e.Conns[key].LocalAddr(),e.Conns[key].RemoteAddr())
+
 	// receive size & message
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	_, err := conn.Read(size)
+	_, err = conn.Read(size)
 	if err == io.EOF {
 		os.Exit(0)
 	} else if err != nil && err != io.EOF {

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gmidarch/development/components"
 	"gmidarch/execution/frontend"
+	"os"
 	"shared"
 	"shared/factories"
 )
@@ -18,9 +19,15 @@ func main(){
 
 	// register
 	fiboProxy := components.Fibonacciproxy{Host:shared.ResolveHostIp(),Port:shared.FIBONACCI_PORT}
-	namingProxy.Register("Fibonacci", fiboProxy)
+	ok := namingProxy.Register("Fibonacci", fiboProxy)
+	if !ok {
+		fmt.Printf("Server:: Service 'Fibonacci' not registered in the Naming Server\n")
+		os.Exit(0)
+	}
 
-//	fmt.Println("Fibonacci Server ready at port "+strconv.Itoa(fiboProxy.Port))
+	fmt.Printf("Server:: Fibonacci server is running at Port: %v \n",shared.FIBONACCI_PORT)
+
+	//namingProxy.Lookup("Fibonacci")
 
 	fmt.Scanln()
 	fmt.Println("done")

@@ -1,0 +1,5 @@
+datatype PROCNAMES = e1 | e2 | e3
+
+channel InvP, InvR, TerR, TerP : PROCNAMES
+
+NtoOne = InvP.e1 -> InvR.e2 -> TerR.e2 -> TerP.e1 -> NtoOne [] InvP.e3 -> InvR.e2 -> TerR.e2 -> TerP.e3 -> NtoOne

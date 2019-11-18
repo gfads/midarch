@@ -1,28 +1,43 @@
 package main
 
 import (
+	"fmt"
+	"gmidarch/development/components"
 	"gmidarch/execution/frontend"
+	"os"
+	"shared"
+	"shared/factories"
+	"time"
 )
 
 func main() {
 	// start configuration
-	frontend.FrontEnd{}.Deploy("middlewareclient.madl")
+	frontend.FrontEnd{}.Deploy("midfibonacciclient.madl")
 
 	// proxy to naming service
-	//namingClientProxy := factories.LocateNaming()
+	namingProxy := factories.LocateNaming()
 
 	// obtain proxy
-	//fibo := namingClientProxy.Lookup("Fibonacci").(fibonacciclientproxy.FibonacciClientProxy)
+	s := "Fibonacci"
+	f,ok := namingProxy.Lookup(s)
+	if !ok {
+		fmt.Printf("Client:: Service '%v' not registered in Naming Service!! \n",s)
+		os.Exit(0)
+	}
+
+	fibo := f.(components.Fibonacciproxy)
+
+	fmt.Printf("Client:: Got a Proxy to Fibonacci\n")
 
 	// invoke remote method
-//	for i := 0; i < parameters.SAMPLE_SIZE; i++ {
+	for i := 0; i < shared.SAMPLE_SIZE; i++ {
 
-//		t1 := time.Now()
-//		fibo.Fibo(38)
-//		t2 := time.Now()
+		t1 := time.Now()
+		fibo.Fibo(38)
+		t2 := time.Now()
 
-//		x := float64(t2.Sub(t1).Nanoseconds()) / 1000000
-//		fmt.Printf("%F \n", x)
-//		time.Sleep(parameters.REQUEST_TIME * time.Millisecond)
-//	}
+		x := float64(t2.Sub(t1).Nanoseconds()) / 1000000
+		fmt.Printf("%F \n", x)
+		//time.Sleep(parameters.REQUEST_TIME * time.Millisecond)
+	}
 }

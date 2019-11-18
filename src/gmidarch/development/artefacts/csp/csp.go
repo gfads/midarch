@@ -56,7 +56,7 @@ func (c *CSP) ConfigureProcessBehaviours(madl madl.MADL) {
 				key := strings.ToLower(madl.Components[i].ElemId) + "." + strings.ToLower(eX)
 				partner, ok := madl.Maps[key]
 				if !ok {
-					fmt.Println("CSP:: Map [" + key + "] of Component " + madl.Components[i].ElemId + "  Not FOUND!")
+					fmt.Printf("CSP:: Configuration '%v' : Map [%v] of Component %v not Found!!", madl.Configuration, key, madl.Components[i].ElemId)
 					os.Exit(0)
 				}
 				configuredBehaviour = strings.Replace(configuredBehaviour, eX, partner, 99)

@@ -1,4 +1,4 @@
-Configuration middlewareserver :=
+Configuration midnamingserver :=
    Components
       naming     : Namingserver
       invoker    : NaminginvokerM

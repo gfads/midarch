@@ -40,6 +40,7 @@ func (NaminginvokerM) I_In(msg *messages.SAMessage, info [] *interface{}) {
 	err := msgpack.Unmarshal(payload, &miopPacket)
 	if err != nil {
 		log.Fatalf("NamingInvokerM:: %s", err)
+		os.Exit(0)
 	}
 
 	var inv shared.Request
@@ -53,6 +54,7 @@ func (NaminginvokerM) I_In(msg *messages.SAMessage, info [] *interface{}) {
 		argsTemp[1] = _p1
 		inv = shared.Request{Op: miopPacket.Bd.ReqHeader.Operation, Args: argsTemp}
 	case "Lookup":
+		fmt.Printf("NamingInvokerM:: Lookup :: HERE\n")
 		_p0 := miopPacket.Bd.ReqBody.Body[0].(string)
 		argsTemp := make([]interface{}, 1, 1)
 		argsTemp[0] = _p0
@@ -68,19 +70,10 @@ func (NaminginvokerM) I_In(msg *messages.SAMessage, info [] *interface{}) {
 }
 
 func (NaminginvokerM) I_Out(msg *messages.SAMessage, info [] *interface{}) { // TODO
-	payload := msg.Payload.([]interface{})
 
-	op := payload[0].(string)
-
-	// I stop here at 14/11/2019
-	switch op {
-
-	}
 	// assembly packet
-	result := make([]interface{}, 1, 1)
-	result[0] = payload
 	repHeader := miop.ReplyHeader{Context: "TODO", RequestId: 13, Status: 131313}
-	repBody := miop.ReplyBody{OperationResult: result}
+	repBody := miop.ReplyBody{OperationResult: *msg}
 	miopHeader := miop.Header{Magic: "M.I.O.P.", Version: "version", MessageType: 2, Size: 131313, ByteOrder: true}
 	miopBody := miop.Body{RepHeader: repHeader, RepBody: repBody}
 	miopPacket := miop.Packet{Hdr: miopHeader, Bd: miopBody}

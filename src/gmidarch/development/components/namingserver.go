@@ -1,7 +1,6 @@
 package components
 
 import (
-	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"shared"
@@ -35,20 +34,26 @@ func (e Namingserver) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		}
 		_p0 := request.Args[0].(string)
 		_p1 := request.Args[1].(map[string]interface{})
-		fmt.Printf("NamingServer:: %v\n", _p1)
 		_p11 := _p1["Host"].(string)
 		_p12 := _p1["Port"].(string)
 		_p13 := _p1["Id"].(int64)
 		_p14 := _p1["Proxy"].(string)
+		iorTemp := ior.IOR{Host: _p11, Port: _p12, Id: int(_p13), Proxy: _p14}
 
-		iorTemp := ior.IOR{Host:_p11,Port:_p12,Id:int(_p13),Proxy:_p14}
+		_r := Namingserver{}.Register(_p0, iorTemp)
+		*msg = messages.SAMessage{Payload: _r}
+	case "Lookup":
+		_p0 := request.Args[0].(string)
+		_ior, _ok := Namingserver{}.Lookup(_p0)
+		_r := []interface{}{_ior, _ok}
+		*msg = messages.SAMessage{Payload: _r}
+	case "List":
+		if Repo == nil { // Repo not initialized
+			Repo = make(map[string]ior.IOR)
+		}
 
-		rTemp := Namingserver{}.Register(_p0,iorTemp)
-
-		r := make([]interface{},2,2)
-		r[0] = request.Op
-		r[1] = rTemp
-		*msg = messages.SAMessage{Payload:r}
+		_r := Namingserver{}.List()
+		*msg = messages.SAMessage{Payload: _r}
 	}
 }
 
@@ -58,19 +63,20 @@ type Naming struct{}
 
 var Repo = map[string]ior.IOR{}
 
-func (Namingserver) Lookup(s string) ior.IOR {
-	return Repo[s]
+func (Namingserver) Lookup(s string) (interface{}, bool) {
+	ior, ok := Repo[s]
+	return ior, ok
 }
 
-func (Namingserver) List() []string{
-	keys := make([]string, 0, len(Repo))
+func (Namingserver) List() []interface{} {
+	keys := make([]interface{}, 0, len(Repo))
 	for k := range Repo {
 		keys = append(keys, k)
 	}
 	return keys
 }
 
-func (Namingserver) Register(serviceName string, ior ior.IOR) bool{
+func (Namingserver) Register(serviceName string, ior ior.IOR) bool {
 	if _, ok := Repo[serviceName]; ok {
 		return false
 	} else {
@@ -78,4 +84,3 @@ func (Namingserver) Register(serviceName string, ior ior.IOR) bool{
 		return true
 	}
 }
-
