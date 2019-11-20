@@ -1,6 +1,7 @@
 package components
 
 import (
+	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"shared"
@@ -77,6 +78,9 @@ func (Namingserver) List() []interface{} {
 }
 
 func (Namingserver) Register(serviceName string, ior ior.IOR) bool {
+
+	fmt.Printf("Naming Server:: Register\n")
+
 	if _, ok := Repo[serviceName]; ok {
 		return false
 	} else {

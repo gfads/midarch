@@ -1,7 +1,6 @@
 package components
 
 import (
-	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"shared"
@@ -37,12 +36,8 @@ func (e Fibonacciproxy) Fibo(_p1 int) int {
 	_reqMsg := messages.SAMessage{messages.Invocation{Host: e.Host, Port: e.Port, Op: "Fibo", Args: _args}}
 
 	i_PreInvRFP  <- _reqMsg
-
-	fmt.Printf("FibonacciProxy:: Fibo:: HERE\n")
-
 	_repMsg := <-i_PosTerRFP
 
-	//payload := _repMsg.Payload.(int64)
 	_reply := int(_repMsg.Payload.(int64))
 
 	return _reply

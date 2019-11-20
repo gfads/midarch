@@ -28,8 +28,6 @@ func (e FibonacciinvokerM) Selector(elem interface{}, elemInfo [] *interface{}, 
 
 func (FibonacciinvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}) { // TODO
 
-	fmt.Printf("FibonacciInvoker:: HERE \n")
-
 	// unmarshall
 	payload := msg.Payload.([]byte)
 

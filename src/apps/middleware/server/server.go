@@ -21,7 +21,7 @@ func main(){
 	fiboProxy := components.Fibonacciproxy{Host:shared.ResolveHostIp(),Port:shared.FIBONACCI_PORT}
 	ok := namingProxy.Register("Fibonacci", fiboProxy)
 	if !ok {
-		fmt.Printf("Server:: Service 'Fibonacci' not registered in the Naming Server\n")
+		fmt.Printf("Server:: Service 'Fibonacci' already registered in the Naming Server\n")
 		os.Exit(0)
 	}
 

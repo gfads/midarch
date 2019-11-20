@@ -54,7 +54,6 @@ func (NaminginvokerM) I_In(msg *messages.SAMessage, info [] *interface{}) {
 		argsTemp[1] = _p1
 		inv = shared.Request{Op: miopPacket.Bd.ReqHeader.Operation, Args: argsTemp}
 	case "Lookup":
-		fmt.Printf("NamingInvokerM:: Lookup :: HERE\n")
 		_p0 := miopPacket.Bd.ReqBody.Body[0].(string)
 		argsTemp := make([]interface{}, 1, 1)
 		argsTemp[0] = _p0

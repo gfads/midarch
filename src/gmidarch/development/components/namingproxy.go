@@ -1,7 +1,6 @@
 package components
 
 import (
-	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"reflect"
@@ -54,7 +53,6 @@ func (e Namingproxy) Lookup(_p1 string) (interface{}, bool) {
 	_args := []interface{}{_p1}
 	_reqMsg := messages.SAMessage{messages.Invocation{Host: e.Host, Port: e.Port, Op: "Lookup", Args: _args}}
 
-	fmt.Printf("Namingproxy:: Lookup :: Here\n")
 	i_PreInvRNP <- _reqMsg
 	_repMsg := <-i_PosTerRNP
 
