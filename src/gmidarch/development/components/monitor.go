@@ -19,6 +19,10 @@ func NewMonitor() Monitor {
 	return *r
 }
 
+func (e Monitor) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+	e.I_Process(msg, info)
+}
+
 func (Monitor) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	*msg = messages.SAMessage{Payload: msg.Payload}
 }

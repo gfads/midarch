@@ -5,6 +5,7 @@ import (
 	"gmidarch/development/artefacts/dot"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/components"
+	"gmidarch/development/connectors"
 	"gmidarch/development/element"
 	"gmidarch/development/messages"
 	"os"
@@ -64,8 +65,8 @@ func (Exec) Create(id string, elem interface{}, typeName string, dot dot.DOTGrap
 				eActions = mapType
 			}
 
-			if shared.IsInternal(actionNameFDR) { // Internal action  // TODO - Remove reflection
-				channel := make(chan messages.SAMessage)
+			if shared.IsInternal(actionNameFDR) {
+				channel := make(chan messages.SAMessage,shared.CHAN_BUFFER_SIZE)
 				var s components.Selector
 
 				switch reflect.TypeOf(elem).Name() {
@@ -101,11 +102,24 @@ func (Exec) Create(id string, elem interface{}, typeName string, dot dot.DOTGrap
 					s = components.NewnaminginvokerM()
 				case "Namingproxy":
 					s = components.NewNamingproxy()
+				case "Monevolutive":
+					s = components.NewMonevolutive()
+				case "Monitor":
+					s = components.NewMonitor()
+				case "Analyser":
+					s = components.NewAnalyser()
+				case "Planner":
+					s = components.NewPlanner()
+				case "Executor":
+					s = components.NewExecutor()
+				case "Oneto8":
+					s = connectors.NewOneto8()
 				default:
 					fmt.Printf("Exec:: Element '%v' not visible in Engine!!\n", reflect.TypeOf(elem).Name())
 					os.Exit(0)
 				}
-				//params := graphs.ExecEdgeInfo{InternalAction: shared.Invoke, ActionName: actionNameFDR, IsInternal: true, ActionChannel: &channel, Message: msg, Info: info}
+
+				//s = element.Element{}
 				params := graphs.ExecEdgeInfo{InternalAction: s.Selector, ActionName: actionNameFDR, IsInternal: true, ActionChannel: &channel, Message: msg, Info: info}
 				mapType := params
 				eActions = mapType

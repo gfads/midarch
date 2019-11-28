@@ -91,6 +91,33 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 	// Attachments
 	atts := []madl.Attachment{}
 
+	if appIsAdaptive {
+		attC1 := madl.Element{ElemId: "monevolutive", TypeName: reflect.TypeOf(components.Monevolutive{}).Name()}
+		attT := madl.Element{ElemId: "t2", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
+		attC2 := madl.Element{ElemId: "monitor", TypeName: reflect.TypeOf(components.Monitor{}).Name()}
+		atts = append(atts, madl.Attachment{attC1, attT, attC2})
+
+		attC1 = madl.Element{ElemId: "monitor", TypeName: reflect.TypeOf(components.Monitor{}).Name()}
+		attT = madl.Element{ElemId: "t3", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
+		attC2 = madl.Element{ElemId: "analyser", TypeName: reflect.TypeOf(components.Analyser{}).Name()}
+		atts = append(atts, madl.Attachment{attC1, attT, attC2})
+
+		attC1 = madl.Element{ElemId: "analyser", TypeName: reflect.TypeOf(components.Analyser{}).Name()}
+		attT = madl.Element{ElemId: "t4", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
+		attC2 = madl.Element{ElemId: "planner", TypeName: reflect.TypeOf(components.Planner{}).Name()}
+		atts = append(atts, madl.Attachment{attC1, attT, attC2})
+
+		attC1 = madl.Element{ElemId: "planner", TypeName: reflect.TypeOf(components.Planner{}).Name()}
+		attT = madl.Element{ElemId: "t5", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
+		attC2 = madl.Element{ElemId: "executor", TypeName: reflect.TypeOf(components.Executor{}).Name()}
+		atts = append(atts, madl.Attachment{attC1, attT, attC2})
+
+		attC1 = madl.Element{ElemId: "executor", TypeName: reflect.TypeOf(components.Executor{}).Name()}
+		attT = madl.Element{ElemId: "t6", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
+		attC2 = madl.Element{ElemId: "core", TypeName: reflect.TypeOf(components.Core{}).Name()}
+		atts = append(atts, madl.Attachment{attC1, attT, attC2})
+	}
+
 	for i := 0; i < len(units); i++ {
 		attC1 := madl.Element{ElemId: "core", TypeName: reflect.TypeOf(components.Core{}).Name()}
 
@@ -137,37 +164,6 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 			fmt.Printf("Creator:: Configuration '%v' cannot be executed because 'OnetoN.dot' is not ok ", mapp.Configuration)
 			os.Exit(0)
 		}
-
-		//attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
-		//attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
-		//atts = append(atts, madl.Attachment{attC1, attT, attC2})
-	}
-
-	if appIsAdaptive {
-		attC1 := madl.Element{ElemId: "monevolutive", TypeName: reflect.TypeOf(components.Monevolutive{}).Name()}
-		attT := madl.Element{ElemId: "t2", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
-		attC2 := madl.Element{ElemId: "monitor", TypeName: reflect.TypeOf(components.Monitor{}).Name()}
-		atts = append(atts, madl.Attachment{attC1, attT, attC2})
-
-		attC1 = madl.Element{ElemId: "monitor", TypeName: reflect.TypeOf(components.Monitor{}).Name()}
-		attT = madl.Element{ElemId: "t3", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
-		attC2 = madl.Element{ElemId: "analyser", TypeName: reflect.TypeOf(components.Analyser{}).Name()}
-		atts = append(atts, madl.Attachment{attC1, attT, attC2})
-
-		attC1 = madl.Element{ElemId: "analyser", TypeName: reflect.TypeOf(components.Analyser{}).Name()}
-		attT = madl.Element{ElemId: "t4", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
-		attC2 = madl.Element{ElemId: "planner", TypeName: reflect.TypeOf(components.Planner{}).Name()}
-		atts = append(atts, madl.Attachment{attC1, attT, attC2})
-
-		attC1 = madl.Element{ElemId: "planner", TypeName: reflect.TypeOf(components.Planner{}).Name()}
-		attT = madl.Element{ElemId: "t5", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
-		attC2 = madl.Element{ElemId: "executor", TypeName: reflect.TypeOf(components.Executor{}).Name()}
-		atts = append(atts, madl.Attachment{attC1, attT, attC2})
-
-		attC1 = madl.Element{ElemId: "executor", TypeName: reflect.TypeOf(components.Executor{}).Name()}
-		attT = madl.Element{ElemId: "t6", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
-		attC2 = madl.Element{ElemId: "core", TypeName: reflect.TypeOf(components.Core{}).Name()}
-		atts = append(atts, madl.Attachment{attC1, attT, attC2})
 	}
 
 	// Adaptability

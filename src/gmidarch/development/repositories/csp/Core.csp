@@ -4,7 +4,19 @@ datatype PROCNAMES = e1 | e2
 channel InvR, InvP : PROCNAMES
 channel I_Debug
 
--- Non-adaptive Core = InvR.e1 -> I_Debug -> Core
+-- Non-adaptive
+-- Core = InvR.e1 -> I_Debug -> Core
+
 -- Adaptive
-Core = InvR.e1 -> P1
-P1 = InvP.e2 -> InvR.e1 -> P1
+--Core = InvR.e1 -> P1
+--P1 = InvP.e2 -> I_Debug -> InvR.e1 -> P1
+
+-- Non-adaptive (new)
+-- Core = I_Debug -> Core
+
+
+-- Adaptive (new with debug)
+Core = InvP.e1 -> I_Debug -> InvR.e2 -> Core
+
+-- Adaptive (new with debug)
+--Core = InvP.e1 -> InvR.e2 -> Core

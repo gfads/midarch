@@ -1,5 +1,6 @@
 digraph G {
-  0 -> 1 [ label="InvP.e1" ];
-  1 -> 2 [ label="I_Initialiseunit" ];
-  2 -> 2 [ label="I_Execute" ];
+  0 -> 1 [ label="I_Initialiseunit" ];
+  1 -> 1 [ label="I_Execute" ];
+  1 -> 2 [ label="InvP.e1" ];
+  2 -> 1 [ label="I_Adaptunit" ];
 }

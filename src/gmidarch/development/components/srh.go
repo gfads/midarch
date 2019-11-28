@@ -37,15 +37,13 @@ func (e SRH) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg
 
 func (e SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [] *interface{}) { // TODO Host & Port
 
-	// create listener if necessary
-	tempPort := *elemInfo[0]
-	port := tempPort.(string)
-	host := "localhost"
-	key := host + ":" + port
-
 	//var err error
 	if LnSRH == nil { // listener was not created yet
-		servAddr, err := net.ResolveTCPAddr("tcp", key)
+		tempPort := *elemInfo[0]
+		port := tempPort.(string)
+		host := "localhost"
+
+		servAddr, err := net.ResolveTCPAddr("tcp", host+":"+port)
 		if err != nil {
 			log.Fatalf("SRH:: %v\n", err)
 		}
@@ -55,72 +53,22 @@ func (e SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [
 		}
 	}
 
-	//conn := e.Conns[key]
+	// internal channels
 	c1 := make(chan []byte)
 	c2 := make(chan []byte)
 
-	go acceptread(&ConnSRH,LnSRH, c1)
+	// it allows to read/accept simulatensouly
+	go acceptread(&ConnSRH, LnSRH, c1)
 	if ConnSRH != nil {
 		go read(ConnSRH, c2)
 	}
 
 	select {
-	case msgTemp1 := <- c1:
+	case msgTemp1 := <-c1:
 		*msg = messages.SAMessage{Payload: msgTemp1}
-	case msgTemp2 := <- c2:
+	case msgTemp2 := <-c2:
 		*msg = messages.SAMessage{Payload: msgTemp2}
 	}
-}
-
-func acceptread(conn *net.Conn,ln net.Listener, c chan []byte){
-	// accept connections
-	var err error
-
-	*conn, err = ln.Accept()
-	if err != nil {
-		log.Fatalf("SRH:: %s", err)
-	}
-
-	// receive size & message
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	x := *conn
-	_, err = x.Read(size)
-	if err == io.EOF {
-		os.Exit(0)
-	} else if err != nil && err != io.EOF {
-		log.Fatalf("SRH::: %s", err)
-	}
-
-	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-	_, err = x.Read(msgTemp)
-	if err != nil {
-		log.Fatalf("SRH:: %s", err)
-	}
-
-	c <- msgTemp
-}
-
-func read(conn net.Conn,  c chan []byte){
-	// accept connections
-	var err error
-
-		// receive size & message
-		size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-		x := conn
-		_, err = x.Read(size)
-		if err == io.EOF {
-			os.Exit(0)
-		} else if err != nil && err != io.EOF {
-			log.Fatalf("SRH::: %s", err)
-		}
-
-		msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-		_, err = x.Read(msgTemp)
-		if err != nil {
-			log.Fatalf("SRH:: %s", err)
-		}
-
-	   c <- msgTemp
 }
 
 func (e SRH) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo []*interface{}) {
@@ -139,4 +87,54 @@ func (e SRH) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo []*i
 	if err != nil {
 		log.Fatalf("SRH:: %s", err)
 	}
+}
+
+func acceptread(conn *net.Conn, ln net.Listener, c chan []byte) {
+
+	// accept connections
+	var err error
+	*conn, err = ln.Accept()
+	if err != nil {
+		log.Fatalf("SRH:: %s", err)
+	}
+
+	// receive size & message
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	tempConn := *conn
+	_, err = tempConn.Read(size)
+	if err == io.EOF {
+		os.Exit(0)
+	} else if err != nil && err != io.EOF {
+		log.Fatalf("SRH::: %s", err)
+	}
+
+	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
+	_, err = tempConn.Read(msgTemp)
+	if err != nil {
+		log.Fatalf("SRH:: %s", err)
+	}
+
+	c <- msgTemp
+}
+
+func read(conn net.Conn, c chan []byte) {
+
+	// receive size & message
+	var err error
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	tempConn := conn
+	_, err = tempConn.Read(size)
+	if err == io.EOF {
+		os.Exit(0)
+	} else if err != nil && err != io.EOF {
+		log.Fatalf("SRH::: %s", err)
+	}
+
+	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
+	_, err = tempConn.Read(msgTemp)
+	if err != nil {
+		log.Fatalf("SRH:: %s", err)
+	}
+
+	c <- msgTemp
 }

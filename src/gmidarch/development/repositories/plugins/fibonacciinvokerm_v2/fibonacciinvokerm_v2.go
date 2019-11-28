@@ -1,4 +1,4 @@
-package components
+package main
 
 import (
 	"apps/fibomiddleware/impl"
@@ -14,6 +14,14 @@ import (
 type FibonacciinvokerM struct {
 	Behaviour string
 	Graph     graphs.ExecGraph
+}
+
+func Gettype() interface{} {
+	return FibonacciinvokerM{}
+}
+
+func Getselector() func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}){
+	return FibonacciinvokerM{}.Selector
 }
 
 func NewFibonacciInvokerM() FibonacciinvokerM {
@@ -43,6 +51,8 @@ func (FibonacciinvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}
 	switch op {
 	case "Fibo":
 		_p0 := int(miopPacket.Bd.ReqBody.Body[0].(int64))
+
+		fmt.Printf("FibonacciInvokerM [Plugin V2]\n")
 
 		_r := impl.Fibonacci{}.F(_p0)
 

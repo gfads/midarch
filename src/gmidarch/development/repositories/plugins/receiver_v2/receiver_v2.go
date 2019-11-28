@@ -2,17 +2,21 @@ package main
 
 import (
 	"fmt"
-	graphs2 "gmidarch/development/artefacts/graphs"
-	messages2 "gmidarch/development/messages"
+	"gmidarch/development/artefacts/graphs"
+	"gmidarch/development/messages"
 )
 
 type Receiver struct {
 	Behaviour string
-	Graph     graphs2.ExecGraph
+	Graph     graphs.ExecGraph
 }
 
 func Gettype() interface{} {
 	return Receiver{}
+}
+
+func Getselector() func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}){
+	return Receiver{}.Selector
 }
 
 func NewReceiver() Receiver {
@@ -24,6 +28,10 @@ func NewReceiver() Receiver {
 	return *r
 }
 
-func (Receiver) I_Printmessage(msg *messages2.SAMessage, info [] *interface{}) {
+func (Receiver) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}){
+	elem.(Receiver).I_Printmessage(msg, info)
+}
+
+func (Receiver) I_Printmessage(msg *messages.SAMessage, info [] *interface{}) {
 	fmt.Printf("Receiver:: Plugin [V2]:: %v  \n", *msg)
 }

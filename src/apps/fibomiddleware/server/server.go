@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gmidarch/development/components"
 	"gmidarch/execution/frontend"
+	"injector/evolutive"
 	"os"
 	"shared"
 	"shared/factories"
@@ -27,7 +28,9 @@ func main(){
 
 	fmt.Printf("Server:: Fibonacci server is running at Port: %v \n",shared.FIBONACCI_PORT)
 
-	//namingProxy.Lookup("Fibonacci")
+	// Start evolutive injector
+	inj := evolutive.EvolutiveInjector{}
+	inj.Start("fibonacciinvokerm")
 
 	fmt.Scanln()
 	fmt.Println("done")

@@ -1,4 +1,5 @@
 digraph G {
-  0 -> 1 [ label="InvR.e1" ];
-  1 -> 0 [ label="InvP.e2" ];
+  0 -> 1 [ label="InvP.e1" ];
+  1 -> 2 [ label="I_Debug" ];
+  2 -> 0 [ label="InvR.e2" ];
 }

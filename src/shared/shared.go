@@ -31,11 +31,11 @@ var IS_EVOLUTIVE = false
 var IS_CORRECTIVE = false
 var IS_PROACTIVE = false
 
-var MONITOR_TIME time.Duration   // seconds
+const MONITOR_TIME time.Duration = 1 * time.Second   // seconds
 var INJECTION_TIME time.Duration // seconds
 var REQUEST_TIME time.Duration   // milliseconds
 var STRATEGY = 0                 // 1 - no change 2 - change once 3 - change same plugin 4 - alternate plugins
-const SAMPLE_SIZE = 5000
+const SAMPLE_SIZE = 100000
 
 var NAMING_HOST = ""
 var QUEUEING_HOST = ""
@@ -56,6 +56,7 @@ type UnitCommand struct {
 	Cmd    string
 	Params plugin.Plugin
 	Type   interface{}
+	Selector func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{})
 }
 
 type AdaptationPlan struct {
@@ -188,7 +189,7 @@ func ShowExecutionParameters(s bool) {
 		fmt.Println("Corrective        : " + strconv.FormatBool(IS_CORRECTIVE))
 		fmt.Println("Evolutive         : " + strconv.FormatBool(IS_EVOLUTIVE))
 		fmt.Println("Proactive         : " + strconv.FormatBool(IS_PROACTIVE))
-		fmt.Println("Monitor Time (s)  : " + (MONITOR_TIME * time.Second).String())
+//		fmt.Println("Monitor Time (s)  : " + (MONITOR_TIME * time.Second).String())
 		fmt.Println("Injection Time (s): " + (INJECTION_TIME * time.Second).String())
 		fmt.Println("Request Time (ms) : " + REQUEST_TIME.String())
 		fmt.Println("Strategy (0-NOT DEFINED 1-No change 2-Change once 3-change same plugin 4-alternate plugins): " + strconv.Itoa(STRATEGY))
@@ -498,7 +499,7 @@ const SIZE_OF_MESSAGE_SIZE = 4
 
 // Optimization
 
-const NUM_MAX_EDGES int = 5
+const NUM_MAX_EDGES_IN_PARALLEL int = 3
 const NUM_MAX_CONNECTIONS int = 5
 const NUM_MAX_MESSAGE_BYTES int = 1024
 const NUM_MAX_NODES int = 50

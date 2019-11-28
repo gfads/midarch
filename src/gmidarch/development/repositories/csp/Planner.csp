@@ -1,5 +1,5 @@
 datatype PROCNAMES = e1 | e2
 channel InvP, InvR : PROCNAMES
-channel I_Createplan
+channel I_Process
 
-Planner = InvP.e1 -> I_Createplan -> InvR.e2 -> Planner
+Planner = InvP.e1 -> I_Process -> InvR.e2 -> Planner

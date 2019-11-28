@@ -20,6 +20,10 @@ func NewAnalyser() Analyser {
 	return *r
 }
 
+func (e Analyser) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+	e.I_Process(msg, info)
+}
+
 func (Analyser) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	monitoredEvolutiveData := msg.Payload.(shared.MonitoredEvolutiveData)
 	evolutiveAnalysisResult := shared.EvolutiveAnalysisResult{}

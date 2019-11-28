@@ -1,7 +1,6 @@
 package components
 
 import (
-	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"shared"
@@ -23,6 +22,9 @@ func Newnamingserver() Namingserver {
 
 func (e Namingserver) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
 	e.I_Process(msg, info)
+}
+
+func (e Namingserver) I_Zero(msg *messages.SAMessage, info [] *interface{}) {
 }
 
 func (e Namingserver) I_Process(msg *messages.SAMessage, info [] *interface{}) {
@@ -78,8 +80,6 @@ func (Namingserver) List() []interface{} {
 }
 
 func (Namingserver) Register(serviceName string, ior ior.IOR) bool {
-
-	fmt.Printf("Naming Server:: Register\n")
 
 	if _, ok := Repo[serviceName]; ok {
 		return false

@@ -34,7 +34,6 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	// check message
 	payload := msg.Payload.([]interface{})
-	//host := payload[0].(string)        // host
 	host := "localhost"                // host TODO
 	port := payload[1].(string)        // port
 	msgToServer := payload[2].([]byte) // message
@@ -58,8 +57,6 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	// connect to server
 	conn := c.Conns[key]
-
-	//fmt.Printf("CRH:: I_Process:: (%v,%v) %v\n", conn.LocalAddr(), conn.RemoteAddr(), len(c.Conns))
 
 	// send message's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)

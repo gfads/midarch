@@ -1,4 +1,4 @@
-package components
+package impl
 
 type Fibonacci struct{}
 
@@ -8,6 +8,6 @@ func (Fibonacci) F(n int) int {
 	} else if n == 1 {
 		return 1
 	} else {
-		return f(n-1) + f(n-2)
+		return Fibonacci{}.F(n-1) + Fibonacci{}.F(n-2)
 	}
 }

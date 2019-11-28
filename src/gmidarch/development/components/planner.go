@@ -20,7 +20,11 @@ func NewPlanner() Planner {
 	return *r
 }
 
-func (Planner) I_Createplan (msg *messages.SAMessage, info [] *interface{}) {
+func (e Planner) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+	e.I_Process(msg, info)
+}
+
+func (Planner) I_Process (msg *messages.SAMessage, info [] *interface{}) {
 	evolutiveAnalysisResult := msg.Payload.(shared.EvolutiveAnalysisResult)
 
 	plan := shared.AdaptationPlan{}

@@ -23,9 +23,15 @@ func NewMonevolutive() Monevolutive {
 	return *r
 }
 
+func (e Monevolutive) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+	e.I_Checkplugins(msg, info)
+}
+
 func (Monevolutive) I_Checkplugins(msg *messages.SAMessage, info [] *interface{}) {
 	newPlugins := []string{}
 	listOfNewPlugins := make(map[string]time.Time)
+
+	time.Sleep(shared.MONITOR_TIME) // TODO
 
 	if isFirstTime {
 		isFirstTime = false
@@ -40,6 +46,4 @@ func (Monevolutive) I_Checkplugins(msg *messages.SAMessage, info [] *interface{}
 	*msg = messages.SAMessage{evolutiveMonitoredData}
 
 	listOfOldPlugins = listOfNewPlugins
-
-	time.Sleep(1000 * time.Millisecond)
 }

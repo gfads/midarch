@@ -10,6 +10,8 @@ import (
 	"time"
 )
 
+var N int = 1
+
 func main() {
 	// start configuration
 	frontend.FrontEnd{}.Deploy("midfibonacciclient.madl")
@@ -17,41 +19,36 @@ func main() {
 	// proxy to naming service
 	namingProxy := factories.LocateNaming()
 
-	// obtain proxy
+	// obtain proxy of fibonacci
 	s := "Fibonacci"
-	proxy,ok := namingProxy.Lookup(s)
+	proxy, ok := namingProxy.Lookup(s)
 	if !ok {
-		fmt.Printf("Client:: Service '%v' not registered in Naming Service!! \n",s)
+		fmt.Printf("Client:: Service '%v' not registered in Naming Service!! \n", s)
 		os.Exit(0)
 	}
-
 	fibo := proxy.(components.Fibonacciproxy)
 
-	durations := [5000]time.Duration{}
+	durations := [shared.SAMPLE_SIZE]time.Duration{}
 
 	// invoke remote method
 	for i := 0; i < shared.SAMPLE_SIZE; i++ {
 
 		t1 := time.Now()
-		fibo.Fibo(10)
+		fibo.Fibo(N)
 		t2 := time.Now()
 
 		durations[i] = t2.Sub(t1)
 
-		//if i >= 1500 {
-		//	fmt.Println(float64(t2.Sub(t1).Nanoseconds())/float64(1000000))
-		//}
-
-		//x := float64(t2.Sub(t1).Nanoseconds()) / 1000000
-		//fmt.Printf("%v \n", x)
-		//time.Sleep(parameters.REQUEST_TIME * time.Millisecond)
+		fmt.Printf("%v\n",float64(durations[i].Nanoseconds())/1000000)
 	}
 
 	totalTime := time.Duration(0)
-	for i := range durations{
+	for i := range durations {
 		totalTime += durations[i]
 	}
 
-	fmt.Printf("Tempo Total: %v\n",totalTime)
-	fmt.Printf("Tempo Médio: %v\n",totalTime/5000)
+	fmt.Printf("Tempo Total [N=%v] [SAMPLE=%v] [TIME=%v]\n", N, shared.SAMPLE_SIZE,totalTime)
+	fmt.Printf("Tempo Médio [N=%v] [SAMPLE=%v] [TIME=%v]\n", N, shared.SAMPLE_SIZE,totalTime/shared.SAMPLE_SIZE)
+
+	fmt.Scanln()
 }

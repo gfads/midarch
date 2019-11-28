@@ -57,8 +57,9 @@ func alternatePlugins(elem string) {
 		case 2: // Plugin 02
 			currentPlugin = 1
 			generatePlugin(elem+"_v2", elem+"_v2")
-			time.Sleep(shared.INJECTION_TIME * time.Second)
+			//time.Sleep(shared.INJECTION_TIME * time.Second)
 		}
+		time.Sleep(1 * time.Second)
 	}
 }
 
