@@ -36,13 +36,14 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	payload := msg.Payload.([]interface{})
 	host := "localhost"                // host TODO
 	port := payload[1].(string)        // port
-	msgToServer := payload[2].([]byte) // message
+	msgToServer := payload[2].([]byte)
 
 	key := host + ":" + port
 	var err error
 	if _, ok := c.Conns[key]; !ok { // no connection open yet
-		servAddr := key // TODO
-		tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
+		//servAddr := key // TODO
+		//tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
+		tcpAddr, err := net.ResolveTCPAddr("tcp", key)
 		if err != nil {
 			fmt.Printf("Client:: %v\n", err)
 			os.Exit(0)

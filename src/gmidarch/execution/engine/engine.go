@@ -45,7 +45,8 @@ func selectEdge(elem interface{}, elemInfo [] *interface{}, chosen *int, edges [
 	var value reflect.Value
 
 	// Assembly select cases
-	for i := 0; i < len(edges); i++ {
+	//for i := 0; i < len(edges); i++ {
+	for i := range edges {
 		if edges[i].Info.IsInternal { // Internal actions
 			hasInternalAction = true
 			casesInt[i] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(*edges[i].Info.ActionChannel)}
@@ -61,9 +62,8 @@ func selectEdge(elem interface{}, elemInfo [] *interface{}, chosen *int, edges [
 		}
 	}
 
-	// Exeternal actions only
 	if hasExternalAction && !hasInternalAction {
-		*chosen, value, _ = reflect.Select(casesExt) // Only external actions
+		*chosen, value, _ = reflect.Select(casesExt) // External action selection
 		*edges[*chosen].Info.Message = value.Interface().(messages.SAMessage)
 		return
 	}
@@ -73,36 +73,38 @@ func selectEdge(elem interface{}, elemInfo [] *interface{}, chosen *int, edges [
 		for i := range edges {
 			if edges[i].Info.IsInternal {
 				edges[i].Info.InternalAction(elem, elemInfo, edges[i].Info.ActionName, edges[i].Info.Message, edges[i].Info.Info)
-			go enableInternalAction(edges[i].Info.ActionChannel, *edges[i].Info.Message) // enable choice by sending something to channel
+				go enableInternalAction(edges[i].Info.ActionChannel, *edges[i].Info.Message)
 			}
 		}
-		*chosen, value, _ = reflect.Select(casesInt) // Only internal actions
+		*chosen, value, _ = reflect.Select(casesInt) // Internal action selection
 		*edges[*chosen].Info.Message = value.Interface().(messages.SAMessage)
-		return
+		return // return from this point
 	}
 
 	// External and internal actions (external actions first and then internal ones)
 	if hasExternalAction && hasInternalAction {
 		casesExt = append(casesExt, reflect.SelectCase{Dir: reflect.SelectDefault}) // append default case
-		*chosen, value, _ = reflect.Select(casesExt)
-		if *chosen != len(edges) { // external action selected
+		*chosen, value, _ = reflect.Select(casesExt)                                // External action selection
+		if *chosen != len(edges) {  // An external action was selected
 			if casesExt[*chosen].Dir == reflect.SelectRecv { // InvP and TerR
 				*edges[*chosen].Info.Message = value.Interface().(messages.SAMessage)
 			}
-			return
+			return // return from this point
 		}
 	}
 
-	// External action NOT selected (default case)
+	// If no external action was selected (default case), then select an internal action
 	for i := range edges {
 		if edges[i].Info.IsInternal {
 			edges[i].Info.InternalAction(elem, elemInfo, edges[i].Info.ActionName, edges[i].Info.Message, edges[i].Info.Info)
-			go enableInternalAction(edges[i].Info.ActionChannel, *edges[i].Info.Message) // enable choice by sending something to channel
+			go enableInternalAction(edges[i].Info.ActionChannel, *edges[i].Info.Message)
 		}
 	}
 
-	*chosen, value, _ = reflect.Select(casesInt) // 2o. Internal actions
+	*chosen, value, _ = reflect.Select(casesInt) // Internal action selection
 	*edges[*chosen].Info.Message = value.Interface().(messages.SAMessage)
+
+	return
 }
 
 func enableInternalAction(channel *chan messages.SAMessage, msg messages.SAMessage) {

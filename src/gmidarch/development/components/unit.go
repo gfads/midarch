@@ -93,11 +93,12 @@ func (u Unit) I_Adaptunit(msg *messages.SAMessage, info [] *interface{}) {
 }
 
 func (u *Unit) changeSelector(s func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{})) graphs.ExecGraph {
-	temp, ok := allUnitsGraph.Load(u.UnitId)
-	if !ok {
-		fmt.Printf("Unit:: Error on acessing the element graph")
-		os.Exit(0)
-	}
+	temp, _ := allUnitsGraph.Load(u.UnitId)
+	//temp, ok := allUnitsGraph.Load(u.UnitId)
+	//if !ok {
+	//	fmt.Printf("Unit:: Error on acessing the element graph")
+	//	os.Exit(0)
+	//}
 	g := temp.(graphs.ExecGraph)
 	for e1 := range g.ExecEdges {
 		for e2 := range g.ExecEdges [e1] {

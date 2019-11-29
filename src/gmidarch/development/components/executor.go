@@ -1,7 +1,6 @@
 package components
 
 import (
-	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"shared"
@@ -43,5 +42,5 @@ func (Executor) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		unitCommand.Selector = funcSelector
 	}
 	*msg = messages.SAMessage{Payload: unitCommand}
-	fmt.Printf("Executor:: %v\n",msg.Payload)
+	//fmt.Printf("Executor:: %v\n",msg.Payload)
 }
