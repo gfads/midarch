@@ -39,7 +39,7 @@ func main() {
 
 		durations[i] = t2.Sub(t1)
 
-		fmt.Printf("%v\n",float64(durations[i].Nanoseconds())/1000000)
+		//fmt.Printf("%v\n",float64(durations[i].Nanoseconds())/1000000)
 	}
 
 	totalTime := time.Duration(0)

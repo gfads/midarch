@@ -16,7 +16,7 @@ channel I_Debug
 
 
 -- Adaptive (new with debug)
-Core = InvP.e1 -> I_Debug -> InvR.e2 -> Core
+--Core = InvP.e1 -> I_Debug -> InvR.e2 -> Core
 
 -- Adaptive (new with debug)
---Core = InvP.e1 -> InvR.e2 -> Core
+Core = InvP.e1 -> InvR.e2 -> Core

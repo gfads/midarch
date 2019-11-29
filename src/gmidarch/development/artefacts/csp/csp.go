@@ -264,7 +264,8 @@ func updateRuntimeBehaviourComponents(compId string, madl madl.MADL) string {
 					r1 = "B = InvR.e1 -> B"
 				} else {
 					//r1 = "B = InvR.e1 -> P1 \n P1 = InvP.e2 -> I_Debug -> InvR.e1 -> P1"
-					r1 = "B = InvP.e1 -> I_Debug -> InvR.e2 -> P1"
+					//r1 = "B = InvP.e1 -> I_Debug -> InvR.e2 -> P1"
+					r1 = "B = InvP.e1 -> InvR.e2 -> P1"
 				}
 				break
 			}

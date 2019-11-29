@@ -52,7 +52,7 @@ func (FibonacciinvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}
 	case "Fibo":
 		_p0 := int(miopPacket.Bd.ReqBody.Body[0].(int64))
 
-		fmt.Printf("FibonacciInvokerM [Plugin V2]\n")
+		//fmt.Printf("FibonacciInvokerM [Plugin V2]\n")
 
 		_r := impl.Fibonacci{}.F(_p0)
 

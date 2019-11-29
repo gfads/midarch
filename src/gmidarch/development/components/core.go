@@ -23,7 +23,7 @@ func NewCore() Core {
 }
 
 func (Core) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
-	Core{}.I_Debug(msg,info)
+//	Core{}.I_Debug(msg,info)
 }
 
 func (Core) I_Debug(msg *messages.SAMessage, info [] *interface{}) {

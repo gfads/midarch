@@ -66,18 +66,18 @@ func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}) {
 func (u Unit) I_Adaptunit(msg *messages.SAMessage, info [] *interface{}) {
 	cmd := msg.Payload.(shared.UnitCommand)
 
-	fmt.Printf("Unit:: I_Adapt:: %v %v %v\n",reflect.TypeOf(u.ElemOfUnit).Name(),reflect.TypeOf(cmd.Type), u.UnitId)
+	//fmt.Printf("Unit:: I_Adapt:: %v %v %v\n",reflect.TypeOf(u.ElemOfUnit).Name(),reflect.TypeOf(cmd.Type), u.UnitId)
 
 	if cmd.Cmd != "" {
 		unitElemType := reflect.TypeOf(u.ElemOfUnit).Name()
 		cmdElemType := reflect.TypeOf(cmd.Type).Name()
 
-		fmt.Printf("Unit:: Selector:: I_Adaptunit:: [%v] [%v] \n", cmd.Cmd, cmd.Type)
+		//fmt.Printf("Unit:: Selector:: I_Adaptunit:: [%v] [%v] \n", cmd.Cmd, cmd.Type)
 
 		// Check if the command is to this unit - check by type, i.e., all elements of a given type are adapted
 		if unitElemType == cmdElemType {
 			if cmd.Cmd == shared.REPLACE_COMPONENT { // TODO
-				fmt.Printf("Unit:: Change happened**** \n")
+				//fmt.Printf("Unit:: Change happened**** \n")
 				allUnitsType.Delete(u.UnitId)
 				allUnitsType.Store(u.UnitId, cmd.Type)
 				g := u.changeSelector(cmd.Selector)

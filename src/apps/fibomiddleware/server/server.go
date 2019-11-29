@@ -30,7 +30,7 @@ func main(){
 
 	// Start evolutive injector
 	inj := evolutive.EvolutiveInjector{}
-	inj.Start("fibonacciinvokerm")
+	go inj.Start("fibonacciinvokerm")
 
 	fmt.Scanln()
 	fmt.Println("done")

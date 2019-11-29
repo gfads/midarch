@@ -35,7 +35,7 @@ const MONITOR_TIME time.Duration = 1 * time.Second   // seconds
 var INJECTION_TIME time.Duration // seconds
 var REQUEST_TIME time.Duration   // milliseconds
 var STRATEGY = 0                 // 1 - no change 2 - change once 3 - change same plugin 4 - alternate plugins
-const SAMPLE_SIZE = 100000
+const SAMPLE_SIZE = 5000
 
 var NAMING_HOST = ""
 var QUEUEING_HOST = ""

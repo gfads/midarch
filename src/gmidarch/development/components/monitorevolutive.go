@@ -31,12 +31,12 @@ func (Monevolutive) I_Checkplugins(msg *messages.SAMessage, info [] *interface{}
 	newPlugins := []string{}
 	listOfNewPlugins := make(map[string]time.Time)
 
-	time.Sleep(shared.MONITOR_TIME) // TODO
-
 	if isFirstTime {
+		time.Sleep(10 * time.Second)  // TODO - only first time
 		isFirstTime = false
 		listOfOldPlugins = shared.LoadPlugins()
 	} else {
+		time.Sleep(shared.MONITOR_TIME) // TODO
 		listOfNewPlugins = shared.LoadPlugins()
 		newPlugins = shared.CheckForNewPlugins(listOfOldPlugins, listOfNewPlugins)
 	}
