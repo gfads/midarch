@@ -1,6 +1,6 @@
 datatype PROCNAMES = s | r | t
 channel InvR,InvP : PROCNAMES
-channel I_Setmessagt,I_Setmessage2,I_Setmessage3,I_PrintMessage
+channel I_Setmessage2,I_Setmessage3,I_PrintMessage,I_Setmessagt
 S = I_Setmessagt -> InvR.t -> S [] I_Setmessage2 -> InvR.t -> S [] I_Setmessage3 -> InvR.t -> S
 R = InvP.t -> I_PrintMessage -> R
 T = InvP.s -> InvR.r -> T

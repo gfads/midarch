@@ -26,6 +26,7 @@ func (al *ArchitecturalRepository) Load() error {
 	al.Library["Oneto2"] = Record{Type: connectors.NewOneto2(), Behaviour: connectors.NewOneto2().Behaviour}
 	al.Library["Oneto8"] = Record{Type: connectors.NewOneto8(), Behaviour: connectors.NewOneto8().Behaviour}
 	al.Library["Oneto5"] = Record{Type: connectors.NewOneto5(), Behaviour: connectors.NewOneto5().Behaviour}
+	al.Library["Oneto3"] = Record{Type: connectors.NewOneto3(), Behaviour: connectors.NewOneto3().Behaviour}
 	al.Library["Oneto6"] = Record{Type: connectors.NewOneto6(), Behaviour: connectors.NewOneto6().Behaviour}
 	al.Library["Oneto7"] = Record{Type: connectors.NewOneto7(), Behaviour: connectors.NewOneto7().Behaviour}
 	al.Library["Oneto9"] = Record{Type: connectors.NewOneto9(), Behaviour: connectors.NewOneto9().Behaviour}

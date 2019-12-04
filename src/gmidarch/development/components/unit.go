@@ -79,7 +79,7 @@ func (u Unit) I_Adaptunit(msg *messages.SAMessage, info [] *interface{}) {
 			if cmd.Cmd == shared.REPLACE_COMPONENT { // TODO
 				//fmt.Printf("Unit:: Change happened**** \n")
 				allUnitsType.Delete(u.UnitId)
-				allUnitsType.Store(u.UnitId, cmd.Type)
+				allUnitsType.Store(u.UnitId, cmd.Type) // TODO - Change
 				g := u.changeSelector(cmd.Selector)
 				allUnitsGraph.Delete(u.UnitId)
 				allUnitsGraph.Store(u.UnitId, g)
@@ -94,11 +94,7 @@ func (u Unit) I_Adaptunit(msg *messages.SAMessage, info [] *interface{}) {
 
 func (u *Unit) changeSelector(s func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{})) graphs.ExecGraph {
 	temp, _ := allUnitsGraph.Load(u.UnitId)
-	//temp, ok := allUnitsGraph.Load(u.UnitId)
-	//if !ok {
-	//	fmt.Printf("Unit:: Error on acessing the element graph")
-	//	os.Exit(0)
-	//}
+
 	g := temp.(graphs.ExecGraph)
 	for e1 := range g.ExecEdges {
 		for e2 := range g.ExecEdges [e1] {

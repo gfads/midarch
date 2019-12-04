@@ -12,7 +12,7 @@ Configuration senderreceiver_ee :=
       unit3 : Unit 
 
     Connectors 
-      t1 : OnetoN 
+      t1 : Oneto3 
       t2 : Oneway 
       t3 : Oneway 
       t4 : Oneway 

@@ -39,6 +39,7 @@ func main() {
 
 		durations[i] = t2.Sub(t1)
 
+		//time.Sleep(10 * time.Millisecond)
 		//fmt.Printf("%v\n",float64(durations[i].Nanoseconds())/1000000)
 	}
 
@@ -51,4 +52,9 @@ func main() {
 	fmt.Printf("Tempo Médio [N=%v] [SAMPLE=%v] [TIME=%v]\n", N, shared.SAMPLE_SIZE,totalTime/shared.SAMPLE_SIZE)
 
 	fmt.Scanln()
+}
+
+func timeTrack(start time.Time, name string) time.Duration {
+	elapsed := time.Since(start)
+	return elapsed
 }

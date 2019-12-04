@@ -114,6 +114,10 @@ func (Exec) Create(id string, elem interface{}, typeName string, dot dot.DOTGrap
 					s = components.NewExecutor()
 				case "Oneto8":
 					s = connectors.NewOneto8()
+				case "Oneto5":
+					s = connectors.NewOneto5()
+				case "Oneto3":
+					s = connectors.NewOneto3()
 				default:
 					fmt.Printf("Exec:: Element '%v' not visible in Engine!!\n", reflect.TypeOf(elem).Name())
 					os.Exit(0)

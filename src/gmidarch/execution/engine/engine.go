@@ -8,6 +8,8 @@ import (
 )
 
 type Engine struct{}
+var hasInternalAction, hasExternalAction bool
+var value reflect.Value
 
 func (Engine) Execute(elem interface{}, elemInfo []*interface{}, graph graphs.ExecGraph, executeForever bool) {
 
@@ -40,9 +42,9 @@ func (Engine) Execute(elem interface{}, elemInfo []*interface{}, graph graphs.Ex
 func selectEdge(elem interface{}, elemInfo [] *interface{}, chosen *int, edges []graphs.ExecEdge) {
 	casesInt := make([]reflect.SelectCase, len(edges), len(edges))
 	casesExt := make([]reflect.SelectCase, len(edges), len(edges)+1)
-	hasInternalAction := false
-	hasExternalAction := false
-	var value reflect.Value
+	hasInternalAction = false
+	hasExternalAction = false
+	//var value reflect.Value
 
 	// Assembly select cases
 	//for i := 0; i < len(edges); i++ {
@@ -65,6 +67,7 @@ func selectEdge(elem interface{}, elemInfo [] *interface{}, chosen *int, edges [
 	if hasExternalAction && !hasInternalAction {
 		*chosen, value, _ = reflect.Select(casesExt) // External action selection
 		*edges[*chosen].Info.Message = value.Interface().(messages.SAMessage)
+
 		return
 	}
 
@@ -78,6 +81,7 @@ func selectEdge(elem interface{}, elemInfo [] *interface{}, chosen *int, edges [
 		}
 		*chosen, value, _ = reflect.Select(casesInt) // Internal action selection
 		*edges[*chosen].Info.Message = value.Interface().(messages.SAMessage)
+
 		return // return from this point
 	}
 

@@ -1,27 +1,29 @@
 datatype PROCNAMES = core | monevolutive | monitor | analyser | planner | executor | unit1 | unit2 | unit3 | t1 | t2 | t3 | t4 | t5 | t6
 channel InvP,InvR : PROCNAMES
-channel I_Collect,I_Process,I_Initialiseunit,I_Execute,I_AdaptUnit,I_Debug
-MONEVOLUTIVE = I_Collect -> InvR.t2 -> MONEVOLUTIVE
+channel I_Collect,I_Process,I_Initialiseunit,I_Execute,I_AdaptUnit,I_Timeout
+UNIT2 = I_Initialiseunit -> UNIT2P1 
+UNIT2P1 = I_Execute -> UNIT2P1 [] InvP.t1 -> I_AdaptUnit -> UNIT2P1
+
+CORE = InvP.t6 -> InvR.t1 -> P1
 MONITOR = InvP.t2 -> I_Process -> InvR.t3 -> MONITOR
 ANALYSER = InvP.t3 -> I_Process -> InvR.t4 -> ANALYSER
-CORE = InvP.t6 -> I_Debug -> InvR.t1 -> P1
 PLANNER = InvP.t4 -> I_Process -> InvR.t5 -> PLANNER
 EXECUTOR = InvP.t5 -> I_Process -> InvR.t6 -> EXECUTOR
 UNIT1 = I_Initialiseunit -> UNIT1P1 
 UNIT1P1 = I_Execute -> UNIT1P1 [] InvP.t1 -> I_AdaptUnit -> UNIT1P1
 
-UNIT2 = I_Initialiseunit -> UNIT2P1 
-UNIT2P1 = I_Execute -> UNIT2P1 [] InvP.t1 -> I_AdaptUnit -> UNIT2P1
-
+MONEVOLUTIVE = I_Collect -> InvR.t2 -> MONEVOLUTIVE
 UNIT3 = I_Initialiseunit -> UNIT3P1 
 UNIT3P1 = I_Execute -> UNIT3P1 [] InvP.t1 -> I_AdaptUnit -> UNIT3P1
 
-T3 = InvP.monitor -> InvR.analyser -> T3
-T4 = InvP.analyser -> InvR.planner -> T4
 T5 = InvP.planner -> InvR.executor -> T5
 T6 = InvP.executor -> InvR.core -> T6
-T1 = InvP.core -> InvR.unit1 -> InvR.unit2 -> InvR.unit3 -> T1
+T1 = InvP.core -> InvR.unit1 -> P2 [] I_Timeout -> P2 
+ P2 = InvR.unit2 -> P3 [] I_Timeout -> P3 
+ P3 = InvR.unit3 -> T1 [] I_Timeout -> T1
 T2 = InvP.monevolutive -> InvR.monitor -> T2
+T3 = InvP.monitor -> InvR.analyser -> T3
+T4 = InvP.analyser -> InvR.planner -> T4
 
-senderreceiver_ee = (CORE ||| MONEVOLUTIVE ||| MONITOR ||| ANALYSER ||| PLANNER ||| EXECUTOR ||| UNIT1 ||| UNIT2 ||| UNIT3)[|{|InvP,InvR|}|](T6[[InvP.executor <- InvR.t6,InvR.core <- InvP.t6]] ||| T1[[InvP.executor <- InvR.t6,InvR.core <- InvP.t6,InvP.core <- InvR.t1,InvR.unit1 <- InvP.t1,InvR.unit2 <- InvP.t1,InvR.unit3 <- InvP.t1]] ||| T2[[InvP.executor <- InvR.t6,InvR.core <- InvP.t6,InvP.core <- InvR.t1,InvR.unit1 <- InvP.t1,InvR.unit2 <- InvP.t1,InvR.unit3 <- InvP.t1,InvP.monevolutive <- InvR.t2,InvR.monitor <- InvP.t2]] ||| T3[[InvP.executor <- InvR.t6,InvR.core <- InvP.t6,InvP.core <- InvR.t1,InvR.unit1 <- InvP.t1,InvR.unit2 <- InvP.t1,InvR.unit3 <- InvP.t1,InvP.monevolutive <- InvR.t2,InvR.monitor <- InvP.t2,InvP.monitor <- InvR.t3,InvR.analyser <- InvP.t3]] ||| T4[[InvP.executor <- InvR.t6,InvR.core <- InvP.t6,InvP.core <- InvR.t1,InvR.unit1 <- InvP.t1,InvR.unit2 <- InvP.t1,InvR.unit3 <- InvP.t1,InvP.monevolutive <- InvR.t2,InvR.monitor <- InvP.t2,InvP.monitor <- InvR.t3,InvR.analyser <- InvP.t3,InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4]] ||| T5[[InvP.executor <- InvR.t6,InvR.core <- InvP.t6,InvP.core <- InvR.t1,InvR.unit1 <- InvP.t1,InvR.unit2 <- InvP.t1,InvR.unit3 <- InvP.t1,InvP.monevolutive <- InvR.t2,InvR.monitor <- InvP.t2,InvP.monitor <- InvR.t3,InvR.analyser <- InvP.t3,InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4,InvP.planner <- InvR.t5,InvR.executor <- InvP.t5]])
+senderreceiver_ee = (CORE ||| MONEVOLUTIVE ||| MONITOR ||| ANALYSER ||| PLANNER ||| EXECUTOR ||| UNIT1 ||| UNIT2 ||| UNIT3)[|{|InvP,InvR|}|](T4[[InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4]] ||| T5[[InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4,InvP.planner <- InvR.t5,InvR.executor <- InvP.t5]] ||| T6[[InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4,InvP.planner <- InvR.t5,InvR.executor <- InvP.t5,InvP.executor <- InvR.t6,InvR.core <- InvP.t6]] ||| T1[[InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4,InvP.planner <- InvR.t5,InvR.executor <- InvP.t5,InvP.executor <- InvR.t6,InvR.core <- InvP.t6,InvP.core <- InvR.t1,InvR.unit1 <- InvP.t1,InvR.unit2 <- InvP.t1,InvR.unit3 <- InvP.t1]] ||| T2[[InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4,InvP.planner <- InvR.t5,InvR.executor <- InvP.t5,InvP.executor <- InvR.t6,InvR.core <- InvP.t6,InvP.core <- InvR.t1,InvR.unit1 <- InvP.t1,InvR.unit2 <- InvP.t1,InvR.unit3 <- InvP.t1,InvP.monevolutive <- InvR.t2,InvR.monitor <- InvP.t2]] ||| T3[[InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4,InvP.planner <- InvR.t5,InvR.executor <- InvP.t5,InvP.executor <- InvR.t6,InvR.core <- InvP.t6,InvP.core <- InvR.t1,InvR.unit1 <- InvP.t1,InvR.unit2 <- InvP.t1,InvR.unit3 <- InvP.t1,InvP.monevolutive <- InvR.t2,InvR.monitor <- InvP.t2,InvP.monitor <- InvR.t3,InvR.analyser <- InvP.t3]])
 assert senderreceiver_ee :[deadlock free]

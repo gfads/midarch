@@ -58,16 +58,16 @@ func (e SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [
 	c2 := make(chan []byte)
 
 	// it allows to read/accept simulatensouly
-	go acceptread(&ConnSRH, LnSRH, c1)
+	go acceptAndRead(&ConnSRH, LnSRH, c1)
 	if ConnSRH != nil {
 		go read(ConnSRH, c2)
 	}
 
 	select {
-	case msgTemp1 := <-c1:
-		*msg = messages.SAMessage{Payload: msgTemp1}
-	case msgTemp2 := <-c2:
-		*msg = messages.SAMessage{Payload: msgTemp2}
+	case msgTemp := <-c1:
+		*msg = messages.SAMessage{Payload: msgTemp}
+	case msgTemp := <-c2:
+		*msg = messages.SAMessage{Payload: msgTemp}
 	}
 }
 
@@ -89,7 +89,7 @@ func (e SRH) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo []*i
 	}
 }
 
-func acceptread(conn *net.Conn, ln net.Listener, c chan []byte) {
+func acceptAndRead(conn *net.Conn, ln net.Listener, c chan []byte) {
 
 	// accept connections
 	var err error

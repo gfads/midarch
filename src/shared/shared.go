@@ -31,11 +31,11 @@ var IS_EVOLUTIVE = false
 var IS_CORRECTIVE = false
 var IS_PROACTIVE = false
 
-const MONITOR_TIME time.Duration = 1 * time.Second   // seconds
-var INJECTION_TIME time.Duration // seconds
-var REQUEST_TIME time.Duration   // milliseconds
-var STRATEGY = 0                 // 1 - no change 2 - change once 3 - change same plugin 4 - alternate plugins
-const SAMPLE_SIZE = 5000
+const MONITOR_TIME time.Duration = 1 * time.Second // seconds
+var INJECTION_TIME time.Duration                   // seconds
+var REQUEST_TIME time.Duration                     // milliseconds
+var STRATEGY = 0                                   // 1 - no change 2 - change once 3 - change same plugin 4 - alternate plugins
+const SAMPLE_SIZE = 10000
 
 var NAMING_HOST = ""
 var QUEUEING_HOST = ""
@@ -53,9 +53,9 @@ type EvolutiveAnalysisResult struct {
 }
 
 type UnitCommand struct {
-	Cmd    string
-	Params plugin.Plugin
-	Type   interface{}
+	Cmd      string
+	Params   plugin.Plugin
+	Type     interface{}
 	Selector func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{})
 }
 
@@ -189,7 +189,7 @@ func ShowExecutionParameters(s bool) {
 		fmt.Println("Corrective        : " + strconv.FormatBool(IS_CORRECTIVE))
 		fmt.Println("Evolutive         : " + strconv.FormatBool(IS_EVOLUTIVE))
 		fmt.Println("Proactive         : " + strconv.FormatBool(IS_PROACTIVE))
-//		fmt.Println("Monitor Time (s)  : " + (MONITOR_TIME * time.Second).String())
+		//		fmt.Println("Monitor Time (s)  : " + (MONITOR_TIME * time.Second).String())
 		fmt.Println("Injection Time (s): " + (INJECTION_TIME * time.Second).String())
 		fmt.Println("Request Time (ms) : " + REQUEST_TIME.String())
 		fmt.Println("Strategy (0-NOT DEFINED 1-No change 2-Change once 3-change same plugin 4-alternate plugins): " + strconv.Itoa(STRATEGY))
@@ -367,7 +367,9 @@ func MyTokenize(s string) [] string {
 func ResolveHostIp() (string) {
 	netInterfaceAddresses, err := net.InterfaceAddrs()
 
-	if err != nil { return "" }
+	if err != nil {
+		return ""
+	}
 	for _, netInterfaceAddress := range netInterfaceAddresses {
 		networkIp, ok := netInterfaceAddress.(*net.IPNet)
 		if ok && !networkIp.IP.IsLoopback() && networkIp.IP.To4() != nil {
@@ -503,3 +505,6 @@ const NUM_MAX_EDGES_IN_PARALLEL int = 3
 const NUM_MAX_CONNECTIONS int = 5
 const NUM_MAX_MESSAGE_BYTES int = 1024
 const NUM_MAX_NODES int = 50
+
+const EVOLUTIVE_ADAPTATION string = "EVOLUTIVE"
+const NON_ADAPTIVE string = "NONE"

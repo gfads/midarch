@@ -92,23 +92,6 @@ func (c *CSP) ConfigureProcessBehaviours(madl madl.MADL) {
 	}
 }
 
-func (CSP) RenameSyncPortOld(action string, processId string) string {
-	r1 := ""
-
-	action = action [0:strings.Index(action, ".")]
-	switch action {
-	case shared.INVP:
-		r1 = shared.INVR + "." + strings.ToLower(processId)
-	case shared.TERP:
-		r1 = shared.INVR + "." + strings.ToLower(processId)
-	case shared.INVR:
-		r1 = shared.INVR + "." + strings.ToLower(processId)
-	case shared.TERR:
-		r1 = shared.INVR + "." + strings.ToLower(processId)
-	}
-	return r1
-}
-
 func (CSP) RenameSyncPort(action string, processId string) string {
 	r1 := ""
 
