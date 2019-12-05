@@ -26,7 +26,7 @@ func (e Oneto3) Selector(elem interface{}, elemInfo [] *interface{}, op string, 
 }
 
 func (Oneto3) I_Timeout(msg *messages.SAMessage, info [] *interface{}) {
-	*msg = *msg
+	fmt.Printf("Oneto3:: ************************** TIMEOUT **********************************************\n")
 }
 
 func (Oneto3) I_Debug1(msg *messages.SAMessage, info [] *interface{}) {

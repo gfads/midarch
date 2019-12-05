@@ -11,55 +11,48 @@ import (
 
 type EvolutiveInjector struct{}
 
-func (EvolutiveInjector) Start(elem string) {
+func (EvolutiveInjector) Start(elem string, interval time.Duration) {
 
-	// Remove old plugins
-	outputLS, err := exec.Command("/bin/ls", shared.DIR_PLUGINS).CombinedOutput()
-	if err != nil {
-		fmt.Printf("Injector:: Something wrong in dir '%v'", shared.DIR_PLUGINS)
-		os.Exit(0)
-	}
-	oldPlugins := strings.Split(string(outputLS), "\n")
-	for plugin := range oldPlugins {
-		exec.Command("/bin/rm", shared.DIR_PLUGINS+"/"+strings.TrimSpace(oldPlugins[plugin])).CombinedOutput()
-	}
-
-	// Strategies for replacing
-
+	// Replacing strategies
 	//go noChange()
 	//go changeOnce(elem)
 	//go changeSamePluginSeveralTimes(elem)
-	go alternatePlugins(elem)
+	go alternatePlugins(elem, interval)
 }
 
 func noChange() {}
 
 func changeOnce(elem string) {
+	removeOldPlugins()
 	generatePlugin(elem, elem+"_v1")
 }
 
 func changeSamePluginSeveralTimes(elem string) {
 
 	for {
+		removeOldPlugins()
 		generatePlugin(elem, elem+"_v1")
 		time.Sleep(shared.INJECTION_TIME * time.Second)
 	}
 }
 
-func alternatePlugins(elem string) {
+func alternatePlugins(elem string, interval time.Duration) {
+
+	removeOldPlugins()
 
 	currentPlugin := 1
 	for {
 		switch currentPlugin {
 		case 1: // Plugin 01
 			currentPlugin = 2
-			generatePlugin(elem+"_v1", elem+"_v1")
+			generatePlugin(elem+"_v2", elem+"_v2")
 		case 2: // Plugin 02
 			currentPlugin = 1
-			generatePlugin(elem+"_v2", elem+"_v2")
-			//time.Sleep(shared.INJECTION_TIME * time.Second)
+			generatePlugin(elem+"_v1", elem+"_v1")
 		}
-		time.Sleep(1 * time.Second)
+
+		fmt.Printf("Evolutive:: Next plugin '%v' will generated in %v !! \n",elem,interval)
+		time.Sleep(interval)
 	}
 }
 
@@ -72,5 +65,24 @@ func generatePlugin(source, plugin string) {
 	if err != nil {
 		fmt.Printf("Injector:: Something wrong in generating plugin '%v' in \n '%v' \n", pIn, pOut)
 		os.Exit(0)
+	}
+}
+
+func removeOldPlugins() {
+	outputLS, err := exec.Command("/bin/ls", shared.DIR_PLUGINS).CombinedOutput()
+	if err != nil {
+		fmt.Printf("Injector:: Something wrong in dir '%v'", shared.DIR_PLUGINS)
+		os.Exit(0)
+	}
+	oldPlugins := strings.Split(string(outputLS), "\n")
+
+	for plugin := range oldPlugins {
+		if strings.TrimSpace(oldPlugins[plugin]) != "" {
+			_, err = exec.Command("/bin/rm", shared.DIR_PLUGINS+"/"+strings.TrimSpace(oldPlugins[plugin])).CombinedOutput()
+			if err != nil {
+				fmt.Printf("Injector:: Something wrong in removing the plugins at '%v' %v", shared.DIR_PLUGINS+"/"+strings.TrimSpace(oldPlugins[plugin]), err)
+				os.Exit(0)
+			}
+		}
 	}
 }

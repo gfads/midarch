@@ -237,18 +237,16 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 		os.Exit(0)
 	}
 
+	// Attachments
+	atts := []madl.Attachment{}
+
 	if appIsAdaptive {
 		conns = append(conns, madl.Element{ElemId: "t2", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()})
 		conns = append(conns, madl.Element{ElemId: "t3", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()})
 		conns = append(conns, madl.Element{ElemId: "t4", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()})
 		conns = append(conns, madl.Element{ElemId: "t5", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()})
 		conns = append(conns, madl.Element{ElemId: "t6", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()})
-	}
 
-	// Attachments
-	atts := []madl.Attachment{}
-
-	if appIsAdaptive {
 		attC1 := madl.Element{ElemId: "monevolutive", TypeName: reflect.TypeOf(components.Monevolutive{}).Name()}
 		attT := madl.Element{ElemId: "t2", TypeName: reflect.TypeOf(connectors.Oneway{}).Name()}
 		attC2 := madl.Element{ElemId: "monitor", TypeName: reflect.TypeOf(components.Monitor{}).Name()}

@@ -77,7 +77,7 @@ func (u Unit) I_Adaptunit(msg *messages.SAMessage, info [] *interface{}) {
 		// Check if the command is to this unit - check by type, i.e., all elements of a given type are adapted
 		if unitElemType == cmdElemType {
 			if cmd.Cmd == shared.REPLACE_COMPONENT { // TODO
-				//fmt.Printf("Unit:: Change happened**** \n")
+				fmt.Printf("Unit:: **************************** Change happened ****************** \n")
 				allUnitsType.Delete(u.UnitId)
 				allUnitsType.Store(u.UnitId, cmd.Type) // TODO - Change
 				g := u.changeSelector(cmd.Selector)

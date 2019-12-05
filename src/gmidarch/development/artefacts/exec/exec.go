@@ -5,7 +5,6 @@ import (
 	"gmidarch/development/artefacts/dot"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/components"
-	"gmidarch/development/connectors"
 	"gmidarch/development/element"
 	"gmidarch/development/messages"
 	"os"
@@ -67,64 +66,11 @@ func (Exec) Create(id string, elem interface{}, typeName string, dot dot.DOTGrap
 
 			if shared.IsInternal(actionNameFDR) {
 				channel := make(chan messages.SAMessage,shared.CHAN_BUFFER_SIZE)
-				var s components.Selector
 
-				switch reflect.TypeOf(elem).Name() {
-				case "Sender":
-					s = components.NewSender()
-				case "Receiver":
-					s = components.NewReceiver()
-				case "Unit":
-					s = components.NewUnit()
-				case "Core":
-					s = components.NewCore()
-				case "Client":
-					s = components.NewClient()
-				case "Server":
-					s = components.NewServer()
-				case "Fibonacciserver":
-					s = components.Newfibonacciserver()
-				case "FibonacciinvokerM":
-					s = components.NewFibonacciInvokerM()
-				case "SRH":
-					s = components.NewSRH()
-				case "Fibonacciclient":
-					s = components.NewFibonacciclient()
-				case "Fibonacciproxy":
-					s = components.NewFibonacciproxy()
-				case "RequestorM":
-					s = components.NewRequestorM()
-				case "CRH":
-					s = components.NewCRH()
-				case "Namingserver":
-					s = components.Newnamingserver()
-				case "NaminginvokerM":
-					s = components.NewnaminginvokerM()
-				case "Namingproxy":
-					s = components.NewNamingproxy()
-				case "Monevolutive":
-					s = components.NewMonevolutive()
-				case "Monitor":
-					s = components.NewMonitor()
-				case "Analyser":
-					s = components.NewAnalyser()
-				case "Planner":
-					s = components.NewPlanner()
-				case "Executor":
-					s = components.NewExecutor()
-				case "Oneto8":
-					s = connectors.NewOneto8()
-				case "Oneto5":
-					s = connectors.NewOneto5()
-				case "Oneto3":
-					s = connectors.NewOneto3()
-				default:
-					fmt.Printf("Exec:: Element '%v' not visible in Engine!!\n", reflect.TypeOf(elem).Name())
-					os.Exit(0)
-				}
+				// Configure selector of each individual element
+				s := components.ConfigureSelector(reflect.TypeOf(elem).Name())
 
-				//s = element.Element{}
-				params := graphs.ExecEdgeInfo{InternalAction: s.Selector, ActionName: actionNameFDR, IsInternal: true, ActionChannel: &channel, Message: msg, Info: info}
+				params := graphs.ExecEdgeInfo{InternalAction: s, ActionName: actionNameFDR, IsInternal: true, ActionChannel: &channel, Message: msg, Info: info}
 				mapType := params
 				eActions = mapType
 			}
