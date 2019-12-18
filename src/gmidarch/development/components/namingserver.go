@@ -20,11 +20,8 @@ func Newnamingserver() Namingserver {
 	return *r
 }
 
-func (e Namingserver) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e Namingserver) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	e.I_Process(msg, info)
-}
-
-func (e Namingserver) I_Zero(msg *messages.SAMessage, info [] *interface{}) {
 }
 
 func (e Namingserver) I_Process(msg *messages.SAMessage, info [] *interface{}) {

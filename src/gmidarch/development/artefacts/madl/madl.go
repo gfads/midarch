@@ -35,7 +35,7 @@ func (m *MADL) ConfigureComponents() {
 	for i := range m.Components {
 		record, ok := lib.Library[m.Components[i].TypeName]
 		if !ok {
-			fmt.Printf("MADL:: Component type '%v' not in Library", m.Components[i].TypeName)
+			fmt.Printf("MADL:: Component type '%v' not registered in Architectural Repository", m.Components[i].TypeName)
 			os.Exit(0)
 		}
 		m.Components[i].Type = record.Type
@@ -73,7 +73,7 @@ func (m *MADL) ConfigureConnectors() {
 
 // Configure channels and Maps - basic to the execution
 func (madl *MADL) ConfigureChannelsAndMaps() {
-	structuralChannels := make(map[string]chan messages.SAMessage, shared.CHAN_BUFFER_SIZE)
+	structuralChannels := make(map[string]chan messages.SAMessage)
 
 	// Configure structural channels
 	for i := range madl.Attachments {

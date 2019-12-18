@@ -21,7 +21,7 @@ func NewOneto3() Oneto3 {
 	return *r
 }
 
-func (e Oneto3) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e Oneto3) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	e.I_Timeout(msg, info)
 }
 

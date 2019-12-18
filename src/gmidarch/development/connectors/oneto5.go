@@ -21,7 +21,7 @@ func NewOneto5() Oneto5 {
 	return *r
 }
 
-func (e Oneto5) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e Oneto5) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	e.I_Timeout(msg, info)
 }
 

@@ -30,7 +30,7 @@ func NewUnit() Unit {
 	return *r
 }
 
-func (u Unit) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (u Unit) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 
 	switch op[2] {
 	case 'E': //"I_Execute":
@@ -77,12 +77,12 @@ func (u Unit) I_Adaptunit(msg *messages.SAMessage, info [] *interface{}) {
 		// Check if the command is to this unit - check by type, i.e., all elements of a given type are adapted
 		if unitElemType == cmdElemType {
 			if cmd.Cmd == shared.REPLACE_COMPONENT { // TODO
-				fmt.Printf("Unit:: **************************** Change happened ****************** \n")
-				allUnitsType.Delete(u.UnitId)
-				allUnitsType.Store(u.UnitId, cmd.Type) // TODO - Change
+				//fmt.Printf("Unit:: **************************** Change happened ****************** \n")
+				//t1 := time.Now()
+				allUnitsType.LoadOrStore(u.UnitId,cmd.Type)
 				g := u.changeSelector(cmd.Selector)
-				allUnitsGraph.Delete(u.UnitId)
-				allUnitsGraph.Store(u.UnitId, g)
+				allUnitsGraph.LoadOrStore(u.UnitId,g)
+				//fmt.Printf("Unit:: %v\n",time.Now().Sub(t1))
 			} else {
 				return
 			}
@@ -92,9 +92,10 @@ func (u Unit) I_Adaptunit(msg *messages.SAMessage, info [] *interface{}) {
 	}
 }
 
-func (u *Unit) changeSelector(s func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{})) graphs.ExecGraph {
+func (u *Unit) changeSelector(s func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}, *bool)) graphs.ExecGraph {
 	temp, _ := allUnitsGraph.Load(u.UnitId)
 
+	//t1 := time.Now()
 	g := temp.(graphs.ExecGraph)
 	for e1 := range g.ExecEdges {
 		for e2 := range g.ExecEdges [e1] {
@@ -103,5 +104,6 @@ func (u *Unit) changeSelector(s func(interface{}, [] *interface{}, string, *mess
 			}
 		}
 	}
+	//fmt.Printf("Unit:: %v\n",time.Now().Sub(t1)/1000000.0)
 	return g
 }

@@ -11,27 +11,27 @@ import (
 	"shared"
 )
 
-type NaminginvokerM struct {
+type Notificationengineinvoker struct {
 	Behaviour string
 	Graph     graphs.ExecGraph
 }
 
-func NewnaminginvokerM() NaminginvokerM {
-	r := new(NaminginvokerM)
+func Newnotificationengineinvoker() Notificationengineinvoker {
+	r := new(Notificationengineinvoker)
 	r.Behaviour = "B = InvP.e1 -> I_In -> InvR.e2 -> TerR.e2 -> I_Out -> TerP.e1 -> B"
 
 	return *r
 }
 
-func (e NaminginvokerM) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
+func (e Notificationengineinvoker) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{},r *bool) {
 	if op[2] == 'I' { // I_In
-		e.I_In(msg, info)
+		e.I_In(msg)
 	} else { // I_Out
-		e.I_Out(msg, info)
+		e.I_Out(msg)
 	}
 }
 
-func (NaminginvokerM) I_In(msg *messages.SAMessage, info [] *interface{}) {
+func (Notificationengineinvoker) I_In(msg *messages.SAMessage) {
 
 	// unmarshall
 	payload := msg.Payload.([]byte)
@@ -39,36 +39,40 @@ func (NaminginvokerM) I_In(msg *messages.SAMessage, info [] *interface{}) {
 	miopPacket := miop.Packet{}
 	err := msgpack.Unmarshal(payload, &miopPacket)
 	if err != nil {
-		log.Fatalf("NamingInvokerM:: %s", err)
-		os.Exit(0)
+		log.Fatalf("Notificationegnineinvoker:: %s\n", err)
+		os.Exit(1)
 	}
 
 	var inv shared.Request
 	op := miopPacket.Bd.ReqHeader.Operation
 	switch op {
-	case "Register":
-		_p0 := miopPacket.Bd.ReqBody.Body[0].(string)
-		_p1 := miopPacket.Bd.ReqBody.Body[1].(map[string]interface{}) // TODO
+	case "Publish":
+		_packetMOM := miopPacket.Bd.ReqBody.Body[0].(map[string]interface{})
+		_header := _packetMOM["Header"].(map[string]interface{})
+		_msg := _packetMOM["Payload"].(string)  // TODO
+		_destination := _header["Destination"]
 		argsTemp := make([]interface{}, 2, 2)
+		argsTemp[0] = _destination
+		argsTemp[1] = _msg
+		inv = shared.Request{Op: miopPacket.Bd.ReqHeader.Operation, Args: argsTemp}
+	case "Subscribe":
+		_p0 := miopPacket.Bd.ReqBody.Body[0].(string)
+		_p1 := miopPacket.Bd.ReqBody.Body[1].(string)
+		_p2 := miopPacket.Bd.ReqBody.Body[2].(string)
+		argsTemp := make([]interface{}, 3, 3)
 		argsTemp[0] = _p0
 		argsTemp[1] = _p1
+		argsTemp[2] = _p2
 		inv = shared.Request{Op: miopPacket.Bd.ReqHeader.Operation, Args: argsTemp}
-	case "Lookup":
-		_p0 := miopPacket.Bd.ReqBody.Body[0].(string)
-		argsTemp := make([]interface{}, 1, 1)
-		argsTemp[0] = _p0
-		inv = shared.Request{Op: miopPacket.Bd.ReqHeader.Operation, Args: argsTemp}
-	case "List":
-		argsTemp := make([]interface{}, 0)
-		inv = shared.Request{Op: miopPacket.Bd.ReqHeader.Operation, Args: argsTemp}
+	case "Unsubscribe":
 	default:
-		fmt.Printf("NamingInvokerM:: Operation '%v' not implemented by Naming Service\n",op)
-		os.Exit(0)
+		fmt.Printf("Notificationegnineinvoker:: Operation '%v' not implemented by Naming Service\n", op)
+		os.Exit(1)
 	}
 	*msg = messages.SAMessage{Payload: inv}
 }
 
-func (NaminginvokerM) I_Out(msg *messages.SAMessage, info [] *interface{}) { // TODO
+func (Notificationengineinvoker) I_Out(msg *messages.SAMessage) { // TODO
 
 	// assembly packet
 	repHeader := miop.ReplyHeader{Context: "TODO", RequestId: 13, Status: 131313}
@@ -80,7 +84,8 @@ func (NaminginvokerM) I_Out(msg *messages.SAMessage, info [] *interface{}) { // 
 	// configure message
 	r, err := msgpack.Marshal(miopPacket)
 	if err != nil {
-		log.Fatalf("NamingInvokerM:: %s", err)
+		log.Fatalf("Notificationegnineinvoker:: %s", err)
+		os.Exit(1)
 	}
 
 	toSRH := make([]interface{}, 1, 1)

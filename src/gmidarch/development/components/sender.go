@@ -18,7 +18,7 @@ func NewSender() Sender {
 	return *r
 }
 
-func (s Sender) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (s Sender) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 
 	switch op {
 	case "I_Setmessage1":

@@ -7,5 +7,6 @@ import (
 
 func main() {
 	frontend.FrontEnd{}.Deploy("midnamingserver.madl")
+
 	fmt.Scanln()
 }

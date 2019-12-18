@@ -20,7 +20,7 @@ func NewPlanner() Planner {
 	return *r
 }
 
-func (e Planner) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e Planner) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	e.I_Process(msg, info)
 }
 

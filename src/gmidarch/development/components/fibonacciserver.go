@@ -19,7 +19,7 @@ func Newfibonacciserver() Fibonacciserver {
 	return *r
 }
 
-func (e Fibonacciserver) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e Fibonacciserver) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	e.I_Process(msg, info)
 }
 

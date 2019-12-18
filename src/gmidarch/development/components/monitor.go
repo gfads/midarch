@@ -19,7 +19,7 @@ func NewMonitor() Monitor {
 	return *r
 }
 
-func (e Monitor) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e Monitor) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	e.I_Process(msg, info)
 }
 

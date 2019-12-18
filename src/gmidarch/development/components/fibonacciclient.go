@@ -25,7 +25,7 @@ func NewFibonacciclient() Fibonacciclient {
 	return *r
 }
 
-func (e Fibonacciclient) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e Fibonacciclient) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	if op[2] == 'S' { // Set message
 		e.I_Setmessage(msg, info)
 	} else { // "I_Printmessage":

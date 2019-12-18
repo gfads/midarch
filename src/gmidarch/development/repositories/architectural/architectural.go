@@ -59,6 +59,11 @@ func (al *ArchitecturalRepository) Load() error {
 	al.Library["Namingserver"] = Record{Type: components.Newnamingserver(), Behaviour: components.Newnamingserver().Behaviour}
 	al.Library["NaminginvokerM"] = Record{Type: components.NewnaminginvokerM(), Behaviour: components.NewnaminginvokerM().Behaviour}
 	al.Library["Namingproxy"] = Record{Type: components.NewNamingproxy(), Behaviour: components.NewNamingproxy().Behaviour}
+	al.Library["Subscriptionmanager"] = Record{Type: components.NewSubscriptionmanager(), Behaviour: components.NewSubscriptionmanager().Behaviour}
+	al.Library["Notificationconsumer"] = Record{Type: components.Newnotificationconsumer(), Behaviour: components.Newnotificationconsumer().Behaviour}
+	al.Library["Notificationengine"] = Record{Type: components.Newnotificationengine(), Behaviour: components.Newnotificationengine().Behaviour}
+	al.Library["Notificationengineinvoker"] = Record{Type: components.Newnotificationengineinvoker(), Behaviour: components.Newnotificationengineinvoker().Behaviour}
+	al.Library["Notificationengineproxy"] = Record{Type: components.Newnotificationengineproxy(), Behaviour: components.Newnotificationengineproxy().Behaviour}
 
 	return r1
 }

@@ -7,8 +7,8 @@ import (
 	"os"
 )
 
-func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *messages.SAMessage,[]*interface{}) {
-    s := func (interface{}, [] *interface{},string, *messages.SAMessage,[]*interface{}){}
+func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *messages.SAMessage,[]*interface{}, *bool) {
+    s := func (interface{}, [] *interface{},string, *messages.SAMessage,[]*interface{}, *bool){}
 
 		switch c {
 		case "Sender":
@@ -53,6 +53,16 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewPlanner().Selector
 		case "Executor":
 			s = NewExecutor().Selector
+		case "Subscriptionmanager":
+			s = NewSubscriptionmanager().Selector
+		case "Notificationconsumer":
+			s = Newnotificationconsumer().Selector
+		case "Notificationengine":
+			s = Newnotificationengine().Selector
+		case "Notificationengineinvoker":
+			s = Newnotificationengineinvoker().Selector
+		case "Notificationengineproxy":
+			s = Newnotificationengineproxy().Selector
 		case "Oneto8":
 			s = connectors.NewOneto8().Selector
 		case "Oneto5":
@@ -60,7 +70,7 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 		case "Oneto3":
 			s = connectors.NewOneto3().Selector
 		default:
-			fmt.Printf("Generic:: Element '%v' has not a selector!!\n", c)
+			fmt.Printf("Generic:: Element '%v' will be not recognized by Unit!!\n", c)
 			os.Exit(0)
 		}
 

@@ -33,18 +33,15 @@ var IS_PROACTIVE = false
 
 const MONITOR_TIME time.Duration = 1 * time.Second
 const INJECTION_TIME time.Duration = 1 * time.Second
-var REQUEST_TIME time.Duration                     // milliseconds
-var STRATEGY = 0                                   // 1 - no change 2 - change once 3 - change same plugin 4 - alternate plugins
-const SAMPLE_SIZE = 100000
 
+var REQUEST_TIME time.Duration // milliseconds
+var STRATEGY = 0               // 1 - no change 2 - change once 3 - change same plugin 4 - alternate plugins
 var NAMING_HOST = ""
 var QUEUEING_HOST = ""
 
 // MAPE-K Types
-type MonitoredCorrectiveData string // used in channel Monitor -> Analyser (Corrective)
-
+type MonitoredCorrectiveData string   // used in channel Monitor -> Analyser (Corrective)
 type MonitoredEvolutiveData [] string // used in channel Monitor -> Analyser (Evolutive)
-
 type MonitoredProactiveData [] string // used in channel Monitor -> Analyser (Proactive)
 
 type EvolutiveAnalysisResult struct {
@@ -56,7 +53,7 @@ type UnitCommand struct {
 	Cmd      string
 	Params   plugin.Plugin
 	Type     interface{}
-	Selector func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{})
+	Selector func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}, *bool)
 }
 
 type AdaptationPlan struct {
@@ -182,7 +179,7 @@ func ShowExecutionParameters(s bool) {
 		fmt.Println("Fibonacci Port  : " + FIBONACCI_PORT)
 		fmt.Println("Queueing Port   : " + QUEUEING_PORT)
 		fmt.Println("------------------------------------------")
-		fmt.Println("Plugin Base Name: " + PLUGIN_BASE_NAME)
+		//fmt.Println("Plugin Base Name: " + PLUGIN_BASE_NAME)
 		fmt.Println("Max Graph Size  : " + strconv.Itoa(GRAPH_SIZE))
 		fmt.Println("------------------------------------------")
 		fmt.Println("Adaptability  ")
@@ -268,12 +265,12 @@ func LoadPlugin(pluginName string) (plugin.Plugin) {
 		plg, err = plugin.Open(pluginFile)
 
 		if err != nil {
-			if attempts >= 1000 { // TODO
+			if attempts >= ATTEMPTS_TO_OPEN_A_PLUGIN { // TODO
 				fmt.Printf("Shared:: Error on trying open plugin '%v' \n", pluginFile)
 				os.Exit(0)
 			} else {
 				attempts++
-				time.Sleep(10 * time.Millisecond)
+				time.Sleep(MONITOR_TIME) // TODO
 			}
 		} else {
 			break
@@ -377,7 +374,19 @@ func ResolveHostIp() (string) {
 			return ip
 		}
 	}
-	return "localhost"
+	return ""
+}
+
+func NextPortTCPAvailable() string {
+
+	listener, err := net.Listen("tcp", ":0")
+	if err != nil {
+		panic(err)
+	}
+
+	port := listener.Addr().(*net.TCPAddr).Port
+
+	return strconv.Itoa(port)
 }
 
 func StringComposition(e []string, sep string, hasSpace bool) string {
@@ -478,9 +487,12 @@ const CALCULATOR_PORT = "2020"
 const FIBONACCI_PORT = "2030"
 const QUEUEING_PORT = "2040"
 
-const CHAN_BUFFER_SIZE = 1
-const PLUGIN_BASE_NAME = "receiver"
-const GRAPH_SIZE = 30
+const SAMPLE_SIZE = 100000
+const ATTEMPTS_TO_OPEN_A_PLUGIN = 1000
+const CHAN_BUFFER_SIZE = 100
+const GRAPH_SIZE = 15
+
+//const PLUGIN_BASE_NAME = "receiver"
 
 const PREFIX_INTERNAL_ACTION = "I_"
 const INVP = "InvP"
@@ -491,6 +503,8 @@ const EVOLUTIVE = "EVOLUTIVE"
 const CORRECTIVE = "REACTIVE"
 const PROACTIVE = "PROACTIVE"
 const EMPTY_LINE = "NONE"
+const QUEUE_SIZE = 100
+const MAX_NUMBER_OF_ACTIVE_CONSUMERS = 10
 
 const EXECUTE_FOREVER bool = true
 

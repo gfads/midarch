@@ -22,7 +22,7 @@ func NewNamingproxy() Namingproxy {
 	return *r
 }
 
-func (e Namingproxy) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e Namingproxy) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	if op[2] == 'I' { // I_In
 		e.I_In(msg, info)
 	} else { //"I_Out"
@@ -48,6 +48,7 @@ func (e Namingproxy) Register(_p1 string, _p2 interface{}) bool {
 	_reply := _payload["Payload"].(bool)
 	return _reply
 }
+
 func (e Namingproxy) Lookup(_p1 string) (interface{}, bool) {
 
 	_args := []interface{}{_p1}

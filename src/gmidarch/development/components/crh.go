@@ -2,12 +2,10 @@ package components
 
 import (
 	"encoding/binary"
-	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"log"
 	"net"
-	"os"
 	"shared"
 )
 
@@ -26,7 +24,7 @@ func NewCRH() CRH {
 	return *r
 }
 
-func (CRH) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (CRH) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	elem.(CRH).I_Process(msg, info)
 }
 
@@ -45,14 +43,12 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		//tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
 		tcpAddr, err := net.ResolveTCPAddr("tcp", key)
 		if err != nil {
-			fmt.Printf("Client:: %v\n", err)
-			os.Exit(0)
+			log.Fatalf("CRH:: %s", err)
 		}
 
 		c.Conns[key], err = net.DialTCP("tcp", nil, tcpAddr)
 		if err != nil {
-			fmt.Printf("Client:: %v\n", err)
-			os.Exit(0)
+			log.Fatalf("CRH:: %s", err)
 		}
 	}
 
@@ -73,7 +69,7 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		log.Fatalf("CRH:: %s", err)
 	}
 
-	//fmt.Printf("CRH:: HERE\n")
+	//fmt.Printf("CRH:: Message sent to Server\n")
 
 	// receive reply's size
 	_, err = conn.Read(size)
@@ -87,6 +83,8 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	if err != nil {
 		log.Fatalf("CRH:: %s", err)
 	}
+
+	//fmt.Printf("CRH:: Message received from Server\n")
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }

@@ -23,7 +23,7 @@ func NewMonevolutive() Monevolutive {
 	return *r
 }
 
-func (e Monevolutive) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e Monevolutive) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	e.I_Checkplugins(msg, info)
 }
 

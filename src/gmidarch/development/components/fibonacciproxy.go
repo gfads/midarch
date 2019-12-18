@@ -13,6 +13,9 @@ type Fibonacciproxy struct {
 	Port      string
 }
 
+var i_PreInvRFP = make(chan messages.SAMessage)
+var i_PosTerRFP = make(chan messages.SAMessage)
+
 func NewFibonacciproxy() Fibonacciproxy {
 
 	r := new(Fibonacciproxy)
@@ -21,15 +24,13 @@ func NewFibonacciproxy() Fibonacciproxy {
 	return *r
 }
 
-func (e Fibonacciproxy) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e Fibonacciproxy) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	if op[2] == 'I' { // I_In
 		e.I_In(msg, info)
 	} else { //"I_Out"
 		e.I_Out(msg, info)
 	}
 }
-var i_PreInvRFP = make(chan messages.SAMessage)
-var i_PosTerRFP = make(chan messages.SAMessage)
 
 func (e Fibonacciproxy) Fibo(_p1 int) int {
 	_args := []interface{}{_p1}

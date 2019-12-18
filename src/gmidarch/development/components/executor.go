@@ -20,7 +20,7 @@ func NewExecutor() Executor {
 	return *r
 }
 
-func (e Executor) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e Executor) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	e.I_Process(msg, info)
 }
 
@@ -34,7 +34,7 @@ func (Executor) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		getType, _ := plg.Lookup("Gettype")
 		elemType := getType.(func() interface{})()
 		getSelector, _ := plg.Lookup("Getselector")
-		funcSelector := getSelector.(func() func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}))()
+		funcSelector := getSelector.(func() func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}, *bool))()
 
 		unitCommand.Cmd = shared.REPLACE_COMPONENT
 		unitCommand.Params = plg

@@ -20,7 +20,7 @@ func NewAnalyser() Analyser {
 	return *r
 }
 
-func (e Analyser) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e Analyser) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	e.I_Process(msg, info)
 }
 

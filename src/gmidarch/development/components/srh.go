@@ -2,6 +2,7 @@ package components
 
 import (
 	"encoding/binary"
+	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"io"
@@ -18,6 +19,9 @@ type SRH struct {
 
 var ConnSRH net.Conn
 var LnSRH net.Listener
+var c1 = make(chan []byte)
+var c2 = make(chan []byte)
+
 
 func NewSRH() SRH {
 
@@ -27,7 +31,7 @@ func NewSRH() SRH {
 	return *r
 }
 
-func (e SRH) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e SRH) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	if op[2] == 'R' { // I_Receive
 		elem.(SRH).I_Receive(msg, info, elemInfo)
 	} else { // "I_Send"
@@ -53,11 +57,7 @@ func (e SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [
 		}
 	}
 
-	// internal channels
-	c1 := make(chan []byte)
-	c2 := make(chan []byte)
-
-	// it allows to read/accept simulatensouly
+	// it allows to read/accept simultaneously
 	go acceptAndRead(&ConnSRH, LnSRH, c1)
 	if ConnSRH != nil {
 		go read(ConnSRH, c2)
@@ -103,7 +103,10 @@ func acceptAndRead(conn *net.Conn, ln net.Listener, c chan []byte) {
 	tempConn := *conn
 	_, err = tempConn.Read(size)
 	if err == io.EOF {
-		os.Exit(0)
+		{
+			fmt.Printf("SRH:: Accept and Read")
+			os.Exit(0)
+		}
 	} else if err != nil && err != io.EOF {
 		log.Fatalf("SRH::: %s", err)
 	}
@@ -125,6 +128,7 @@ func read(conn net.Conn, c chan []byte) {
 	tempConn := conn
 	_, err = tempConn.Read(size)
 	if err == io.EOF {
+		fmt.Printf("SRH:: Read")
 		os.Exit(0)
 	} else if err != nil && err != io.EOF {
 		log.Fatalf("SRH::: %s", err)

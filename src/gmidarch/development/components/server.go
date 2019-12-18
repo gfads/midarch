@@ -20,7 +20,7 @@ func NewServer() Server {
 	return *r
 }
 
-func (Server) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (Server) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	elem.(Server).I_Process(msg, info)
 }
 

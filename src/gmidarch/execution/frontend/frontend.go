@@ -33,6 +33,7 @@ func (f FrontEnd) Deploy(file string) {
 		eeApp := deployer.NewEE()
 		eeApp.Deploy(mapp) // Deploy app
 		eeApp.Start()      // Start app
+
 	case shared.EVOLUTIVE_ADAPTATION:
 		appKindOfAdaptability := make([]string, 1, 1)
 		appKindOfAdaptability = mapp.Adaptability

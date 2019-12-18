@@ -1,0 +1,5 @@
+datatype PROCNAMES = e1 | e2 | e3
+channel InvP, TerP, InvR, TerR : PROCNAMES
+channel I_Process, I_SM, I_NC, I_Out
+
+Notificationengine = InvP.e1 -> (I_SM -> InvR.e2 -> TerR.e2 -> I_Out -> TerP.e1 -> Notificationengine [] I_NC -> InvR.e3 -> TerR.e3 -> TerP.e1 -> Notificationengine)

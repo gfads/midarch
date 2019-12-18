@@ -1,0 +1,24 @@
+Configuration QueueServer :=
+   Components
+      manager  : Subscriptionmanager
+      notifier : Notificationconsumer
+      engine   : Notificationengine
+      invoker  : Notificationengineinvoker
+      srh      : SRH   @QUEUEING_PORT
+
+   Connectors
+      t1 : Requestreply
+      t2 : Requestreply
+      t3 : Requestreply
+      t4 : Requestreply
+
+   Attachments
+      srh,t1,invoker
+      invoker,t2,engine
+      engine,t3,manager
+      engine,t4,notifier
+
+   Adaptability
+      None
+
+EndConf

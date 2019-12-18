@@ -21,7 +21,7 @@ func NewRequestorM() RequestorM {
 	return *r
 }
 
-func (e RequestorM) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
+func (e RequestorM) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	if op[2] == 'I' {  // I_In
 		e.I_In(msg, info)
 	} else { // "I_Out"
