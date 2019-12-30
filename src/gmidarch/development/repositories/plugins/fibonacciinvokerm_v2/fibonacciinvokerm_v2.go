@@ -20,7 +20,7 @@ func Gettype() interface{} {
 	return FibonacciinvokerM{}
 }
 
-func Getselector() func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}){
+func Getselector() func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}, *bool){
 	return FibonacciinvokerM{}.Selector
 }
 
@@ -31,11 +31,11 @@ func NewFibonacciInvokerM() FibonacciinvokerM {
 	return *r
 }
 
-func (e FibonacciinvokerM) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
-	e.I_Process(msg, info)
+func (e FibonacciinvokerM) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
+	e.I_Process(msg, info, r)
 }
 
-func (FibonacciinvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}) { // TODO
+func (FibonacciinvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}, r *bool) { // TODO
 
 	// unmarshall
 	payload := msg.Payload.([]byte)
@@ -52,7 +52,7 @@ func (FibonacciinvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}
 	case "Fibo":
 		_p0 := int(miopPacket.Bd.ReqBody.Body[0].(int64))
 
-		//fmt.Printf("FibonacciInvokerM [Plugin V2]\n")
+		//fmt.Printf("FibonacciInvokerM [Plugin V1]\n")
 
 		_r := impl.Fibonacci{}.F(_p0)
 
@@ -66,7 +66,7 @@ func (FibonacciinvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}
 		// configure message
 		r, err := msgpack.Marshal(miopPacket)
 		if err != nil {
-			log.Fatalf("NamingInvokerM:: %s", err)
+			log.Fatalf("FibonacciInvokerM:: %s", err)
 		}
 
 		toSRH := make([]interface{}, 1, 1)

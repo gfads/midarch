@@ -2,10 +2,12 @@ package components
 
 import (
 	"encoding/binary"
+	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"log"
 	"net"
+	"os"
 	"shared"
 )
 
@@ -32,7 +34,7 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	// check message
 	payload := msg.Payload.([]interface{})
-	host := "localhost"                // host TODO
+	host := "127.0.0.1"                // host TODO
 	port := payload[1].(string)        // port
 	msgToServer := payload[2].([]byte)
 
@@ -48,7 +50,8 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 		c.Conns[key], err = net.DialTCP("tcp", nil, tcpAddr)
 		if err != nil {
-			log.Fatalf("CRH:: %s", err)
+			fmt.Printf("CRH:: %v\n", err)
+			os.Exit(1)
 		}
 	}
 
@@ -60,31 +63,38 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	binary.LittleEndian.PutUint32(size, uint32(len(msgToServer)))
 	_, err = conn.Write(size)
 	if err != nil {
-		log.Fatalf("CRH:: %s", err)
+		fmt.Printf("CRH:: %v\n", err)
+		os.Exit(1)
 	}
+
+	//fmt.Printf("CRH:: %v \n\n",size)
 
 	// send message
+	//fmt.Printf("CRH:: Message to server:: %v %v >> %v << \n\n",msgToServer, len(msgToServer), binary.LittleEndian.Uint32(size))
 	_, err = conn.Write(msgToServer)
 	if err != nil {
-		log.Fatalf("CRH:: %s", err)
+		fmt.Printf("CRH:: %v\n", err)
+		os.Exit(1)
 	}
 
-	//fmt.Printf("CRH:: Message sent to Server\n")
+	//fmt.Printf("CRH:: Message sent to Server [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
 	// receive reply's size
 	_, err = conn.Read(size)
 	if err != nil {
-		log.Fatalf("CRH:: %s", err)
+		fmt.Printf("CRH:: %v\n", err)
+		os.Exit(1)
 	}
 
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
 	_, err = conn.Read(msgFromServer)
 	if err != nil {
-		log.Fatalf("CRH:: %s", err)
+		fmt.Printf("CRH:: %v\n", err)
+		os.Exit(1)
 	}
 
-	//fmt.Printf("CRH:: Message received from Server\n")
+	//fmt.Printf("CRH:: Message received from Server:: [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }

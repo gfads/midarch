@@ -24,6 +24,5 @@ func main() {
 			fmt.Printf("Publisher:: Message enqueued:: %v\n",msg1)
 		}
 		idx++
-		//time.Sleep(1 * time.Second)
 	}
 }

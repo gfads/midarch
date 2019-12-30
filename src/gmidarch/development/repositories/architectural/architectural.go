@@ -32,7 +32,8 @@ func (al *ArchitecturalRepository) Load() error {
 	al.Library["Oneto9"] = Record{Type: connectors.NewOneto9(), Behaviour: connectors.NewOneto9().Behaviour}
 	al.Library["Oneway"] = Record{Type: connectors.NewOneway(), Behaviour: connectors.NewOneway().Behaviour}
 	al.Library["Receiver"] = Record{Type: components.NewReceiver(), Behaviour: components.NewReceiver().Behaviour}
-	al.Library["Requestreply"] = Record{Type: connectors.NewRequestReply(), Behaviour: connectors.NewRequestReply().Behaviour}
+	al.Library["Requestreply"] = Record{Type: connectors.Newrequestreply(), Behaviour: connectors.Newrequestreply().Behaviour}
+	al.Library["Reqreponeto2"] = Record{Type: connectors.Newreqreponeto2(), Behaviour: connectors.Newreqreponeto2().Behaviour}
 	al.Library["Sender"] = Record{Type: components.NewSender(), Behaviour: components.NewSender().Behaviour}
 	al.Library["Client"] = Record{Type: components.NewClient(), Behaviour: components.NewClient().Behaviour}
 	al.Library["Server"] = Record{Type: components.NewServer(), Behaviour: components.NewServer().Behaviour}

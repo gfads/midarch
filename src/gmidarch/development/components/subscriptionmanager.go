@@ -46,8 +46,7 @@ func (s Subscriptionmanager) I_Process(msg *messages.SAMessage) {
 		_r[0] = _rTemp
 		_r[1] = SubscribersSM
 
-		_ter := shared.QueueingTermination{_r}
-		*msg = messages.SAMessage{_ter}
+		*msg = messages.SAMessage{_r}
 	case "Unsubscribe":
 		_topic := _req.Args[0].(string)
 		_ip := _req.Args[1].(string)

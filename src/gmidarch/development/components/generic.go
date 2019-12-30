@@ -65,6 +65,8 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = Newnotificationengineproxy().Selector
 		case "Oneto8":
 			s = connectors.NewOneto8().Selector
+		case "Oneto9":
+			s = connectors.NewOneto9().Selector
 		case "Oneto5":
 			s = connectors.NewOneto5().Selector
 		case "Oneto3":

@@ -1,4 +1,4 @@
-Configuration QueueServer :=
+Configuration queueingserver :=
    Components
       manager  : Subscriptionmanager
       notifier : Notificationconsumer
@@ -15,10 +15,10 @@ Configuration QueueServer :=
    Attachments
       srh,t1,invoker
       invoker,t2,engine
-      engine,t3,manager
-      engine,t4,notifier
+      engine,t3,notifier
+      engine,t4,manager
 
    Adaptability
-      None
+      Evolutive
 
 EndConf

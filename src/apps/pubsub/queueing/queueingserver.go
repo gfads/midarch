@@ -6,7 +6,7 @@ import (
 )
 
 func main(){
-	frontend.FrontEnd{}.Deploy("queueserver.madl")
+	frontend.FrontEnd{}.Deploy("queueingserver.madl")
 
 	fmt.Printf("Queue server ready!!\n")
 

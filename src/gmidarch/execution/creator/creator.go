@@ -74,6 +74,8 @@ func (Creator) CreateNew(mapp madl.MADL, appKindOfAdaptability []string) (madl.M
 		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto6{}).Name(), Params: params})
 	case "midnamingserver":
 		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto5{}).Name(), Params: params})
+	case "queueingserver":
+		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto9{}).Name(), Params: params})
 
 	default:
 		fmt.Printf("Creator:: Configuration '%v' cannot be executed because 'OnetoN.dot' is not ok!!", mapp.Configuration)
@@ -159,6 +161,11 @@ func (Creator) CreateNew(mapp madl.MADL, appKindOfAdaptability []string) (madl.M
 			attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto5{}).Name(), Params: params}
 			attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
 			atts = append(atts, madl.Attachment{attC1, attT, attC2})
+		case "queueingserver":
+			attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto9{}).Name(), Params: params}
+			attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
+			atts = append(atts, madl.Attachment{attC1, attT, attC2})
+
 
 		default:
 			fmt.Printf("Creator:: Configuration '%v' cannot be executed because 'OnetoN.dot' is not ok ", mapp.Configuration)
@@ -232,6 +239,8 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto6{}).Name(), Params: params})
 	case 8:
 		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto8{}).Name(), Params: params})
+	case 9:
+		conns = append(conns, madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto9{}).Name(), Params: params})
 	default:
 		fmt.Printf("Creator:: Configuration '%v' cannot be executed because 'OnetoN.dot' is not ok!!", mapp.Configuration)
 		os.Exit(0)
@@ -292,6 +301,10 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 			atts = append(atts, madl.Attachment{attC1, attT, attC2})
 		case 8:
 			attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto8{}).Name(), Params: params}
+			attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
+			atts = append(atts, madl.Attachment{attC1, attT, attC2})
+		case 9:
+			attT := madl.Element{ElemId: "t1", TypeName: reflect.TypeOf(connectors.Oneto9{}).Name(), Params: params}
 			attC2 := madl.Element{ElemId: units[i], TypeName: reflect.TypeOf(components.Unit{}).Name()}
 			atts = append(atts, madl.Attachment{attC1, attT, attC2})
 		default:

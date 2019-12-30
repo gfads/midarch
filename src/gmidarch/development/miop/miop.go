@@ -42,5 +42,3 @@ type ReplyBody struct {
 	//OperationResult [] interface{}
 	OperationResult interface{}
 }
-
-

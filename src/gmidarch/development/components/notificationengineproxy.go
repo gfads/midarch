@@ -43,11 +43,15 @@ func (e Notificationengineproxy) Publish(_p1 string, _p2 interface{}) bool {
 	_reqMsg := messages.SAMessage{messages.Invocation{Host: e.Host, Port: e.Port, Op: "Publish", Args: _args}}
 
 	i_PreInvNEP  <- _reqMsg
+
+	//fmt.Printf("NotificationProxy:: Publish:: Before response \n")
+
 	_repMsg := <-i_PosTerNEP
 
+	//fmt.Printf("NotificationProxy:: Publish:: After response\n")
+
 	_payload := _repMsg.Payload.(map[string]interface{})
-	_replyTemp := _payload["Payload"].(map[string]interface{})
-	_reply := _replyTemp["R"].(bool)
+	_reply := _payload["Payload"].(bool)
 
 	return _reply
 }
@@ -56,7 +60,6 @@ func (e Notificationengineproxy) Subscribe(_p1 string, _chn chan interface{}) (b
 	_p2 := shared.ResolveHostIp()             // host TODO
 	_p3 := shared.NextPortTCPAvailable()      // port
 	_args := []interface{}{_p1,_p2,_p3}
-
 
 	_reqMsg := messages.SAMessage{messages.Invocation{Host: e.Host, Port: e.Port, Op: "Subscribe", Args: _args}}
 

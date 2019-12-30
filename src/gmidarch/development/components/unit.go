@@ -32,22 +32,23 @@ func NewUnit() Unit {
 
 func (u Unit) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 
+//	fmt.Printf("Unit:: HERE:: %v \n",op)
 	switch op[2] {
 	case 'E': //"I_Execute":
-		elem.(Unit).I_Execute(msg, info)
+		elem.(Unit).I_Execute(msg, info, r)
 	case 'I': //"I_Initialiseunit":
-		elem.(Unit).I_Initialiseunit(msg, info)
+		elem.(Unit).I_Initialiseunit(msg, info, r)
 	case 'A': //"I_Adaptunit":
-		elem.(Unit).I_Adaptunit(msg, info)
+		elem.(Unit).I_Adaptunit(msg, info, r)
 	}
 }
 
-func (u Unit) I_Initialiseunit(msg *messages.SAMessage, info [] *interface{}) {
+func (u Unit) I_Initialiseunit(msg *messages.SAMessage, info [] *interface{}, r *bool) {
 	allUnitsType.Store(u.UnitId, u.ElemOfUnit)
 	allUnitsGraph.Store(u.UnitId, u.GraphOfElem)
 }
 
-func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}) {
+func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}, r *bool) {
 	var ok bool
 	u.ElemOfUnit, ok = allUnitsType.Load(u.UnitId)
 	if !ok {
@@ -59,14 +60,17 @@ func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}) {
 		fmt.Printf("Unit:: Error on acessing the element graph")
 		os.Exit(0)
 	}
+
 	u.GraphOfElem = temp.(graphs.ExecGraph)
 	engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, !shared.EXECUTE_FOREVER)
+
+	return
 }
 
-func (u Unit) I_Adaptunit(msg *messages.SAMessage, info [] *interface{}) {
+func (u Unit) I_Adaptunit(msg *messages.SAMessage, info [] *interface{}, r *bool) {
 	cmd := msg.Payload.(shared.UnitCommand)
 
-	//fmt.Printf("Unit:: I_Adapt:: %v %v %v\n",reflect.TypeOf(u.ElemOfUnit).Name(),reflect.TypeOf(cmd.Type), u.UnitId)
+	fmt.Printf("Unit:: I_Adapt:: %v %v %v\n",reflect.TypeOf(u.ElemOfUnit).Name(),reflect.TypeOf(cmd.Type), u.UnitId)
 
 	if cmd.Cmd != "" {
 		unitElemType := reflect.TypeOf(u.ElemOfUnit).Name()

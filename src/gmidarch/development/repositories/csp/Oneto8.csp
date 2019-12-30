@@ -3,8 +3,6 @@ datatype PROCNAMES = e1 | e2 | e3 | e4 | e5 | e6 | e7 | e8 | e9
 channel InvP, InvR : PROCNAMES
 channel I_Debug1, I_Debug2, I_Timeout
 
---Oneto8 = InvP.e1 -> InvR.e2 -> InvR.e3 -> InvR.e4 -> InvR.e5 -> InvR.e6 -> InvR.e7 -> InvR.e8 -> InvR.e9 -> Oneto8
---Oneto8 = InvP.e1 -> I_Debug1 -> (InvR.e2 -> P2 [] I_Timeout -> P2)
 Oneto8 = InvP.e1 -> (InvR.e2 -> P2 [] I_Timeout -> P2)
 P2 = InvR.e3 -> P3 [] I_Timeout -> P3
 P3 = InvR.e4 -> P4 [] I_Timeout -> P4
@@ -13,4 +11,3 @@ P5 = InvR.e6 -> P6 [] I_Timeout -> P6
 P6 = InvR.e7 -> P7 [] I_Timeout -> P7
 P7 = InvR.e8 -> P8 [] I_Timeout -> P8
 P8 = InvR.e9 -> Oneto8 [] I_Timeout -> Oneto8
---P8 = InvR.e9 -> I_Debug2 -> Oneto8 [] I_Timeout -> Oneto8

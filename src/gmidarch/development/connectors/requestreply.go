@@ -9,7 +9,7 @@ type Requestreply struct {
 	Graph     graphs.ExecGraph
 }
 
-func NewRequestReply() Requestreply {
+func Newrequestreply() Requestreply {
 
 	// create a new instance of client
 	r := new(Requestreply)

@@ -15,7 +15,7 @@ func Gettype() interface{} {
 	return Receiver{}
 }
 
-func Getselector() func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}){
+func Getselector() func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}, *bool){
 	return Receiver{}.Selector
 }
 
@@ -28,10 +28,10 @@ func NewReceiver() Receiver {
 	return *r
 }
 
-func (Receiver) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}){
-	elem.(Receiver).I_Printmessage(msg, info)
+func (e Receiver) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool){
+	e.I_Printmessage(msg,r)
 }
 
-func (Receiver) I_Printmessage(msg *messages.SAMessage, info [] *interface{}) {
+func (Receiver) I_Printmessage(msg *messages.SAMessage, r *bool) {
 	fmt.Printf("Receiver:: Plugin [V1]:: %v  \n", *msg)
 }

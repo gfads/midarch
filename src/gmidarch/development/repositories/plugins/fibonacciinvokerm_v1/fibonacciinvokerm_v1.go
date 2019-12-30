@@ -20,7 +20,7 @@ func Gettype() interface{} {
 	return FibonacciinvokerM{}
 }
 
-func Getselector() func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}){
+func Getselector() func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}, *bool){
 	return FibonacciinvokerM{}.Selector
 }
 
@@ -31,11 +31,11 @@ func NewFibonacciInvokerM() FibonacciinvokerM {
 	return *r
 }
 
-func (e FibonacciinvokerM) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}) {
-	e.I_Process(msg, info)
+func (e FibonacciinvokerM) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
+	e.I_Process(msg, info, r)
 }
 
-func (FibonacciinvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}) { // TODO
+func (FibonacciinvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}, r *bool) { // TODO
 
 	// unmarshall
 	payload := msg.Payload.([]byte)

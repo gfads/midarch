@@ -18,22 +18,41 @@ type Monevolutive struct {
 func NewMonevolutive() Monevolutive {
 
 	r := new(Monevolutive)
-	r.Behaviour = "B = I_Collect -> InvR.e1 -> B"
+	r.Behaviour = "B = I_Checkplugins -> InvR.e1 -> B"
+	//r.Behaviour = "B = I_Checkplugins -> InvR.e1 -> B [] I_Noplugins -> B"
 
 	return *r
 }
 
 func (e Monevolutive) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
-	e.I_Checkplugins(msg, info)
+	//if op[2] == 'C' {
+		e.I_Checkplugins(msg, info, r)
+	//} else {
+	//	e.I_Noplugins(msg, info, r)
+	//}
 }
 
-func (Monevolutive) I_Checkplugins(msg *messages.SAMessage, info [] *interface{}) {
+func (Monevolutive) I_Noplugins(msg *messages.SAMessage, info [] *interface{}, r *bool) {
+	listOfNewPlugins := make(map[string]time.Time)
+
+	if len(listOfNewPlugins) != 0 {
+		*r = false
+		return
+	}
+}
+
+func (Monevolutive) I_Checkplugins(msg *messages.SAMessage, info [] *interface{}, r *bool) {
 	newPlugins := []string{}
 	listOfNewPlugins := make(map[string]time.Time)
 
+	//if len(listOfNewPlugins) == 0 {
+	//	*r = false
+	//	return
+	//}
+
 	if isFirstTime {
-		//time.Sleep(10 * time.Second)  // TODO - only first time
-		time.Sleep(1 * time.Second)  // TODO - only first time
+		time.Sleep(shared.FIRST_MONITOR_TIME) // TODO - only first time
+		//time.Sleep(1 * time.Second)
 		isFirstTime = false
 		listOfOldPlugins = shared.LoadPlugins()
 	} else {

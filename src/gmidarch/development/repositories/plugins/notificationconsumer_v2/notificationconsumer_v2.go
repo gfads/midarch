@@ -1,9 +1,10 @@
-package components
+package main
 
 import (
 	"encoding/json"
 	"fmt"
 	"gmidarch/development/artefacts/graphs"
+	"gmidarch/development/components"
 	"gmidarch/development/messages"
 	"net"
 	"os"
@@ -24,8 +25,16 @@ func Newnotificationconsumer() Notificationconsumer {
 	return *r
 }
 
+func Gettype() interface{} {
+	return Notificationconsumer{}
+}
+
+func Getselector() func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}, *bool){
+	return Notificationconsumer{}.Selector
+}
+
 func (e Notificationconsumer) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
-	elem.(Notificationconsumer).I_Process(msg)
+	e.I_Process(msg)
 }
 
 var ActiveConsumers = map[string]bool{}
@@ -34,8 +43,8 @@ var connNC map[string]net.Conn
 
 func (n Notificationconsumer) I_Process(msg *messages.SAMessage) {
 	_args := msg.Payload.([]interface{})
-	_msg := _args[0].(*MessageEnqueued)
-	_subscribers := _args[1].([]SubscriberRecord)
+	_msg := _args[0].(*components.MessageEnqueued)
+	_subscribers := _args[1].([]components.SubscriberRecord)
 
 	for s := range _subscribers {
 		n.NotifySubscriber(_subscribers[s], *_msg)
@@ -44,7 +53,7 @@ func (n Notificationconsumer) I_Process(msg *messages.SAMessage) {
 	*msg = messages.SAMessage{_r}
 }
 
-func (Notificationconsumer) NotifySubscriber(subscriber SubscriberRecord, msg MessageEnqueued) {
+func (Notificationconsumer) NotifySubscriber(subscriber components.SubscriberRecord, msg components.MessageEnqueued) {
 
 	err := *new(error)
 	// Check if 'Active Consumers' (Consumers whose connection to Handler already exists) has been created

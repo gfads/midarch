@@ -10,7 +10,8 @@ import (
 	"time"
 )
 
-var N int = 1
+//var N int = 1
+var N int = 24
 
 func clientX(fibo components.Fibonacciproxy){
 	durations := [shared.SAMPLE_SIZE]time.Duration{}
@@ -24,19 +25,16 @@ func clientX(fibo components.Fibonacciproxy){
 
 		durations[i] = t2.Sub(t1)
 
-		//fmt.Printf("Client:: %v\n",durations[i])
-
-		//time.Sleep(10 * time.Millisecond)
-		//fmt.Printf("%v\n",float64(durations[i].Nanoseconds())/1000000)
+		fmt.Printf("%v\n",float64(durations[i].Nanoseconds())/1000000)
 	}
 
-	totalTime := time.Duration(0)
-	for i := range durations {
-		totalTime += durations[i]
-	}
+	//totalTime := time.Duration(0)
+	//for i := range durations {
+	//	totalTime += durations[i]
+	//}
 
-	fmt.Printf("Tempo Total [N=%v] [SAMPLE=%v] [TIME=%v]\n", N, shared.SAMPLE_SIZE, totalTime)
-	fmt.Printf("Tempo Médio [N=%v] [SAMPLE=%v] [TIME=%v]\n", N, shared.SAMPLE_SIZE, totalTime/shared.SAMPLE_SIZE)
+	//fmt.Printf("Tempo Total [N=%v] [SAMPLE=%v] [TIME=%v]\n", N, shared.SAMPLE_SIZE, totalTime)
+	//fmt.Printf("Tempo Médio [N=%v] [SAMPLE=%v] [TIME=%v]\n", N, shared.SAMPLE_SIZE, totalTime/shared.SAMPLE_SIZE)
 }
 
 func main() {
@@ -56,8 +54,6 @@ func main() {
 	fibo1 := proxy1.(components.Fibonacciproxy)
 
 	clientX(fibo1)
-
-	fmt.Scanln()
 }
 
 func timeTrack(start time.Time, name string) time.Duration {

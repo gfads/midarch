@@ -1,5 +1,5 @@
 package components
-
+/*
 import (
 	"encoding/binary"
 	"fmt"
@@ -178,3 +178,4 @@ func nextConnection() int {
 	}
 	return r
 }
+*/
