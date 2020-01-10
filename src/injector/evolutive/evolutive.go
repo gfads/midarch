@@ -40,18 +40,25 @@ func alternatePlugins(elem string, interval time.Duration) {
 
 	removeOldPlugins()
 
+	elemNew := ""
+	elemOld := ""
+
 	currentPlugin := 1
 	for {
 		switch currentPlugin {
 		case 1: // Plugin 01
 			currentPlugin = 2
-			generatePlugin(elem+"_v2", elem+"_v2")
+			elemOld = elem+"_v1"
+			elemNew = elem+"_v2"
+			generatePlugin(elemOld, elemNew)
 		case 2: // Plugin 02
 			currentPlugin = 1
-			generatePlugin(elem+"_v1", elem+"_v1")
+			elemOld = elem+"_v2"
+			elemNew = elem+"_v1"
+			generatePlugin(elemOld, elemNew)
 		}
 
-		fmt.Printf("Evolutive:: Next plugin '%v' will generated in %v !! \n",elem,interval)
+		fmt.Printf("Evolutive:: Next plugin '%v' will generated in %v !! \n",elemNew,interval)
 		time.Sleep(interval)
 	}
 }

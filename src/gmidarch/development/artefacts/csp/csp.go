@@ -257,7 +257,6 @@ func updateRuntimeBehaviourComponents(compId string, madl madl.MADL) string {
 				if (strings.ToUpper(madl.AppAdaptability[0]) == "NONE") { // TODO
 					r1 = "B = I_InitialiseUnit -> P1\n P1 = I_Execute -> P1"
 				} else {
-					//r1 = "B = InvP.e1 -> I_Initialiseunit -> P1 \nP1 = I_Execute -> P1 [] InvP.e1 -> I_AdaptUnit -> P1"
 					r1 = "B = I_Initialiseunit -> P1 \nP1 = I_Execute -> P1 [] InvP.e1 -> I_AdaptUnit -> P1"
 				}
 				break

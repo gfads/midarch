@@ -67,7 +67,8 @@ func (e Notificationengineproxy) Subscribe(_p1 string, _chn chan interface{}) (b
 	_repMsg := <-i_PosTerNEP
 
 	_payload := _repMsg.Payload.(map[string]interface{})
-	_reply := _payload["Payload"].(bool)
+	_replyTemp := _payload["Payload"].(map[string]interface{})
+	_reply := _replyTemp["R"].(bool)
 
 	// Create the new handler associated to the topic [one handler per topic]
 	if _,ok := HandlersProxy[_p1]; !ok{

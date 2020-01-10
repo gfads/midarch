@@ -30,20 +30,16 @@ func main() {
 
 	for {
 
+		// receive request
 		reqMsg := <-chn
-
+		//fmt.Printf("Server:: Receive request:: [%v] \n",reqMsg)
 		x1 := reqMsg.(map[string]interface{})
 		x2 := x1["Msg"].(map[string]interface{})
-		//fmt.Printf("Server:: %v\n",x2)
 		x3 := x2["Args"].([]interface{})
 		p1 := int(x3[0].(float64))
+
+		// calculate and publish result
 		queueingroxy.Publish(repQueue, impl.Fibonacci{}.F(p1))
-		/*if ok {
-			fmt.Printf("Server:: Message sent to Client:: %v\n", repMsg)
-		} else {
-			fmt.Printf("Server:: Message NOT sent to Client:: %v\n", repMsg)
-			os.Exit(1)
-		}
-		*/
+		//fmt.Printf("Server:: Published response\n")
 	}
 }

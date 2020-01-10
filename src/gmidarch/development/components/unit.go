@@ -32,7 +32,7 @@ func NewUnit() Unit {
 
 func (u Unit) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 
-//	fmt.Printf("Unit:: HERE:: %v \n",op)
+	//	fmt.Printf("Unit:: HERE:: %v \n",op)
 	switch op[2] {
 	case 'E': //"I_Execute":
 		elem.(Unit).I_Execute(msg, info, r)
@@ -50,6 +50,7 @@ func (u Unit) I_Initialiseunit(msg *messages.SAMessage, info [] *interface{}, r 
 
 func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}, r *bool) {
 	var ok bool
+
 	u.ElemOfUnit, ok = allUnitsType.Load(u.UnitId)
 	if !ok {
 		fmt.Printf("Unit:: Error on acessing the element type")
@@ -62,7 +63,12 @@ func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}, r *bool) 
 	}
 
 	u.GraphOfElem = temp.(graphs.ExecGraph)
-	engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, !shared.EXECUTE_FOREVER)
+	if reflect.TypeOf(u.ElemOfUnit).Name() == "Notificationengine" {
+		fmt.Printf("Unit:: Forever \n")
+		engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, shared.EXECUTE_FOREVER)
+	} else {
+		engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, !shared.EXECUTE_FOREVER)
+	}
 
 	return
 }
@@ -70,23 +76,18 @@ func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}, r *bool) 
 func (u Unit) I_Adaptunit(msg *messages.SAMessage, info [] *interface{}, r *bool) {
 	cmd := msg.Payload.(shared.UnitCommand)
 
-	fmt.Printf("Unit:: I_Adapt:: %v %v %v\n",reflect.TypeOf(u.ElemOfUnit).Name(),reflect.TypeOf(cmd.Type), u.UnitId)
+	//fmt.Printf("Unit:: I_Adapt:: %v [%v] %v\n", reflect.TypeOf(u.ElemOfUnit).Name(), cmd.Cmd, u.UnitId)
 
 	if cmd.Cmd != "" {
 		unitElemType := reflect.TypeOf(u.ElemOfUnit).Name()
 		cmdElemType := reflect.TypeOf(cmd.Type).Name()
 
-		//fmt.Printf("Unit:: Selector:: I_Adaptunit:: [%v] [%v] \n", cmd.Cmd, cmd.Type)
-
 		// Check if the command is to this unit - check by type, i.e., all elements of a given type are adapted
 		if unitElemType == cmdElemType {
 			if cmd.Cmd == shared.REPLACE_COMPONENT { // TODO
-				//fmt.Printf("Unit:: **************************** Change happened ****************** \n")
-				//t1 := time.Now()
-				allUnitsType.LoadOrStore(u.UnitId,cmd.Type)
+				allUnitsType.LoadOrStore(u.UnitId, cmd.Type)
 				g := u.changeSelector(cmd.Selector)
-				allUnitsGraph.LoadOrStore(u.UnitId,g)
-				//fmt.Printf("Unit:: %v\n",time.Now().Sub(t1))
+				allUnitsGraph.LoadOrStore(u.UnitId, g)
 			} else {
 				return
 			}

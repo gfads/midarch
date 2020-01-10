@@ -3,16 +3,16 @@ package main
 import (
 	"fmt"
 	"injector/evolutive"
-	"time"
+	"shared"
 )
 
 func main() {
 
-	elem := "notificationconsumer"
+	//elem := "notificationconsumer"
 	//elem := "fibonacciinvokerm"
-	//elem := "receiver"
+	elem := "receiver"
 	inj := evolutive.EvolutiveInjector{}
-	go inj.Start(elem, 1*time.Second)
+	go inj.Start(elem, shared.INJECTION_TIME)
 
 	fmt.Scanln()
 }

@@ -19,7 +19,6 @@ func (Engine) Execute(elem interface{}, elemInfo []*interface{}, graph graphs.Ex
 	// Execute graph
 	for {
 		edges := graph.AdjacentEdges(node)
-		//fmt.Printf("Engine:: %v\n",edges)
 		if len(edges) == 1 {
 			if edges[0].Info.IsInternal { // Internal action
 				r := true
@@ -105,7 +104,6 @@ func selectEdge(elem interface{}, elemInfo [] *interface{}, chosen *int, edges [
 		for {
 			*chosen, value, _ = reflect.Select(casesExt) // External action selection
 			if *chosen != len(edges) {                   // An external action was selected
-				//		fmt.Printf("Engine:: External selected:: %v ********\n",idx)
 				if casesExt[*chosen].Dir == reflect.SelectRecv { // InvP and TerR
 					*edges[*chosen].Info.Message = value.Interface().(messages.SAMessage)
 				}

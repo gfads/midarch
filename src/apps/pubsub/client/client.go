@@ -28,7 +28,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	N := 1
+	N := 10
 	reqMsg := shared.Request{Op: "Fibo", Args: []interface{}{N}}
 
 	for i := 0; i < shared.SAMPLE_SIZE; i++ {
@@ -40,7 +40,7 @@ func main() {
 		durations[i] = t2.Sub(t1)
 
 		fmt.Printf("[%v] %v\n",i,float64(durations[i].Nanoseconds())/1000000)
-		//time.Sleep(100 * time.Millisecond)
+		//time.Sleep(10 * time.Millisecond)
 	}
 
 	//totalTime := time.Duration(0)

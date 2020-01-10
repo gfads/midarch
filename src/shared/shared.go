@@ -32,7 +32,7 @@ var IS_CORRECTIVE = false
 var IS_PROACTIVE = false
 
 const MONITOR_TIME time.Duration = 1 * time.Second
-const FIRST_MONITOR_TIME time.Duration = 10 * time.Second
+const FIRST_MONITOR_TIME time.Duration = 1 * time.Second
 const INJECTION_TIME time.Duration = 1 * time.Second
 
 var REQUEST_TIME time.Duration // milliseconds
@@ -488,7 +488,7 @@ const CALCULATOR_PORT = "2020"
 const FIBONACCI_PORT = "2030"
 const QUEUEING_PORT = "2040"
 
-const SAMPLE_SIZE = 5000
+const SAMPLE_SIZE = 1000
 const ATTEMPTS_TO_OPEN_A_PLUGIN = 1000
 const CHAN_BUFFER_SIZE = 100
 const GRAPH_SIZE = 15

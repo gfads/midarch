@@ -17,5 +17,5 @@ Configuration midfibonacciserver :=
       srh,t3,fibonacciinvoker
 
    Adaptability
-      Evolutive
+      None
 EndConf 

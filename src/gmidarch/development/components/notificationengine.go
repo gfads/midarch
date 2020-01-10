@@ -1,10 +1,14 @@
 package components
 
 import (
+	"encoding/json"
 	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
+	"net"
+	"os"
 	"shared"
+	"strings"
 )
 
 type Notificationengine struct {
@@ -16,116 +20,134 @@ type MessageEnqueued struct {
 	Msg interface{}
 }
 
+type SubscriberRecord struct {
+	Host string
+	Port string
+}
+
 const MAX_NUMBER_OF_TOPICS = 3
 
-var SubscribersNE = map[string][]SubscriberRecord{}
+var connNC map[string]net.Conn
+var Subscribers = map[string][]SubscriberRecord{}
 var Topics = map[string]chan MessageEnqueued{}
 var currentTopic = ""
 
 func Newnotificationengine() Notificationengine {
 
 	r := new(Notificationengine)
-	r.Behaviour = "B = I_NC -> InvR.e2 -> TerR.e2 -> B [] InvP.e1 -> (I_SM -> InvR.e3 -> TerR.e3 -> I_Out -> TerP.e1 -> B [] I_Publish -> TerP.e1 -> B)"
-
+	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B [] I_NC -> B"
 	return *r
 }
 
-func (Notificationengine) I_Debug() {
-	fmt.Printf("NE:: I_Debug\n")
-}
-
 func (e Notificationengine) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
-	//time.Sleep(1 * time.Second)
-
-	switch op[2] {
-	case 'P': // I_Publish
-		e.I_Publish(msg, r)
-	case 'S': // Subscription Manager
-		e.I_SM(msg, r)
-	case 'N': // Notification consumer
+	if op[2] == 'P' {
+		e.I_Process(msg)
+	} else {
 		e.I_NC(msg, r)
-	case 'O': // I_Out
-		e.I_Out(msg, r)
-	case 'D':
-		e.I_Debug()
 	}
 }
 
-func (e Notificationengine) I_Publish(msg *messages.SAMessage, r *bool) {
+func (e Notificationengine) I_Process(msg *messages.SAMessage) {
 	_req := msg.Payload.(shared.Request)
 
-	if _req.Op != "Publish" {
-		*r = false
-	} else {
-		_x1 := _req.Args[0].(messages.MessageMOM)
-		//_x2 := _x1["Header"].(map[string]interface{})
-		//_topic := _x2["Destination"].(string)
-		//_msg := _req.Args[1].(map[string]interface{})
-		//_msg := _x2["Payload"].(messages.MessageMOM)
-		//fmt.Printf("NE:: %v %v\n",_topic,_msg)
-
-		//fmt.Printf("NE:: I_Publish:: BEGIN:: [%v,%v]\n", _topic,_msg)
-
-		//_r := e.Publish(_topic, _msg)
-		_r := e.Publish(_x1.Header.Destination, _x1.Payload)
-		//fmt.Printf("NE:: I_Publish:: END:: [%v,%v]\n", _topic,_msg)
-
+	switch _req.Op {
+	case "Publish":
+		_momMessage := _req.Args[0].(messages.MessageMOM)
+		_r := e.Publish(_momMessage.Header.Destination, _momMessage.Payload) // Publish
 		*msg = messages.SAMessage{Payload: _r}
+	case "Subscribe":
+		_topic := _req.Args[0].(string)
+		_ip := _req.Args[1].(string)
+		_port := _req.Args[2].(string)
+		_r := e.Subscribe(_topic, _ip, _port) // Subscribe
+		*msg = messages.SAMessage{_r}
+	case "Unsubscribe":
+		_topic := _req.Args[0].(string)
+		_ip := _req.Args[1].(string)
+		_port := _req.Args[2].(string)
+		_r := e.Unsubscribe(_topic, _ip, _port) // Unsubscribe
+		*msg = messages.SAMessage{_r}
+	default:
+		fmt.Println("Notificationengine:: Operation " + _req.Op + " is not implemented by Notificationengine")
+		os.Exit(1)
 	}
 }
 
 func (e Notificationengine) I_NC(msg *messages.SAMessage, r *bool) {
 
-	if len(Topics) == 0 || len(SubscribersNE) == 0 {
+	if len(Topics) == 0 || len(Subscribers) == 0 {
 		*r = false
+		return
 	} else {
-		currentTopic = nxtTopic()
+		currentTopic = nextTopic()
 		_msg := e.Consume(currentTopic)
 		if _msg.Msg != nil {
-			//fmt.Printf("NE:: I_NC:: BEGIN:: [%v,%v]\n", currentTopic,_msg)
-			_args := make([]interface{}, 2, 2)
-			_args[0] = _msg
-			_args[1] = filterSubscribers(currentTopic)
-			*msg = messages.SAMessage{_args}
-			//fmt.Printf("NE:: I_NC:: END:: [%v,%v]\n", currentTopic,_msg)
+			_subscribers := filterSubscribers(currentTopic)
+			for s := range _subscribers {
+				e.NotifySubscriber(_subscribers[s], *_msg)
+			}
 		} else {
 			*r = false
+			return
 		}
 	}
 }
 
-func (e Notificationengine) I_SM(msg *messages.SAMessage, r *bool) {
-	_req := msg.Payload.(shared.Request)
+func (s Notificationengine) Subscribe(topic string, ip string, port string) bool {
+	r := true
 
-	if _req.Op != "Subscribe" && _req.Op != "Unsubscribe" {
-		*r = false
-		return
+	// Check if the list of subscribers has already been created
+	if Subscribers == nil {
+		Subscribers = make(map[string][]SubscriberRecord)
 	}
-	//fmt.Printf("NE:: I_SM:: %v \n",_req.Op)
+
+	// Check if the topic already exists
+	if _, ok := Subscribers[topic]; !ok {
+		Subscribers[topic] = []SubscriberRecord{}
+	}
+
+	// Include new subscriber
+	Subscribers[topic] = append(Subscribers[topic], SubscriberRecord{Host: ip, Port: port})
+
+	return r
 }
 
-func (e Notificationengine) I_Out(msg *messages.SAMessage, r *bool) {
-	_rTemp := msg.Payload.([]interface{})
-	SubscribersNE = _rTemp[1].(map[string][]SubscriberRecord)
-	_r := shared.QueueingTermination{R: _rTemp[0].(bool)}
+func (s Notificationengine) Unsubscribe(topic string, ip string, port string) bool {
+	r := true
 
-	//fmt.Printf("NE:: I_Out\n")
+	// Check if the list is empty
+	if Subscribers == nil {
+		r = false
+	} else {
+		records := []SubscriberRecord{}
+		ok := false
+		if records, ok = Subscribers[topic]; !ok {
+			r = false
+		} else {
+			// Remove subscriber
+			for i := range records {
+				if records[i].Host == ip && records[i].Port == port {
+					records[i] = records[len(records)-1] // Replace it with the last one.
+					records = records[:len(records)-1]
+					Subscribers[topic] = records
+				}
+			}
+		}
+	}
 
-	*msg = messages.SAMessage{Payload: _r}
+	return r
 }
 
 func (Notificationengine) Consume(topic string) *MessageEnqueued {
 	r := new(MessageEnqueued)
 
-	//fmt.Printf("NE:: Consume:: BEGIN:: [%v]\n", topic)
 	if _, ok := Topics[topic]; !ok {
 		Topics[topic] = make(chan MessageEnqueued, shared.QUEUE_SIZE)
 	}
 
 	select {
-		case *r = <-Topics[topic]:
-			//fmt.Printf("NE:: Consume:: END:: [%v]\n", topic)
-			default:
+	case *r = <-Topics[topic]:
+	default:
 	}
 	return r
 }
@@ -133,7 +155,6 @@ func (Notificationengine) Consume(topic string) *MessageEnqueued {
 func (Notificationengine) Publish(topic string, msg interface{}) bool {
 	r := false
 
-	//fmt.Printf("NE:: Publish:: BEGIN:: [%v,%v]\n", topic,msg)
 	// Check if the topic exist
 	if _, ok := Topics[topic]; !ok {
 		Topics[topic] = make(chan MessageEnqueued, shared.QUEUE_SIZE)
@@ -150,7 +171,7 @@ func (Notificationengine) Publish(topic string, msg interface{}) bool {
 	return r
 }
 
-func nxtTopic() string {
+func nextTopic() string {
 	r := ""
 
 	if currentTopic == "" {
@@ -187,11 +208,45 @@ func nxtTopic() string {
 func filterSubscribers(topic string) []SubscriberRecord {
 	r := []SubscriberRecord{}
 
-	for t := range SubscribersNE {
+	for t := range Subscribers {
 		if t == topic {
-			r = SubscribersNE[t]
+			r = Subscribers[t]
 			break
 		}
 	}
 	return r
+}
+
+func (Notificationengine) NotifySubscriber(subscriber SubscriberRecord, msg MessageEnqueued) {
+
+	err := *new(error)
+	if connNC == nil {
+		connNC = make(map[string]net.Conn, shared.MAX_NUMBER_OF_ACTIVE_CONSUMERS)
+	}
+
+	// Notify Subscribers
+	host := subscriber.Host
+	port := subscriber.Port
+	addr := strings.Join([]string{host, port}, ":")
+
+	// Check if the connection with the Handler already exists
+	_, ok := connNC[addr]
+	if !ok {
+		connNC[addr], err = net.Dial("tcp", addr)
+		if err != nil {
+			fmt.Printf("NofiticationConsumer:: %v\n", err)
+			os.Exit(0)
+		}
+	}
+
+	// Prepare message to be sent to Handler
+	msgMOM := messages.MessageMOM{Header: messages.MOMHeader{""}, Payload: msg}
+
+	// Send message
+	encoder := json.NewEncoder(connNC[addr]) // TODO
+	err = encoder.Encode(msgMOM)
+	if err != nil {
+		fmt.Printf("NofiticationConsumer:: %v\n", err)
+		os.Exit(0)
+	}
 }

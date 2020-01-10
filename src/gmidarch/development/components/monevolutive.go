@@ -18,47 +18,47 @@ type Monevolutive struct {
 func NewMonevolutive() Monevolutive {
 
 	r := new(Monevolutive)
-	r.Behaviour = "B = I_Checkplugins -> InvR.e1 -> B"
-	//r.Behaviour = "B = I_Checkplugins -> InvR.e1 -> B [] I_Noplugins -> B"
+	//r.Behaviour = "B = I_Checkplugins -> InvR.e1 -> B"
+	r.Behaviour = "B = I_Hasnewplugins -> InvR.e1 -> B [] I_Nonewplugins -> B"
 
 	return *r
 }
 
 func (e Monevolutive) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
-	//if op[2] == 'C' {
-		e.I_Checkplugins(msg, info, r)
-	//} else {
-	//	e.I_Noplugins(msg, info, r)
-	//}
+	if op[2] == 'H' {
+		e.I_Hasnewplugins(msg, info, r)
+	} else {
+		e.I_Nonewplugins(msg, info, r)
+	}
 }
 
-func (Monevolutive) I_Noplugins(msg *messages.SAMessage, info [] *interface{}, r *bool) {
-	listOfNewPlugins := make(map[string]time.Time)
-
-	if len(listOfNewPlugins) != 0 {
+func (Monevolutive) I_Nonewplugins(msg *messages.SAMessage, info [] *interface{}, r *bool) {
+	listOfNewPlugins := shared.LoadPlugins()
+	newPlugins := shared.CheckForNewPlugins(listOfOldPlugins, listOfNewPlugins)
+	if len(newPlugins) != 0 {
 		*r = false
 		return
 	}
 }
 
-func (Monevolutive) I_Checkplugins(msg *messages.SAMessage, info [] *interface{}, r *bool) {
+func (Monevolutive) I_Hasnewplugins(msg *messages.SAMessage, info [] *interface{}, r *bool) {
 	newPlugins := []string{}
 	listOfNewPlugins := make(map[string]time.Time)
 
-	//if len(listOfNewPlugins) == 0 {
-	//	*r = false
-	//	return
-	//}
-
 	if isFirstTime {
-		time.Sleep(shared.FIRST_MONITOR_TIME) // TODO - only first time
-		//time.Sleep(1 * time.Second)
+		time.Sleep(shared.FIRST_MONITOR_TIME) // only first time
 		isFirstTime = false
 		listOfOldPlugins = shared.LoadPlugins()
 	} else {
-		time.Sleep(shared.MONITOR_TIME) // TODO
+		time.Sleep(shared.MONITOR_TIME)
 		listOfNewPlugins = shared.LoadPlugins()
 		newPlugins = shared.CheckForNewPlugins(listOfOldPlugins, listOfNewPlugins)
+	}
+
+	// return from this point if no new plugins detected
+	if len(newPlugins) == 0 {
+		*r = false
+		return
 	}
 
 	evolutiveMonitoredData := shared.MonitoredEvolutiveData{}

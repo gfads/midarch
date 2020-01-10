@@ -53,10 +53,6 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewPlanner().Selector
 		case "Executor":
 			s = NewExecutor().Selector
-		case "Subscriptionmanager":
-			s = NewSubscriptionmanager().Selector
-		case "Notificationconsumer":
-			s = Newnotificationconsumer().Selector
 		case "Notificationengine":
 			s = Newnotificationengine().Selector
 		case "Notificationengineinvoker":

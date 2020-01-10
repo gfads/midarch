@@ -19,7 +19,7 @@ func (l Loader) Load(file string) madl.MADL {
 	err := m.Check()
 	if (err != nil) {
 		fmt.Println("MADL: " + err.Error())
-		os.Exit(0)
+		os.Exit(1)
 	}
 
 	// Configure Channels and Maps

@@ -5,27 +5,30 @@ import (
 	"gmidarch/development/components"
 	"gmidarch/execution/frontend"
 	"os"
-	"shared"
 	"shared/factories"
+	"strconv"
 	"time"
 )
 
-//var N int = 1
-var N int = 24
-
 func clientX(fibo components.Fibonacciproxy){
-	durations := [shared.SAMPLE_SIZE]time.Duration{}
+
+	n,_ := strconv.Atoi(os.Args[1])
+	SAMPLE_SIZE,_ := strconv.Atoi(os.Args[2])
+
+	//durations := [SAMPLE_SIZE]time.Duration{}
 
 	// invoke remote method
-	for i := 0; i < shared.SAMPLE_SIZE; i++ {
+	for i := 0; i < SAMPLE_SIZE; i++ {
 
 		t1 := time.Now()
-		fibo.Fibo(N)
+		fibo.Fibo(n)
 		t2 := time.Now()
 
-		durations[i] = t2.Sub(t1)
+		duration := t2.Sub(t1)
 
-		fmt.Printf("%v\n",float64(durations[i].Nanoseconds())/1000000)
+		//durations[i] = t2.Sub(t1)
+
+		fmt.Printf("%v\n",float64(duration.Nanoseconds())/1000000)
 	}
 
 	//totalTime := time.Duration(0)
