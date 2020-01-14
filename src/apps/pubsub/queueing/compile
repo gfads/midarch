@@ -1,0 +1,21 @@
+source ~/.cshrc
+echo
+echo Compiling 'Queueing server'...
+echo
+cd /Users/nsr/Dropbox/go/midarch-go-v13/src/apps/pubsub/queueing
+go build queueingserver.go
+
+echo Compiling 'Fibonacci Server (MOM)'...  
+echo
+cd /Users/nsr/Dropbox/go/midarch-go-v13/src/apps/pubsub/server
+go build server.go
+
+echo Compiling 'Fibonacci Client (MOM)'...
+echo
+cd /Users/nsr/Dropbox/go/midarch-go-v13/src/apps/pubsub/client
+go build client.go
+
+echo Compiling 'Fibonacci Injector (MOM)'...
+echo
+cd /Users/nsr/Dropbox/go/midarch-go-v13/src/apps/fibomiddleware/injector
+go build injector.go

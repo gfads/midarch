@@ -1,0 +1,10 @@
+digraph G {
+  0 -> 1 [ label="InvP.e1" ];
+  0 -> 2 [ label="InvP.e3" ];
+  1 -> 5 [ label="InvR.e2" ];
+  2 -> 3 [ label="InvR.e2" ];
+  3 -> 4 [ label="TerR.e2" ];
+  4 -> 0 [ label="TerP.e3" ];
+  5 -> 6 [ label="TerR.e2" ];
+  6 -> 0 [ label="TerP.e1" ];
+}
