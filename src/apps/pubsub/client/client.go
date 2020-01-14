@@ -6,11 +6,12 @@ import (
 	"os"
 	"shared"
 	"shared/factories"
+	"strconv"
 	"time"
 )
 
 func main() {
-	durations := [shared.SAMPLE_SIZE]time.Duration{}
+	//durations := [shared.SAMPLE_SIZE]time.Duration{}
 
 	fe := frontend.FrontEnd{}
 	fe.Deploy("queueclient.madl")
@@ -20,26 +21,32 @@ func main() {
 	repQueue := "replies"
 	chn := make(chan interface{})
 
-	ok := queueingroxy.Subscribe(repQueue, chn)
-	if ok {
-		fmt.Printf("Client:: Client subscribed to queue '%v'\n", repQueue)
-	} else {
-		fmt.Printf("Client:: Client not subscribed to queue '%v'\n", repQueue)
-		os.Exit(1)
-	}
+	queueingroxy.Subscribe(repQueue, chn)
+	//ok := queueingroxy.Subscribe(repQueue, chn)
+	//if ok {
+	//	fmt.Printf("Client:: Client subscribed to queue '%v'\n", repQueue)
+	//} else {
+	//	fmt.Printf("Client:: Client not subscribed to queue '%v'\n", repQueue)
+	//	os.Exit(1)
+	//}
 
-	N := 10
-	reqMsg := shared.Request{Op: "Fibo", Args: []interface{}{N}}
+	n,_ := strconv.Atoi(os.Args[1])
+	SAMPLE_SIZE,_ := strconv.Atoi(os.Args[2])
 
-	for i := 0; i < shared.SAMPLE_SIZE; i++ {
+	reqMsg := shared.Request{Op: "Fibo", Args: []interface{}{n}}
+
+	for i := 0; i < SAMPLE_SIZE; i++ {
 		t1 := time.Now()
 		queueingroxy.Publish(reqQueue, reqMsg)
 		<-chn
+		//fmt.Printf("%v\n",<-chn)
 		t2 := time.Now()
 
-		durations[i] = t2.Sub(t1)
+		//durations[i] = t2.Sub(t1)
+		duration := t2.Sub(t1)
+		fmt.Printf("%v\n",float64(duration.Nanoseconds())/1000000)
 
-		fmt.Printf("[%v] %v\n",i,float64(durations[i].Nanoseconds())/1000000)
+		//fmt.Printf("[%v] %v\n",i,float64(durations[i].Nanoseconds())/1000000)
 		//time.Sleep(10 * time.Millisecond)
 	}
 

@@ -22,6 +22,7 @@ func (h HandlerNotify) Start(chn chan interface{}) {
 
 	// Create server to wait for notifications from 'Notification Consumer'
 	addr := shared.ResolveHostIp() + ":" + strings.TrimSpace(h.Port)
+
 	ln, err = net.Listen("tcp", addr)
 	if err != nil {
 		fmt.Printf("HandlerNotify:: Unable to listen at port [%v,%v] \n", h.Host,h.Port)

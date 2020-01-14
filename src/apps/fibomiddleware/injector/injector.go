@@ -9,8 +9,8 @@ import (
 func main() {
 
 	//elem := "notificationconsumer"
-	//elem := "fibonacciinvokerm"
-	elem := "receiver"
+	elem := "fibonacciinvokerm"
+	//elem := "receiver"
 	inj := evolutive.EvolutiveInjector{}
 	go inj.Start(elem, shared.INJECTION_TIME)
 
