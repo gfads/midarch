@@ -13,5 +13,5 @@ Configuration queueingserver :=
       invoker,t2,engine
 
    Adaptability
-      None
+      Evolutive
 EndConf

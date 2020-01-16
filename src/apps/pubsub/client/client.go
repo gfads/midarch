@@ -3,10 +3,8 @@ package main
 import (
 	"fmt"
 	"gmidarch/execution/frontend"
-	"os"
 	"shared"
 	"shared/factories"
-	"strconv"
 	"time"
 )
 
@@ -30,8 +28,11 @@ func main() {
 	//	os.Exit(1)
 	//}
 
-	n,_ := strconv.Atoi(os.Args[1])
-	SAMPLE_SIZE,_ := strconv.Atoi(os.Args[2])
+	//n,_ := strconv.Atoi(os.Args[1])
+	//SAMPLE_SIZE,_ := strconv.Atoi(os.Args[2])
+
+	n := 1
+	SAMPLE_SIZE := 1000
 
 	reqMsg := shared.Request{Op: "Fibo", Args: []interface{}{n}}
 

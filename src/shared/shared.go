@@ -33,7 +33,7 @@ var IS_PROACTIVE = false
 
 const MONITOR_TIME time.Duration = 1 * time.Second
 const FIRST_MONITOR_TIME time.Duration = 1 * time.Second
-const INJECTION_TIME time.Duration = 1 * time.Second
+var INJECTION_TIME time.Duration
 
 var REQUEST_TIME time.Duration // milliseconds
 var STRATEGY = 0               // 1 - no change 2 - change once 3 - change same plugin 4 - alternate plugins
@@ -460,18 +460,80 @@ func SaveFile(path, name, ext string, content []string) {
 	defer file.Close()
 }
 
+func localizegMidArch() string {
+	r := ""
+	found := false
+
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		if pair[0] == "GMIDARCHDIR"{
+			r = pair[1]
+			found = true
+		}
+	}
+
+	if !found{
+		fmt.Println("Shared:: Error:: OS Environment variable 'GOPATH' not configured\n")
+		os.Exit(1)
+	}
+	fmt.Println(r)
+	return r
+}
+
+func localizegGO() string {
+	r := ""
+	found := false
+
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		if pair[0] == "GOROOT"{
+			r = pair[1]
+			found = true
+		}
+	}
+
+	if !found{
+		fmt.Println("Shared:: Error:: OS Environment variable 'GOROOT' not configured\n")
+		os.Exit(1)
+	}
+	return r
+}
+
+func localizegFDR() string {
+	r := ""
+	found := false
+
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		if pair[0] == "FDR4"{
+			r = pair[1]
+			found = true
+		}
+	}
+
+	if !found{
+		fmt.Println("Shared:: Error:: OS Environment variable 'FDR4' not configured\n")
+		os.Exit(1)
+	}
+	return r
+}
+
 // ******************* PARAMETERS
 
 //const BASE_DIR  = "/go/midarch-go"  // docker
-const DIR_BASE = "/Users/nsr/Dropbox/go/midarch-go-v13"
-const DIR_PLUGINS = DIR_BASE + "/src/gmidarch/execution/repositories/plugins"
-const DIR_PLUGINS_SOURCE = DIR_BASE + "/src/gmidarch/development/repositories/plugins"
-const DIR_CSP = DIR_BASE + "/src/apps/artefacts/csps"
-const DIR_MADL = DIR_BASE + "/src/apps/artefacts/madls"
-const DIR_GO = "/usr/local/go/bin"
-const DIR_FDR = "/Volumes/Macintosh HD/Applications/FDR4-2.app/Contents/MacOS"
-const DIR_CSPARSER = DIR_BASE + "/src/verification/cspdot/csparser"
-const DIR_DOT = DIR_BASE + "/src/gmidarch/development/repositories/dot"
+//const DIR_BASE = "/Users/nsr/Dropbox/go/midarch-go-v13"
+var DIR_BASE = localizegMidArch()
+//const DIR_GO = "/usr/local/go/bin"
+var DIR_GO = localizegGO()
+//const DIR_FDR = "/Volumes/Macintosh HD/Applications/FDR4-2.app/Contents/MacOS"
+var DIR_FDR = localizegFDR()
+
+var DIR_PLUGINS = DIR_BASE + "/src/gmidarch/execution/repositories/plugins"
+var DIR_PLUGINS_SOURCE = DIR_BASE + "/src/gmidarch/development/repositories/plugins"
+var DIR_CSP = DIR_BASE + "/src/apps/artefacts/csps"
+var DIR_MADL = DIR_BASE + "/src/apps/artefacts/madls"
+var DIR_CSPARSER = DIR_BASE + "/src/verification/cspdot/csparser"
+var DIR_DOT = DIR_BASE + "/src/gmidarch/development/repositories/dot"
 const MADL_EXTENSION = ".madl"
 const CSP_EXTENSION = ".csp"
 const DOT_EXTENSION = ".dot"
