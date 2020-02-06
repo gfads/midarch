@@ -11,24 +11,33 @@
  - Install FDR4
  - Configure FDR4=<path>/fdr4
 
-3. RabbitMQ
+3. Download additional packages used by gMidArch
+
+  go get gopkg.in/check.v1
+  go get github.com/kr/pretty
+  go get github.com/kr/text
+  go get github.com/vmihailenco/msgpack
+  go get github.com/vmihailenco/tagparser
+
+4. RabbitMQ
  - Download & Install RabbitMQ (https://www.rabbitmq.com/download.html)
  - Download Source code of 'Fibonacci Application': https://github.com/nsrosa70/midarch-go-v11.git
  - Code of Client & Server at: <download-dir>/src/transport/rabbitmq
 
-4. gRPC
-   -Download & Install gRPC (https://grpc.io)
+5. gRPC
+   - Download & Install gRPC (https://grpc.io)
    - Download Source code of 'Fibonacci Application': https://github.com/nsrosa70/midarch-go-v11.git
    - Code of Client & Server at: <download-dir>/src/transport/grpc
 
-
-5. Download & Install AFiRM
+6. Download & Install AFiRM
 
    - Access https://github.com/andregpss/afirm.git
 
-6. Source codes of gRPC Client/Server
+7. Source codes of gRPC Client/Server
 
-7. Source code RabbitMQ
+8. Source code RabbitMQ
+
+
 
 ********* EXPERIMENTS *******************
 
