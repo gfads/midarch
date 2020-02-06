@@ -48,7 +48,7 @@ func (f FrontEnd) Deploy(file string) {
 		gen.SaveCSPFile(cspee)    		// Generate & save CSPs
 
 		// Check CSPs
-		//chk.Check(cspee)  // TODO think about as it takes a long time and may be correct by construction
+		chk.Check(cspee)  // TODO think about as it takes a long time and may be correct by construction
 
 		dep.DeployApp(mee, mapp) // Deploy App into EE & start EE
 		dep.Start()
