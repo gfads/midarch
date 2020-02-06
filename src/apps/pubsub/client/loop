@@ -1,7 +1,7 @@
-for h in 34 36; do
-  for i in 100000; do
-       echo "gmidarch-$h-$i-mom.txt"
-       ./client $h $i > "gmidarch-$h-$i-mom.txt"
+for h in 36; do
+  for i in 10000 100000; do
+       echo "gmidarch-$h-$i-mom-adapt.txt"
+       ./client $h $i > "gmidarch-$h-$i-mom-adap.txt"
        sleep 10
   done
 done

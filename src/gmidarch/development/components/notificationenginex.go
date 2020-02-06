@@ -11,7 +11,7 @@ import (
 	"strings"
 )
 
-type Notificationengine struct {
+type NotificationengineX struct {
 	Behaviour string
 	Graph     graphs.ExecGraph
 }
@@ -32,14 +32,14 @@ var Subscribers = map[string][]SubscriberRecord{}
 var Topics = map[string]chan MessageEnqueued{}
 var currentTopic = ""
 
-func Newnotificationengine() Notificationengine {
+func NewnotificationengineX() NotificationengineX {
 
-	r := new(Notificationengine)
+	r := new(NotificationengineX)
 	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B [] I_NC -> B"
 	return *r
 }
 
-func (e Notificationengine) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
+func (e NotificationengineX) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	if op[2] == 'P' {
 		e.I_Process(msg)
 	} else {
@@ -47,7 +47,7 @@ func (e Notificationengine) Selector(elem interface{}, elemInfo [] *interface{},
 	}
 }
 
-func (e Notificationengine) I_Process(msg *messages.SAMessage) {
+func (e NotificationengineX) I_Process(msg *messages.SAMessage) {
 	_req := msg.Payload.(shared.Request)
 
 	switch _req.Op {
@@ -73,7 +73,7 @@ func (e Notificationengine) I_Process(msg *messages.SAMessage) {
 	}
 }
 
-func (e Notificationengine) I_NC(msg *messages.SAMessage, r *bool) {
+func (e NotificationengineX) I_NC(msg *messages.SAMessage, r *bool) {
 
 	if len(Topics) == 0 || len(Subscribers) == 0 {
 		*r = false
@@ -93,7 +93,7 @@ func (e Notificationengine) I_NC(msg *messages.SAMessage, r *bool) {
 	}
 }
 
-func (s Notificationengine) Subscribe(topic string, ip string, port string) bool {
+func (s NotificationengineX) Subscribe(topic string, ip string, port string) bool {
 	r := true
 
 	// Check if the list of subscribers has already been created
@@ -112,7 +112,7 @@ func (s Notificationengine) Subscribe(topic string, ip string, port string) bool
 	return r
 }
 
-func (s Notificationengine) Unsubscribe(topic string, ip string, port string) bool {
+func (s NotificationengineX) Unsubscribe(topic string, ip string, port string) bool {
 	r := true
 
 	// Check if the list is empty
@@ -138,7 +138,7 @@ func (s Notificationengine) Unsubscribe(topic string, ip string, port string) bo
 	return r
 }
 
-func (Notificationengine) Consume(topic string) *MessageEnqueued {
+func (NotificationengineX) Consume(topic string) *MessageEnqueued {
 	r := new(MessageEnqueued)
 
 	if _, ok := Topics[topic]; !ok {
@@ -152,7 +152,7 @@ func (Notificationengine) Consume(topic string) *MessageEnqueued {
 	return r
 }
 
-func (Notificationengine) Publish(topic string, msg interface{}) bool {
+func (NotificationengineX) Publish(topic string, msg interface{}) bool {
 	r := false
 
 	// Check if the topic exist
@@ -217,7 +217,7 @@ func filterSubscribers(topic string) []SubscriberRecord {
 	return r
 }
 
-func (Notificationengine) NotifySubscriber(subscriber SubscriberRecord, msg MessageEnqueued) {
+func (NotificationengineX) NotifySubscriber(subscriber SubscriberRecord, msg MessageEnqueued) {
 
 	err := *new(error)
 	if connNC == nil {

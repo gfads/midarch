@@ -63,12 +63,8 @@ func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}, r *bool) 
 	}
 
 	u.GraphOfElem = temp.(graphs.ExecGraph)
-	if reflect.TypeOf(u.ElemOfUnit).Name() == "Notificationengine" {
-		fmt.Printf("Unit:: Forever \n")
-		engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, shared.EXECUTE_FOREVER)
-	} else {
-		engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, !shared.EXECUTE_FOREVER)
-	}
+	//engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, !shared.EXECUTE_FOREVER)
+	engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, shared.EXECUTE_FOREVER)
 
 	return
 }

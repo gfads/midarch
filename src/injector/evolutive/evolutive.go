@@ -70,7 +70,7 @@ func generatePlugin(source, plugin string) {
 
 	_, err := exec.Command(shared.DIR_GO+"/go", "build", "-buildmode=plugin", "-o", pOut, pIn).CombinedOutput()
 	if err != nil {
-		fmt.Printf("Injector:: Something wrong in generating plugin '%v' in \n '%v' \n", pIn, pOut)
+		fmt.Printf("Injector:: Something wrong in generating plugin '%v' in \n '%v': %v \n", pIn, pOut,err)
 		os.Exit(0)
 	}
 }
@@ -87,7 +87,7 @@ func removeOldPlugins() {
 		if strings.TrimSpace(oldPlugins[plugin]) != "" {
 			_, err = exec.Command("/bin/rm", shared.DIR_PLUGINS+"/"+strings.TrimSpace(oldPlugins[plugin])).CombinedOutput()
 			if err != nil {
-				fmt.Printf("Injector:: Something wrong in removing the plugins at '%v' %v", shared.DIR_PLUGINS+"/"+strings.TrimSpace(oldPlugins[plugin]), err)
+				fmt.Printf("Injector:: Something is wrong in removing the plugins at '%v' %v", shared.DIR_PLUGINS+"/"+strings.TrimSpace(oldPlugins[plugin]), err)
 				os.Exit(0)
 			}
 		}

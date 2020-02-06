@@ -524,7 +524,7 @@ func localizegFDR() string {
 //const DIR_BASE = "/Users/nsr/Dropbox/go/midarch-go-v13"
 var DIR_BASE = localizegMidArch()
 //const DIR_GO = "/usr/local/go/bin"
-var DIR_GO = localizegGO()
+var DIR_GO = localizegGO()+"/bin"
 //const DIR_FDR = "/Volumes/Macintosh HD/Applications/FDR4-2.app/Contents/MacOS"
 var DIR_FDR = localizegFDR()
 

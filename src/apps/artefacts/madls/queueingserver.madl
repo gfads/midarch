@@ -1,6 +1,6 @@
 Configuration queueingserver :=
    Components
-      engine   : Notificationengine
+      engine   : NotificationengineX
       invoker  : Notificationengineinvoker
       srh      : SRH   @QUEUEING_PORT
 
