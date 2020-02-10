@@ -1,0 +1,14 @@
+digraph G {
+  0 -> 1 [ label="InvP.e1" ];
+  1 -> 2 [ label="I_DeserialiseMIOP" ];
+  2 -> 3 [ label="InvR.e2" ];
+  3 -> 4 [ label="TerR.e2" ];
+  4 -> 5 [ label="I_Preparetoobject" ];
+  5 -> 6 [ label="InvR.e3" ];
+  6 -> 7 [ label="TerR.e3" ];
+  7 -> 8 [ label="I_SerialiseMIOP" ];
+  8 -> 9 [ label="InvR.e2" ];
+  9 -> 10 [ label="TerR.e2" ];
+  10 -> 11 [ label="I_PreparetoSRH" ];
+  11 -> 0 [ label="TerP.e1" ];
+}

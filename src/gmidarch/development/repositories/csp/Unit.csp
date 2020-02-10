@@ -1,0 +1,23 @@
+datatype PROCNAMES = e1
+
+channel InvP : PROCNAMES
+channel I_Initialiseunit, I_Execute
+channel I_Adaptunit, a, b, c, d
+
+-- Non-adaptable version
+--Unit = I_Initialiseunit -> P1
+--P1 = I_Execute -> P1
+
+-- Adaptable version
+--Unit = InvP.e1 -> I_Initialiseunit -> P1
+--P1 = I_Execute -> P1 [] InvP.e1 -> I_Adaptunit -> P1
+
+-- Adaptable version (new version)
+--Unit = I_Initialiseunit -> P1
+--P1 = I_Execute -> P1 [] InvP.e1 -> I_Adaptunit -> P1
+
+Unit = I_Initialiseunit -> (P1 ||| P2)
+
+P1 = I_Execute -> P1
+
+P2 = InvP.e1 -> I_Adaptunit -> P2

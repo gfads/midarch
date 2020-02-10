@@ -1,8 +1,0 @@
-digraph G {
-  0 -> 1 [ label="InvP.t1" ];
-  1 -> 2 [ label="I_PosInvP" ];
-  2 -> 3 [ label="InvR.t2" ];
-  3 -> 4 [ label="TerR.t2" ];
-  4 -> 5 [ label="I_PosTerR" ];
-  5 -> 0 [ label="TerP.t1" ];
-}

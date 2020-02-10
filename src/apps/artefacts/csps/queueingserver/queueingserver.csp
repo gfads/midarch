@@ -1,0 +1,11 @@
+datatype PROCNAMES = engine | invoker | srh | t1 | t2
+channel InvP,TerP,InvR,TerR : PROCNAMES
+channel I_Process,I_NC,I_In,I_Out,I_Receive,I_Send
+ENGINE = InvP.t2 -> I_Process -> TerP.t2 -> ENGINE [] I_NC -> ENGINE
+INVOKER = InvP.t1 -> I_In -> InvR.t2 -> TerR.t2 -> I_Out -> TerP.t1 -> INVOKER
+SRH = I_Receive -> InvR.t1 -> TerR.t1 -> I_Send -> SRH
+T1 = InvP.srh -> InvR.invoker -> TerR.invoker -> TerP.srh -> T1
+T2 = InvP.invoker -> InvR.engine -> TerR.engine -> TerP.invoker -> T2
+
+queueingserver = (ENGINE ||| INVOKER ||| SRH)[|{|InvP,TerP,InvR,TerR|}|](T1[[InvP.srh <- InvR.t1,InvR.invoker <- InvP.t1,TerR.invoker <- TerP.t1,TerP.srh <- TerR.t1]] ||| T2[[InvP.srh <- InvR.t1,InvR.invoker <- InvP.t1,TerR.invoker <- TerP.t1,TerP.srh <- TerR.t1,InvP.invoker <- InvR.t2,InvR.engine <- InvP.t2,TerR.engine <- TerP.t2,TerP.invoker <- TerR.t2]])
+assert queueingserver :[deadlock free]

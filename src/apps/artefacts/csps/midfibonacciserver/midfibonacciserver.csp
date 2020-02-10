@@ -1,0 +1,14 @@
+datatype PROCNAMES = namingproxy | fibonacciinvoker | requestor | crh | srh | t1 | t2 | t3
+channel TerR,InvP,TerP,InvR : PROCNAMES
+channel I_Receive,I_Send,I_In,I_Out,I_Process
+NAMINGPROXY = I_In -> InvR.t1 -> TerR.t1 -> I_Out -> NAMINGPROXY
+FIBONACCIINVOKER = InvP.t3 -> I_Process -> TerP.t3 -> FIBONACCIINVOKER
+REQUESTOR = InvP.t1 -> I_In -> InvR.t2 -> TerR.t2 -> I_Out -> TerP.t1 -> REQUESTOR
+CRH = InvP.t2 -> I_Process -> TerP.t2 -> CRH
+SRH = I_Receive -> InvR.t3 -> TerR.t3 -> I_Send -> SRH
+T1 = InvP.namingproxy -> InvR.requestor -> TerR.requestor -> TerP.namingproxy -> T1
+T2 = InvP.requestor -> InvR.crh -> TerR.crh -> TerP.requestor -> T2
+T3 = InvP.srh -> InvR.fibonacciinvoker -> TerR.fibonacciinvoker -> TerP.srh -> T3
+
+midfibonacciserver = (NAMINGPROXY ||| FIBONACCIINVOKER ||| REQUESTOR ||| CRH ||| SRH)[|{|TerR,InvP,TerP,InvR|}|](T2[[InvP.requestor <- InvR.t2,InvR.crh <- InvP.t2,TerR.crh <- TerP.t2,TerP.requestor <- TerR.t2]] ||| T3[[InvP.requestor <- InvR.t2,InvR.crh <- InvP.t2,TerR.crh <- TerP.t2,TerP.requestor <- TerR.t2,InvP.srh <- InvR.t3,InvR.fibonacciinvoker <- InvP.t3,TerR.fibonacciinvoker <- TerP.t3,TerP.srh <- TerR.t3]] ||| T1[[InvP.requestor <- InvR.t2,InvR.crh <- InvP.t2,TerR.crh <- TerP.t2,TerP.requestor <- TerR.t2,InvP.srh <- InvR.t3,InvR.fibonacciinvoker <- InvP.t3,TerR.fibonacciinvoker <- TerP.t3,TerP.srh <- TerR.t3,InvP.namingproxy <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.namingproxy <- TerR.t1]])
+assert midfibonacciserver :[deadlock free]

@@ -1,85 +1,150 @@
 package madl
 
 import (
-	"gmidarch/shared/shared"
-	"strings"
 	"errors"
-	"strconv"
-	"gmidarch/shared/parameters"
-	"gmidarch/development/framework/element"
-	"gmidarch/development/framework/configuration/attachments"
 	"fmt"
+	"gmidarch/development/artefacts/dot"
+	"gmidarch/development/artefacts/exec"
+	"gmidarch/development/messages"
+	"gmidarch/development/repositories/architectural"
+	"os"
+	"reflect"
+	"shared"
+	"strconv"
+	"strings"
 )
 
 type MADL struct {
-	SourceMADL        MADLFile
-	ConfigurationName string
-	Components        []element.ElementMADL
-	Connectors        []element.ElementMADL
-	Attachments       [] attachments.AttachmentMADL
-	Adaptability      []string
+	Path            string
+	File            string
+	Configuration   string
+	Components      []Element
+	Connectors      []Element
+	Attachments     []Attachment
+	Adaptability    []string
+	AppAdaptability []string
+	Channels        map[string]chan messages.SAMessage
+	Maps            map[string]string
 }
 
-func (m *MADL) Create(madlFile MADLFile) error {
-	r1 := *new(error)
+// Configure executable graph of components
+func (m *MADL) ConfigureComponents() {
+	lib := new(architectural.ArchitecturalRepository)
+	lib.Load()
 
-	m.SourceMADL = madlFile
+	for i := range m.Components {
+		record, ok := lib.Library[m.Components[i].TypeName]
+		if !ok {
+			fmt.Printf("MADL:: Component type '%v' not registered in Architectural Repository", m.Components[i].TypeName)
+			os.Exit(0)
+		}
+		m.Components[i].Type = record.Type
+		m.Components[i].Behaviour = record.Behaviour
+		dotgraph := dot.DOT{}.Read(m.Components[i].TypeName + shared.DOT_EXTENSION)
 
-	// Configuration
-	configurationName, err := m.IdentifyConfigurationName()
-	if (err != nil) {
-		r1 = errors.New("MADL: " + err.Error())
-		return r1
+		// Create the executable graph of a given component from dot file
+		execgraph := exec.Exec{}.Create(m.Components[i].ElemId, m.Components[i].Type, m.Components[i].TypeName, dotgraph, m.Maps, m.Channels)
+
+		m.Components[i].Graph = execgraph
 	}
-	m.ConfigurationName = configurationName
-
-	// Components
-	components, err := m.IdentifyComponents()
-	if (err != nil) {
-		r1 = errors.New("MADL: " + err.Error())
-		return r1
-	}
-	m.Components = components
-
-	// Connectors
-	connectors, err := m.IdentifyConnectors()
-	if (err != nil) {
-		r1 = errors.New("MADL: " + err.Error())
-		return r1
-	}
-	m.Connectors = connectors
-
-	// Attachments
-	attachments, err := m.IdentifyAttachments()
-	if (err != nil) {
-		r1 = errors.New("MADL: " + err.Error())
-		return r1
-	}
-	m.Attachments = attachments
-	m.SetAttachmentTypes()
-
-	adaptability, err := m.IdentifyAdaptability()
-	if (err != nil) {
-		r1 = errors.New("MADL: " + err.Error())
-		return r1
-	}
-	m.Adaptability = adaptability
-
-	err = m.Check()
-	if (err != nil) {
-		r1 = errors.New("MADL: " + err.Error())
-		return r1
-	}
-
-	return r1
 }
 
-func (m MADL) IdentifyConfigurationName() (string, error) {
+// Configure executable graph of connectors
+func (m *MADL) ConfigureConnectors() {
+	lib := new(architectural.ArchitecturalRepository)
+	lib.Load()
+
+	for i := range m.Connectors {
+		record, ok := lib.Library[m.Connectors[i].TypeName]
+		if !ok {
+			fmt.Println("MADL:: Connector type '" + m.Connectors[i].TypeName + "'not in Library")
+			os.Exit(0)
+		}
+		m.Connectors[i].Type = record.Type
+		m.Connectors[i].Behaviour = record.Behaviour
+		dotgraph := dot.DOT{}.Read(m.Connectors[i].TypeName + shared.DOT_EXTENSION)
+
+		// Create the executable graph of a given connector from dot file
+		execgraph := exec.Exec{}.Create(m.Connectors[i].ElemId, m.Connectors[i].Type, m.Connectors[i].TypeName, dotgraph, m.Maps, m.Channels)
+
+		m.Connectors[i].Graph = execgraph
+	}
+}
+
+// Configure channels and Maps - basic to the execution
+func (madl *MADL) ConfigureChannelsAndMaps() {
+	structuralChannels := make(map[string]chan messages.SAMessage)
+
+	// Configure structural channels
+	for i := range madl.Attachments {
+		c1Id := madl.Attachments[i].C1.ElemId
+		c2Id := madl.Attachments[i].C2.ElemId
+		tId := madl.Attachments[i].T.ElemId
+
+		// c1 -> t
+		key01 := c1Id + "." + shared.INVR + "." + tId
+		key02 := tId + "." + shared.INVP + "." + c1Id
+		key03 := tId + "." + shared.TERP + "." + c1Id
+		key04 := c1Id + "." + shared.TERR + "." + tId
+		structuralChannels[key01] = make(chan messages.SAMessage, shared.CHAN_BUFFER_SIZE)
+		structuralChannels[key02] = structuralChannels[key01]
+		structuralChannels[key03] = make(chan messages.SAMessage, shared.CHAN_BUFFER_SIZE)
+		structuralChannels[key04] = structuralChannels[key03]
+
+		// t -> c2
+		key01 = tId + "." + shared.INVR + "." + c2Id
+		key02 = c2Id + "." + shared.INVP + "." + tId
+		key03 = c2Id + "." + shared.TERP + "." + tId
+		key04 = tId + "." + shared.TERR + "." + c2Id
+		structuralChannels[key01] = make(chan messages.SAMessage, shared.CHAN_BUFFER_SIZE)
+		structuralChannels[key02] = structuralChannels[key01]
+		structuralChannels[key03] = make(chan messages.SAMessage, shared.CHAN_BUFFER_SIZE)
+		structuralChannels[key04] = structuralChannels[key03]
+	}
+	madl.Channels = structuralChannels
+
+	// Configure maps
+	elemMaps := make(map[string]string)
+	partners := make(map[string]string)
+
+	for i := range madl.Attachments {
+		c1Id := madl.Attachments[i].C1.ElemId
+		c2Id := madl.Attachments[i].C2.ElemId
+		tId := madl.Attachments[i].T.ElemId
+		if !strings.Contains(partners[c1Id], tId) {
+			partners[c1Id] += ":" + tId
+		}
+		if !strings.Contains(partners[tId], c1Id) {
+			partners[tId] += ":" + c1Id
+		}
+		if !strings.Contains(partners[tId], c2Id) {
+			partners[tId] += ":" + c2Id
+		}
+		if !strings.Contains(partners[c2Id], tId) {
+			partners[c2Id] += ":" + tId
+		}
+	}
+
+	for i := range partners {
+		p := strings.Split(partners[i], ":")
+		c := 1
+		for j := range p {
+			if p[j] != "" {
+				elemMaps[i+".e"+strconv.Itoa(c)] = p[j]
+				c++
+			}
+		}
+	}
+	madl.Maps = elemMaps
+}
+
+// Indentify Configuration Name
+func (MADL) IdentifyConfigurationName(content []string) (string, error) {
 	r1 := ""
 	r2 := *new(error)
 
-	for l := range m.SourceMADL.Content {
-		tempContent := m.SourceMADL.Content[l]
+	for l := range content {
+		tempContent := content[l]
 		if strings.Contains(strings.ToUpper(tempContent), "CONFIGURATION") {
 			temp := strings.Split(tempContent, " ")
 			r1 = strings.TrimSpace(temp[1])
@@ -91,22 +156,34 @@ func (m MADL) IdentifyConfigurationName() (string, error) {
 	return r1, r2
 }
 
-func (m MADL) IdentifyComponents() ([]element.ElementMADL, error) {
+// Indentify Components
+func (MADL) IdentifyComponents(content []string) ([]Element, error) {
 	foundComponents := false
-	r1 := []element.ElementMADL{}
+	r1 := []Element{}
 	r2 := *new(error)
 
-	for l := range m.SourceMADL.Content {
-		tempLine := m.SourceMADL.Content[l]
+	for l := range content {
+		tempLine := content[l]
 		if strings.Contains(strings.ToUpper(tempLine), "COMPONENTS") {
 			foundComponents = true
 		} else {
 			if foundComponents && !shared.SkipLine(tempLine) && strings.Contains(tempLine, ":") {
+				compType := *new(string)
 				temp := strings.Split(tempLine, ":")
-				compId := strings.TrimSpace(temp[0])
-				compType := ""
-				compType = strings.TrimSpace(temp[1])
-				r1 = append(r1, element.ElementMADL{ElemId: compId, ElemType: compType})
+				if strings.Contains(tempLine, "@") {
+					compId := strings.TrimSpace(temp[0])
+					compType = strings.TrimSpace(temp[1][:strings.Index(temp[1], "@")])
+					paramPort := strings.TrimSpace(tempLine[strings.Index(tempLine, "@")+1:])
+					tempPort := shared.SetOfPorts[paramPort]                     // TODO
+					infoTemp := make([]*interface{},1,1)
+					infoTemp[0] = new(interface{})
+					*infoTemp[0] = tempPort
+					r1 = append(r1, Element{ElemId: compId, TypeName: compType, Info:infoTemp})
+				} else {
+					compId := strings.TrimSpace(temp[0])
+					compType = strings.TrimSpace(temp[1])
+					r1 = append(r1, Element{ElemId: compId, TypeName: compType})
+				}
 			} else {
 				if foundComponents && !shared.SkipLine(tempLine) && !strings.Contains(tempLine, ":") {
 					break
@@ -122,13 +199,13 @@ func (m MADL) IdentifyComponents() ([]element.ElementMADL, error) {
 	return r1, r2
 }
 
-func (m MADL) IdentifyConnectors() ([]element.ElementMADL, error) {
+func (MADL) IdentifyConnectors(content []string) ([]Element, error) {
 	foundConnectors := false
-	r1 := []element.ElementMADL{}
+	r1 := []Element{}
 	r2 := *new(error)
 
-	for l := range m.SourceMADL.Content {
-		tempLine := m.SourceMADL.Content[l]
+	for l := range content {
+		tempLine := content[l]
 		if strings.Contains(strings.ToUpper(tempLine), "CONNECTORS") {
 			foundConnectors = true
 		} else {
@@ -136,7 +213,8 @@ func (m MADL) IdentifyConnectors() ([]element.ElementMADL, error) {
 				temp := strings.Split(tempLine, ":")
 				connId := strings.TrimSpace(temp[0])
 				connType := strings.TrimSpace(temp[1])
-				r1 = append(r1, element.ElementMADL{ElemId: connId, ElemType: connType})
+				connTypeName := connType
+				r1 = append(r1, Element{ElemId: connId, Type: connType, TypeName: connTypeName})
 			} else {
 				if foundConnectors && tempLine != "" && !strings.Contains(tempLine, ":") {
 					break
@@ -152,28 +230,28 @@ func (m MADL) IdentifyConnectors() ([]element.ElementMADL, error) {
 	return r1, r2
 }
 
-func (m MADL) IdentifyAttachments() ([]attachments.AttachmentMADL, error) {
-	r1 := []attachments.AttachmentMADL{}
+func (MADL) IdentifyAttachments(content []string) ([]Attachment, error) {
+	r1 := []Attachment{}
 	r2 := *new(error)
 
 	// Identify Attachments
 	foundAttachments := false
-	for l := range m.SourceMADL.Content {
-		tempLine := m.SourceMADL.Content[l]
+	for l := range content {
+		tempLine := content[l]
 		if strings.Contains(strings.ToUpper(tempLine), "ATTACHMENTS") {
 			foundAttachments = true
 		} else {
 			if foundAttachments && !shared.SkipLine(tempLine) && strings.Contains(tempLine, ",") {
 				atts := strings.Split(strings.TrimSpace(tempLine), ",")
-				c1Temp := atts[0]
-				tTemp := atts[1]
-				c2Temp := atts[2]
+				c1Temp := strings.TrimSpace(atts[0])
+				tTemp := strings.TrimSpace(atts[1])
+				c2Temp := strings.TrimSpace(atts[2])
 
-				c1 := element.ElementMADL{ElemId: c1Temp}
-				t := element.ElementMADL{ElemId: tTemp}
-				c2 := element.ElementMADL{ElemId: c2Temp}
+				c1 := Element{ElemId: c1Temp}
+				t := Element{ElemId: tTemp}
+				c2 := Element{ElemId: c2Temp}
 
-				att := attachments.AttachmentMADL{c1, t, c2}
+				att := Attachment{c1, t, c2}
 				r1 = append(r1, att)
 			} else {
 				if foundAttachments && tempLine != "" && !strings.Contains(tempLine, ",") {
@@ -190,13 +268,13 @@ func (m MADL) IdentifyAttachments() ([]attachments.AttachmentMADL, error) {
 	return r1, r2
 }
 
-func (m MADL) IdentifyAdaptability() ([]string, error) {
+func (MADL) IdentifyAdaptability(content []string) ([]string, error) {
 	r1 := []string{}
 	r2 := *new(error)
 
 	foundAdaptability := false
-	for l := range m.SourceMADL.Content {
-		tempLine := m.SourceMADL.Content[l]
+	for l := range content {
+		tempLine := content[l]
 		if strings.Contains(strings.ToUpper(tempLine), "ADAPTABILITY") {
 			foundAdaptability = true
 		} else {
@@ -217,183 +295,10 @@ func (m MADL) IdentifyAdaptability() ([]string, error) {
 	return r1, r2
 }
 
-func (m *MADL) SetAttachmentTypes() {
-	for a := range m.Attachments {
-		c1 := m.Attachments[a].C1.ElemId
-		c1Type, err := m.GetType(c1)
-		shared.CheckError(err, "MADL")
-		t := m.Attachments[a].T.ElemId
-		tType, err := m.GetType(t)
-		shared.CheckError(err, "MADL")
-		c2 := m.Attachments[a].C2.ElemId
-		c2Type, err := m.GetType(c2)
-		shared.CheckError(err, "MADL")
+func (m MADL) PrintComponents() {
 
-		tempAttachment := attachments.AttachmentMADL{element.ElementMADL{ElemId: c1, ElemType: c1Type}, element.ElementMADL{ElemId: t, ElemType: tType}, element.ElementMADL{c2, c2Type}}
-		m.Attachments[a] = tempAttachment
-	}
-}
-
-func (m MADL) GetType(elemId string) (string, error) {
-	r1 := ""
-	r2 := *new(error)
-	found := false
-
-	for c := range m.Components {
-		if m.Components[c].ElemId == elemId {
-			found = true
-			r1 = m.Components[c].ElemType
-			break
-		}
-	}
-
-	if !found {
-		for c := range m.Connectors {
-			if m.Connectors[c].ElemId == elemId {
-				found = true
-				r1 = m.Connectors[c].ElemType
-				break
-			}
-		}
-	}
-
-	if !found {
-		r2 = errors.New("MADL:: Type of element '" + elemId + "' not found.")
-	}
-	return r1, r2
-}
-
-func (m MADL) CreateEE(kindOfAdaptability []string) (MADL, error) {
-	r1 := MADL{}
-	r2 := *new(error)
-	isAdaptive := true
-
-
-	if len(kindOfAdaptability) == 1 && kindOfAdaptability[0]== "NONE"{
-		isAdaptive = false
-	}
-
-	// configuration
-	r1.ConfigurationName = m.ConfigurationName + "_EE"
-
-	// Components
-	comps := []element.ElementMADL{}
-
-	comps = append(comps, element.ElementMADL{"ee", "ExecutionEnvironment"})
-
-	if isAdaptive {
-		comps = append(comps, element.ElementMADL{"monitorevolutive", "MAPEKMonitorEvolutive"}) //TODO
-		comps = append(comps, element.ElementMADL{"mapekmonitor", "MAPEKMonitor"})
-		comps = append(comps, element.ElementMADL{"analyser", "MAPEKAnalyser"})
-		comps = append(comps, element.ElementMADL{"planner", "MAPEKPlanner"})
-		comps = append(comps, element.ElementMADL{"executor", "MAPEKExecutor"})
-	}
-
-	units := []string{}
-	for i := 0; i < len(m.Components)+len(m.Connectors); i++ {
-		units = append(units, "unit"+strconv.Itoa(i+1))
-	}
-	for i := 0; i < len(units); i++ {
-		comps = append(comps, element.ElementMADL{units[i], "ExecutionUnit"})
-	}
-
-	// Connectors
-	conns := [] element.ElementMADL{}
-
-	conns = append(conns, element.ElementMADL{"t1", "OneToN"})
-
-	if isAdaptive {
-		conns = append(conns, element.ElementMADL{"t2", "OneWay"})
-		conns = append(conns, element.ElementMADL{"t3", "OneWay"})
-		conns = append(conns, element.ElementMADL{"t4", "OneWay"})
-		conns = append(conns, element.ElementMADL{"t5", "OneWay"})
-		conns = append(conns, element.ElementMADL{"t6", "OneWay"})
-	}
-
-	// Attachments
-	atts := []attachments.AttachmentMADL{}
-
-	for i := 0; i < len(units); i++ {
-		attC1 := element.ElementMADL{"ee", "ExecutionEnvironment"}
-		attT := element.ElementMADL{"t1", "OneToN"}
-		attC2 := element.ElementMADL{units[i], "ExecutionUnit"}
-		atts = append(atts, attachments.AttachmentMADL{attC1, attT, attC2})
-	}
-
-	if isAdaptive {
-		attC1 := element.ElementMADL{"monitorevolutive", "MAPEKMonitorEvolutive"}
-		attT := element.ElementMADL{"t2", "OneWay"}
-		attC2 := element.ElementMADL{"mapekmonitor", "MAPEKMonitor"}
-		atts = append(atts, attachments.AttachmentMADL{attC1, attT, attC2})
-
-		attC1 = element.ElementMADL{"mapekmonitor", "MAPEKMonitor"}
-		attT = element.ElementMADL{"t3", "OneWay"}
-		attC2 = element.ElementMADL{"analyser", "MAPEKAnalyser"}
-		atts = append(atts, attachments.AttachmentMADL{attC1, attT, attC2})
-
-		attC1 = element.ElementMADL{"analyser", "MAPEKAnalyser"}
-		attT = element.ElementMADL{"t4", "OneWay"}
-		attC2 = element.ElementMADL{"planner", "MAPEKPlanner"}
-		atts = append(atts, attachments.AttachmentMADL{attC1, attT, attC2})
-
-		attC1 = element.ElementMADL{"planner", "MAPEKPlanner"}
-		attT = element.ElementMADL{"t5", "OneWay"}
-		attC2 = element.ElementMADL{"executor", "MAPEKExecutor"}
-		atts = append(atts, attachments.AttachmentMADL{attC1, attT, attC2})
-
-		attC1 = element.ElementMADL{"executor", "MAPEKExecutor"}
-		attT = element.ElementMADL{"t6", "OneWay"}
-		attC2 = element.ElementMADL{"ee", "ExecutionEnvironment"}
-		atts = append(atts, attachments.AttachmentMADL{attC1, attT, attC2})
-	}
-
-	// Adaptability
-	adaptability := []string{}
-	adaptability = append(adaptability, "NONE") // TODO
-
-	// configure MADL EE
-	r1.SourceMADL.FileName = strings.Replace(m.SourceMADL.FileName, parameters.MADL_EXTENSION, "", 99) + "_EE" + parameters.MADL_EXTENSION
-	r1.SourceMADL.FilePath = m.SourceMADL.FilePath
-	r1.Components = comps
-	r1.Connectors = conns
-	r1.Attachments = atts
-	r1.Adaptability = adaptability
-
-	return r1, r2
-}
-
-func (m MADL) Print() {
-	lines := []string{}
-
-	// Configuration
-	lines = append(lines,"Configuration "+m.ConfigurationName+" := "+ "\n")
-
-	// Components
-	lines = append(lines,"Components"+"\n")
-	for i := range m.Components{
-		lines = append(lines,"   "+m.Components[i].ElemId+" : "+m.Components[i].ElemType+"\n")
-	}
-
-	// Connectors
-	lines = append(lines,"Connectors"+"\n")
-	for i := range m.Connectors{
-		lines = append(lines,"   "+m.Connectors[i].ElemId+" : "+m.Connectors[i].ElemType+"\n")
-	}
-
-	// Attachments
-	lines = append(lines,"Attachments"+"\n")
-	for i := range m.Attachments {
-		lines = append(lines,"   "+m.Attachments[i].C1.ElemId+","+m.Attachments[i].T.ElemId+","+m.Attachments[i].C2.ElemId+"\n")
-	}
-
-	// Adaptability
-	lines = append(lines,"Adaptability"+"\n")
-	lines = append(lines,"   "+m.Adaptability[0] + "\n") // TODO
-
-	lines = append(lines,"EndConf")
-
-	for i := range lines {
-		fmt.Print(lines[i])
+	for i := range m.Components {
+		fmt.Println(reflect.TypeOf(m.Components[i].Type))
 	}
 }
 
@@ -403,17 +308,17 @@ func (m MADL) Check() (error) {
 	// Check if all components/connectors were declared
 	for a := range m.Attachments {
 
-		if !m.IsInComponents(m.Attachments[a].C1) {
+		if !m.isInComponents(m.Attachments[a].C1) {
 			r1 = errors.New("Component '" + m.Attachments[a].C1.ElemId + "' was not Declared!!")
 			return r1
 		}
 
-		if !m.IsInConnectors(m.Attachments[a].T) {
+		if !m.isInConnectors(m.Attachments[a].T) {
 			r1 = errors.New("Connector '" + m.Attachments[a].T.ElemId + "' was not Declared!!")
 			return r1
 
 		}
-		if !m.IsInComponents(m.Attachments[a].C2) {
+		if !m.isInComponents(m.Attachments[a].C2) {
 			r1 = errors.New("Component '" + m.Attachments[a].C2.ElemId + "' was not Declared!!")
 			return r1
 		}
@@ -421,14 +326,14 @@ func (m MADL) Check() (error) {
 
 	// Check if all components/connectors were used
 	for c := range m.Components {
-		if !m.IsComponentInAttachments(m.Components[c]) {
+		if !m.isComponentInAttachments(m.Components[c]) {
 			r1 = errors.New("Component '" + m.Components[c].ElemId + "' declared, but not Used!!")
 			return r1
 		}
 	}
 
 	for t := range m.Connectors {
-		if !m.IsConnectorInAttachments(m.Connectors[t]) {
+		if !m.isConnectorInAttachments(m.Connectors[t]) {
 			r1 = errors.New("Connector '" + m.Connectors[t].ElemId + "' declared, but not Used!!")
 			return r1
 		}
@@ -436,7 +341,7 @@ func (m MADL) Check() (error) {
 	return r1
 }
 
-func (m MADL) IsInConnectors(e element.ElementMADL) bool {
+func (m MADL) isInConnectors(e Element) bool {
 	foundConnector := false
 
 	for i := range m.Connectors {
@@ -448,7 +353,7 @@ func (m MADL) IsInConnectors(e element.ElementMADL) bool {
 	return foundConnector
 }
 
-func (m MADL) IsInComponents(e element.ElementMADL) bool {
+func (m MADL) isInComponents(e Element) bool {
 	foundComponent := false
 
 	for i := range m.Components {
@@ -460,7 +365,7 @@ func (m MADL) IsInComponents(e element.ElementMADL) bool {
 	return foundComponent
 }
 
-func (m MADL) IsComponentInAttachments(e element.ElementMADL) bool {
+func (m MADL) isComponentInAttachments(e Element) bool {
 	foundComponent := false
 
 	for a := range m.Attachments {
@@ -472,7 +377,7 @@ func (m MADL) IsComponentInAttachments(e element.ElementMADL) bool {
 	return foundComponent
 }
 
-func (m MADL) IsConnectorInAttachments(e element.ElementMADL) bool {
+func (m MADL) isConnectorInAttachments(e Element) bool {
 	foundComponent := false
 
 	for a := range m.Attachments {

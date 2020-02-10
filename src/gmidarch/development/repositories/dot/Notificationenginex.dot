@@ -1,0 +1,6 @@
+digraph G {
+  0 -> 1 [ label="InvP.e1" ];
+  0 -> 0 [ label="I_NC" ];
+  1 -> 2 [ label="I_Process" ];
+  2 -> 0 [ label="TerP.e1" ];
+}

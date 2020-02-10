@@ -1,9 +1,0 @@
-datatype PROCNAMES = sender | receiver | t5
-channel InvP,InvR : PROCNAMES
-channel I_PreInvR1,I_PreInvR2,I_PosInvP
-SENDER = I_PreInvR1 -> InvR.t5 -> SENDER [] I_PreInvR2 -> InvR.t5 -> SENDER
-RECEIVER = InvP.t5 -> I_PosInvP -> RECEIVER
-T5 = InvP.sender -> InvR.receiver -> T5
-
-SenderReceiver = (SENDER ||| RECEIVER)[|{|InvP,InvR|}|](T5[[InvP.sender <- InvR.t5,InvR.receiver <- InvR.t5]])
-assert SenderReceiver :[deadlock free]

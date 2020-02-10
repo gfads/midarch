@@ -1,0 +1,4 @@
+datatype PROCNAMES = e1 | e2
+channel InvP, TerP, InvR, TerR : PROCNAMES
+
+Requestreply = InvP.e1 -> InvR.e2 -> TerR.e2 -> TerP.e1 -> Requestreply

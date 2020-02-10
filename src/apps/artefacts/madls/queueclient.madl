@@ -1,0 +1,18 @@
+Configuration QueueClient :=
+   Components
+      proxy     : Notificationengineproxy
+      requestor : RequestorM
+      crh       : CRH
+
+   Connectors
+      t1 : Requestreply
+      t2 : Requestreply
+
+   Attachments
+      proxy,t1,requestor
+      requestor,t2,crh
+
+   Adaptability
+      NONE
+
+EndConf

@@ -1,0 +1,19 @@
+Configuration midfibonacciclient :=
+   Components
+      proxyn    : Namingproxy
+      proxyf    : Fibonacciproxy
+      requestor : RequestorM
+      crh       : CRH
+
+   Connectors
+      t1 : NtoOne
+      t2 : Requestreply
+
+   Attachments
+      proxyn,t1,requestor
+      proxyf,t1,requestor
+      requestor,t2,crh
+
+   Adaptability
+      None
+EndConf

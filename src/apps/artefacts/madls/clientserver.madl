@@ -1,0 +1,16 @@
+Configuration clientserver :=
+
+   Components
+      client : Client
+      server : Server
+
+   Connectors
+      t : Requestreply
+
+   Attachments
+      client,t,server
+
+   Adaptability
+      None
+
+EndConf

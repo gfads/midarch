@@ -1,4 +1,0 @@
-digraph G {
-  0 -> 1 [ label="InvP.sender" ];
-  1 -> 0 [ label="InvR.receiver" ];
-}

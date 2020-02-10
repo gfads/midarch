@@ -1,8 +1,0 @@
-digraph G {
-  0 -> 3 [ label="InvP.proactiveMonitor" ];
-  0 -> 1 [ label="InvP.correctiveMonitor" ];
-  0 -> 2 [ label="InvP.evolutiveMonitor" ];
-  1 -> 0 [ label="InvR.monitor" ];
-  2 -> 0 [ label="InvR.monitor" ];
-  3 -> 0 [ label="InvR.monitor" ];
-}

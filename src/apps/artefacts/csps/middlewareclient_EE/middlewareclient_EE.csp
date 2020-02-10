@@ -1,0 +1,23 @@
+datatype PROCNAMES = core | unit1 | unit2 | unit3 | unit4 | unit5 | t1
+channel InvR,InvP : PROCNAMES
+channel I_InitialiseUnit,I_Execute
+CORE = InvR.t1 -> CORE
+UNIT1 = I_InitialiseUnit -> UNIT1P1
+ UNIT1P1 = I_Execute -> UNIT1P1
+
+UNIT2 = I_InitialiseUnit -> UNIT2P1
+ UNIT2P1 = I_Execute -> UNIT2P1
+
+UNIT3 = I_InitialiseUnit -> UNIT3P1
+ UNIT3P1 = I_Execute -> UNIT3P1
+
+UNIT4 = I_InitialiseUnit -> UNIT4P1
+ UNIT4P1 = I_Execute -> UNIT4P1
+
+UNIT5 = I_InitialiseUnit -> UNIT5P1
+ UNIT5P1 = I_Execute -> UNIT5P1
+
+T1 = InvP.core -> InvR.unit1 -> InvR.unit2 -> InvR.unit3 -> InvR.unit4 -> InvR.unit5 -> T1
+
+middlewareclient_ee = (CORE ||| UNIT1 ||| UNIT2 ||| UNIT3 ||| UNIT4 ||| UNIT5)[|{|InvR,InvP|}|](T1[[InvP.core <- InvR.t1,InvR.unit1 <- InvP.t1,InvR.unit2 <- InvP.t1,InvR.unit3 <- InvP.t1,InvR.unit4 <- InvP.t1,InvR.unit5 <- InvP.t1]])
+assert middlewareclient_ee :[deadlock free]

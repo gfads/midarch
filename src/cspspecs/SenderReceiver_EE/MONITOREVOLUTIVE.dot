@@ -1,6 +1,0 @@
-digraph G {
-  0 -> 1 [ label="I_EvolutiveMonitoring" ];
-  1 -> 2 [ label="I_HasPlugin" ];
-  1 -> 0 [ label="I_HasNotPlugin" ];
-  2 -> 0 [ label="InvR.t2" ];
-}

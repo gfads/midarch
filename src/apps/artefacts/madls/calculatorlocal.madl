@@ -1,0 +1,15 @@
+Configuration senderreceiver :=
+
+   Components
+      client : Calculatorclient
+      server : Calculatorserver
+
+   Connectors
+      t1 : Requestreply
+
+   Attachments
+      client,t1,server
+
+   Adaptability
+      Evolutive
+EndConf

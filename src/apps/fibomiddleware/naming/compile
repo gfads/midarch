@@ -1,0 +1,20 @@
+source ~/.cshrc
+echo
+echo Compiling 'Naming server'...
+echo
+cd /Users/nsr/Dropbox/go/midarch-go-v13/src/apps/fibomiddleware/naming
+go build namingserver.go
+echo Compiling 'Fibonacci Server'...  
+echo
+cd /Users/nsr/Dropbox/go/midarch-go-v13/src/apps/fibomiddleware/server
+go build server.go
+
+echo Compiling 'Fibonacci Client'...
+echo
+cd /Users/nsr/Dropbox/go/midarch-go-v13/src/apps/fibomiddleware/client
+go build client.go
+
+echo Compiling 'Fibonacci Injector'...
+echo
+cd /Users/nsr/Dropbox/go/midarch-go-v13/src/apps/fibomiddleware/injector
+go build injector.go
