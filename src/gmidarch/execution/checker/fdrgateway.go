@@ -19,7 +19,11 @@ func (FDRGateway) Check(csp csp.CSP) {
 
 	out, err := exec.Command(cmdExp, inputFile).Output()
 	if err != nil {
-		fmt.Println("CSPGateway:: File '" + inputFile + "' has a problem (e.g.,syntax error)")
+		if err.Error() == "exit status 127" {
+			fmt.Println("CSPGateway:: Problem in the execution of the FDR ( File '"+inputFile+"' ). Error: ", err)
+		} else {
+			fmt.Println("CSPGateway:: File '"+inputFile+"' has a problem (e.g.,syntax error). Error: ", err)
+		}
 		os.Exit(0)
 	}
 	s := string(out[:])

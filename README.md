@@ -5,9 +5,10 @@
 #### 1. Download gMidArch
 
  - Download gMidArch (https://github.com/gfads/midarch.git) into <path>/gmidarch
- - Configure GOPATH=<path>/gmidarch
- - Configure GMIDARCHDIR=<path>/gmidarch
-
+ - Configure GOPATH=\<path-to-gopath>
+ - Configure GOROOT=\<path-to-goroot>
+ - Configure GMIDARCHDIR=\<path-to-gmidarch-gopath>
+    
 #### 2. Install FDR4
 
  - Download (https://cocotec.io/fdr/index.html) into <path>/fdr4
@@ -17,11 +18,11 @@
 #### 3. Download additional packages used by gMidArch
 
 ```
-  go get gopkg.in/check.v1
-  go get github.com/kr/pretty
-  go get github.com/kr/text
-  go get github.com/vmihailenco/msgpack
-  go get github.com/vmihailenco/tagparser
+go get gopkg.in/check.v1
+go get github.com/kr/pretty
+go get github.com/kr/text
+go get github.com/vmihailenco/msgpack
+go get github.com/vmihailenco/tagparser
 ```
 
 #### 4. RabbitMQ
@@ -52,8 +53,8 @@
 1. Move to GMIDARCHDIR/src/apps/artefacts/madls
 2. Edit 'midfibonacciserver.madl' (set 'Adaptability' to 'None')
 3. Move to GMIDARCHDIR/src/apps/fibomiddleware/naming
-4. Compile 'go build naming.go'
-5. Start Naming Service: './naming'
+4. Compile 'go build namingserver.go'
+5. Start Naming Service: './namingserver'
 6. Move to GMIDARCHDIR/src/apps/fibomiddleware/server
 7. Compile 'go build server.go'
 8. Start Fibonacci Server: './server'
@@ -77,7 +78,6 @@
 12. Move GMIDARCHDIR/src/apps/fibomiddleware/injector
 13. Compile 'go build injector.go'
 14. Start injector: './injector <time-between-injections (in seconds)>'
-
 
 #### Scenario 3 (gMidArch - MOM)
 

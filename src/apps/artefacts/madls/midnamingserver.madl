@@ -1,7 +1,7 @@
 Configuration midnamingserver :=
    Components
       naming     : Namingserver
-      invoker    : NaminginvokerM
+      invoker    : Naminginvokerm
       srh        : SRH @NAMING_PORT
 
    Connectors
