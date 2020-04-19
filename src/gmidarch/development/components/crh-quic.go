@@ -1,10 +1,12 @@
 package components
 
 import (
+	"context"
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/binary"
 	"fmt"
+	"github.com/lucas-clemente/quic-go"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"io/ioutil"
@@ -15,14 +17,14 @@ import (
 type CRHQuic struct {
 	Behaviour string
 	Graph     graphs.ExecGraph
-	Conns     map[string]*tls.Conn
+	Conns     map[string]quic.Session
 }
 
 func NewCRHQuic() CRHQuic {
 
 	r := new(CRHQuic)
 	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B"
-	r.Conns = make(map[string]*tls.Conn, shared.NUM_MAX_CONNECTIONS)
+	r.Conns = make(map[string]quic.Session, shared.NUM_MAX_CONNECTIONS)
 
 	return *r
 }
@@ -47,7 +49,7 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		//	log.Fatalf("CRHQuic:: %s", err)
 		//}
 
-		c.Conns[addr], err = tls.Dial("tcp4", addr, getClientTLSQuicConfig())
+		c.Conns[addr], err = quic.DialAddr(addr, getClientTLSQuicConfig(), nil)
 		if err != nil {
 			fmt.Printf("CRHQuic:: %v\n", err)
 			os.Exit(1)
@@ -57,14 +59,21 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	// connect to server
 	conn := c.Conns[addr]
 
-	// send message's size
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	binary.LittleEndian.PutUint32(size, uint32(len(msgToServer)))
-	_, err = conn.Write(size)
+	stream, err := conn.OpenStreamSync(context.Background())
 	if err != nil {
 		fmt.Printf("CRHQuic:: %v\n", err)
 		os.Exit(1)
 	}
+
+	// send message's size
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	binary.LittleEndian.PutUint32(size, uint32(len(msgToServer)))
+	_, err = stream.Write(size)
+	if err != nil {
+		fmt.Printf("CRHQuic:: %v\n", err)
+		os.Exit(1)
+	}
+	// TODO continue from here
 
 	//fmt.Printf("CRHQuic:: %v \n\n",size)
 
