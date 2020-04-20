@@ -79,7 +79,7 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	// send message
 	//fmt.Printf("CRHQuic:: Message to server:: %v %v >> %v << \n\n",msgToServer, len(msgToServer), binary.LittleEndian.Uint32(size))
-	_, err = conn.Write(msgToServer)
+	_, err = stream.Write(msgToServer)
 	if err != nil {
 		fmt.Printf("CRHQuic:: %v\n", err)
 		os.Exit(1)
@@ -88,7 +88,7 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	//fmt.Printf("CRHQuic:: Message sent to Server [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
 	// receive reply's size
-	_, err = conn.Read(size)
+	_, err = stream.Read(size)
 	if err != nil {
 		fmt.Printf("CRHQuic:: %v\n", err)
 		os.Exit(1)
@@ -96,7 +96,7 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
-	_, err = conn.Read(msgFromServer)
+	_, err = stream.Read(msgFromServer)
 	if err != nil {
 		fmt.Printf("CRHQuic:: %v\n", err)
 		os.Exit(1)
