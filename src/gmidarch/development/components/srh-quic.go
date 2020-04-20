@@ -1,14 +1,15 @@
 package components
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/binary"
 	"fmt"
+	"github.com/lucas-clemente/quic-go"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"io"
 	"log"
-	"net"
 	"os"
 	"shared"
 )
@@ -19,8 +20,9 @@ type SRHQuic struct {
 }
 
 // TODO: Can't be part of SRHQuic? I've to change the names because the scope is the entire package
-var ConnsSRHQuic []net.Conn
-var LnSRHQuic net.Listener
+var ConnsSRHQuic []quic.Session
+var StreamsSRHQuic []quic.Stream
+var LnSRHQuic quic.Listener
 
 var c1Quic = make(chan []byte)
 var c2Quic = make(chan []byte)
@@ -53,7 +55,8 @@ func (e SRHQuic) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemIn
 		//if err != nil {
 		//	log.Fatalf("SRH:: %v\n", err)
 		//}
-		ln, err := tls.Listen("tcp4", host+":"+port, getServerTLSQuicConfig())
+		quicConfig := quic.Config{ KeepAlive:true }
+		ln, err := quic.ListenAddr(host+":"+port, getServerTLSQuicConfig(), &quicConfig)
 		if err != nil {
 			log.Fatalf("SRHQuic:: %v\n", err)
 		}
@@ -88,7 +91,7 @@ func (e SRHQuic) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemIn
 func acceptAndReadQuic(currentConnectionQuic int, c chan []byte) {
 
 	// accept connections
-	temp, err := LnSRHQuic.Accept()
+	temp, err := LnSRHQuic.Accept(context.Background())
 	if err != nil {
 		fmt.Printf("SRHQuic:: %v\n", err)
 		os.Exit(1)
@@ -99,7 +102,13 @@ func acceptAndReadQuic(currentConnectionQuic int, c chan []byte) {
 	// receive size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	tempConn := ConnsSRHQuic[currentConnectionQuic]
-	_, err = tempConn.Read(size)
+	stream, err := tempConn.AcceptStream(context.Background())
+	StreamsSRHQuic = append(StreamsSRHQuic, stream)
+	if err != nil {
+		fmt.Printf("SRHQuic:: %v\n", err)
+		os.Exit(1)
+	}
+	_, err = stream.Read(size)
 	if err == io.EOF {
 		{
 			fmt.Printf("SRHQuic:: Accept and Read\n")
@@ -112,7 +121,7 @@ func acceptAndReadQuic(currentConnectionQuic int, c chan []byte) {
 
 	// receive message
 	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-	_, err = tempConn.Read(msgTemp)
+	_, err = stream.Read(msgTemp)
 	if err != nil {
 		fmt.Printf("SRHQuic:: %v\n", err)
 		os.Exit(1)
@@ -125,9 +134,9 @@ func readQuic(currentConnectionQuic int, c chan []byte) {
 
 	// receive size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	tempConn := ConnsSRHQuic[currentConnectionQuic]
+	stream := StreamsSRHQuic[currentConnectionQuic]
 
-	_, err := tempConn.Read(size)
+	_, err := stream.Read(size)
 	if err == io.EOF {
 		fmt.Printf("SRHQuic:: Read\n")
 		os.Exit(0)
@@ -138,7 +147,7 @@ func readQuic(currentConnectionQuic int, c chan []byte) {
 
 	// receive message
 	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-	_, err = tempConn.Read(msgTemp)
+	_, err = stream.Read(msgTemp)
 	if err != nil {
 		fmt.Printf("SRHQuic:: %v\n", err)
 		os.Exit(1)
@@ -155,14 +164,14 @@ func (e SRHQuic) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo 
 	// send message's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	binary.LittleEndian.PutUint32(size, uint32(len(msgTemp)))
-	_, err := ConnsSRHQuic[currentConnectionQuic].Write(size)
+	_, err := StreamsSRHQuic[currentConnectionQuic].Write(size)
 	if err != nil {
 		fmt.Printf("SRHQuic:: %v\n", err)
 		os.Exit(1)
 	}
 
 	// send message
-	_, err = ConnsSRHQuic[currentConnectionQuic].Write(msgTemp)
+	_, err = StreamsSRHQuic[currentConnectionQuic].Write(msgTemp)
 	if err != nil {
 		fmt.Printf("SRHQuic:: %v\n", err)
 		os.Exit(1)
