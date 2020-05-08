@@ -29,6 +29,7 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewFibonacciInvokerM().Selector
 		case "SRH":
 			s = NewSRH().Selector
+			fmt.Println("Criado SRH no ConfigureSelector")
 		case "Fibonacciclient":
 			s = NewFibonacciclient().Selector
 		case "Fibonacciproxy":

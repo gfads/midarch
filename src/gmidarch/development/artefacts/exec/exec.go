@@ -65,7 +65,7 @@ func (Exec) Create(id string, elem interface{}, typeName string, dot dot.DOTGrap
 			}
 
 			if shared.IsInternal(actionNameFDR) {
-				channel := make(chan messages.SAMessage,shared.CHAN_BUFFER_SIZE)
+				channel := make(chan messages.SAMessage, shared.CHAN_BUFFER_SIZE)
 
 				// Configure selector of each individual element
 				s := components.ConfigureSelector(reflect.TypeOf(elem).Name())

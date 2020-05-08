@@ -1,6 +1,7 @@
 package architectural
 
 import (
+	"fmt"
 	"gmidarch/development/components"
 	"gmidarch/development/connectors"
 )
@@ -17,7 +18,7 @@ type ArchitecturalRepository struct {
 func (al *ArchitecturalRepository) Load() error {
 	r1 := *new(error)
 
-	al.Library = make(map[string]Record)
+	al.Library = make(map[string]Record) // TODO: avoid creating duplicate elements (maybe use interfaces to return behaviours and map to the created interface, not to a Record?)
 
 	// load
 	al.Library["Analyser"] = Record{Type: components.NewAnalyser(), Behaviour: components.NewAnalyser().Behaviour}
@@ -43,6 +44,7 @@ func (al *ArchitecturalRepository) Load() error {
 	al.Library["RequestorM"] = Record{Type: components.NewRequestorM(), Behaviour: components.NewRequestorM().Behaviour}
 	al.Library["CRH"] = Record{Type: components.NewCRH(), Behaviour: components.NewCRH().Behaviour}
 	al.Library["SRH"] = Record{Type: components.NewSRH(), Behaviour: components.NewSRH().Behaviour}
+	fmt.Println("SRH criado 2 vezes na arquitetura")
 	al.Library["Calculatorserver"] = Record{Type: components.Newcalculatorserver(), Behaviour: components.Newcalculatorserver().Behaviour}
 	al.Library["Calculatorinvoker"] = Record{Type: components.NewCalculatorinvoker(), Behaviour: components.NewCalculatorinvoker().Behaviour}
 	al.Library["Calculatorclient"] = Record{Type: components.NewCalculatorclient(), Behaviour: components.NewCalculatorclient().Behaviour}

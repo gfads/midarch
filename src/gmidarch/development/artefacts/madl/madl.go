@@ -29,8 +29,10 @@ type MADL struct {
 
 // Configure executable graph of components
 func (m *MADL) ConfigureComponents() {
+	fmt.Println("Vai criar arquitetura na configuração de components")
 	lib := new(architectural.ArchitecturalRepository)
-	lib.Load()
+	lib.Load() // Todo: centralize lib loading to avoid duplicate creations of architectural elements
+
 
 	for i := range m.Components {
 		record, ok := lib.Library[m.Components[i].TypeName]
@@ -51,8 +53,9 @@ func (m *MADL) ConfigureComponents() {
 
 // Configure executable graph of connectors
 func (m *MADL) ConfigureConnectors() {
+	fmt.Println("Vai criar arquitetura na configuração de connectors")
 	lib := new(architectural.ArchitecturalRepository)
-	lib.Load()
+	lib.Load() // Todo: centralize lib loading to avoid duplicate creations of architectural elements
 
 	for i := range m.Connectors {
 		record, ok := lib.Library[m.Connectors[i].TypeName]
