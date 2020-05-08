@@ -43,6 +43,8 @@ func (al *ArchitecturalRepository) Load() error {
 	al.Library["RequestorM"] = Record{Type: components.NewRequestorM(), Behaviour: components.NewRequestorM().Behaviour}
 	al.Library["CRH"] = Record{Type: components.NewCRH(), Behaviour: components.NewCRH().Behaviour}
 	al.Library["SRH"] = Record{Type: components.NewSRH(), Behaviour: components.NewSRH().Behaviour}
+	al.Library["CRHUdp"] = Record{Type: components.NewCRHUdp(), Behaviour: components.NewCRHUdp().Behaviour}
+	al.Library["SRHUdp"] = Record{Type: components.NewSRHUdp(), Behaviour: components.NewSRHUdp().Behaviour}
 	al.Library["Calculatorserver"] = Record{Type: components.Newcalculatorserver(), Behaviour: components.Newcalculatorserver().Behaviour}
 	al.Library["Calculatorinvoker"] = Record{Type: components.NewCalculatorinvoker(), Behaviour: components.NewCalculatorinvoker().Behaviour}
 	al.Library["Calculatorclient"] = Record{Type: components.NewCalculatorclient(), Behaviour: components.NewCalculatorclient().Behaviour}
