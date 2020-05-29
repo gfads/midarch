@@ -17,8 +17,8 @@ type SRHUdp struct {
 	Graph     graphs.ExecGraph
 }
 
-var ConnsSRHUdp []*net.UDPConn
-var addr	*net.UDPAddr
+var connSRHUdp 	*net.UDPConn
+var addr		*net.UDPAddr
 
 var c1Udp = make(chan []byte)
 var c2Udp = make(chan []byte)
@@ -46,19 +46,20 @@ func (s SRHUdp) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInf
 	port := tempPort.(string)
 	host := "127.0.0.1" // TODO
 
-	if LnSRH == nil { // listener was not created yet
+	if connSRHUdp == nil { // connection was not created yet
 		servAddr, err := net.ResolveUDPAddr("udp", host+":"+port)
 		if err != nil {
 			log.Fatalf("SRHUdp:: %v\n", err)
 		}
-		conn, err := net.ListenUDP("udp", servAddr)
-		ConnsSRHUdp = append(ConnsSRHUdp, conn)
+		connSRHUdp, err = net.ListenUDP("udp", servAddr)
+
 		if err != nil {
 			log.Fatalf("SRHUdp:: %v\n", err)
 		}
 		currentConnectionUdp++
 	}
 
+	// TODO: do these states make sense in UDP?
 	switch stateUdp {
 	case 0:
 		go acceptAndReadUDP(currentConnectionUdp, c1Udp)
@@ -83,6 +84,8 @@ func (s SRHUdp) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInf
 	currentConnectionUdp = nextConnectionUDP()
 }
 
+// TODO: this function makes sense? Since UDP don't have connections its duplicated with readUDP
+// TODO: remove currentConnection parameter since there is now connection array
 func acceptAndReadUDP(currentConnection int, c chan []byte) {
 
 	// accept connections
@@ -96,7 +99,7 @@ func acceptAndReadUDP(currentConnection int, c chan []byte) {
 
 	// receive size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	tempConn := ConnsSRHUdp[currentConnection]
+	tempConn := connSRHUdp
 	_, tmpAddr, err := tempConn.ReadFromUDP(size)
 	addr = tmpAddr
 	if err == io.EOF {
@@ -124,7 +127,7 @@ func readUDP(currentConnection int, c chan []byte) {
 
 	// receive size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	tempConn := ConnsSRHUdp[currentConnection]
+	tempConn := connSRHUdp
 
 	_, tmpAddr, err := tempConn.ReadFromUDP(size)
 	addr = tmpAddr
@@ -156,32 +159,33 @@ func (s SRHUdp) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo [
 	// send message's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	binary.LittleEndian.PutUint32(size, uint32(len(msgTemp)))
-	fmt.Println(addr)
-	_, err := ConnsSRHUdp[currentConnectionUdp].WriteTo(size, addr)
+	_, err := connSRHUdp.WriteTo(size, addr)
 	if err != nil {
 		fmt.Printf("SRHUdp:: %v\n", err)
 		os.Exit(1)
 	}
 
 	// send message
-	_, err = ConnsSRHUdp[currentConnectionUdp].WriteTo(msgTemp, addr)
+	_, err = connSRHUdp.WriteTo(msgTemp, addr)
 	if err != nil {
 		fmt.Printf("SRHUdp:: %v\n", err)
 		os.Exit(1)
 	}
 }
 
+// TODO: what will identify the other peer if there is no connections?
 func nextConnectionUDP() int {
-	r := -1
+	/*r := -1
 
 	if currentConnectionUdp == -1 {
 		r = 0
 	} else {
-		if (currentConnectionUdp + 1) == len(ConnsSRHUdp) {
+		if (currentConnectionUdp + 1) == len(connSRHUdp) {
 			r = 0
 		} else {
 			r = currentConnectionUdp + 1
 		}
 	}
-	return r
+	return r*/
+	return 1
 }
