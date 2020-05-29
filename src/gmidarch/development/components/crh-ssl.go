@@ -8,6 +8,7 @@ import (
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"io/ioutil"
+	"log"
 	"os"
 	"shared"
 )
@@ -19,7 +20,6 @@ type CRHSsl struct {
 }
 
 func NewCRHSsl() CRHSsl {
-
 	r := new(CRHSsl)
 	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B"
 	r.Conns = make(map[string]*tls.Conn, shared.NUM_MAX_CONNECTIONS)
@@ -99,10 +99,10 @@ func (c CRHSsl) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 }
 
 func getClientTLSConfig() *tls.Config {
-	pwd, _ := os.Getwd()
-
-	// TODO: adjust path to CA.pem file
-	trustCert, err := ioutil.ReadFile(pwd+"/app/server/ssl/myCA.pem")
+	if shared.CA_PATH == "" {
+		log.Fatal("CRHSsl:: Error:: Environment variable 'CA_PATH' not configured\n")
+	}
+	trustCert, err := ioutil.ReadFile(shared.CA_PATH)
 	if err != nil {
 		fmt.Println("Error loading trust certificate. ",err)
 	}
@@ -110,7 +110,6 @@ func getClientTLSConfig() *tls.Config {
 	if !certs.AppendCertsFromPEM(trustCert) {
 		fmt.Println("Error installing trust certificate.")
 	}
-
 
 	// connect to server
 	tlsConfig := &tls.Config{

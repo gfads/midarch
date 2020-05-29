@@ -18,7 +18,6 @@ type SRHSsl struct {
 	Graph     graphs.ExecGraph
 }
 
-// TODO: Can't be part of SRHSsl? I've to change the names because the scope is the entire package
 var ConnsSRHSsl []net.Conn
 var LnSRHSsl net.Listener
 
@@ -84,7 +83,6 @@ func (e SRHSsl) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInf
 	currentConnectionSsl = nextConnectionSsl()
 }
 
-// TODO : can't be part of SRHSsl?
 func acceptAndReadSsl(currentConnectionSsl int, c chan []byte) {
 
 	// accept connections
@@ -120,7 +118,6 @@ func acceptAndReadSsl(currentConnectionSsl int, c chan []byte) {
 	c <- msgTemp
 }
 
-// TODO : can't be part of SRHSsl?
 func readSsl(currentConnectionSsl int, c chan []byte) {
 
 	// receive size
@@ -169,7 +166,6 @@ func (e SRHSsl) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo [
 	}
 }
 
-// TODO : can't be part of SRHSsl?
 func nextConnectionSsl() int {
 	r := -1
 
@@ -186,9 +182,15 @@ func nextConnectionSsl() int {
 }
 
 func getServerTLSConfig() *tls.Config {
-	pwd, _ := os.Getwd()
-	// TODO: adjust path to crt and key files
-	cert, err := tls.LoadX509KeyPair(pwd+"/app/server/ssl/localhost.crt", pwd+"/app/server/ssl/localhost.key")
+	if shared.CRT_PATH == "" {
+		log.Fatal("SRHSsl:: Error:: Environment variable 'CRT_PATH' not configured\n")
+	}
+
+	if shared.KEY_PATH == "" {
+		log.Fatal("SRHSsl:: Error:: Environment variable 'KEY_PATH' not configured\n")
+	}
+
+	cert, err := tls.LoadX509KeyPair(shared.CRT_PATH, shared.KEY_PATH)
 	if err != nil {
 		log.Fatal("Error loading certificate. ", err)
 	}
