@@ -19,7 +19,6 @@ type SRHQuic struct {
 	Graph     graphs.ExecGraph
 }
 
-// TODO: Can't be part of SRHQuic? I've to change the names because the scope is the entire package
 var ConnsSRHQuic []quic.Session
 var StreamsSRHQuic []quic.Stream
 var LnSRHQuic quic.Listener
@@ -87,7 +86,6 @@ func (e SRHQuic) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemIn
 	currentConnectionQuic = nextConnectionQuic()
 }
 
-// TODO : can't be part of SRHQuic?
 func acceptAndReadQuic(currentConnectionQuic int, c chan []byte) {
 
 	// accept connections
@@ -129,7 +127,6 @@ func acceptAndReadQuic(currentConnectionQuic int, c chan []byte) {
 	c <- msgTemp
 }
 
-// TODO : can't be part of SRHQuic?
 func readQuic(currentConnectionQuic int, c chan []byte) {
 
 	// receive size
@@ -178,7 +175,6 @@ func (e SRHQuic) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo 
 	}
 }
 
-// TODO : can't be part of SRHQuic?
 func nextConnectionQuic() int {
 	r := -1
 
@@ -195,9 +191,15 @@ func nextConnectionQuic() int {
 }
 
 func getServerTLSQuicConfig() *tls.Config {
-	pwd, _ := os.Getwd()
-	// TODO: adjust path to crt and key files
-	cert, err := tls.LoadX509KeyPair(pwd+"/apps/server/ssl/localhost.crt", pwd+"/apps/server/ssl/localhost.key")
+	if shared.CRT_PATH == "" {
+		log.Fatal("SRHSsl:: Error:: Environment variable 'CRT_PATH' not configured\n")
+	}
+
+	if shared.KEY_PATH == "" {
+		log.Fatal("SRHSsl:: Error:: Environment variable 'KEY_PATH' not configured\n")
+	}
+
+	cert, err := tls.LoadX509KeyPair(shared.CRT_PATH, shared.KEY_PATH)
 	if err != nil {
 		log.Fatal("Error loading certificate. ", err)
 	}

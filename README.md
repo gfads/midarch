@@ -8,7 +8,13 @@
  - Configure GOPATH=\<path-to-gopath>
  - Configure GOROOT=\<path-to-goroot>
  - Configure GMIDARCHDIR=\<path-to-gmidarch-gopath>
-    
+ 
+If you are going to use SSL then configure SSL environment variables:
+
+ - Configure CA_PATH=\<path-to-ca-cert-file>
+ - Configure CRT_PATH=\<path-to-cert-file>
+ - Configure KEY_PATH=\<path-to-cert-key-file>
+   
 #### 2. Install FDR4
 
  - Download (https://cocotec.io/fdr/index.html) into <path>/fdr4

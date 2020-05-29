@@ -29,6 +29,8 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewFibonacciInvokerM().Selector
 		case "SRH":
 			s = NewSRH().Selector
+		case "SRHQuic":
+			s = NewSRHQuic().Selector
 		case "Fibonacciclient":
 			s = NewFibonacciclient().Selector
 		case "Fibonacciproxy":
@@ -37,6 +39,8 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewRequestorM().Selector
 		case "CRH":
 			s = NewCRH().Selector
+		case "CRHQuic":
+			s = NewCRHQuic().Selector
 		case "Namingserver":
 			s = Newnamingserver().Selector
 		case "NaminginvokerM":

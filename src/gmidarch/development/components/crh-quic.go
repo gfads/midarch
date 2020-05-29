@@ -10,6 +10,7 @@ import (
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"io/ioutil"
+	"log"
 	"os"
 	"shared"
 )
@@ -21,7 +22,6 @@ type CRHQuic struct {
 }
 
 func NewCRHQuic() CRHQuic {
-
 	r := new(CRHQuic)
 	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B"
 	r.Conns = make(map[string]quic.Session, shared.NUM_MAX_CONNECTIONS)
@@ -108,10 +108,11 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 }
 
 func getClientTLSQuicConfig() *tls.Config {
-	pwd, _ := os.Getwd()
+	if shared.CA_PATH == "" {
+		log.Fatal("CRHSsl:: Error:: Environment variable 'CA_PATH' not configured\n")
+	}
 
-	// TODO: adjust path to CA.pem file
-	trustCert, err := ioutil.ReadFile(pwd+"/apps/server/ssl/myCA.pem")
+	trustCert, err := ioutil.ReadFile(shared.CA_PATH)
 	if err != nil {
 		fmt.Println("Error loading trust certificate. ",err)
 	}
@@ -120,8 +121,6 @@ func getClientTLSQuicConfig() *tls.Config {
 		fmt.Println("Error installing trust certificate.")
 	}
 
-
-	// connect to server
 	tlsConfig := &tls.Config{
 		//InsecureSkipVerify: true,
 		RootCAs: certs,
