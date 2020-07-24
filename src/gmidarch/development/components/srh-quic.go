@@ -67,7 +67,7 @@ func (e SRHQuic) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemIn
 		go acceptAndReadQuic(currentConnectionQuic, c1Quic)
 		stateQuic = 1
 	case 1:
-		go acceptAndReadQuic(currentConnectionQuic, c1Quic)
+		go readQuic(currentConnectionQuic, c2Quic)
 		stateQuic = 2
 	case 2:
 		go readQuic(currentConnectionQuic, c2Quic)
