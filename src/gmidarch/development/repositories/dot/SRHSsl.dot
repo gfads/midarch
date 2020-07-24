@@ -1,0 +1,6 @@
+digraph G {
+  0 -> 1 [ label="I_Receive" ];
+  1 -> 2 [ label="InvR.e1" ];
+  2 -> 3 [ label="TerR.e1" ];
+  3 -> 0 [ label="I_Send" ];
+}
