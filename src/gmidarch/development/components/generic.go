@@ -31,6 +31,8 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewSRH().Selector
 		case "SRHSsl":
 			s = NewSRHSsl().Selector
+		case "SRHQuic":
+			s = NewSRHQuic().Selector
 		case "Fibonacciclient":
 			s = NewFibonacciclient().Selector
 		case "Fibonacciproxy":
@@ -41,6 +43,8 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewCRH().Selector
 		case "CRHSsl":
 			s = NewCRHSsl().Selector
+		case "CRHQuic":
+			s = NewCRHQuic().Selector
 		case "Namingserver":
 			s = Newnamingserver().Selector
 		case "NaminginvokerM":

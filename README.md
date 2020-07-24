@@ -29,6 +29,7 @@ go get github.com/kr/pretty
 go get github.com/kr/text
 go get github.com/vmihailenco/msgpack
 go get github.com/vmihailenco/tagparser
+go get github.com/lucas-clemente/quic-go
 ```
 
 #### 4. RabbitMQ
