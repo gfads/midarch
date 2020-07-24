@@ -64,7 +64,7 @@ func (e SRHSsl) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInf
 		go acceptAndReadSsl(currentConnectionSsl, c1Ssl)
 		stateSsl = 1
 	case 1:
-		go acceptAndReadSsl(currentConnectionSsl, c1Ssl)
+		go readSsl(currentConnectionSsl, c2Ssl)
 		stateSsl = 2
 	case 2:
 		go readSsl(currentConnectionSsl, c2Ssl)
