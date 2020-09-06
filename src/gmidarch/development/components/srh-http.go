@@ -12,97 +12,97 @@ import (
 	"shared"
 )
 
-type SRH struct {
+type SRHHttp struct {
 	Behaviour string
 	Graph     graphs.ExecGraph
 }
 
-var ConnsSRH []net.Conn
-var LnSRH net.Listener
+var ConnsSRHHttp []net.Conn
+var LnSRHHttp net.Listener
 
-var c1 = make(chan []byte)
-var c2 = make(chan []byte)
-var currentConnection = -1
-var state = 0
+var c1Http = make(chan []byte)
+var c2Http = make(chan []byte)
+var currentConnectionHttp = -1
+var stateHttp = 0
 
-func NewSRH() SRH {
+func NewSRHHttp() SRHHttp {
 
-	r := new(SRH)
+	r := new(SRHHttp)
 	r.Behaviour = "B = I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> B"
 
 	return *r
 }
 
-func (e SRH) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
+func (e SRHHttp) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	if op[2] == 'R' { // I_Receive
-		elem.(SRH).I_Receive(msg, info, elemInfo)
+		elem.(SRHHttp).I_Receive(msg, info, elemInfo)
 	} else { // "I_Send"
-		elem.(SRH).I_Send(msg, info, elemInfo)
+		elem.(SRHHttp).I_Send(msg, info, elemInfo)
 	}
 }
 
-func (e SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [] *interface{}) { // TODO Host & Port
+func (e SRHHttp) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [] *interface{}) { // TODO Host & Port
 	tempPort := *elemInfo[0]
 	port := tempPort.(string)
 	host := "127.0.0.1" // TODO
 
-	if LnSRH == nil { // listener was not created yet
+	if LnSRHHttp == nil { // listener was not created yet
 		servAddr, err := net.ResolveTCPAddr("tcp", host+":"+port)
 		if err != nil {
-			log.Fatalf("SRH:: %v\n", err)
+			log.Fatalf("SRHHttp:: %v\n", err)
 		}
-		LnSRH, err = net.ListenTCP("tcp", servAddr)
+		LnSRHHttp, err = net.ListenTCP("tcp", servAddr)
 		if err != nil {
-			log.Fatalf("SRH:: %v\n", err)
+			log.Fatalf("SRHHttp:: %v\n", err)
 		}
 	}
 
-	switch state {
+	switch stateHttp {
 	case 0:
-		go acceptAndRead(currentConnection, c1)
-		state = 1
+		go acceptAndReadHttp(currentConnectionHttp, c1Http)
+		stateHttp = 1
 	case 1:
-		go read(currentConnection, c1)
-		state = 2
+		go readHttp(currentConnectionHttp, c1Http)
+		stateHttp = 2
 	case 2:
-		go read(currentConnection, c1)
+		go readHttp(currentConnectionHttp, c1Http)
 	}
 
-	//go acceptAndRead(currentConnection, c1, done)
-	//go read(currentConnection, c2, done)
+	//go acceptAndReadHttp(currentConnectionHttp, c1Http, done)
+	//go readHttp(currentConnectionHttp, c2Http, done)
 
 	select {
-	case msgTemp := <-c1:
+	case msgTemp := <-c1Http:
 		*msg = messages.SAMessage{Payload: msgTemp}
-	case msgTemp := <-c2:
+	case msgTemp := <-c2Http:
 		*msg = messages.SAMessage{Payload: msgTemp}
 	}
 
-	currentConnection = nextConnection()
+	currentConnectionHttp = nextConnectionHttp()
 }
 
-func acceptAndRead(currentConnection int, c chan []byte) {
+func acceptAndReadHttp(currentConnectionHttp int, c chan []byte) {
 
 	// accept connections
-	temp, err := LnSRH.Accept()
+	temp, err := LnSRHHttp.Accept()
 	if err != nil {
-		fmt.Printf("SRH:: %v\n", err)
+		fmt.Printf("SRHHttp:: %v\n", err)
 		os.Exit(1)
 	}
-	ConnsSRH = append(ConnsSRH, temp)
-	currentConnection++
+	ConnsSRHHttp = append(ConnsSRHHttp, temp)
+	currentConnectionHttp++
 
 	// receive size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	tempConn := ConnsSRH[currentConnection]
+	tempConn := ConnsSRHHttp[currentConnectionHttp]
 	_, err = tempConn.Read(size)
 	if err == io.EOF {
 		{
-			fmt.Printf("SRH:: Accept and Read\n")
+			fmt.Printf("SRHHttp:: Accept and Read\n")
 			os.Exit(0)
 		}
 	} else if err != nil && err != io.EOF {
-		fmt.Printf("SRH:: %v\n", err)
+		fmt.Printf("SRHHttp:: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -110,24 +110,24 @@ func acceptAndRead(currentConnection int, c chan []byte) {
 	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
 	_, err = tempConn.Read(msgTemp)
 	if err != nil {
-		fmt.Printf("SRH:: %v\n", err)
+		fmt.Printf("SRHHttp:: %v\n", err)
 		os.Exit(1)
 	}
 	c <- msgTemp
 }
 
-func read(currentConnection int, c chan []byte) {
+func readHttp(currentConnectionHttp int, c chan []byte) {
 
 	// receive size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	tempConn := ConnsSRH[currentConnection]
+	tempConn := ConnsSRHHttp[currentConnectionHttp]
 
 	_, err := tempConn.Read(size)
 	if err == io.EOF {
-		fmt.Printf("SRH:: Read\n")
+		fmt.Printf("SRHHttp:: read\n")
 		os.Exit(0)
 	} else if err != nil && err != io.EOF {
-		fmt.Printf("SRH:: %v\n", err)
+		fmt.Printf("SRHHttp:: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -135,7 +135,7 @@ func read(currentConnection int, c chan []byte) {
 	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
 	_, err = tempConn.Read(msgTemp)
 	if err != nil {
-		fmt.Printf("SRH:: %v\n", err)
+		fmt.Printf("SRHHttp:: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -144,36 +144,36 @@ func read(currentConnection int, c chan []byte) {
 	return
 }
 
-func (e SRH) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo []*interface{}) {
+func (e SRHHttp) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo []*interface{}) {
 	msgTemp := msg.Payload.([]interface{})[0].([]byte)
 
 	// send message's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	binary.LittleEndian.PutUint32(size, uint32(len(msgTemp)))
-	_, err := ConnsSRH[currentConnection].Write(size)
+	_, err := ConnsSRHHttp[currentConnectionHttp].Write(size)
 	if err != nil {
-		fmt.Printf("SRH:: %v\n", err)
+		fmt.Printf("SRHHttp:: %v\n", err)
 		os.Exit(1)
 	}
 
 	// send message
-	_, err = ConnsSRH[currentConnection].Write(msgTemp)
+	_, err = ConnsSRHHttp[currentConnectionHttp].Write(msgTemp)
 	if err != nil {
-		fmt.Printf("SRH:: %v\n", err)
+		fmt.Printf("SRHHttp:: %v\n", err)
 		os.Exit(1)
 	}
 }
 
-func nextConnection() int {
+func nextConnectionHttp() int {
 	r := -1
 
-	if currentConnection == -1 {
+	if currentConnectionHttp == -1 {
 		r = 0
 	} else {
-		if (currentConnection + 1) == len(ConnsSRH) {
+		if (currentConnectionHttp + 1) == len(ConnsSRHHttp) {
 			r = 0
 		} else {
-			r = currentConnection + 1
+			r = currentConnectionHttp + 1
 		}
 	}
 	return r

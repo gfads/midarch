@@ -11,26 +11,26 @@ import (
 	"shared"
 )
 
-type CRH struct {
+type CRHHttp struct {
 	Behaviour string
 	Graph     graphs.ExecGraph
 	Conns     map[string]net.Conn
 }
 
-func NewCRH() CRH {
+func NewCRHHttp() CRHHttp {
 
-	r := new(CRH)
+	r := new(CRHHttp)
 	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B"
 	r.Conns = make(map[string]net.Conn, shared.NUM_MAX_CONNECTIONS)
 
 	return *r
 }
 
-func (CRH) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
-	elem.(CRH).I_Process(msg, info)
+func (CRHHttp) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
+	elem.(CRHHttp).I_Process(msg, info)
 }
 
-func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
+func (c CRHHttp) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	// check message
 	payload := msg.Payload.([]interface{})
@@ -45,12 +45,12 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		//tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
 		tcpAddr, err := net.ResolveTCPAddr("tcp", key)
 		if err != nil {
-			log.Fatalf("CRH:: %s", err)
+			log.Fatalf("CRHHttp:: %s", err)
 		}
 
 		c.Conns[key], err = net.DialTCP("tcp", nil, tcpAddr)
 		if err != nil {
-			fmt.Printf("CRH:: %v\n", err)
+			fmt.Printf("CRHHttp:: %v\n", err)
 			os.Exit(1)
 		}
 	}
@@ -63,26 +63,26 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	binary.LittleEndian.PutUint32(size, uint32(len(msgToServer)))
 	_, err = conn.Write(size)
 	if err != nil {
-		fmt.Printf("CRH:: %v\n", err)
+		fmt.Printf("CRHHttp:: %v\n", err)
 		os.Exit(1)
 	}
 
-	//fmt.Printf("CRH:: %v \n\n",size)
+	//fmt.Printf("CRHHttp:: %v \n\n",size)
 
 	// send message
-	//fmt.Printf("CRH:: Message to server:: %v %v >> %v << \n\n",msgToServer, len(msgToServer), binary.LittleEndian.Uint32(size))
+	//fmt.Printf("CRHHttp:: Message to server:: %v %v >> %v << \n\n",msgToServer, len(msgToServer), binary.LittleEndian.Uint32(size))
 	_, err = conn.Write(msgToServer)
 	if err != nil {
-		fmt.Printf("CRH:: %v\n", err)
+		fmt.Printf("CRHHttp:: %v\n", err)
 		os.Exit(1)
 	}
 
-	//fmt.Printf("CRH:: Message sent to Server [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
+	//fmt.Printf("CRHHttp:: Message sent to Server [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
 	// receive reply's size
 	_, err = conn.Read(size)
 	if err != nil {
-		fmt.Printf("CRH:: %v\n", err)
+		fmt.Printf("CRHHttp:: %v\n", err)
 		os.Exit(1)
 	}
 
@@ -90,11 +90,11 @@ func (c CRH) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
 	_, err = conn.Read(msgFromServer)
 	if err != nil {
-		fmt.Printf("CRH:: %v\n", err)
+		fmt.Printf("CRHHttp:: %v\n", err)
 		os.Exit(1)
 	}
 
-	//fmt.Printf("CRH:: Message received from Server:: [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
+	//fmt.Printf("CRHHttp:: Message received from Server:: [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
