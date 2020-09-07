@@ -1,6 +1,7 @@
 package components
 
 import (
+	"bufio"
 	"encoding/binary"
 	"fmt"
 	"gmidarch/development/artefacts/graphs"
@@ -62,10 +63,10 @@ func (e SRHHttp) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemIn
 		go acceptAndReadHttp(currentConnectionHttp, c1Http)
 		stateHttp = 1
 	case 1:
-		go readHttp(currentConnectionHttp, c1Http)
+		go acceptAndReadHttp(currentConnectionHttp, c1Http)
 		stateHttp = 2
 	case 2:
-		go readHttp(currentConnectionHttp, c1Http)
+		go acceptAndReadHttp(currentConnectionHttp, c1Http)
 	}
 
 	//go acceptAndReadHttp(currentConnectionHttp, c1Http, done)
@@ -92,28 +93,40 @@ func acceptAndReadHttp(currentConnectionHttp int, c chan []byte) {
 	ConnsSRHHttp = append(ConnsSRHHttp, temp)
 	currentConnectionHttp++
 
-	// receive size
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	tempConn := ConnsSRHHttp[currentConnectionHttp]
-	_, err = tempConn.Read(size)
-	if err == io.EOF {
-		{
-			fmt.Printf("SRHHttp:: Accept and Read\n")
-			os.Exit(0)
+	// read request
+	reader := bufio.NewReader(ConnsSRHHttp[currentConnectionHttp])
+	var message string
+	for i := 0; i <= 13; i++  {
+		line, err := reader.ReadString('\n')
+		if err == io.EOF {
+			{
+				fmt.Printf("SRHHttp:: Accept and Read\n")
+				os.Exit(0)
+			}
+		} else if err != nil && err != io.EOF {
+			fmt.Printf("SRHHttp:: %v\n", err)
+			os.Exit(1)
 		}
-	} else if err != nil && err != io.EOF {
-		fmt.Printf("SRHHttp:: %v\n", err)
-		os.Exit(1)
+
+		//fmt.Println("Request:", line, "END")
+		message += line
 	}
 
-	// receive message
-	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-	_, err = tempConn.Read(msgTemp)
-	if err != nil {
-		fmt.Printf("SRHHttp:: %v\n", err)
-		os.Exit(1)
-	}
-	c <- msgTemp
+	//fmt.Println("Size:",size)
+	//fmt.Println("Size:",fmt.Sprint(binary.LittleEndian.Uint32(size)))
+	//
+	//// receive message
+	//msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
+	//_, err = tempConn.Read(msgTemp)
+	//if err != nil {
+	//	fmt.Printf("SRHHttp:: %v\n", err)
+	//	os.Exit(1)
+	//}
+
+	fmt.Println("Msg:", message)
+	//fmt.Println("Msg:", string(message))
+
+	c <- []byte (message)
 }
 
 func readHttp(currentConnectionHttp int, c chan []byte) {
@@ -145,23 +158,26 @@ func readHttp(currentConnectionHttp int, c chan []byte) {
 }
 
 func (e SRHHttp) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo []*interface{}) {
-	msgTemp := msg.Payload.([]interface{})[0].([]byte)
+	msgTemp := msg.Payload.([]byte)
+
 
 	// send message's size
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	binary.LittleEndian.PutUint32(size, uint32(len(msgTemp)))
-	_, err := ConnsSRHHttp[currentConnectionHttp].Write(size)
+	//size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	//binary.LittleEndian.PutUint32(size, uint32(len(msgTemp)))
+	//_, err := ConnsSRHHttp[currentConnectionHttp].Write(size)
+	//if err != nil {
+	//	fmt.Printf("SRHHttp:: %v\n", err)
+	//	os.Exit(1)
+	//}
+
+	// send message
+	_, err := ConnsSRHHttp[currentConnectionHttp].Write(msgTemp)
 	if err != nil {
 		fmt.Printf("SRHHttp:: %v\n", err)
 		os.Exit(1)
 	}
 
-	// send message
-	_, err = ConnsSRHHttp[currentConnectionHttp].Write(msgTemp)
-	if err != nil {
-		fmt.Printf("SRHHttp:: %v\n", err)
-		os.Exit(1)
-	}
+	ConnsSRHHttp[currentConnectionHttp].Close()
 }
 
 func nextConnectionHttp() int {

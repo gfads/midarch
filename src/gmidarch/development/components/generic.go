@@ -27,6 +27,8 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = Newfibonacciserver().Selector
 		case "FibonacciinvokerM":
 			s = NewFibonacciInvokerM().Selector
+		case "HttpInvokerM":
+			s = NewHttpInvokerM().Selector
 		case "SRH":
 			s = NewSRH().Selector
 		case "SRHHttp":
