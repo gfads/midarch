@@ -5,7 +5,6 @@ import (
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"os"
-	"strings"
 )
 
 type HttpInvokerM struct {
@@ -27,51 +26,24 @@ func (e HttpInvokerM) Selector(elem interface{}, elemInfo [] *interface{}, op st
 func (HttpInvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}) { // TODO
 	// unmarshall
 	payload := msg.Payload.([]byte)
-	// Todo: Remove manual unmarshall HTTP message from here
-	message := messages.HttpMessage{}
-	message.Headers.Fields = make(map[string]string)
-	lines := strings.Split(string(payload), "\n")
-	bodyStarted := false
-	for _, line := range lines {
-		if message.Method == "" {
-			startLine := strings.Fields(line)
-			message.Method = startLine[0]
-			message.Protocol = startLine[2]
+	request := messages.HttpRequest{}
+	request.Unmarshal(payload)
 
-			route := strings.Split(startLine[1], "?")
-			message.Route = route[0]
-			if len(route) > 1 {
-				message.QueryParameters = route[1]
-			}
-
-			continue
-		}
-
-		if strings.TrimSpace(line) == "" {
-			bodyStarted = true
-		}
-
-		if !bodyStarted {
-			header := strings.Split(line, ": ")
-			fmt.Println("HttpInvokerM.I_Process header:", header)
-			message.Headers.Fields[header[0]] = header[1]
-		}else{
-			message.Body += line
-		}
-	}
-
-	fmt.Println("HttpInvokerM.I_Process method:", message.Method)
-	switch message.Method {
+	switch request.Method {
 	case "GET":
-		msgTemp := []byte(`HTTP/1.1 200 OK
-content-type: text/html; charset=UTF-8
-date: Sun 06 Sep 2020 14:39:08 GMT
+		response := messages.HttpResponse{}
+		response.Protocol = "HTTP/1.1"
+		response.Status = "200"
+		response.Header.Fields = make(map[string]string)
+		response.Header.Fields["content-type"] = "text/html; charset=UTF-8"
+		response.Header.Fields["date"] = "Sun 06 Sep 2020 14:39:09 GMT"
+		response.Body = "<html><h1>Teste ok</h1></html>"
 
-<html><h1>Teste ok</h1></html>`)
-		fmt.Println("HttpInvokerM.I_Process GET:", msgTemp)
+		msgTemp := response.Marshal()
+		fmt.Println("HttpInvokerM.I_Process GET:", string(msgTemp))
 		*msg = messages.SAMessage{Payload: msgTemp}
 	default:
-		fmt.Printf("HttpInvokerM:: Operation '%v' not implemented by Http Service\n", message.Method)
+		fmt.Printf("HttpInvokerM:: Method '%v' not implemented by Http Service\n", request.Method)
 		os.Exit(0)
 	}
 	fmt.Println("HttpInvokerM.I_Process finished")
