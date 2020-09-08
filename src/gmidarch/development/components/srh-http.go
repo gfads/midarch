@@ -2,7 +2,6 @@ package components
 
 import (
 	"bufio"
-	"encoding/binary"
 	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
@@ -10,7 +9,7 @@ import (
 	"log"
 	"net"
 	"os"
-	"shared"
+	"strings"
 )
 
 type SRHHttp struct {
@@ -96,16 +95,20 @@ func acceptAndReadHttp(currentConnectionHttp int, c chan []byte) {
 	// read request
 	reader := bufio.NewReader(ConnsSRHHttp[currentConnectionHttp])
 	var message string
-	for i := 0; i <= 13; i++  {
+	for {
 		line, err := reader.ReadString('\n')
 		if err == io.EOF {
 			{
 				fmt.Printf("SRHHttp:: Accept and Read\n")
-				os.Exit(0)
+				os.Exit(0) // Todo: In a Http server EOF means that the client hit esc while waiting for result, it's not a problem! The server must stay up! What to do in this case?
 			}
 		} else if err != nil && err != io.EOF {
 			fmt.Printf("SRHHttp:: %v\n", err)
 			os.Exit(1)
+		}
+
+		if strings.TrimSpace(line) == "" { // Todo: supposing a request without body, have to change latter to support a body in requests
+			break
 		}
 
 		//fmt.Println("Request:", line, "END")
@@ -129,27 +132,50 @@ func acceptAndReadHttp(currentConnectionHttp int, c chan []byte) {
 func readHttp(currentConnectionHttp int, c chan []byte) {
 
 	// receive size
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	tempConn := ConnsSRHHttp[currentConnectionHttp]
+	//size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	//tempConn := ConnsSRHHttp[currentConnectionHttp]
 
-	_, err := tempConn.Read(size)
-	if err == io.EOF {
-		fmt.Printf("SRHHttp:: read\n")
-		os.Exit(0)
-	} else if err != nil && err != io.EOF {
-		fmt.Printf("SRHHttp:: %v\n", err)
-		os.Exit(1)
+	//_, err := tempConn.Read(size)
+	//if err == io.EOF {
+	//	fmt.Printf("SRHHttp:: read\n")
+	//	os.Exit(0)
+	//} else if err != nil && err != io.EOF {
+	//	fmt.Printf("SRHHttp:: %v\n", err)
+	//	os.Exit(1)
+	//}
+	//
+	//// receive message
+	//msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
+	//_, err = tempConn.Read(msgTemp)
+	//if err != nil {
+	//	fmt.Printf("SRHHttp:: %v\n", err)
+	//	os.Exit(1)
+	//}
+
+	// read request
+	reader := bufio.NewReader(ConnsSRHHttp[currentConnectionHttp])
+	var message string
+	for {
+		line, err := reader.ReadString('\n')
+		if err == io.EOF {
+			{
+				fmt.Printf("SRHHttp:: Read\n")
+				os.Exit(0) // Todo: In a Http server EOF means that the client hit esc while waiting for result, it's not a problem! The server must stay up! What to do in this case?
+			}
+		} else if err != nil && err != io.EOF {
+			fmt.Printf("SRHHttp:: %v\n", err)
+			os.Exit(1)
+		}
+
+		if strings.TrimSpace(line) == "" { // Todo: supposing a request without body, have to change latter to support a body in requests
+			break
+		}
+
+		//fmt.Println("Request:", line, "END")
+		message += line
 	}
 
-	// receive message
-	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-	_, err = tempConn.Read(msgTemp)
-	if err != nil {
-		fmt.Printf("SRHHttp:: %v\n", err)
-		os.Exit(1)
-	}
-
-	c <- msgTemp
+	c <- []byte (message)
 
 	return
 }
