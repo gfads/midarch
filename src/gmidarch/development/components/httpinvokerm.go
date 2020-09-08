@@ -41,5 +41,5 @@ func (HttpInvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}) { /
 		fmt.Printf("HttpInvokerM:: Method '%v' not implemented by Http Service\n", request.Method)
 		os.Exit(0)
 	}
-	fmt.Println("HttpInvokerM.I_Process finished")
+	//fmt.Println("HttpInvokerM.I_Process finished")
 }

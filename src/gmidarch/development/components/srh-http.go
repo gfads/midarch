@@ -123,9 +123,6 @@ func acceptAndReadHttp(currentConnectionHttp int, c chan []byte) {
 	//	os.Exit(1)
 	//}
 
-	fmt.Println("Msg:", message)
-	//fmt.Println("Msg:", string(message))
-
 	c <- []byte (message)
 }
 
