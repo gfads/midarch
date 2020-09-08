@@ -2,10 +2,8 @@ package components
 
 import (
 	"apps/httpserver/impl"
-	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
-	"os"
 )
 
 type HttpInvokerM struct {
@@ -30,16 +28,11 @@ func (HttpInvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}) { /
 	request := messages.HttpRequest{}
 	request.Unmarshal(payload)
 
-	switch request.Method {
-	case "GET":
-		response := messages.HttpResponse{}
-		impl.RequestListener(request, &response)
+	response := messages.HttpResponse{}
+	impl.RequestListener(request, &response)
 
-		msgTemp := response.Marshal()
-		*msg = messages.SAMessage{Payload: msgTemp}
-	default:
-		fmt.Printf("HttpInvokerM:: Method '%v' not implemented by Http Service\n", request.Method)
-		os.Exit(0)
-	}
+	msgTemp := response.Marshal()
+	*msg = messages.SAMessage{Payload: msgTemp}
+
 	//fmt.Println("HttpInvokerM.I_Process finished")
 }
