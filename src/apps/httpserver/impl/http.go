@@ -23,15 +23,15 @@ func RequestListener(request messages.HttpRequest, response *messages.HttpRespon
 		if request.QueryParameters != "" {
 			fmt.Println("Http.RequestListener queryParameters:", request.QueryParameters)
 			parameters := strings.Split(request.QueryParameters, "&")
-			response.Body = "<html><h1>RequestListener Test Ok</h1>"
+			response.Body = "<html><body><h1>RequestListener Test Ok</h1>"
 			response.Body += "<ul>"
 			for _, parameter := range parameters {
 				fmt.Println("Http.RequestListener parameter:", parameter)
 				response.Body += "<li>"+parameter
 			}
-			response.Body += "</ul></html>"
+			response.Body += "</ul></body></html>"
 		} else {
-			response.Body = "<html><h1>RequestListener Test Ok (without query parameters)</h1></html>"
+			response.Body = "<html><body><h1>RequestListener Test Ok (without query parameters)</h1></body></html>"
 		}
 	case "/Fibo":
 		response.Status = "200"
@@ -48,6 +48,11 @@ func RequestListener(request messages.HttpRequest, response *messages.HttpRespon
 			response.Status = "400"
 		}
 	default:
-		response.Status = "400"
+		response.Status = "404"
+	}
+
+	bodySize := len(response.Body)
+	if bodySize > 0 {
+		response.Header.Fields["content-length"] = strconv.Itoa(bodySize)
 	}
 }
