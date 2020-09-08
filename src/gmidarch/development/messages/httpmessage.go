@@ -1,7 +1,6 @@
 package messages
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -43,14 +42,11 @@ func (req *HttpRequest) Unmarshal(payload []byte) {
 
 		if !bodyStarted {
 			header := strings.Split(line, ": ")
-			fmt.Println("HttpInvokerM.I_Process header:", header)
 			req.Header.Fields[header[0]] = header[1]
 		}else{
 			req.Body += line
 		}
 	}
-
-	fmt.Println("HttpRequest.Unmarshal method:", req.Method)
 }
 
 type HttpResponse struct {

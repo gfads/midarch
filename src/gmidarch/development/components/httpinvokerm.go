@@ -1,6 +1,7 @@
 package components
 
 import (
+	"apps/httpserver/impl"
 	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
@@ -32,15 +33,9 @@ func (HttpInvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}) { /
 	switch request.Method {
 	case "GET":
 		response := messages.HttpResponse{}
-		response.Protocol = "HTTP/1.1"
-		response.Status = "200"
-		response.Header.Fields = make(map[string]string)
-		response.Header.Fields["content-type"] = "text/html; charset=UTF-8"
-		response.Header.Fields["date"] = "Sun 06 Sep 2020 14:39:09 GMT"
-		response.Body = "<html><h1>Teste ok</h1></html>"
+		impl.RequestListener(request, &response)
 
 		msgTemp := response.Marshal()
-		fmt.Println("HttpInvokerM.I_Process GET:", string(msgTemp))
 		*msg = messages.SAMessage{Payload: msgTemp}
 	default:
 		fmt.Printf("HttpInvokerM:: Method '%v' not implemented by Http Service\n", request.Method)
