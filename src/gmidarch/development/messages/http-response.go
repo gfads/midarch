@@ -22,9 +22,10 @@ func (resp HttpResponse) Marshal() []byte {
 }
 
 func (resp *HttpResponse) Unmarshal(payload string) {
-	//fmt.Println("HttpResponse.Unmarshal payload:", payload)
 	resp.Header.Fields = make(map[string]string)
 	lines := strings.Split(payload, "\n")
+	//fmt.Println("HttpResponse.Unmarshal payload:", payload)
+
 	bodyStarted := false
 	for _, line := range lines {
 		if resp.Protocol == "" {

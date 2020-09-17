@@ -51,7 +51,9 @@ func (al *ArchitecturalRepository) Load() error {
 	al.Library["SRHQuic"] = Record{Type: components.NewSRHQuic(), Behaviour: components.NewSRHQuic().Behaviour}
 	al.Library["CRHUdp"] = Record{Type: components.NewCRHUdp(), Behaviour: components.NewCRHUdp().Behaviour}
 	al.Library["SRHUdp"] = Record{Type: components.NewSRHUdp(), Behaviour: components.NewSRHUdp().Behaviour}
+	al.Library["HttpRequestorM"] = Record{Type: components.NewHttpRequestorM(), Behaviour: components.NewHttpRequestorM().Behaviour}
 	al.Library["HttpInvokerM"] = Record{Type: components.NewHttpInvokerM(), Behaviour: components.NewHttpInvokerM().Behaviour}
+	al.Library["HttpProxy"] = Record{Type: components.NewHttpProxy(), Behaviour: components.NewHttpProxy().Behaviour}
 	al.Library["Calculatorserver"] = Record{Type: components.Newcalculatorserver(), Behaviour: components.Newcalculatorserver().Behaviour}
 	al.Library["Calculatorinvoker"] = Record{Type: components.NewCalculatorinvoker(), Behaviour: components.NewCalculatorinvoker().Behaviour}
 	al.Library["Calculatorclient"] = Record{Type: components.NewCalculatorclient(), Behaviour: components.NewCalculatorclient().Behaviour}

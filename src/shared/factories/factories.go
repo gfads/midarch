@@ -10,6 +10,11 @@ func LocateNaming() components.Namingproxy {
 	return p
 }
 
+func GetHttpProxy(url string, port string) components.HttpProxy {
+	p := components.HttpProxy{Host: url,Port: port}
+	return p
+}
+
 func FactoryQueueing() components.Notificationengineproxy {
 	p := components.Notificationengineproxy{Host: shared.QUEUEING_HOST, Port: shared.QUEUEING_PORT}
 	return p

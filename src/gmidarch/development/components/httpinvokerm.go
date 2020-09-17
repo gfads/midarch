@@ -33,6 +33,4 @@ func (HttpInvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}) { /
 
 	msgTemp := response.Marshal()
 	*msg = messages.SAMessage{Payload: msgTemp}
-
-	//fmt.Println("HttpInvokerM.I_Process finished")
 }

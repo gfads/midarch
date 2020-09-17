@@ -18,7 +18,13 @@ type HttpRequest struct {
 }
 
 func (req *HttpRequest) Marshal() []byte {
-	request := req.Method + " " + req.Route + " " + req.Protocol + "\n"
+	var request string
+	if req.QueryParameters != "" {
+		request = req.Method + " " + req.Route + "?" + req.QueryParameters + " " + req.Protocol + "\n"
+	} else {
+		request = req.Method + " " + req.Route +                             " " + req.Protocol + "\n"
+	}
+
 	for key, value := range req.Header.Fields {
 		request += key + ": " + value + "\n"
 	}
@@ -30,7 +36,7 @@ func (req *HttpRequest) Marshal() []byte {
 func (req *HttpRequest) Unmarshal(payload []byte) {
 	req.Header.Fields = make(map[string]string)
 	lines := strings.Split(string(payload), "\n")
-	//fmt.Println("HttpResponse.Unmarshal lines:", lines)
+
 	bodyStarted := false
 	for _, line := range lines {
 		if req.Method == "" {

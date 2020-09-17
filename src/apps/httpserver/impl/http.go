@@ -21,12 +21,10 @@ func RequestListener(request messages.HttpRequest, response *messages.HttpRespon
 		response.Header.Fields["content-type"] = "text/html; charset=UTF-8"
 
 		if request.QueryParameters != "" {
-			fmt.Println("Http.RequestListener queryParameters:", request.QueryParameters)
 			parameters := strings.Split(request.QueryParameters, "&")
 			response.Body = "<html><body><h1>RequestListener Test Ok</h1>"
 			response.Body += "<ul>"
 			for _, parameter := range parameters {
-				fmt.Println("Http.RequestListener parameter:", parameter)
 				response.Body += "<li>"+parameter
 			}
 			response.Body += "</ul></body></html>"
@@ -38,7 +36,6 @@ func RequestListener(request messages.HttpRequest, response *messages.HttpRespon
 		response.Header.Fields["content-type"] = "text/html; charset=UTF-8"
 
 		if request.QueryParameters != "" {
-			fmt.Println("Http.RequestListener queryParameters:", request.QueryParameters)
 			_p, _ := strconv.Atoi(strings.Split(request.QueryParameters, "=")[1])
 
 			_r := impl.Fibonacci{}.F(_p)
