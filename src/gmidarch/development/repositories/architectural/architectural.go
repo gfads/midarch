@@ -45,6 +45,8 @@ func (al *ArchitecturalRepository) Load() error {
 	al.Library["SRH"] = Record{Type: components.NewSRH(), Behaviour: components.NewSRH().Behaviour}
 	al.Library["CRHHttp"] = Record{Type: components.NewCRHHttp(), Behaviour: components.NewCRHHttp().Behaviour}
 	al.Library["SRHHttp"] = Record{Type: components.NewSRHHttp(), Behaviour: components.NewSRHHttp().Behaviour}
+	al.Library["CRHHttps"] = Record{Type: components.NewCRHHttps(), Behaviour: components.NewCRHHttps().Behaviour}
+	al.Library["SRHHttps"] = Record{Type: components.NewSRHHttps(), Behaviour: components.NewSRHHttps().Behaviour}
 	al.Library["CRHSsl"] = Record{Type: components.NewCRHSsl(), Behaviour: components.NewCRHSsl().Behaviour}
 	al.Library["SRHSsl"] = Record{Type: components.NewSRHSsl(), Behaviour: components.NewSRHSsl().Behaviour}
 	al.Library["CRHQuic"] = Record{Type: components.NewCRHQuic(), Behaviour: components.NewCRHQuic().Behaviour}

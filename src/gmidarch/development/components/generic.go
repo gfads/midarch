@@ -37,6 +37,8 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewSRH().Selector
 		case "SRHHttp":
 			s = NewSRHHttp().Selector
+		case "SRHHttps":
+			s = NewSRHHttps().Selector
 		case "SRHSsl":
 			s = NewSRHSsl().Selector
 		case "SRHQuic":
@@ -53,6 +55,8 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewCRH().Selector
 		case "CRHHttp":
 			s = NewCRHHttp().Selector
+		case "CRHHttps":
+			s = NewCRHHttps().Selector
 		case "CRHSsl":
 			s = NewCRHSsl().Selector
 		case "CRHQuic":
