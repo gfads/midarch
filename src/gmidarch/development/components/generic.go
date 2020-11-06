@@ -39,6 +39,8 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewSRHHttp().Selector
 		case "SRHHttps":
 			s = NewSRHHttps().Selector
+		case "SRHHttp2":
+			s = NewSRHHttp2().Selector
 		case "SRHSsl":
 			s = NewSRHSsl().Selector
 		case "SRHQuic":
