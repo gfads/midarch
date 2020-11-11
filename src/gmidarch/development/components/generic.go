@@ -33,6 +33,8 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewHttpRequestorM().Selector
 		case "HttpInvokerM":
 			s = NewHttpInvokerM().Selector
+		case "Http2InvokerM":
+			s = NewHttp2InvokerM().Selector
 		case "SRH":
 			s = NewSRH().Selector
 		case "SRHHttp":

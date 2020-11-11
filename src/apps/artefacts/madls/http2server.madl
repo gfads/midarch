@@ -1,6 +1,6 @@
-Configuration httpserver :=
+Configuration http2server :=
    Components
-      httpinvoker : HttpInvokerM
+      httpinvoker : Http2InvokerM
       srh         : SRHHttp2    @HTTP_PORT
 
    Connectors

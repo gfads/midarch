@@ -1,7 +1,6 @@
 package components
 
 import (
-	"apps/http2server/impl"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"log"
@@ -17,8 +16,8 @@ type SRHHttp2 struct {
 //var http2 net.Http
 var first = true
 
-var c1Http2 = make(chan []byte)
-var c2Http2 = make(chan []byte)
+var c1Http2 = make(chan messages.HttpMessage)
+var c2Http2 = make(chan messages.HttpMessage)
 
 func NewSRHHttp2() SRHHttp2 {
 
@@ -36,10 +35,55 @@ func (e SRHHttp2) Selector(elem interface{}, elemInfo [] *interface{}, op string
 	}
 }
 
+//func makeHandler2(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
+//	I_Receive
+//
+//	I_Send
+//
+//	c1 <- msg
+//
+//
+//	x := func(w http.ResponseWriter, r *http.Request) {
+//		fn(w, r)
+//	}
+//
+//	c1 <- x
+//	return
+//}
+
 func makeHandler(fn func(http.ResponseWriter, *http.Request)) http.HandlerFunc {
+
+
 	return func(w http.ResponseWriter, r *http.Request) {
-		fn(w, r)
+
+		log.Println("Before c1Http")
+		//msg := (r).(*interface{})
+		//var msg, msg1 *interface{}
+		//*msg = r
+		//*msg1 = &w
+		//c1Http2 <-[]*interface{}{msg, msg1}
+		c1Http2 <- messages.HttpMessage{w, r}
+		log.Println("Before fn")
+		//fn(w, r)
+		log.Println("After fn")
+		response := <- c2Http2
+		log.Println("Message:", response)
 	}
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	log.Println("Before c1Http")
+	//msg := (r).(*interface{})
+	//var msg, msg1 *interface{}
+	//*msg = r
+	//*msg1 = &w
+	//c1Http2 <-[]*interface{}{msg, msg1}
+	c1Http2 <- messages.HttpMessage{w, r}
+	log.Println("Before fn")
+	//fn(w, r)
+	log.Println("After fn")
+	response := <- c2Http2
+	log.Println("Message:", response)
 }
 
 func (e SRHHttp2) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [] *interface{}) { // TODO Host & Port
@@ -51,38 +95,22 @@ func (e SRHHttp2) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemI
 
 	if first { // listener was not created yet
 		first = false
-		http.HandleFunc("/", makeHandler(impl.Handler))
-		log.Fatal(http.ListenAndServeTLS(":"+port, shared.CRT_PATH, shared.KEY_PATH, nil))
+		http.HandleFunc("/", handler) //makeHandler(impl.Handler))
+		go http.ListenAndServeTLS(":"+port, shared.CRT_PATH, shared.KEY_PATH, nil)
 	}
+	log.Println("Before receive c1Http")
+	httpMessage := <- c1Http2
 
+	msg.Payload = httpMessage
+	log.Println("HttpMessage:", httpMessage)
 	log.Println("I_Receive.End")
-
-	//switch stateHttp2 {
-	//case 0:
-	//	go acceptAndReadHttp2(currentConnectionHttp2, c1Http2)
-	//	stateHttp2 = 1
-	//case 1:
-	//	go acceptAndReadHttp2(currentConnectionHttp2, c1Http2)
-	//	stateHttp2 = 2
-	//case 2:
-	//	go acceptAndReadHttp2(currentConnectionHttp2, c1Http2)
-	//}
-	//
-	////go acceptAndReadHttp2(currentConnectionHttp2, c1Http2, done)
-	////go readHttp2(currentConnectionHttp2, c2Http2, done)
-	//
-	//select {
-	//case msgTemp := <-c1Http2:
-	//	*msg = messages.SAMessage{Payload: msgTemp}
-	//case msgTemp := <-c2Http2:
-	//	*msg = messages.SAMessage{Payload: msgTemp}
-	//}
-	//
-	//currentConnectionHttp2 = nextConnectionHttp2()
 }
 
 func (e SRHHttp2) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo []*interface{}) {
-	msgTemp := msg.Payload.([]byte)
+	log.Println("I_Send.Begin")
+	httpMessage := msg.Payload.(messages.HttpMessage)
+
+	c2Http2 <- httpMessage
 
 	//// send message
 	//_, err := ConnsSRHHttp2[currentConnectionHttp2].Write(msgTemp)
@@ -93,5 +121,6 @@ func (e SRHHttp2) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo
 	//
 	//ConnsSRHHttp2[currentConnectionHttp2].Close()
 
-	log.Println(msgTemp)
+	//log.Println(msgTemp)
+	log.Println("I_Send.End")
 }
