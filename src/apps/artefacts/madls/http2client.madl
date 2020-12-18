@@ -1,0 +1,19 @@
+Configuration http2client :=
+   Components
+      proxyn    : Namingproxy
+      proxyf    : Http2Proxy
+      requestor : Http2RequestorM
+      crh       : CRHHttp2
+
+   Connectors
+      t1 : Ntoone
+      t2 : Requestreply
+
+   Attachments
+      proxyn,t1,requestor
+      proxyf,t1,requestor
+      requestor,t2,crh
+
+   Adaptability
+      None
+EndConf

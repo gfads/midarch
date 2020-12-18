@@ -2,7 +2,6 @@ package components
 
 import (
 	"errors"
-	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"gmidarch/development/repositories/plugins/http2"
@@ -11,36 +10,43 @@ import (
 	"go/parser"
 	"go/token"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"shared"
 	"sort"
+	"strconv"
 	"strings"
 )
 
 type Route struct {
 	Mapping		string
 	Function	interface{}
+	Parameters  []string
 }
 
 type Http2InvokerM struct {
 	Behaviour string
 	Graph     graphs.ExecGraph
+	routes		[]Route
 }
 
 func NewHttp2InvokerM() Http2InvokerM {
 	r := new(Http2InvokerM)
 	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B"
 
+	r.routes = getControllers()
+
 	return *r
 }
 
-func (e Http2InvokerM) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
-	e.I_Process(msg, info)
+func (inv Http2InvokerM) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
+	inv.I_Process(msg, info)
 }
 
-func (Http2InvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}) { // TODO
+func (inv Http2InvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	// unmarshall
 	httpMessage := msg.Payload.(messages.HttpMessage)
 	//request := messages.HttpRequest{}
@@ -48,62 +54,79 @@ func (Http2InvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}) { 
 
 	//response := messages.HttpResponse{}
 
-	routes := getControllers()
-	sort.Slice(routes, func(i, j int) bool {
-		return routes[i].Mapping < routes[j].Mapping
-	})
-
 	var result []reflect.Value
 	var err error
+	errorInCall := false
 
 	found := false
-	for _, route := range routes {
-		log.Println(httpMessage.Request.RequestURI,  "=>", route.Mapping)
+	for _, route := range inv.routes {
 		if strings.HasPrefix(httpMessage.Request.RequestURI, route.Mapping) {
-			result, err = Call(route.Function)
-			if err != nil {
-				log.Fatal(err)
+			//log.Println(httpMessage.Request.RequestURI,  "=>", route.Mapping)
+			uriParameters := getURIParameters(httpMessage.Request.RequestURI)
+			// Sort parameters based on function
+			var parameters []interface{}
+			for _, param := range route.Parameters {
+				value := uriParameters[param]
+				if value != nil {
+					parameters = append(parameters, value)
+				}
 			}
-			log.Println("Result:", len(result))
+			//log.Println("parameters:", parameters, "route.Parameters", route.Parameters)
+
+			result, err = Call(route.Function, parameters)
+			if err != nil {
+				// Every error must be returned to client, dont raise a fatal error
+				errorInCall = true
+			}
 			found = true
 			break
 		}
 	}
 
 	if !found {
-		fmt.Fprintf(httpMessage.Response, "404 - Not found.\n\nThe requested URL " + httpMessage.Request.RequestURI + " was not found on this server!")
+		httpMessage.Response.WriteHeader(http.StatusNotFound)
+		httpMessage.Response.Write([]byte("404 - Not found.\n\nThe requested URL " + httpMessage.Request.RequestURI + " was not found on this server!"))
+		return
+	} else if errorInCall {
+		httpMessage.Response.WriteHeader(http.StatusBadRequest)
+		httpMessage.Response.Write([]byte("400 - Bad Request.\n\n" + err.Error()))
 		return
 	}
 
-	//httpMessage.Response.Write([]byte(result.(string)))
+	httpMessage.Response.Write([]byte(result[0].Interface().(string)))
 
-	log.Println("Response:", httpMessage.Response)
-	log.Println("Result:", len(result))
-
-	fmt.Fprintf(httpMessage.Response, result[0].Interface().(string))
-
-	//impl.Handler(httpMessage.Response, httpMessage.Request)
-
-	//msgTemp := response.Marshal()
 	*msg = messages.SAMessage{Payload: httpMessage}
-	log.Println("Http2Invoker.I_Process")
+	//log.Println("Http2Invoker.I_Process")
+}
+
+func getURIParameters(uri string) (parameters map[string]interface{}) {
+	parameters = make(map[string]interface{})
+	paramRegex, err := regexp.Compile("([?][\\w|=|%|(|)|+|-|.]+)|([&][\\w|=|%|(|)|+|-|.]+)")
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+	params := paramRegex.FindAllString(uri, -1)
+	for _, param := range params {
+		param := param[1:]
+		keyValue := strings.Split(param, "=")
+		parameters[keyValue[0]] = keyValue[1]
+	}
+	return parameters
 }
 
 
 func getProjectFiles(projectRoot string) (files []string) {
 	files = []string{}
-	log.Println("getProjectFiles")
 	err := filepath.Walk(projectRoot, func(path string, info os.FileInfo, err error) error {
 		//log.Println("getProjectFiles.func: file->", path)
 		if info == nil || info.IsDir() {
 			return nil
 		}
-//		log.Println("getProjectFiles.before append")
 		if filepath.Ext(path) == ".go" {
 			//log.Println("getProjectFiles.appending",path,"where",files)
 			files = append(files, path)
 		}
-		//log.Println("getProjectFiles.after append")
 		return nil
 	})
 	if err!= nil {
@@ -114,20 +137,21 @@ func getProjectFiles(projectRoot string) (files []string) {
 }
 
 func getControllers() (routes []Route) {
-	files := getProjectFiles(shared.DIR_BASE)  // TODO: get project base dir, not the "go" base dir
+	files := getProjectFiles(shared.DIR_BASE + "/src/apps/")
 	routes = []Route{}
 
 	for _, file := range files {
-		if strings.Contains(file, "/home/dcruzb/go/src/") { ///components/") {
-			//log.Println(file)
-			routes = append(routes, FuncDescription(file)...)
-		}
+		routes = append(routes, getRoutesFromFile(file)...)
 	}
+
+	sort.Slice(routes, func(i, j int) bool {
+		return routes[i].Mapping < routes[j].Mapping
+	})
 
 	return routes
 }
 
-func FuncDescription(filename string) (routes []Route) {
+func getRoutesFromFile(filename string) (routes []Route) {
 	//log.Println("Filename:", filename)
 	routes = []Route{}
 
@@ -150,38 +174,75 @@ func FuncDescription(filename string) (routes []Route) {
 		return nil
 	}
 
-	//log.Println(d)
+	rgxAnnotations, err := regexp.Compile("([@][\\w|=|\"|(|)|,| |/]+)")
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	rgxParameters, err := regexp.Compile("((?:\\()[\\w|=|\"|,| |/]+[)])")
+	if err != nil {
+		log.Fatal(err)
+		return
+	}
+
+	mapping := ""
+	requestMapping := ""
+	mappingIndex := strings.Index(d.Doc, "@RequestMapping(")
+	if mappingIndex >= 0 {
+		requestMapping = d.Doc[mappingIndex+17 : len(d.Doc)-3]
+	}
+
 	for _, theFunc := range d.Funcs {
 		//log.Println("*********************", theFunc.Doc)
-		if strings.Contains(theFunc.Doc, "@GetMapping") {
-			mapping := ""
-			var function interface{}
+		var function interface{}
+		function = http2.GetFunction(theFunc.Name)
+		var parameters []string
 
-			mappingIndex := strings.Index(d.Doc, "@RequestMapping(")
-			if mappingIndex >= 0 {
-				mapping = d.Doc[mappingIndex + 17:len(d.Doc)-3]
+		annotations := rgxAnnotations.FindAllString(theFunc.Doc, -1)
+		//log.Println("annotations:", annotations, "theFunc.Doc", theFunc.Doc)
+		for _, annotation := range annotations {
+			param := rgxParameters.FindString(annotation)
+			//log.Println("param:", param)
+			if param != "" {
+				param = param[1:len(param)-1]
 			}
+			params := strings.Split(param, ",")
+			//log.Println("param:", param, "params:", params)
 
-			rmp := strings.Index(theFunc.Doc, "@GetMapping(value=")
-			if rmp >= 0 {
-				mapping += theFunc.Doc[rmp + 19:len(theFunc.Doc)-3]
+			if strings.Contains(annotation, "@GetMapping") {
+				for _, parameter := range params {
+					p := strings.Split(parameter, "=")
+					key := p[0]
+					value := strings.ReplaceAll(p[1], "\"", "")
+					//rmp := strings.Index(theFunc.Doc, "@GetMapping(value=")
+					//if rmp >= 0 {
+					if key == "value" {
+						mapping = requestMapping + value //theFunc.Doc[rmp+19 : len(theFunc.Doc)-3]
+					}
+				}
 			}
-
-			//if theFunc.Name == "GetHealth" {
-			//	function = impl.GetHealth
-			//}else{
-			//	function = impl.GetItems
-			//}
-			function = http2.GetFunction(theFunc.Name)
-
-			route := Route{
-				Mapping:  mapping,
-				Function: function,
+			if strings.Contains(annotation, "@RequestParam") {
+				//log.Println("@RequestParam:", params)
+				for _, parameter := range params {
+					p := strings.Split(parameter, "=")
+					key := p[0]
+					value := strings.ReplaceAll(p[1], "\"", "")
+					if key == "key" {
+						parameters = append(parameters, value)
+					}
+				}
 			}
-
-			routes = append(routes, route)
-			log.Println("Filename:", filename, "Controllers:", route)
 		}
+
+		route := Route{
+			Mapping:  mapping,
+			Function: function,
+			Parameters: parameters,
+		}
+
+		routes = append(routes, route)
+		//log.Println("Filename:", filename, "Controllers:", route)
 	}
 
 	if len(routes) <= 0 {
@@ -191,18 +252,27 @@ func FuncDescription(filename string) (routes []Route) {
 	return routes
 }
 
-func Call(function interface{}, params ... interface{}) (result []reflect.Value, err error) {
+func Call(function interface{}, params []interface{}) (result []reflect.Value, err error) {
 	f := reflect.ValueOf(function)
-	if len(params) != f.Type().NumIn() {
+	numIn := f.Type().NumIn()
+	if len(params) != numIn {
 		err = errors.New("Unexpected number of params.")
 		return nil, err
 	}
-	in := make([]reflect.Value, len(params))
+
+	in := make([]reflect.Value, numIn)
 	for k, param := range params {
-		in[k] = reflect.ValueOf(param)
+		switch f.Type().In(k).Kind() { // TODO: dcruzb Implement support to other types too
+		case reflect.Int:
+			value, err := strconv.Atoi(param.(string))
+			if err != nil {
+				return nil, err
+			}
+			in[k] = reflect.ValueOf(value)
+		}
 	}
 
 	result = f.Call(in)
-	log.Println("Call.Result:", result)
+	//log.Println("Call.Result:", result)
 	return result, nil
 }

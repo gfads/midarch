@@ -46,6 +46,7 @@ func (al *ArchitecturalRepository) Load() error {
 	al.Library["CRHHttp"] = Record{Type: components.NewCRHHttp(), Behaviour: components.NewCRHHttp().Behaviour}
 	al.Library["SRHHttp"] = Record{Type: components.NewSRHHttp(), Behaviour: components.NewSRHHttp().Behaviour}
 	al.Library["CRHHttps"] = Record{Type: components.NewCRHHttps(), Behaviour: components.NewCRHHttps().Behaviour}
+	al.Library["CRHHttp2"] = Record{Type: components.NewCRHHttp2(), Behaviour: components.NewCRHHttp2().Behaviour}
 	al.Library["SRHHttps"] = Record{Type: components.NewSRHHttps(), Behaviour: components.NewSRHHttps().Behaviour}
 	al.Library["SRHHttp2"] = Record{Type: components.NewSRHHttp2(), Behaviour: components.NewSRHHttp2().Behaviour}
 	al.Library["CRHSsl"] = Record{Type: components.NewCRHSsl(), Behaviour: components.NewCRHSsl().Behaviour}
@@ -55,9 +56,11 @@ func (al *ArchitecturalRepository) Load() error {
 	al.Library["CRHUdp"] = Record{Type: components.NewCRHUdp(), Behaviour: components.NewCRHUdp().Behaviour}
 	al.Library["SRHUdp"] = Record{Type: components.NewSRHUdp(), Behaviour: components.NewSRHUdp().Behaviour}
 	al.Library["HttpRequestorM"] = Record{Type: components.NewHttpRequestorM(), Behaviour: components.NewHttpRequestorM().Behaviour}
+	al.Library["Http2RequestorM"] = Record{Type: components.NewHttp2RequestorM(), Behaviour: components.NewHttp2RequestorM().Behaviour}
 	al.Library["HttpInvokerM"] = Record{Type: components.NewHttpInvokerM(), Behaviour: components.NewHttpInvokerM().Behaviour}
 	al.Library["Http2InvokerM"] = Record{Type: components.NewHttp2InvokerM(), Behaviour: components.NewHttp2InvokerM().Behaviour}
 	al.Library["HttpProxy"] = Record{Type: components.NewHttpProxy(), Behaviour: components.NewHttpProxy().Behaviour}
+	al.Library["Http2Proxy"] = Record{Type: components.NewHttp2Proxy(), Behaviour: components.NewHttp2Proxy().Behaviour}
 	al.Library["Calculatorserver"] = Record{Type: components.Newcalculatorserver(), Behaviour: components.Newcalculatorserver().Behaviour}
 	al.Library["Calculatorinvoker"] = Record{Type: components.NewCalculatorinvoker(), Behaviour: components.NewCalculatorinvoker().Behaviour}
 	al.Library["Calculatorclient"] = Record{Type: components.NewCalculatorclient(), Behaviour: components.NewCalculatorclient().Behaviour}

@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-	// start configuration
 	frontend.FrontEnd{}.Deploy("http2server.madl")
 
 	//// proxy to naming service
