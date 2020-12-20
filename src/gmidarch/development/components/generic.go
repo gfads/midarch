@@ -27,8 +27,26 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = Newfibonacciserver().Selector
 		case "FibonacciinvokerM":
 			s = NewFibonacciInvokerM().Selector
+		case "HttpProxy":
+			s = NewHttpProxy().Selector
+		case "Http2Proxy":
+			s = NewHttp2Proxy().Selector
+		case "HttpRequestorM":
+			s = NewHttpRequestorM().Selector
+		case "Http2RequestorM":
+			s = NewHttp2RequestorM().Selector
+		case "HttpInvokerM":
+			s = NewHttpInvokerM().Selector
+		case "Http2InvokerM":
+			s = NewHttp2InvokerM().Selector
 		case "SRH":
 			s = NewSRH().Selector
+		case "SRHHttp":
+			s = NewSRHHttp().Selector
+		case "SRHHttps":
+			s = NewSRHHttps().Selector
+		case "SRHHttp2":
+			s = NewSRHHttp2().Selector
 		case "SRHSsl":
 			s = NewSRHSsl().Selector
 		case "SRHQuic":
@@ -43,6 +61,12 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewRequestorM().Selector
 		case "CRH":
 			s = NewCRH().Selector
+		case "CRHHttp":
+			s = NewCRHHttp().Selector
+		case "CRHHttps":
+			s = NewCRHHttps().Selector
+		case "CRHHttp2":
+			s = NewCRHHttp2().Selector
 		case "CRHSsl":
 			s = NewCRHSsl().Selector
 		case "CRHQuic":

@@ -25,7 +25,8 @@ var SetOfPorts = map[string]string{
 	"NAMING_PORT":     NAMING_PORT,
 	"CALCULATOR_PORT": CALCULATOR_PORT,
 	"FIBONACCI_PORT":  FIBONACCI_PORT,
-	"QUEUEING_PORT":   QUEUEING_PORT}
+	"QUEUEING_PORT":   QUEUEING_PORT,
+	"HTTP_PORT":   HTTP_PORT}
 
 var IS_EVOLUTIVE = false
 var IS_CORRECTIVE = false
@@ -179,6 +180,7 @@ func ShowExecutionParameters(s bool) {
 		fmt.Println("Calculator Port : " + CALCULATOR_PORT)
 		fmt.Println("Fibonacci Port  : " + FIBONACCI_PORT)
 		fmt.Println("Queueing Port   : " + QUEUEING_PORT)
+		fmt.Println("Http Port       : " + HTTP_PORT)
 		fmt.Println("------------------------------------------")
 		//fmt.Println("Plugin Base Name: " + PLUGIN_BASE_NAME)
 		fmt.Println("Max Graph Size  : " + strconv.Itoa(GRAPH_SIZE))
@@ -585,6 +587,7 @@ const NAMING_PORT = "4040"
 const CALCULATOR_PORT = "2020"
 const FIBONACCI_PORT = "2030"
 const QUEUEING_PORT = "2040"
+const HTTP_PORT = "2050"
 
 const SAMPLE_SIZE = 1000
 const ATTEMPTS_TO_OPEN_A_PLUGIN = 1000

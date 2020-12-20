@@ -1,0 +1,14 @@
+datatype PROCNAMES = namingproxy | httpinvoker | requestor | crh | srh | t1 | t2 | t3
+channel InvP,TerP,InvR,TerR : PROCNAMES
+channel I_Send,I_In,I_Out,I_Process,I_Receive
+NAMINGPROXY = I_In -> InvR.t1 -> TerR.t1 -> I_Out -> NAMINGPROXY
+HTTPINVOKER = InvP.t3 -> I_Process -> TerP.t3 -> HTTPINVOKER
+REQUESTOR = InvP.t1 -> I_In -> InvR.t2 -> TerR.t2 -> I_Out -> TerP.t1 -> REQUESTOR
+CRH = InvP.t2 -> I_Process -> TerP.t2 -> CRH
+SRH = I_Receive -> InvR.t3 -> TerR.t3 -> I_Send -> SRH
+T1 = InvP.namingproxy -> InvR.requestor -> TerR.requestor -> TerP.namingproxy -> T1
+T2 = InvP.requestor -> InvR.crh -> TerR.crh -> TerP.requestor -> T2
+T3 = InvP.srh -> InvR.httpinvoker -> TerR.httpinvoker -> TerP.srh -> T3
+
+httpserver = (NAMINGPROXY ||| HTTPINVOKER ||| REQUESTOR ||| CRH ||| SRH)[|{|InvP,TerP,InvR,TerR|}|](T1[[InvP.namingproxy <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.namingproxy <- TerR.t1]] ||| T2[[InvP.namingproxy <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.namingproxy <- TerR.t1,InvP.requestor <- InvR.t2,InvR.crh <- InvP.t2,TerR.crh <- TerP.t2,TerP.requestor <- TerR.t2]] ||| T3[[InvP.namingproxy <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.namingproxy <- TerR.t1,InvP.requestor <- InvR.t2,InvR.crh <- InvP.t2,TerR.crh <- TerP.t2,TerP.requestor <- TerR.t2,InvP.srh <- InvR.t3,InvR.httpinvoker <- InvP.t3,TerR.httpinvoker <- TerP.t3,TerP.srh <- TerR.t3]])
+assert httpserver :[deadlock free]

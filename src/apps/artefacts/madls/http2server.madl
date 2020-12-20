@@ -1,0 +1,14 @@
+Configuration http2server :=
+   Components
+      httpinvoker : Http2InvokerM
+      srh         : SRHHttp2    @HTTP_PORT
+
+   Connectors
+      t1 : Requestreply
+
+   Attachments
+      srh,t1,httpinvoker
+
+   Adaptability
+      None
+EndConf 
