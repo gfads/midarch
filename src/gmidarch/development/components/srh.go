@@ -62,10 +62,10 @@ func (e SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [
 		go acceptAndRead(currentConnection, c1)
 		state = 1
 	case 1:
-		go acceptAndRead(currentConnection, c1)
+		go read(currentConnection, c1)
 		state = 2
 	case 2:
-		go read(currentConnection, c2)
+		go read(currentConnection, c1)
 	}
 
 	//go acceptAndRead(currentConnection, c1, done)

@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package fibonacci;
+
+message Request {
+    int32 place = 1;
+}
+
+message Response {
+    int64 number = 1;
+}
+
+service FibonacciService {
+    rpc Fibo(Request) returns (Response) {}
+}

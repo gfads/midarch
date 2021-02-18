@@ -35,7 +35,7 @@ func (FibonacciinvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}
 	miopPacket := miop.Packet{}
 	err := msgpack.Unmarshal(payload, &miopPacket)
 	if err != nil {
-		log.Fatalf("NamingInvokerM:: %s", err)
+		log.Fatalf("FibonacciinvokerM:: %s", err)
 	}
 
 	//var inv shared.Request
@@ -56,7 +56,7 @@ func (FibonacciinvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}
 		// configure message
 		r, err := msgpack.Marshal(miopPacket)
 		if err != nil {
-			log.Fatalf("NamingInvokerM:: %s", err)
+			log.Fatalf("FibonacciinvokerM:: %s", err)
 		}
 
 		toSRH := make([]interface{}, 1, 1)

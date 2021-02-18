@@ -25,7 +25,8 @@ var SetOfPorts = map[string]string{
 	"NAMING_PORT":     NAMING_PORT,
 	"CALCULATOR_PORT": CALCULATOR_PORT,
 	"FIBONACCI_PORT":  FIBONACCI_PORT,
-	"QUEUEING_PORT":   QUEUEING_PORT}
+	"QUEUEING_PORT":   QUEUEING_PORT,
+	"HTTP_PORT":   HTTP_PORT}
 
 var IS_EVOLUTIVE = false
 var IS_CORRECTIVE = false
@@ -179,6 +180,7 @@ func ShowExecutionParameters(s bool) {
 		fmt.Println("Calculator Port : " + CALCULATOR_PORT)
 		fmt.Println("Fibonacci Port  : " + FIBONACCI_PORT)
 		fmt.Println("Queueing Port   : " + QUEUEING_PORT)
+		fmt.Println("Http Port       : " + HTTP_PORT)
 		fmt.Println("------------------------------------------")
 		//fmt.Println("Plugin Base Name: " + PLUGIN_BASE_NAME)
 		fmt.Println("Max Graph Size  : " + strconv.Itoa(GRAPH_SIZE))
@@ -518,6 +520,39 @@ func localizegFDR() string {
 	return r
 }
 
+func localizeCA() (caPath string) {
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		if pair[0] == "CA_PATH" {
+			caPath = pair[1]
+		}
+	}
+
+	return caPath
+}
+
+func localizeCert() (crtPath string) {
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		if pair[0] == "CRT_PATH" {
+			crtPath = pair[1]
+		}
+	}
+
+	return crtPath
+}
+
+func localizeKey() (keyPath string) {
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		if pair[0] == "KEY_PATH" {
+			keyPath = pair[1]
+		}
+	}
+
+	return keyPath
+}
+
 // ******************* PARAMETERS
 
 //const BASE_DIR  = "/go/midarch-go"  // docker
@@ -527,6 +562,9 @@ var DIR_BASE = localizegMidArch()
 var DIR_GO = localizegGO()+"/bin"
 //const DIR_FDR = "/Volumes/Macintosh HD/Applications/FDR4-2.app/Contents/MacOS"
 var DIR_FDR = localizegFDR()
+var CA_PATH = localizeCA()
+var CRT_PATH = localizeCert()
+var KEY_PATH = localizeKey()
 
 var DIR_PLUGINS = DIR_BASE + "/src/gmidarch/execution/repositories/plugins"
 var DIR_PLUGINS_SOURCE = DIR_BASE + "/src/gmidarch/development/repositories/plugins"
@@ -549,6 +587,7 @@ const NAMING_PORT = "4040"
 const CALCULATOR_PORT = "2020"
 const FIBONACCI_PORT = "2030"
 const QUEUEING_PORT = "2040"
+const HTTP_PORT = "2050"
 
 const SAMPLE_SIZE = 1000
 const ATTEMPTS_TO_OPEN_A_PLUGIN = 1000

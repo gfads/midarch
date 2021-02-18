@@ -6,7 +6,7 @@ Configuration midfibonacciclient :=
       crh       : CRH
 
    Connectors
-      t1 : NtoOne
+      t1 : Ntoone
       t2 : Requestreply
 
    Attachments
