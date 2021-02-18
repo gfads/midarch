@@ -3,6 +3,7 @@ package components
 import (
 	"bufio"
 	"crypto/tls"
+	"encoding/binary"
 	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
@@ -97,8 +98,11 @@ func acceptAndReadHttps(currentConnectionHttps int, c chan []byte) {
 	// read request
 	reader := bufio.NewReader(ConnsSRHHttps[currentConnectionHttps])
 	var message string
+	h2 := false
+	blankLines := 0
 	for {
 		line, err := reader.ReadString('\n')
+		//log.Println(line)
 		if err == io.EOF {
 			{
 				fmt.Printf("SRHHttps:: Accept and Read\n")
@@ -109,8 +113,38 @@ func acceptAndReadHttps(currentConnectionHttps int, c chan []byte) {
 			os.Exit(1)
 		}
 
-		if strings.TrimSpace(line) == "" { // Todo: supposing a request without body, have to change latter to support a body in requests
-			break
+		if strings.TrimSpace(line) == "PRI * HTTP/2.0" {
+			h2 = true
+		}
+
+		if strings.TrimSpace(line) == "" {
+			if h2 {
+				blankLines ++
+				if blankLines >= 2 {
+					//break
+					tp := make([]byte, 8, 8)
+					binary.LittleEndian.PutUint32(tp, uint32(4))
+					flags := make([]byte, 8, 8)
+					identifier := make([]byte, 31, 31)
+
+
+					msg := append(tp, flags...)
+					msg = append(msg, []byte("\nR")...)
+					msg = append(msg, identifier...)
+
+					size := make([]byte, 24, 24)
+					binary.LittleEndian.PutUint32(size, uint32(len(msg)))
+					settings := append(size, msg...)
+					_, err := ConnsSRHHttps[currentConnectionHttps].Write(settings)
+					log.Print(settings)
+					if err != nil {
+						fmt.Printf("SRHHttps:: %v\n", err)
+						os.Exit(1)
+					}
+				}
+			} else {
+				break
+			}
 		}
 
 		//fmt.Println("Request:", line, "END")

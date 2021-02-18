@@ -45,7 +45,7 @@ func (e SRHSsl) Selector(elem interface{}, elemInfo [] *interface{}, op string, 
 func (e SRHSsl) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [] *interface{}) { // TODO Host & Port
 	tempPort := *elemInfo[0]
 	port := tempPort.(string)
-	host := "127.0.0.1" // TODO
+	host := "localhost" //"127.0.0.1" // TODO
 
 	if LnSRHSsl == nil { // listener was not created yet
 		//servAddr, err := net.ResolveTCPAddr("tcp", host+":"+port)
@@ -197,7 +197,7 @@ func getServerTLSConfig() *tls.Config {
 
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{cert},
-		NextProtos:   []string{"exemplo"},
+		NextProtos:   []string{"h2"},
 	}
 	return tlsConfig
 }

@@ -2,14 +2,13 @@ package impl
 
 import (
 	"apps/fibomiddleware/impl"
-	"fmt"
 	"gmidarch/development/messages"
 	"strconv"
 	"strings"
 )
 
 func RequestListener(request messages.HttpRequest, response *messages.HttpResponse) {
-	fmt.Println("Http.RequestListener request:", request.Method, request.Route, request.QueryParameters)
+	//fmt.Println("Http.RequestListener request:", request.Method, request.Route, request.QueryParameters)
 
 	response.Protocol = "HTTP/1.1"
 	response.Header.Fields = make(map[string]string)

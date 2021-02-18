@@ -62,7 +62,7 @@ func (e HttpProxy) Fibo(_p1 int) int {
 		fmt.Printf("HttpProxy:: Response Status: %v\n", response.Status)
 		os.Exit(1)
 	}
-	fmt.Printf("HttpProxy:: Response Body: %v\n", response.Body)
+	//fmt.Printf("HttpProxy:: Response Body: %v\n", response.Body)
 
 	_r,err := strconv.Atoi(response.Body)
 	if err != nil {

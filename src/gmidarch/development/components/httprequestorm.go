@@ -50,7 +50,6 @@ func (HttpRequestorM) I_In(msg *messages.SAMessage, info [] *interface{}) {
 }
 
 func (HttpRequestorM) I_Out(msg *messages.SAMessage, info [] *interface{}) {
-	// Todo: Implement HTTPS
 	//response := messages.HttpResponse{}
 
 	//response := msg.Payload.(messages.HttpResponse)

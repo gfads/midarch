@@ -22,7 +22,7 @@ var addr		*net.UDPAddr
 
 var c1Udp = make(chan []byte)
 var c2Udp = make(chan []byte)
-var currentConnectionUdp = -1
+//var currentConnectionUdp = -1
 var stateUdp = 0
 
 func NewSRHUdp() SRHUdp {
@@ -47,28 +47,28 @@ func (s SRHUdp) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInf
 	host := "127.0.0.1" // TODO
 
 	if connSRHUdp == nil { // connection was not created yet
-		servAddr, err := net.ResolveUDPAddr("udp", host+":"+port)
+		servAddr, err := net.ResolveUDPAddr("udp4", host+":"+port)
 		if err != nil {
 			log.Fatalf("SRHUdp:: %v\n", err)
 		}
-		connSRHUdp, err = net.ListenUDP("udp", servAddr)
+		connSRHUdp, err = net.ListenUDP("udp4", servAddr)
 
 		if err != nil {
 			log.Fatalf("SRHUdp:: %v\n", err)
 		}
-		currentConnectionUdp++
+		//currentConnectionUdp++
 	}
 
 	// TODO: do these states make sense in UDP?
 	switch stateUdp {
 	case 0:
-		go acceptAndReadUDP(currentConnectionUdp, c1Udp)
+		go acceptAndReadUDP(0, c1Udp)
 		stateUdp = 1
 	case 1:
-		go acceptAndReadUDP(currentConnectionUdp, c1Udp)
+		go readUDP(0, c1Udp)
 		stateUdp = 2
 	case 2:
-		go readUDP(currentConnectionUdp, c2Udp)
+		go readUDP(0, c1Udp)
 	}
 
 	//go acceptAndRead(currentConnectionUdp, c1Udp, done)
@@ -81,7 +81,7 @@ func (s SRHUdp) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInf
 		*msg = messages.SAMessage{Payload: msgTemp}
 	}
 
-	currentConnectionUdp = nextConnectionUDP()
+	//currentConnectionUdp = nextConnectionUDP()
 }
 
 // TODO: this function makes sense? Since UDP don't have connections its duplicated with readUDP
@@ -114,8 +114,8 @@ func acceptAndReadUDP(currentConnection int, c chan []byte) {
 
 	// receive message
 	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-	_, tmpAddr, err = tempConn.ReadFromUDP(msgTemp)
-	addr = tmpAddr
+	_, _, err = tempConn.ReadFromUDP(msgTemp)
+	//addr = tmpAddr
 	if err != nil {
 		fmt.Printf("SRHUdp:: %v\n", err)
 		os.Exit(1)
@@ -141,8 +141,8 @@ func readUDP(currentConnection int, c chan []byte) {
 
 	// receive message
 	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-	_, tmpAddr, err = tempConn.ReadFromUDP(msgTemp)
-	addr = tmpAddr
+	_, _, err = tempConn.ReadFromUDP(msgTemp)
+	//addr = tmpAddr
 	if err != nil {
 		fmt.Printf("SRHUdp:: %v\n", err)
 		os.Exit(1)
@@ -159,14 +159,14 @@ func (s SRHUdp) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo [
 	// send message's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	binary.LittleEndian.PutUint32(size, uint32(len(msgTemp)))
-	_, err := connSRHUdp.WriteTo(size, addr)
+	_, err := connSRHUdp.WriteToUDP(size, addr)
 	if err != nil {
 		fmt.Printf("SRHUdp:: %v\n", err)
 		os.Exit(1)
 	}
 
 	// send message
-	_, err = connSRHUdp.WriteTo(msgTemp, addr)
+	_, err = connSRHUdp.WriteToUDP(msgTemp, addr)
 	if err != nil {
 		fmt.Printf("SRHUdp:: %v\n", err)
 		os.Exit(1)

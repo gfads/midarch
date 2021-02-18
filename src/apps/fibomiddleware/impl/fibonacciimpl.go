@@ -11,3 +11,8 @@ func (Fibonacci) F(n int) int {
 		return Fibonacci{}.F(n-1) + Fibonacci{}.F(n-2)
 	}
 }
+
+func (f Fibonacci) FiboRPC(n int, r *int) error {
+	*r = f.F(n)
+	return nil
+}
