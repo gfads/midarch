@@ -47,7 +47,7 @@ func (e SRHQuic) Selector(elem interface{}, elemInfo [] *interface{}, op string,
 func (e SRHQuic) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [] *interface{}) { // TODO Host & Port
 	tempPort := *elemInfo[0]
 	port := tempPort.(string)
-	host := "127.0.0.1" // TODO
+	host := "localhost" //"127.0.0.1" // TODO
 
 	if LnSRHQuic == nil { // listener was not created yet
 		//servAddr, err := net.ResolveTCPAddr("tcp", host+":"+port)
@@ -67,10 +67,10 @@ func (e SRHQuic) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemIn
 		go acceptAndReadQuic(currentConnectionQuic, c1Quic)
 		stateQuic = 1
 	case 1:
-		go readQuic(currentConnectionQuic, c2Quic)
+		go readQuic(currentConnectionQuic, c1Quic)
 		stateQuic = 2
 	case 2:
-		go readQuic(currentConnectionQuic, c2Quic)
+		go readQuic(currentConnectionQuic, c1Quic)
 	}
 
 	//go acceptAndRead(currentConnectionQuic, c1Quic, done)
@@ -94,13 +94,14 @@ func acceptAndReadQuic(currentConnectionQuic int, c chan []byte) {
 		fmt.Printf("SRHQuic:: %v\n", err)
 		os.Exit(1)
 	}
-	ConnsSRHQuic = append(ConnsSRHQuic, temp)
+	ConnsSRHQuic = append(ConnsSRHQuic, temp) // Quic Session
 	currentConnectionQuic++
 
 	// receive size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	tempConn := ConnsSRHQuic[currentConnectionQuic]
 	stream, err := tempConn.AcceptStream(context.Background())
+	//stream, err := tempConn.OpenStreamSync(context.Background())
 	StreamsSRHQuic = append(StreamsSRHQuic, stream)
 	if err != nil {
 		fmt.Printf("SRHQuic:: %v\n", err)
@@ -116,10 +117,10 @@ func acceptAndReadQuic(currentConnectionQuic int, c chan []byte) {
 		fmt.Printf("SRHQuic:: %v\n", err)
 		os.Exit(1)
 	}
-
+	stream2 := StreamsSRHQuic[currentConnectionQuic]
 	// receive message
 	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-	_, err = stream.Read(msgTemp)
+	_, err = stream2.Read(msgTemp)
 	if err != nil {
 		fmt.Printf("SRHQuic:: %v\n", err)
 		os.Exit(1)
@@ -128,7 +129,6 @@ func acceptAndReadQuic(currentConnectionQuic int, c chan []byte) {
 }
 
 func readQuic(currentConnectionQuic int, c chan []byte) {
-
 	// receive size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	stream := StreamsSRHQuic[currentConnectionQuic]

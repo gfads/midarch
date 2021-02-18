@@ -21,6 +21,8 @@ type CRHQuic struct {
 	Conns     map[string]quic.Session
 }
 
+var Stream    quic.Stream
+
 func NewCRHQuic() CRHQuic {
 	r := new(CRHQuic)
 	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B"
@@ -37,7 +39,7 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	// check message
 	payload := msg.Payload.([]interface{})
-	host := "127.0.0.1"                // host TODO
+	host := "localhost" //"127.0.0.1"                // host TODO
 	port := payload[1].(string)        // port
 	msgToServer := payload[2].([]byte)
 
@@ -54,21 +56,21 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 			fmt.Printf("CRHQuic:: %v\n", err)
 			os.Exit(1)
 		}
+
+		Stream, err = c.Conns[addr].OpenStreamSync(context.Background())
+		if err != nil {
+			fmt.Printf("CRHQuic:: %v\n", err)
+			os.Exit(1)
+		}
 	}
 
 	// connect to server
-	conn := c.Conns[addr]
-
-	stream, err := conn.OpenStreamSync(context.Background())
-	if err != nil {
-		fmt.Printf("CRHQuic:: %v\n", err)
-		os.Exit(1)
-	}
+	//conn := c.Conns[addr]
 
 	// send message's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	binary.LittleEndian.PutUint32(size, uint32(len(msgToServer)))
-	_, err = stream.Write(size)
+	_, err = Stream.Write(size)
 	if err != nil {
 		fmt.Printf("CRHQuic:: %v\n", err)
 		os.Exit(1)
@@ -76,32 +78,34 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	// TODO continue from here
 
 	//fmt.Printf("CRHQuic:: %v \n\n",size)
-
-	// send message
+		// send message
 	//fmt.Printf("CRHQuic:: Message to server:: %v %v >> %v << \n\n",msgToServer, len(msgToServer), binary.LittleEndian.Uint32(size))
-	_, err = stream.Write(msgToServer)
+	_, err = Stream.Write(msgToServer)
 	if err != nil {
 		fmt.Printf("CRHQuic:: %v\n", err)
 		os.Exit(1)
 	}
 
+	//fmt.Println("Enviado msgToServer")
 	//fmt.Printf("CRHQuic:: Message sent to Server [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
 	// receive reply's size
-	_, err = stream.Read(size)
+	_, err = Stream.Read(size)
 	if err != nil {
 		fmt.Printf("CRHQuic:: %v\n", err)
 		os.Exit(1)
 	}
+
+	//fmt.Println("Lido size")
 
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
-	_, err = stream.Read(msgFromServer)
+	_, err = Stream.Read(msgFromServer)
 	if err != nil {
 		fmt.Printf("CRHQuic:: %v\n", err)
 		os.Exit(1)
 	}
-
+	//fmt.Println("Lido msgFromServer")
 	//fmt.Printf("CRHQuic:: Message received from Server:: [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
 	*msg = messages.SAMessage{Payload: msgFromServer}

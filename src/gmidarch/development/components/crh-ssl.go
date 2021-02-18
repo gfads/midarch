@@ -35,7 +35,7 @@ func (c CRHSsl) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	// check message
 	payload := msg.Payload.([]interface{})
-	host := "127.0.0.1"                // host TODO
+	host := "localhost" //"127.0.0.1"                // host TODO
 	port := payload[1].(string)        // port
 	msgToServer := payload[2].([]byte)
 
