@@ -55,6 +55,10 @@ func (al *ArchitecturalRepository) Load() error {
 	al.Library["SRHQuic"] = Record{Type: components.NewSRHQuic(), Behaviour: components.NewSRHQuic().Behaviour}
 	al.Library["CRHUdp"] = Record{Type: components.NewCRHUdp(), Behaviour: components.NewCRHUdp().Behaviour}
 	al.Library["SRHUdp"] = Record{Type: components.NewSRHUdp(), Behaviour: components.NewSRHUdp().Behaviour}
+	al.Library["CRHRpc"] = Record{Type: components.NewCRHRpc(), Behaviour: components.NewCRHRpc().Behaviour}
+	al.Library["SRHRpc"] = Record{Type: components.NewSRHRpc(), Behaviour: components.NewSRHRpc().Behaviour}
+	al.Library["RPCRequestorM"] = Record{Type: components.NewRPCRequestorM(), Behaviour: components.NewRPCRequestorM().Behaviour}
+	al.Library["RPCInvokerM"] = Record{Type: components.NewRPCInvokerM(), Behaviour: components.NewRPCInvokerM().Behaviour}
 	al.Library["HttpRequestorM"] = Record{Type: components.NewHttpRequestorM(), Behaviour: components.NewHttpRequestorM().Behaviour}
 	al.Library["Http2RequestorM"] = Record{Type: components.NewHttp2RequestorM(), Behaviour: components.NewHttp2RequestorM().Behaviour}
 	al.Library["HttpInvokerM"] = Record{Type: components.NewHttpInvokerM(), Behaviour: components.NewHttpInvokerM().Behaviour}

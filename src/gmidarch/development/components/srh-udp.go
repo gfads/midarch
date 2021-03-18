@@ -44,7 +44,7 @@ func (s SRHUdp) Selector(elem interface{}, elemInfo [] *interface{}, op string, 
 func (s SRHUdp) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [] *interface{}) { // TODO Host & Port
 	tempPort := *elemInfo[0]
 	port := tempPort.(string)
-	host := "127.0.0.1" // TODO
+	host := "0.0.0.0" // TODO
 
 	if connSRHUdp == nil { // connection was not created yet
 		servAddr, err := net.ResolveUDPAddr("udp4", host+":"+port)

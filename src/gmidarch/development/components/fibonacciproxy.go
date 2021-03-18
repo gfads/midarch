@@ -3,6 +3,7 @@ package components
 import (
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
+	"reflect"
 	"shared"
 )
 
@@ -34,12 +35,19 @@ func (e Fibonacciproxy) Selector(elem interface{}, elemInfo [] *interface{}, op 
 
 func (e Fibonacciproxy) Fibo(_p1 int) int {
 	_args := []interface{}{_p1}
-	_reqMsg := messages.SAMessage{messages.Invocation{Host: e.Host, Port: e.Port, Op: "Fibo", Args: _args}}
+	_reqMsg := messages.SAMessage{messages.Invocation{Host: e.Host, Port: e.Port, Op: "Fibonacci.FiboRPC", Args: _args}}
 
 	i_PreInvRFP  <- _reqMsg
 	_repMsg := <-i_PosTerRFP
 
-	_reply := int(_repMsg.Payload.(int64))
+	//_reply := int(_repMsg.Payload.(int64))
+	var _reply int
+	reflectedField := reflect.ValueOf(_repMsg.Payload)
+	switch reflectedField.Kind() {
+		case reflect.Uint16: _reply = int(_repMsg.Payload.(uint16))
+		case reflect.Uint32: _reply = int(_repMsg.Payload.(uint32))
+		case reflect.Int64: _reply = int(_repMsg.Payload.(int64))
+	}
 
 	return _reply
 }

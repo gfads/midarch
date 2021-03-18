@@ -1,0 +1,14 @@
+Configuration midfibonacciserver :=
+   Components
+      fibonacciinvoker : RPCInvokerM
+      srh              : SRHRpc    @FIBONACCI_PORT
+
+   Connectors
+      t1 : Requestreply
+
+   Attachments
+      srh,t1,fibonacciinvoker
+
+   Adaptability
+      None
+EndConf 

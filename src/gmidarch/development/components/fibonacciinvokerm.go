@@ -9,6 +9,7 @@ import (
 	"gmidarch/development/miop"
 	"log"
 	"os"
+	"reflect"
 )
 
 type FibonacciinvokerM struct {
@@ -41,8 +42,15 @@ func (FibonacciinvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}
 	//var inv shared.Request
 	op := miopPacket.Bd.ReqHeader.Operation
 	switch op {
-	case "Fibo":
-		_p0 := int(miopPacket.Bd.ReqBody.Body[0].(int64))
+	case "Fibonacci.FiboRPC":
+		//_p0 := int(miopPacket.Bd.ReqBody.Body[0].(int64))
+		var _p0 int
+		reflectedField := reflect.ValueOf(miopPacket.Bd.ReqBody.Body[0])
+		switch reflectedField.Kind() {
+			case reflect.Uint16: _p0 = int(miopPacket.Bd.ReqBody.Body[0].(uint16))
+			case reflect.Uint32: _p0 = int(miopPacket.Bd.ReqBody.Body[0].(uint32))
+			case reflect.Int64: _p0 = int(miopPacket.Bd.ReqBody.Body[0].(int64))
+		}
 
 		_r := impl.Fibonacci{}.F(_p0)
 

@@ -4,17 +4,23 @@ import (
 	"fmt"
 	"gmidarch/development/components"
 	"gmidarch/execution/frontend"
+	"os"
 	"shared"
 	"shared/factories"
+	"strconv"
 	"time"
 )
 
 func clientX(fibo components.Http2Proxy){
-
-	//n,_ := strconv.Atoi(os.Args[1])
-	//SAMPLE_SIZE,_ := strconv.Atoi(os.Args[2])
-	n := 10
-	SAMPLE_SIZE := 10
+	var n, SAMPLE_SIZE int
+	if len(os.Args) >= 2 {
+		n, _ = strconv.Atoi(os.Args[1])
+		SAMPLE_SIZE, _ = strconv.Atoi(os.Args[2])
+	}else{
+		n, _ = strconv.Atoi(shared.EnvironmentVariableValue("FIBONACCI_PLACE"))
+		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValue("SAMPLE_SIZE"))
+	}
+	fmt.Println("FIBONACCI_PLACE / SAMPLE_SIZE :", n, "/", SAMPLE_SIZE)
 
 	//durations := [SAMPLE_SIZE]time.Duration{}
 
@@ -42,11 +48,14 @@ func clientX(fibo components.Http2Proxy){
 }
 
 func main() {
+	// Wait for server to get up
+	time.Sleep(10 * time.Second)
+
 	// start configuration
 	frontend.FrontEnd{}.Deploy("http2client.madl")
 
 	// proxy to naming service
-	fibo1 := factories.GetHttp2Proxy("https://localhost", shared.HTTP_PORT)
+	fibo1 := factories.GetHttp2Proxy("https://server", shared.HTTP_PORT)
 
 	//// obtain proxy of fibonacci
 	//s := "Fibonacci"

@@ -33,21 +33,21 @@ func (c CRHUdp) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	// check message
 	payload := msg.Payload.([]interface{})
-	host := "127.0.0.1"                // host TODO
+	host := payload[0].(string)        // host
 	port := payload[1].(string)        // port
 	msgToServer := payload[2].([]byte)
 
-	key := host + ":" + port
+	addr := host + ":" + port
 	var err error
-	if _, ok := c.Conns[key]; !ok { // no connection open yet
+	if _, ok := c.Conns[addr]; !ok { // no connection open yet
 		//servAddr := key // TODO
 		//tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
-		udpAddr, err := net.ResolveUDPAddr("udp", key)
+		udpAddr, err := net.ResolveUDPAddr("udp", addr)
 		if err != nil {
 			log.Fatalf("CRHUdp:: %s", err)
 		}
 
-		c.Conns[key], err = net.DialUDP("udp", nil, udpAddr)
+		c.Conns[addr], err = net.DialUDP("udp", nil, udpAddr)
 		if err != nil {
 			fmt.Printf("CRHUdp:: %v\n", err)
 			os.Exit(1)
@@ -55,7 +55,7 @@ func (c CRHUdp) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	}
 
 	// connect to server
-	conn := c.Conns[key]
+	conn := c.Conns[addr]
 
 	// send message's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)

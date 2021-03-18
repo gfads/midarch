@@ -44,7 +44,7 @@ func (e SRHHttp) Selector(elem interface{}, elemInfo [] *interface{}, op string,
 func (e SRHHttp) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [] *interface{}) { // TODO Host & Port
 	tempPort := *elemInfo[0]
 	port := tempPort.(string)
-	host := "127.0.0.1" // TODO
+	host := "0.0.0.0" // TODO
 
 	if LnSRHHttp == nil { // listener was not created yet
 		servAddr, err := net.ResolveTCPAddr("tcp", host+":"+port)

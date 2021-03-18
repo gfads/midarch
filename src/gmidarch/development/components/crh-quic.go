@@ -36,10 +36,9 @@ func (CRHQuic) Selector(elem interface{}, elemInfo [] *interface{}, op string, m
 }
 
 func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
-
 	// check message
 	payload := msg.Payload.([]interface{})
-	host := "localhost" //"127.0.0.1"                // host TODO
+	host := payload[0].(string)        // host
 	port := payload[1].(string)        // port
 	msgToServer := payload[2].([]byte)
 

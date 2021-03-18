@@ -1,0 +1,37 @@
+version: '3.1'
+services:
+  namingserver:
+    image: midarch/fibomiddleware:namingserver-ssl
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+    environment:
+#      CA_PATH: "/go/src/ssl/myCA.pem"
+      CRT_PATH: "/go/src/ssl/namingserver.crt"
+      KEY_PATH: "/go/src/ssl/namingserver.key"
+
+  server:
+    image: midarch/fibomiddleware:server-ssl
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+    environment:
+      CA_PATH: "/go/src/ssl/myCA.pem"
+      CRT_PATH: "/go/src/ssl/server.crt"
+      KEY_PATH: "/go/src/ssl/server.key"
+
+  client:
+    image: midarch/fibomiddleware:client-ssl
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+    environment:
+      FIBONACCI_PLACE: "12"
+      SAMPLE_SIZE: "10"
+      CA_PATH: "/go/src/ssl/myCA.pem"
+
+#      CRT_PATH: "/go/src/ssl/localhost.crt"
+#      KEY_PATH: "/go/src/ssl/localhost.key"

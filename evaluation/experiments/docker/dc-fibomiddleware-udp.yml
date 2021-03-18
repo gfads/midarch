@@ -1,0 +1,25 @@
+version: '3.1'
+services:
+  namingserver:
+    image: midarch/fibomiddleware:namingserver-udp
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+
+  server:
+    image: midarch/fibomiddleware:server-udp
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+
+  client:
+    image: midarch/fibomiddleware:client-udp
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+    environment:
+      FIBONACCI_PLACE: "12"
+      SAMPLE_SIZE: "10"

@@ -47,7 +47,7 @@ func (e SRHQuic) Selector(elem interface{}, elemInfo [] *interface{}, op string,
 func (e SRHQuic) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [] *interface{}) { // TODO Host & Port
 	tempPort := *elemInfo[0]
 	port := tempPort.(string)
-	host := "localhost" //"127.0.0.1" // TODO
+	host := "0.0.0.0" //"127.0.0.1" // TODO
 
 	if LnSRHQuic == nil { // listener was not created yet
 		//servAddr, err := net.ResolveTCPAddr("tcp", host+":"+port)
