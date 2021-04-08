@@ -32,7 +32,6 @@ func (e RequestorM) Selector(elem interface{}, elemInfo [] *interface{}, op stri
 
 func (RequestorM) I_In(msg *messages.SAMessage, info [] *interface{}) {
 	inv := msg.Payload.(messages.Invocation)
-
 	// assembly packet
 	reqHeader := miop.RequestHeader{Context: "TODO", RequestId: 13, ResponseExpected: true, Key: 131313, Operation: inv.Op}
 	reqBody := miop.RequestBody{Body: inv.Args}

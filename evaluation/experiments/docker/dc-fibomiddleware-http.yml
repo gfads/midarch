@@ -1,25 +1,36 @@
 version: '3.1'
 services:
   server:
-    image: midarch/fibomiddleware:server-http
+    image: midarch/fibomiddleware:1.0.2-server-http
     deploy:
       replicas: 1
       restart_policy:
         condition: none
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 1024M
     environment:
       CA_PATH: "/go/src/ssl/myCA.pem"
       CRT_PATH: "/go/src/ssl/server.crt"
       KEY_PATH: "/go/src/ssl/server.key"
 
   client:
-    image: midarch/fibomiddleware:client-http
+    image: midarch/fibomiddleware:1.0.2-client-http
     deploy:
       replicas: 1
       restart_policy:
         condition: none
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 1024M
     environment:
-      FIBONACCI_PLACE: "12"
-      SAMPLE_SIZE: "10"
+      FIBONACCI_PLACE: "2"
+      SAMPLE_SIZE: "10000"
+      AVERAGE_WAITING_TIME: "60"
       CA_PATH: "/go/src/ssl/myCA.pem"
 
 #      CRT_PATH: "/go/src/ssl/localhost.crt"

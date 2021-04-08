@@ -62,10 +62,10 @@ func (e SRHHttp) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemIn
 		go acceptAndReadHttp(currentConnectionHttp, c1Http)
 		stateHttp = 1
 	case 1:
-		go acceptAndReadHttp(currentConnectionHttp, c1Http)
+		go readHttp(currentConnectionHttp, c1Http)
 		stateHttp = 2
 	case 2:
-		go acceptAndReadHttp(currentConnectionHttp, c1Http)
+		go readHttp(currentConnectionHttp, c1Http)
 	}
 
 	//go acceptAndReadHttp(currentConnectionHttp, c1Http, done)
@@ -200,7 +200,7 @@ func (e SRHHttp) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo 
 		os.Exit(1)
 	}
 
-	ConnsSRHHttp[currentConnectionHttp].Close()
+	//ConnsSRHHttp[currentConnectionHttp].Close()
 }
 
 func nextConnectionHttp() int {

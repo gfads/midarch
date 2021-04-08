@@ -3,7 +3,6 @@ package components
 import (
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
-	"reflect"
 	"shared"
 )
 
@@ -40,14 +39,17 @@ func (e Fibonacciproxy) Fibo(_p1 int) int {
 	i_PreInvRFP  <- _reqMsg
 	_repMsg := <-i_PosTerRFP
 
-	//_reply := int(_repMsg.Payload.(int64))
-	var _reply int
-	reflectedField := reflect.ValueOf(_repMsg.Payload)
-	switch reflectedField.Kind() {
-		case reflect.Uint16: _reply = int(_repMsg.Payload.(uint16))
-		case reflect.Uint32: _reply = int(_repMsg.Payload.(uint32))
-		case reflect.Int64: _reply = int(_repMsg.Payload.(int64))
-	}
+	_reply := shared.SafeGetInt(_repMsg.Payload)			// To get the value as int from any type of interface
+	//_reply := _repMsg.Payload.(int)						// For better performance on docker (RPC)
+	//_reply := int(_repMsg.Payload.(int8))					// For better performance on docker (UDP)
+	//_reply := int(_repMsg.Payload.(uint32))					// For better performance on docker (Others)
+	//var _reply int										// For general purpose
+	//reflectedField := reflect.ValueOf(_repMsg.Payload)
+	//switch reflectedField.Kind() {
+	//	case reflect.Uint16: _reply = int(_repMsg.Payload.(uint16))
+	//	case reflect.Uint32: _reply = int(_repMsg.Payload.(uint32))
+	//	case reflect.Int64: _reply = int(_repMsg.Payload.(int64))
+	//}
 
 	return _reply
 }

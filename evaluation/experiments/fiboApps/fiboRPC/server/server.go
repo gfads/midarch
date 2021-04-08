@@ -13,7 +13,7 @@ func main() {
 
 	rpc.Register(fibonacci)
 
-	addr, err := net.ResolveTCPAddr("tcp", "localhost:" + shared.FIBONACCI_PORT)
+	addr, err := net.ResolveTCPAddr("tcp", "0.0.0.0:" + shared.FIBONACCI_PORT)
 	if err != nil {
 		log.Fatal("Error while resolving IP address: ", err)
 	}

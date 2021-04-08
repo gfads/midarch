@@ -85,7 +85,6 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		os.Exit(1)
 	}
 
-	//fmt.Println("Enviado msgToServer")
 	//fmt.Printf("CRHQuic:: Message sent to Server [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
 	// receive reply's size
@@ -95,7 +94,6 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		os.Exit(1)
 	}
 
-	//fmt.Println("Lido size")
 
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
@@ -104,7 +102,6 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		fmt.Printf("CRHQuic:: %v\n", err)
 		os.Exit(1)
 	}
-	//fmt.Println("Lido msgFromServer")
 	//fmt.Printf("CRHQuic:: Message received from Server:: [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
 	*msg = messages.SAMessage{Payload: msgFromServer}

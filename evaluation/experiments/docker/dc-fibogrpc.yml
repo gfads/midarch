@@ -1,23 +1,7 @@
 version: '3.1'
 services:
-  namingserver:
-    image: midarch/fibomiddleware:1.0.2-namingserver-quic
-    deploy:
-      replicas: 1
-      restart_policy:
-        condition: none
-      resources:
-        limits:
-          memory: 1024M
-        reservations:
-          memory: 1024M
-    environment:
-#      CA_PATH: "/go/src/ssl/myCA.pem"
-      CRT_PATH: "/go/src/ssl/namingserver.crt"
-      KEY_PATH: "/go/src/ssl/namingserver.key"
-
   server:
-    image: midarch/fibomiddleware:1.0.2-server-quic
+    image: midarch/fibogrpc:1.0.2-server-grpc
     deploy:
       replicas: 1
       restart_policy:
@@ -33,7 +17,7 @@ services:
       KEY_PATH: "/go/src/ssl/server.key"
 
   client:
-    image: midarch/fibomiddleware:1.0.3-client-quic
+    image: midarch/fibogrpc:1.0.2-client-grpc
     deploy:
       replicas: 1
       restart_policy:

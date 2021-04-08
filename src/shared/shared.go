@@ -564,6 +564,33 @@ func EnvironmentVariableValue(variable string) (value string) {
 	return value
 }
 
+func SafeGetInt(number interface{}) int {
+	switch number.(type) {
+	case uint8:
+		return int(number.(uint8))
+	case int8:
+		return int(number.(int8))
+	case uint16:
+		return int(number.(uint16))
+	case int16:
+		return int(number.(int16))
+	case uint32:
+		return int(number.(uint32))
+	case int32:
+		return int(number.(int32))
+	case int64:
+		return int(number.(int64))
+	case float32:
+		return int(number.(float32))
+	case float64:
+		return int(number.(float64))
+	case int:
+		return number.(int)
+	default:
+		return int(0)
+	}
+}
+
 // ******************* PARAMETERS
 
 //const BASE_DIR  = "/go/midarch-go"  // docker

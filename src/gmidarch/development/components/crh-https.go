@@ -41,8 +41,8 @@ func (c CRHHttps) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	addr := host + ":" + port
 	var err error
-	//if _, ok := c.Conns[key]; !ok { // no connection open yet
-		//servAddr := key // TODO
+	if _, ok := c.Conns[addr]; !ok { // no connection open yet
+		//servAddr := addr // TODO
 		//tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
 		//tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 		//if err != nil {
@@ -54,7 +54,7 @@ func (c CRHHttps) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 			fmt.Printf("CRHHttps:: %v\n", err)
 			os.Exit(1)
 		}
-	//}
+	}
 
 	// connect to server
 	conn := c.Conns[addr]

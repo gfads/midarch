@@ -1,7 +1,7 @@
 package main
 
 import (
-	fibonacci "apps/fiboApps/fibo_gRPC/proto"
+	fibonacci "../proto"
 	"apps/fibomiddleware/impl"
 	"context"
 	"google.golang.org/grpc"
@@ -19,10 +19,26 @@ func (f *FibonacciServer) Fibo(ctx context.Context, request *fibonacci.Request) 
 }
 
 func main() {
+	//rand.Seed(time.Now().UnixNano())
+	//for i := 0; i < 100; i++ {
+	//	var rd = rand.NormFloat64()
+	//	//println(rd)
+	//	//println(float64(rd))
+	//	//println(rd * 1000)
+	//	//println(float64(int(rd * 1000)))
+	//	//println(float64(int(rd * 1000))/1000)
+	//	fmt.Println(rd)
+	//	//fmt.Println(math.Round(rd))
+	//	fmt.Println(math.Round(rd * 1000))
+	//}
+	//
+	//return
+
+
 	grpcServer := grpc.NewServer()
 	fibonacci.RegisterFibonacciServiceServer(grpcServer, &FibonacciServer{})
 
-	addr, err := net.ResolveTCPAddr("tcp", "localhost:" + shared.FIBONACCI_PORT)
+	addr, err := net.ResolveTCPAddr("tcp", "0.0.0.0:" + shared.FIBONACCI_PORT)
 	if err != nil {
 		log.Fatal("Error while resolving IP address: ", err)
 	}

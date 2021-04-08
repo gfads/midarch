@@ -3,7 +3,6 @@ package components
 import (
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
-	"reflect"
 	"shared"
 	"shared/ior"
 )
@@ -37,14 +36,14 @@ func (e Namingserver) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		_p1 := request.Args[1].(map[string]interface{})
 		_p11 := _p1["Host"].(string)
 		_p12 := _p1["Port"].(string)
-		//_p13 := _p1["Id"].(int64)
-		var _p13 int64
-		reflectedField := reflect.ValueOf(_p1["Id"])
-		switch reflectedField.Kind() {
-			case reflect.Uint16: _p13 = int64(_p1["Id"].(uint16))
-			case reflect.Uint32: _p13 = int64(_p1["Id"].(uint32))
-			case reflect.Int64: _p13 = _p1["Id"].(int64)
-		}
+		_p13 := _p1["Id"].(uint16)						// For better performance on docker
+		//var _p13 int64								// For general purpose
+		//reflectedField := reflect.ValueOf(_p1["Id"])
+		//switch reflectedField.Kind() {
+		//	case reflect.Uint16: _p13 = int64(_p1["Id"].(uint16))
+		//	case reflect.Uint32: _p13 = int64(_p1["Id"].(uint32))
+		//	case reflect.Int64: _p13 = _p1["Id"].(int64)
+		//}
 		_p14 := _p1["Proxy"].(string)
 		iorTemp := ior.IOR{Host: _p11, Port: _p12, Id: int(_p13), Proxy: _p14}
 

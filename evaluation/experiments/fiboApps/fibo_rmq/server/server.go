@@ -5,6 +5,7 @@ import (
 	"github.com/streadway/amqp"
 	"log"
 	"strconv"
+	"time"
 )
 
 func failOnError(err error, msg string) {
@@ -24,7 +25,10 @@ func failOnError(err error, msg string) {
 //}
 
 func main() {
-	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
+	// Wait for server to get up
+	time.Sleep(15 * time.Second)
+
+	conn, err := amqp.Dial("amqp://guest:guest@rmq:5672/")
 	failOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
