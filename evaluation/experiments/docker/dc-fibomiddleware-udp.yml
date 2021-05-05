@@ -37,5 +37,5 @@ services:
           memory: 1024M
     environment:
       FIBONACCI_PLACE: "2"
-      SAMPLE_SIZE: "1000"
-      AVERAGE_WAITING_TIME: "6"
+      SAMPLE_SIZE: "10000"
+      AVERAGE_WAITING_TIME: "60"

@@ -1,7 +1,6 @@
 package components
 
 import (
-	"crypto/tls"
 	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
@@ -13,14 +12,14 @@ import (
 type CRHRpc struct {
 	Behaviour string
 	Graph     graphs.ExecGraph
-	Conns     map[string]*tls.Conn
+	Conns     map[string]*rpc.Client
 }
 
 func NewCRHRpc() CRHRpc {
 
 	r := new(CRHRpc)
 	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B"
-	r.Conns = make(map[string]*tls.Conn, shared.NUM_MAX_CONNECTIONS)
+	r.Conns = make(map[string]*rpc.Client, shared.NUM_MAX_CONNECTIONS)
 
 	return *r
 }
@@ -38,9 +37,9 @@ func (c CRHRpc) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	inv := payload[2].(messages.Invocation) // Fibonacci place
 	n := inv.Args[0]
 
-	//addr := host + ":" + port
+	addr := host + ":" + port
 	var err error
-	//if _, ok := c.Conns[key]; !ok { // no connection open yet
+	if _, ok := c.Conns[addr]; !ok { // no connection open yet
 		//servAddr := key // TODO
 		//tcpAddr, err := net.ResolveTCPAddr("tcp", servAddr)
 		//tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
@@ -53,10 +52,16 @@ func (c CRHRpc) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		//	fmt.Printf("CRHRpc:: %v\n", err)
 		//	os.Exit(1)
 		//}
-	//}
+		c.Conns[addr], err = rpc.Dial("tcp", addr)
+		if err != nil {
+			fmt.Printf("CRHRpc:: %v\n", err)
+			os.Exit(1)
+		}
+	}
 
 	// connect to server
 	//conn := c.Conns[addr]
+	client := c.Conns[addr]
 
 	// send message's size
 	//size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
@@ -76,11 +81,13 @@ func (c CRHRpc) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	//client := &http.Client{}
 	//resp, err := client.Do(request)
-	client, err := rpc.Dial("tcp", host + ":" + port)
-	if err != nil {
-		fmt.Printf("CRHRpc:: %v\n", err)
-		os.Exit(1)
-	}
+
+
+	//client, err := rpc.Dial("tcp", host + ":" + port)
+	//if err != nil {
+	//	fmt.Printf("CRHRpc:: %v\n", err)
+	//	os.Exit(1)
+	//}
 
 	var reply int
 	err = client.Call(inv.Op, n, &reply)
