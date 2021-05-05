@@ -20,6 +20,13 @@ func GetHttp2Proxy(url string, port string) components.Http2Proxy {
 	return p
 }
 
+func GetFibonacciProxy(url string, port string) components.Fibonacciproxy {
+	p := components.NewFibonacciproxy()
+	p.Host = url
+	p.Port = port
+	return p
+}
+
 func FactoryQueueing() components.Notificationengineproxy {
 	p := components.Notificationengineproxy{Host: shared.QUEUEING_HOST, Port: shared.QUEUEING_PORT}
 	return p

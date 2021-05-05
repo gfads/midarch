@@ -12,7 +12,7 @@ type SRHHttp2 struct {
 	Graph     graphs.ExecGraph
 }
 
-var first = true
+var firstHttp2 = true
 
 var c1Http2 = make(chan messages.HttpMessage)
 var c2Http2 = make(chan messages.HttpMessage)
@@ -49,8 +49,8 @@ func (e SRHHttp2) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemI
 
 	//log.Println("I_Receive.Begin")
 
-	if first { // listener was not created yet
-		first = false
+	if firstHttp2 { // listener was not created yet
+		firstHttp2 = false
 		http.HandleFunc("/", handler) //makeHandler(impl.Handler))
 		go http.ListenAndServeTLS(":"+port, shared.CRT_PATH, shared.KEY_PATH, nil)
 	}

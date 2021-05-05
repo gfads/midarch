@@ -2,7 +2,6 @@ package frontend
 
 import (
 	"fmt"
-	"gmidarch/execution/checker"
 	"gmidarch/execution/creator"
 	"gmidarch/execution/deployer"
 	"gmidarch/execution/generator"
@@ -17,7 +16,7 @@ func (f FrontEnd) Deploy(file string) {
 	l := loader.Loader{}
 	crt := creator.Creator{}
 	gen := generator.Generator{}
-	chk := checker.Checker{}
+	//chk := checker.Checker{}
 	dep := deployer.NewEE()
 
 	// Read MADL and generate architectural artifacts (App)
@@ -28,7 +27,7 @@ func (f FrontEnd) Deploy(file string) {
 		cspapp := gen.CSP(mapp) // Generate CSP
 		gen.SaveCSPFile(cspapp) // Save CSP
 
-		chk.Check(cspapp)       // Check CSP
+		//chk.Check(cspapp)       // Check CSP
 
 		eeApp := deployer.NewEE()
 		eeApp.Deploy(mapp) // Deploy app
@@ -48,7 +47,7 @@ func (f FrontEnd) Deploy(file string) {
 		gen.SaveCSPFile(cspee)    		// Generate & save CSPs
 
 		// Check CSPs
-		chk.Check(cspee)  // TODO think about as it takes a long time and may be correct by construction
+		//chk.Check(cspee)  // TODO think about as it takes a long time and may be correct by construction
 
 		dep.DeployApp(mee, mapp) // Deploy App into EE & start EE
 		dep.Start()

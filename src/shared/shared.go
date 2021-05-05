@@ -38,7 +38,7 @@ var INJECTION_TIME time.Duration
 
 var REQUEST_TIME time.Duration // milliseconds
 var STRATEGY = 0               // 1 - no change 2 - change once 3 - change same plugin 4 - alternate plugins
-var NAMING_HOST = ""
+var NAMING_HOST = "namingserver"
 var QUEUEING_HOST = ""
 
 // MAPE-K Types
@@ -475,7 +475,7 @@ func localizegMidArch() string {
 	}
 
 	if !found{
-		fmt.Println("Shared:: Error:: OS Environment variable 'GOPATH' not configured\n")
+		fmt.Println("Shared:: Error:: OS Environment variable 'GMIDARCHDIR' not configured\n")
 		os.Exit(1)
 	}
 	fmt.Println(r)
@@ -551,6 +551,44 @@ func localizeKey() (keyPath string) {
 	}
 
 	return keyPath
+}
+
+func EnvironmentVariableValue(variable string) (value string) {
+	for _, e := range os.Environ() {
+		pair := strings.SplitN(e, "=", 2)
+		if pair[0] == variable {
+			value = pair[1]
+		}
+	}
+
+	return value
+}
+
+func SafeGetInt(number interface{}) int {
+	switch number.(type) {
+	case uint8:
+		return int(number.(uint8))
+	case int8:
+		return int(number.(int8))
+	case uint16:
+		return int(number.(uint16))
+	case int16:
+		return int(number.(int16))
+	case uint32:
+		return int(number.(uint32))
+	case int32:
+		return int(number.(int32))
+	case int64:
+		return int(number.(int64))
+	case float32:
+		return int(number.(float32))
+	case float64:
+		return int(number.(float64))
+	case int:
+		return number.(int)
+	default:
+		return int(0)
+	}
 }
 
 // ******************* PARAMETERS

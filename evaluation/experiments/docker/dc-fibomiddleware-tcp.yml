@@ -1,0 +1,56 @@
+version: '3.1'
+services:
+  namingserver:
+    image: midarch/fibomiddleware:1.0.2-namingserver-tcp
+#    networks:
+#      gmidarch:
+#        aliases:
+#          - namingserver
+#    ports:
+#      - "4040:4040"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 1024M
+
+  server:
+    image: midarch/fibomiddleware:1.0.2-server-tcp
+#    networks:
+#      gmidarch:
+#        aliases:
+#          - server
+#    ports:
+#      - "2030:2030"
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 1024M
+
+  client:
+    image: midarch/fibomiddleware:1.0.3-client-tcp
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          memory: 1024M
+        reservations:
+          memory: 1024M
+    environment:
+      FIBONACCI_PLACE: "2"
+      SAMPLE_SIZE: "10000"
+      AVERAGE_WAITING_TIME: "60"
+
+#networks:
+#  gmidarch:

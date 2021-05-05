@@ -46,7 +46,7 @@ func (e SRHHttps) Selector(elem interface{}, elemInfo [] *interface{}, op string
 func (e SRHHttps) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [] *interface{}) { // TODO Host & Port
 	tempPort := *elemInfo[0]
 	port := tempPort.(string)
-	host := "localhost" // TODO
+	host := "0.0.0.0" // TODO
 
 	if LnSRHHttps == nil { // listener was not created yet
 		//servAddr, err := net.ResolveTCPAddr("tcp", host+":"+port)
@@ -65,10 +65,10 @@ func (e SRHHttps) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemI
 		go acceptAndReadHttps(currentConnectionHttps, c1Https)
 		stateHttps = 1
 	case 1:
-		go acceptAndReadHttps(currentConnectionHttps, c1Https)
+		go readHttps(currentConnectionHttps, c1Https)
 		stateHttps = 2
 	case 2:
-		go acceptAndReadHttps(currentConnectionHttps, c1Https)
+		go readHttps(currentConnectionHttps, c1Https)
 	}
 
 	//go acceptAndReadHttps(currentConnectionHttps, c1Https, done)
@@ -236,7 +236,7 @@ func (e SRHHttps) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo
 		os.Exit(1)
 	}
 
-	ConnsSRHHttps[currentConnectionHttps].Close()
+	//ConnsSRHHttps[currentConnectionHttps].Close()
 }
 
 func nextConnectionHttps() int {

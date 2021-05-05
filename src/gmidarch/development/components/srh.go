@@ -44,7 +44,7 @@ func (e SRH) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg
 func (e SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [] *interface{}) { // TODO Host & Port
 	tempPort := *elemInfo[0]
 	port := tempPort.(string)
-	host := "127.0.0.1" // TODO
+	host := "0.0.0.0" // Listen on all interfaces
 
 	if LnSRH == nil { // listener was not created yet
 		servAddr, err := net.ResolveTCPAddr("tcp", host+":"+port)

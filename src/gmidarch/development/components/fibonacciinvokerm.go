@@ -41,9 +41,16 @@ func (FibonacciinvokerM) I_Process(msg *messages.SAMessage, info [] *interface{}
 	//var inv shared.Request
 	op := miopPacket.Bd.ReqHeader.Operation
 	switch op {
-	case "Fibo":
-		_p0 := int(miopPacket.Bd.ReqBody.Body[0].(int64))
-
+	case "Fibonacci.FiboRPC":
+		_p0 := int(miopPacket.Bd.ReqBody.Body[0].(int8)) 	// For better performance on docker
+		//var _p0 int 									 	// For general purpose
+		//reflectedField := reflect.ValueOf(miopPacket.Bd.ReqBody.Body[0])
+		//switch reflectedField.Kind() {
+		//	case reflect.Uint16: _p0 = int(miopPacket.Bd.ReqBody.Body[0].(uint16))
+		//	case reflect.Uint32: _p0 = int(miopPacket.Bd.ReqBody.Body[0].(uint32))
+		//	case reflect.Int8: _p0 = int(miopPacket.Bd.ReqBody.Body[0].(int8))
+		//	case reflect.Int64: _p0 = int(miopPacket.Bd.ReqBody.Body[0].(int64))
+		//}
 		_r := impl.Fibonacci{}.F(_p0)
 
 		// assembly packet

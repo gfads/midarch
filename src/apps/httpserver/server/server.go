@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"gmidarch/execution/frontend"
 	"shared"
+	"sync"
 )
 
 func main(){
+	var wg sync.WaitGroup
+	wg.Add(1)
 
 	// start configuration
 	frontend.FrontEnd{}.Deploy("httpserver.madl")
@@ -25,6 +28,7 @@ func main(){
 
 	fmt.Printf("Server:: Http Server is running at Port: %v \n",shared.HTTP_PORT)
 
-	fmt.Scanln()
+	//fmt.Scanln()
+	wg.Wait()
 	fmt.Println("done")
 }

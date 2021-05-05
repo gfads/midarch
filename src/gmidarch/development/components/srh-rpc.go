@@ -1,162 +1,89 @@
 package components
 
-/*
 import (
-	"encoding/binary"
+	"apps/fibomiddleware/impl"
 	"fmt"
 	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
-	"io"
 	"log"
 	"net"
-	"os"
-	"shared"
+	"net/rpc"
 )
 
-type SRH struct {
+type SRHRpc struct {
 	Behaviour string
 	Graph     graphs.ExecGraph
 }
 
-var ConnsSRH map[string]net.Conn
-var LnsSRH map[string]net.Listener
-//var c1 = make(chan []byte)
-//var c2 = make(chan []byte)
+var firstRPC = true
 
-func NewSRH() SRH {
+var c1RPC = make(chan messages.HttpMessage) // TODO: Adjust message type
+var c2RPC = make(chan messages.HttpMessage)
 
-	r := new(SRH)
+func NewSRHRpc() SRHRpc {
 
+	r := new(SRHRpc)
 	r.Behaviour = "B = I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> B"
-	LnsSRH = make(map[string]net.Listener)
-	ConnsSRH = make(map[string]net.Conn)
 
 	return *r
 }
 
-func (e SRH) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
+func (e SRHRpc) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 	if op[2] == 'R' { // I_Receive
-		elem.(SRH).I_Receive(msg, info, elemInfo)
+		elem.(SRHRpc).I_Receive(msg, info, elemInfo)
 	} else { // "I_Send"
-		elem.(SRH).I_Send(msg, info, elemInfo)
+		elem.(SRHRpc).I_Send(msg, info, elemInfo)
 	}
 }
 
-func (e SRH) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [] *interface{}) { // TODO Host & Port
+//func handler(w http.ResponseWriter, r *http.Request) {
+//	//log.Println("Before c1Http")
+//	c1RPC <- messages.HttpMessage{w, r}
+//	// Awaiting for message processing to return
+//	<-c2RPC
+//	//response := <- c2RPC
+//	//log.Println("Message:", response)
+//}
+
+func (e SRHRpc) I_Receive(msg *messages.SAMessage, info [] *interface{}, elemInfo [] *interface{}) { // TODO Host & Port
 	tempPort := *elemInfo[0]
 	port := tempPort.(string)
-	host := "127.0.0.1" // TODO
+	host := "0.0.0.0" // TODO
 
-	key := host + ":" + port
-	if LnsSRH[key] == nil { // listener was not created yet
-		servAddr, err := net.ResolveTCPAddr("tcp", key)
+	//log.Println("I_Receive.Begin")
+
+	if firstRPC { // listener was not created yet
+		firstRPC = false
+		//http.HandleFunc("/", handler) //makeHandler(impl.Handler))
+		//go http.ListenAndServeTLS(":"+port, shared.CRT_PATH, shared.KEY_PATH, nil)
+
+		fibonacci := new(impl.Fibonacci)
+
+		rpc.Register(fibonacci)
+
+		addr, err := net.ResolveTCPAddr("tcp", host + ":" + port)//shared.FIBONACCI_PORT)
 		if err != nil {
-			fmt.Printf("SRH:: %s \n", err)
-			os.Exit(0)
+			log.Fatal("Error while resolving IP address: ", err)
 		}
-		lnsTemp, err := net.ListenTCP("tcp", servAddr)
-		if err != nil {
-			fmt.Printf("SRH:: %s \n", err)
-			os.Exit(0)
-		}
-		LnsSRH[key] = lnsTemp
+		ln, err := net.ListenTCP("tcp", addr)
+		rpc.Accept(ln)
+		fmt.Println("Chegou após accept")
 	}
+	fmt.Println("Chegou após first loop")
+	//log.Println("Before receive c1Http")
+	//httpMessage := <-c1RPC
 
-	// it allows to read/accept simultaneously
-	var c1 = make(chan []byte)
-	var c2 = make(chan []byte)
-
-	go acceptAndRead(key, c1)
-	if ConnsSRH[key] != nil {
-		go read(key, c2)
-	}
-
-	select {
-	case msgTemp := <-c1:
-		*msg = messages.SAMessage{Payload: msgTemp}
-	case msgTemp := <-c2:
-		*msg = messages.SAMessage{Payload: msgTemp}
-	}
+	//msg.Payload = httpMessage
+	//log.Println("HttpMessage:", httpMessage)
+	//log.Println("I_Receive.End")
 }
 
-func (e SRH) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo []*interface{}) {
-	msgTemp := msg.Payload.([]interface{})[0].([]byte)
+func (e SRHRpc) I_Send(msg *messages.SAMessage, info [] *interface{}, elemInfo []*interface{}) {
+	//log.Println("I_Send.Begin")
+	//httpMessage := msg.Payload.(messages.HttpMessage)
 
-	tempPort := *elemInfo[0]
-	port := tempPort.(string)
-	host := "127.0.0.1"
-	key := host + ":" + port
+	// Report that the message was sent
+	//c2RPC <- httpMessage
 
-	// send message's size
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	binary.LittleEndian.PutUint32(size, uint32(len(msgTemp)))
-	_, err := ConnsSRH[key].Write(size)
-	if err != nil {
-		log.Fatalf("SRH:: %s", err)
-	}
-
-	// send message
-	_, err = ConnsSRH[key].Write(msgTemp)
-	if err != nil {
-		fmt.Printf("SRH:: %s \n", err)
-		os.Exit(0)
-	}
+	//log.Println("I_Send.End")
 }
-
-func acceptAndRead(key string, c chan []byte) {
-
-	// accept connections
-	var err error
-	ConnsSRH[key], err = LnsSRH[key].Accept()
-	if err != nil {
-		fmt.Printf("SRH:: %s \n", err)
-		os.Exit(0)
-	}
-
-	// receive size & message
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	tempConn := ConnsSRH[key]
-	_, err = tempConn.Read(size)
-	if err == io.EOF {
-		{
-			fmt.Printf("SRH:: Accept and Read\n")
-			os.Exit(0)
-		}
-	} else if err != nil && err != io.EOF {
-		fmt.Printf("SRH:: %s \n", err)
-		os.Exit(0)
-	}
-
-	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-	_, err = tempConn.Read(msgTemp)
-	if err != nil {
-		fmt.Printf("SRH:: %s \n", err)
-		os.Exit(0)
-	}
-
-	c <- msgTemp
-}
-
-func read(key string, c chan []byte) {
-
-	// receive size & message
-	var err error
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	tempConn := ConnsSRH[key]
-	_, err = tempConn.Read(size)
-	if err == io.EOF {
-		fmt.Printf("SRH:: Read\n")
-		os.Exit(0)
-	} else if err != nil && err != io.EOF {
-		log.Fatalf("SRH::: %s", err)
-	}
-
-	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-	_, err = tempConn.Read(msgTemp)
-	if err != nil {
-		log.Fatalf("SRH:: %s", err)
-	}
-
-	c <- msgTemp
-}
-*/

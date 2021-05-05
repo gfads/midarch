@@ -36,10 +36,9 @@ func (CRHQuic) Selector(elem interface{}, elemInfo [] *interface{}, op string, m
 }
 
 func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
-
 	// check message
 	payload := msg.Payload.([]interface{})
-	host := "localhost" //"127.0.0.1"                // host TODO
+	host := payload[0].(string)        // host
 	port := payload[1].(string)        // port
 	msgToServer := payload[2].([]byte)
 
@@ -86,7 +85,6 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		os.Exit(1)
 	}
 
-	//fmt.Println("Enviado msgToServer")
 	//fmt.Printf("CRHQuic:: Message sent to Server [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
 	// receive reply's size
@@ -96,7 +94,6 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		os.Exit(1)
 	}
 
-	//fmt.Println("Lido size")
 
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
@@ -105,7 +102,6 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		fmt.Printf("CRHQuic:: %v\n", err)
 		os.Exit(1)
 	}
-	//fmt.Println("Lido msgFromServer")
 	//fmt.Printf("CRHQuic:: Message received from Server:: [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
 	*msg = messages.SAMessage{Payload: msgFromServer}

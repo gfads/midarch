@@ -32,10 +32,9 @@ func (CRHSsl) Selector(elem interface{}, elemInfo [] *interface{}, op string, ms
 }
 
 func (c CRHSsl) I_Process(msg *messages.SAMessage, info [] *interface{}) {
-
 	// check message
 	payload := msg.Payload.([]interface{})
-	host := "localhost" //"127.0.0.1"                // host TODO
+	host := payload[0].(string)        // host "localhost" //"127.0.0.1"                // host TODO
 	port := payload[1].(string)        // port
 	msgToServer := payload[2].([]byte)
 
@@ -56,7 +55,6 @@ func (c CRHSsl) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	// connect to server
 	conn := c.Conns[addr]
-
 	// send message's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	binary.LittleEndian.PutUint32(size, uint32(len(msgToServer)))
@@ -75,7 +73,6 @@ func (c CRHSsl) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		fmt.Printf("CRHSsl:: %v\n", err)
 		os.Exit(1)
 	}
-
 	//fmt.Printf("CRHSsl:: Message sent to Server [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
 	// receive reply's size
@@ -84,7 +81,6 @@ func (c CRHSsl) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		fmt.Printf("CRHSsl:: %v\n", err)
 		os.Exit(1)
 	}
-
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
 	_, err = conn.Read(msgFromServer)
@@ -92,7 +88,6 @@ func (c CRHSsl) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 		fmt.Printf("CRHSsl:: %v\n", err)
 		os.Exit(1)
 	}
-
 	//fmt.Printf("CRHSsl:: Message received from Server:: [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
@@ -115,7 +110,7 @@ func getClientTLSConfig() *tls.Config {
 	tlsConfig := &tls.Config{
 		//InsecureSkipVerify: true,
 		RootCAs: certs,
-		NextProtos:         []string{"exemplo"},
+		NextProtos: []string{"exemplo"},
 	}
 	return tlsConfig
 }

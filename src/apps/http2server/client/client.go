@@ -4,20 +4,31 @@ import (
 	"fmt"
 	"gmidarch/development/components"
 	"gmidarch/execution/frontend"
+	"math"
+	"math/rand"
+	"os"
 	"shared"
 	"shared/factories"
+	"strconv"
 	"time"
 )
 
 func clientX(fibo components.Http2Proxy){
-
-	//n,_ := strconv.Atoi(os.Args[1])
-	//SAMPLE_SIZE,_ := strconv.Atoi(os.Args[2])
-	n := 10
-	SAMPLE_SIZE := 10
+	var n, SAMPLE_SIZE, AVERAGE_WAITING_TIME int
+	if len(os.Args) >= 2 {
+		n, _ = strconv.Atoi(os.Args[1])
+		SAMPLE_SIZE, _ = strconv.Atoi(os.Args[2])
+		AVERAGE_WAITING_TIME = 60
+	}else{
+		n, _ = strconv.Atoi(shared.EnvironmentVariableValue("FIBONACCI_PLACE"))
+		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValue("SAMPLE_SIZE"))
+		AVERAGE_WAITING_TIME, _ = strconv.Atoi(shared.EnvironmentVariableValue("AVERAGE_WAITING_TIME"))
+	}
+	fmt.Println("FIBONACCI_PLACE / SAMPLE_SIZE / AVERAGE_WAITING_TIME:", n, "/", SAMPLE_SIZE, "/", AVERAGE_WAITING_TIME)
 
 	//durations := [SAMPLE_SIZE]time.Duration{}
 
+	rand.Seed(time.Now().UnixNano())
 	// invoke remote method
 	for i := 0; i < SAMPLE_SIZE; i++ {
 
@@ -30,6 +41,12 @@ func clientX(fibo components.Http2Proxy){
 		//durations[i] = t2.Sub(t1)
 
 		fmt.Printf("%v\n",float64(duration.Nanoseconds())/1000000)
+
+		// Normally distributed waiting time between calls with an average of 60 milliseconds and standard deviation of 20 milliseconds
+		var rd = int(math.Round((rand.NormFloat64()+3) * float64(AVERAGE_WAITING_TIME/3)))
+		if rd > 0 {
+			time.Sleep(time.Duration(rd) * time.Millisecond)
+		}
 	}
 
 	//totalTime := time.Duration(0)
@@ -42,11 +59,14 @@ func clientX(fibo components.Http2Proxy){
 }
 
 func main() {
+	// Wait for server to get up
+	time.Sleep(10 * time.Second)
+
 	// start configuration
 	frontend.FrontEnd{}.Deploy("http2client.madl")
 
 	// proxy to naming service
-	fibo1 := factories.GetHttp2Proxy("https://localhost", shared.HTTP_PORT)
+	fibo1 := factories.GetHttp2Proxy("https://server", shared.HTTP_PORT)
 
 	//// obtain proxy of fibonacci
 	//s := "Fibonacci"

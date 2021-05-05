@@ -39,6 +39,12 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewHttpInvokerM().Selector
 		case "Http2InvokerM":
 			s = NewHttp2InvokerM().Selector
+		case "RPCProxy":
+			s = NewRPCProxy().Selector
+		case "RPCRequestorM":
+			s = NewRPCRequestorM().Selector
+		case "RPCInvokerM":
+			s = NewRPCInvokerM().Selector
 		case "SRH":
 			s = NewSRH().Selector
 		case "SRHHttp":
@@ -53,6 +59,8 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewSRHQuic().Selector
 		case "SRHUdp":
 			s = NewSRHUdp().Selector
+		case "SRHRpc":
+			s = NewSRHRpc().Selector
 		case "Fibonacciclient":
 			s = NewFibonacciclient().Selector
 		case "Fibonacciproxy":
@@ -73,6 +81,8 @@ func ConfigureSelector(c string) func (interface{}, [] *interface{},string, *mes
 			s = NewCRHQuic().Selector
 		case "CRHUdp":
 			s = NewCRHUdp().Selector
+		case "CRHRpc":
+			s = NewCRHRpc().Selector
 		case "Namingserver":
 			s = Newnamingserver().Selector
 		case "NaminginvokerM":
