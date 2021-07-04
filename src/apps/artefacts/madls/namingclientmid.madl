@@ -1,0 +1,26 @@
+Configuration calculatordistributedclientmid :=
+
+   Components
+      client     : Client
+      requestor  : Requestor
+      marshaller : Jasonmarshaller
+      //marshaller : Gobmarshaller
+      crh        : CRHTCP
+
+   Connectors
+      //t1 : Requestreply
+      t1 : Ntoonereqrep
+      t2 : Requestreply
+      t3 : Requestreply
+
+   Attachments
+      client, t1, requestor
+      //client2, t1, requestor
+      //client3, t1, requestor
+      requestor, t2, marshaller
+      requestor, t3, crh
+
+   Adaptability
+      None
+EndConf
+

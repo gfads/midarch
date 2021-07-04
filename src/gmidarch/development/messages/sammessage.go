@@ -1,6 +1,9 @@
 package messages
 
-// Software architecture messagemom
+// Software architecture message
 type SAMessage struct {
-	Payload interface{}
+	From string   `json:"From"`
+	To string     `json:"To"`
+	Payload interface{} `json:"Payload"`
 }
+

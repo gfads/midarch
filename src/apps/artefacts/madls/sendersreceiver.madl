@@ -1,0 +1,21 @@
+Configuration sendersreceiver :=
+
+   Components
+      s1 : Sender
+      s2 : Sender
+      s3 : Sender
+      s4 : Sender
+      r1 : Receiver
+
+   Connectors
+      t : Ntoone
+
+   Attachments
+      s1,t,r1
+      s2,t,r1
+      s3,t,r1
+      s4,t,r1
+
+   Adaptability
+      None
+EndConf

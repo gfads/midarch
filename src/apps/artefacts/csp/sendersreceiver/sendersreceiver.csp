@@ -1,0 +1,12 @@
+datatype PROCNAMES = s1 | s2 | s3 | s4 | r1 | t
+channel InvP,InvR : PROCNAMES
+channel I_Printmessage,I_Setmessagt,I_Setmessage2
+S1 = I_Setmessagt -> InvR.t -> S1 [] I_Setmessage2 -> InvR.t -> S1
+S2 = I_Setmessagt -> InvR.t -> S2 [] I_Setmessage2 -> InvR.t -> S2
+S3 = I_Setmessagt -> InvR.t -> S3 [] I_Setmessage2 -> InvR.t -> S3
+S4 = I_Setmessagt -> InvR.t -> S4 [] I_Setmessage2 -> InvR.t -> S4
+R1 = InvP.t -> I_Printmessage -> R1
+T = InvP.s1 -> InvR.r1 -> T[] InvP.s2 -> InvR.r1 -> T[] InvP.s3 -> InvR.r1 -> T[] InvP.s4 -> InvR.r1 -> T
+
+sendersreceiver = (S1 ||| S2 ||| S3 ||| S4 ||| R1)[|{|InvP,InvR|}|](T[[InvP.s1 <- InvR.t,InvR.r1 <- InvP.t,InvP.s2 <- InvR.t,InvR.r1 <- InvP.t,InvP.s3 <- InvR.t,InvR.r1 <- InvP.t,InvP.s4 <- InvR.t,InvR.r1 <- InvP.t]])
+assert sendersreceiver :[deadlock free]

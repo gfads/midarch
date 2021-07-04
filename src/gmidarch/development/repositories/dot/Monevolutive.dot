@@ -1,5 +1,0 @@
-digraph G {
-  0 -> 1 [ label="I_Hasnewplugins" ];
-  0 -> 0 [ label="I_Nonewplugins" ];
-  1 -> 0 [ label="InvR.e1" ];
-}

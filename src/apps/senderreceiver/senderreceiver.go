@@ -6,9 +6,9 @@ import (
 )
 
 func main() {
+	fe := frontend.NewFrontend()
 
-	fe := frontend.FrontEnd{}
-	fe.Deploy("senderreceiver.madl")
+	fe.Deploy("senderreceiver.madl","","","","","")
 
 	fmt.Scanln()
 }

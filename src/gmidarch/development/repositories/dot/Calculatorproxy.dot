@@ -1,8 +1,6 @@
 digraph G {
-  0 -> 1 [ label="InvP.e1" ];
-  1 -> 2 [ label="I_Processin" ];
-  2 -> 3 [ label="InvR.e2" ];
-  3 -> 4 [ label="TerR.e2" ];
-  4 -> 5 [ label="I_Processout" ];
-  5 -> 0 [ label="TerP.e1" ];
+  0 -> 1 [ label="I_In" ];
+  1 -> 2 [ label="InvR.e1" ];
+  2 -> 3 [ label="TerR.e1" ];
+  3 -> 0 [ label="I_Out" ];
 }

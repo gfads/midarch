@@ -1,5 +1,0 @@
-datatype PROCNAMES = e1 | e2
-channel InvP, InvR : PROCNAMES
-channel I_Hasnewplugins, I_Nonewplugins
-
-Monevolutive = I_Hasnewplugins -> InvR.e1 -> Monevolutive [] I_Nonewplugins -> Monevolutive

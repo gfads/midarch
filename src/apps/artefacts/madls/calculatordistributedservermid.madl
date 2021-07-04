@@ -1,0 +1,26 @@
+Configuration calculatordistributedservermid :=
+  Components
+      naming     : Namingproxy
+      requestor  : Requestor
+      cinvoker   : Calculatorinvoker
+      marshaller : Jasonmarshaller
+      crh        : CRHTCP
+      srh        : SRHTCP
+
+   Connectors
+      t1 : Requestreply
+      t2 : Requestreply
+      t3 : Requestreply
+      t4 : Requestreply
+      t5 : Requestreply
+
+   Attachments
+        naming,t1,requestor
+        requestor,t2,marshaller
+        requestor,t3,crh
+        srh,t4,cinvoker
+        cinvoker,t5,marshaller
+   Adaptability
+      None
+
+EndConf

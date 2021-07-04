@@ -1,15 +1,22 @@
-Configuration senderreceiver :=
+Configuration calculatorlocal :=
 
    Components
-      client : Calculatorclient
-      server : Calculatorserver
+      client1 : Client
+      client2 : Client
+      client3 : Client
+      client4 : Client
+      server : Server
 
    Connectors
-      t1 : Requestreply
+      t : Ntoonereqrep
 
    Attachments
-      client,t1,server
+      client1,t,server
+      client2,t,server
+      client3,t,server
+      client4,t,server
 
    Adaptability
-      Evolutive
+      NONE
+
 EndConf

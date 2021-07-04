@@ -2,56 +2,41 @@ package deployer
 
 import (
 	"gmidarch/development/artefacts/madl"
-	"gmidarch/development/components"
-	"gmidarch/execution/engine"
-	"reflect"
+	"gmidarch/development/messages"
+	"gmidarch/execution/core"
 	"shared"
 )
 
-type Deployer struct {
-	MADLX madl.MADL
+type DeployParameters struct {
+	Args map[string]messages.EndPoint
 }
 
-func NewEE() Deployer {
-	r := new(Deployer)
-	return *r
+type Deployer interface {
+	//Deploy(madl.MADL)
+	Start()
 }
 
-func (d Deployer) Start() {
+type DeployerImpl struct {
+	Madl madl.MADL
+}
 
-	for i := range d.MADLX.Components {
-		elem := d.MADLX.Components[i].Type
-		graph := d.MADLX.Components[i].Graph
+func NewDeployer(m madl.MADL) Deployer {
+	return DeployerImpl{Madl: m}
+}
 
-		// Configure Unit's Info with Element's Info (Only components)
-		switch d.MADLX.Components[i].TypeName {
-		case reflect.TypeOf(components.Unit{}).Name():
-			tempElem := *d.MADLX.Components[i].Info[0]
-			unit := elem.(components.Unit)
-			unit.UnitId = d.MADLX.Components[i].ElemId
-			unit.ElemOfUnit = tempElem.(madl.Element).Type
-			unit.GraphOfElem = tempElem.(madl.Element).Graph
-			unit.ElemOfUnitInfo = tempElem.(madl.Element).Info
-			elem = unit
-			go engine.Engine{}.Execute(elem, unit.ElemOfUnitInfo, graph, shared.EXECUTE_FOREVER)
-		default:
-			go engine.Engine{}.Execute(elem, d.MADLX.Components[i].Info, graph, shared.EXECUTE_FOREVER)
-		}
-	}
-
-	for i := range d.MADLX.Connectors {
-		go engine.Engine{}.Execute(d.MADLX.Connectors[i].Type, d.MADLX.Components[i].Info, d.MADLX.Connectors[i].Graph, shared.EXECUTE_FOREVER)
+func (d DeployerImpl) Start() {
+	for i := range d.Madl.Components {
+		engine := engine.NewEngine()
+		go engine.Execute(&d.Madl.Components[i], shared.EXECUTE_FOREVER)
 	}
 }
 
-func (d *Deployer) DeployApp(mee madl.MADL, mapp madl.MADL) {
+/*
+func (d *DeployerImpl) Deploy(mee madl.MADL, mapp madl.MADL) {
 
-	elems := []madl.Element{}
+	comps := []component.Component{}
 	for i := range mapp.Components {
-		elems = append(elems, mapp.Components[i])
-	}
-	for i := range mapp.Connectors {
-		elems = append(elems, mapp.Connectors[i])
+		comps = append(comps, mapp.Components[i])
 	}
 
 	idx := 0
@@ -65,9 +50,13 @@ func (d *Deployer) DeployApp(mee madl.MADL, mapp madl.MADL) {
 		}
 	}
 	d.MADLX = mee
-}
 
+}
+*/
+
+/*
 func (d *Deployer) Deploy(m madl.MADL) {
 
 	d.MADLX = m
 }
+*/

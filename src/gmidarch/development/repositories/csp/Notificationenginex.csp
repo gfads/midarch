@@ -1,5 +1,0 @@
-datatype PROCNAMES = e1 | e2 | e3
-channel InvP, TerP : PROCNAMES
-channel I_Process, I_NC
-
-Notificationengine = InvP.e1 -> I_Process -> TerP.e1 -> Notificationengine [] I_NC -> Notificationengine

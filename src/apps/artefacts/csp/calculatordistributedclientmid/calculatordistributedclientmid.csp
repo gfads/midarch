@@ -1,0 +1,14 @@
+datatype PROCNAMES = calculatorproxy | requestor | marshaller | crh | namingproxy | t1 | t2 | t3
+channel TerR,TerP,InvP,InvR : PROCNAMES
+channel I_Process,I_In,I_Out,I_Beforemarshalling,I_Beforesend,I_Beforeunmarshalling,I_Beforeproxy
+REQUESTOR = InvP.t1 -> I_Beforemarshalling -> InvR.t2 -> TerR.t2 -> I_Beforesend -> InvR.t3 -> TerR.t3 -> I_Beforeunmarshalling -> InvR.t2 -> TerR.t2 -> I_Beforeproxy -> TerP.t1 -> REQUESTOR
+MARSHALLER = InvP.t2 -> I_Process -> TerP.t2 -> MARSHALLER
+CRH = InvP.t3 -> I_Process -> TerP.t3 -> CRH
+NAMINGPROXY = I_In -> InvR.t1 -> TerR.t1 -> I_Out -> NAMINGPROXY
+CALCULATORPROXY = I_In -> InvR.t1 -> TerR.t1 -> I_Out -> CALCULATORPROXY
+T1 = InvP.calculatorproxy -> InvR.requestor -> TerR.requestor -> TerP.calculatorproxy -> T1 [] InvP.namingproxy -> InvR.requestor -> TerR.requestor -> TerP.namingproxy -> T1 
+T2 = InvP.requestor -> InvR.marshaller-> TerR.marshaller -> TerP.requestor ->T2
+T3 = InvP.requestor -> InvR.crh-> TerR.crh -> TerP.requestor ->T3
+
+calculatordistributedclientmid = (MARSHALLER ||| CRH ||| NAMINGPROXY ||| CALCULATORPROXY ||| REQUESTOR)[|{|TerR,TerP,InvP,InvR|}|](T1[[InvP.calculatorproxy <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.calculatorproxy <- TerR.t1,InvP.namingproxy <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.namingproxy <- TerR.t1]] ||| T2[[InvP.calculatorproxy <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.calculatorproxy <- TerR.t1,InvP.namingproxy <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.namingproxy <- TerR.t1,InvP.requestor <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.requestor <- TerR.t2]] ||| T3[[InvP.calculatorproxy <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.calculatorproxy <- TerR.t1,InvP.namingproxy <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.namingproxy <- TerR.t1,InvP.requestor <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.requestor <- TerR.t2,InvP.requestor <- InvR.t3,InvR.crh <- InvP.t3,TerR.crh <- TerP.t3,TerP.requestor <- TerR.t3]])
+assert calculatordistributedclientmid :[deadlock free]

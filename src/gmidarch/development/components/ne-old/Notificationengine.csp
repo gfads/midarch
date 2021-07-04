@@ -1,6 +1,0 @@
-datatype PROCNAMES = e1 | e2 | e3
-channel InvP, TerP, InvR, TerR : PROCNAMES
-channel I_Process, I_SM, I_NC, I_Out, I_Publish, I_1Debug, I_2Debug, I_3Debug, I_4Debug, I_5Debug, I_6Debug
-
-Notificationengine = I_NC -> InvR.e2 -> TerR.e2 -> Notificationengine [] InvP.e1 -> (I_SM -> InvR.e3 -> TerR.e3 -> I_Out -> TerP.e1 -> Notificationengine [] I_Publish -> TerP.e1 -> Notificationengine)
---Notificationengine = I_NC -> I_1Debug -> InvR.e2 -> I_2Debug -> TerR.e2 -> I_3Debug -> Notificationengine [] InvP.e1 -> I_4Debug -> (I_SM -> InvR.e3 -> TerR.e3 -> I_Out -> TerP.e1 -> Notificationengine [] I_Publish -> I_5Debug -> TerP.e1 -> I_6Debug -> Notificationengine)

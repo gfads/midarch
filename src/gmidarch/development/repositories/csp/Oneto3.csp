@@ -1,8 +1,0 @@
-datatype PROCNAMES = e1 | e2 | e3 | e4 | e5 | e6 | e7 | e8 | e9
-
-channel InvP, InvR : PROCNAMES
-channel I_Debug1, I_Debug2, I_Timeout
-
-Oneto3 = InvP.e1 -> (InvR.e2 -> P2 [] I_Timeout -> P2)
-P2 = InvR.e3 -> P3 [] I_Timeout -> P3
-P3 = InvR.e4 -> Oneto3 [] I_Timeout -> Oneto3

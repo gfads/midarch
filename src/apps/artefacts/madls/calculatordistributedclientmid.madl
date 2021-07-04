@@ -1,0 +1,24 @@
+Configuration calculatordistributedclientmid :=
+
+   Components
+      namingproxy      : Namingproxy
+      calculatorproxy  : Calculatorproxy
+      requestor        : Requestor
+      marshaller       : Jasonmarshaller
+      crh              : CRHTCP
+
+   Connectors
+      t1 : Ntoonereqrep
+      t2 : Requestreply
+      t3 : Requestreply
+
+   Attachments
+      calculatorproxy, t1, requestor
+      namingproxy, t1, requestor
+      requestor, t2, marshaller
+      requestor, t3, crh
+
+   Adaptability
+      None
+EndConf
+

@@ -1,0 +1,12 @@
+datatype PROCNAMES = client1 | client2 | client3 | client4 | server | t
+channel InvP,TerP,InvR,TerR : PROCNAMES
+channel I_Process,I_Beforesend,I_Afterreceive
+CLIENT1 = I_Beforesend -> InvR.t -> TerR.t -> I_Afterreceive -> CLIENT1
+CLIENT2 = I_Beforesend -> InvR.t -> TerR.t -> I_Afterreceive -> CLIENT2
+CLIENT3 = I_Beforesend -> InvR.t -> TerR.t -> I_Afterreceive -> CLIENT3
+CLIENT4 = I_Beforesend -> InvR.t -> TerR.t -> I_Afterreceive -> CLIENT4
+SERVER = InvP.t -> I_Process -> TerP.t -> SERVER
+T = InvP.client1 -> InvR.server -> TerR.server -> TerP.client1 -> T [] InvP.client2 -> InvR.server -> TerR.server -> TerP.client2 -> T [] InvP.client3 -> InvR.server -> TerR.server -> TerP.client3 -> T [] InvP.client4 -> InvR.server -> TerR.server -> TerP.client4 -> T 
+
+calculatorlocal = (SERVER ||| CLIENT1 ||| CLIENT2 ||| CLIENT3 ||| CLIENT4)[|{|InvP,TerP,InvR,TerR|}|](T[[InvP.client1 <- InvR.t,InvR.server <- InvP.t,TerR.server <- TerP.t,TerP.client1 <- TerR.t,InvP.client2 <- InvR.t,InvR.server <- InvP.t,TerR.server <- TerP.t,TerP.client2 <- TerR.t,InvP.client3 <- InvR.t,InvR.server <- InvP.t,TerR.server <- TerP.t,TerP.client3 <- TerR.t,InvP.client4 <- InvR.t,InvR.server <- InvP.t,TerR.server <- TerP.t,TerP.client4 <- TerR.t]])
+assert calculatorlocal :[deadlock free]

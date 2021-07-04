@@ -1,9 +1,0 @@
-for h in 36; do
-  for i in 100000; do
-       #echo "gmidarch-$h-$i-rpc.txt"
-       #./client $h $i > "gmidarch-$h-$i-rpc.txt"
-       echo "gmidarch-$h-$i-rpc-adap.txt"
-       ./client $h $i > "gmidarch-$h-$i-rpc-adap.txt"
-       sleep 10
-  done
-done

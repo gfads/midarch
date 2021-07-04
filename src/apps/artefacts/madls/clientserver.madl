@@ -1,16 +1,17 @@
 Configuration clientserver :=
 
    Components
-      client : Client
+      client1 : Client
       server : Server
 
    Connectors
       t : Requestreply
 
    Attachments
-      client,t,server
+      client1,t,server
 
    Adaptability
-      None
+      NONE
 
 EndConf
+

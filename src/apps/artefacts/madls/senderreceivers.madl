@@ -1,0 +1,19 @@
+Configuration senderreceiver :=
+
+   Components
+      s : Sender
+      r1 : Receiver
+      r2 : Receiver
+      r3 : Receiver
+
+   Connectors
+      t : Oneton
+
+   Attachments
+      s,t,r1
+      s,t,r2
+      s,t,r3
+
+   Adaptability
+      None
+EndConf

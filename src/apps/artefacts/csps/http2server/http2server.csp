@@ -1,9 +1,0 @@
-datatype PROCNAMES = httpinvoker | srh | t1
-channel TerP,InvR,TerR,InvP : PROCNAMES
-channel I_Process,I_Receive,I_Send
-HTTPINVOKER = InvP.t1 -> I_Process -> TerP.t1 -> HTTPINVOKER
-SRH = I_Receive -> InvR.t1 -> TerR.t1 -> I_Send -> SRH
-T1 = InvP.srh -> InvR.httpinvoker -> TerR.httpinvoker -> TerP.srh -> T1
-
-http2server = (HTTPINVOKER ||| SRH)[|{|TerP,InvR,TerR,InvP|}|](T1[[InvP.srh <- InvR.t1,InvR.httpinvoker <- InvP.t1,TerR.httpinvoker <- TerP.t1,TerP.srh <- TerR.t1]])
-assert http2server :[deadlock free]

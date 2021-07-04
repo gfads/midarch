@@ -1,9 +1,0 @@
-datatype PROCNAMES = e1
-channel InvR, TerR : PROCNAMES
-channel I_Receive, I_Send, I_Accept, I_Read, I_Connect
-
-SRH = I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> SRH
-
---SRH = I_Read -> InvR.e1 -> TerR.e1 -> I_Send -> SRH [] I_Connect -> SRH
---SRH = I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> SRH [] I_Accept -> SRH
---SRH = I_Accept -> I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> SRH [] I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> SRH

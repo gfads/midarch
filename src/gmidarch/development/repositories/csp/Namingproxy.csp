@@ -1,5 +1,0 @@
-datatype PROCNAMES = e1
-channel InvP, TerP, InvR, TerR : PROCNAMES
-channel I_In, I_Out
-
-Proxy = I_In -> InvR.e1 -> TerR.e1 -> I_Out -> Proxy
