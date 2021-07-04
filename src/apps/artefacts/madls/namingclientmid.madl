@@ -3,7 +3,7 @@ Configuration calculatordistributedclientmid :=
    Components
       client     : Client
       requestor  : Requestor
-      marshaller : Jasonmarshaller
+      marshaller : Jsonmarshaller
       //marshaller : Gobmarshaller
       crh        : CRHTCP
 

@@ -27,7 +27,7 @@ var SetOfComponentTypesRAM = map[string]interface{}{
 	"Server":            apps.Server{},
 	"Sender":            apps.Sender{},
 	"Receiver":          apps.Receiver{},
-	"Jasonmarshaller":   middleware.Jasonmarshaller{},
+	"Jsonmarshaller":   middleware.Jsonmarshaller{},
 	"Gobmarshaller":     middleware.Gobmarshaller{},
 	"CRHTCP":            middleware.CRHTCP{},
 	"SRHTCP":            middleware.SRHTCP{},

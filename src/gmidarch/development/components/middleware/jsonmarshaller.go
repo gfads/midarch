@@ -8,12 +8,12 @@ import (
 	"shared"
 )
 
-//@Type: Jasonmarshaller
+//@Type: Jsonmarshaller
 //@Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
 
-type Jasonmarshaller struct{}
+type Jsonmarshaller struct{}
 
-func (j Jasonmarshaller) I_Process(id string, msg *messages.SAMessage, info *interface{}) {
+func (j Jsonmarshaller) I_Process(id string, msg *messages.SAMessage, info *interface{}) {
 	req := msg.Payload.(messages.FunctionalRequest)
 	op := req.Op
 
@@ -30,7 +30,7 @@ func (j Jasonmarshaller) I_Process(id string, msg *messages.SAMessage, info *int
 	}
 }
 
-func (Jasonmarshaller) Marshall(m miop.MiopPacket) []byte {
+func (Jsonmarshaller) Marshall(m miop.MiopPacket) []byte {
 
 	r, err := json.Marshal(m)
 	if err != nil {
@@ -39,7 +39,8 @@ func (Jasonmarshaller) Marshall(m miop.MiopPacket) []byte {
 
 	return r
 }
-func (Jasonmarshaller) Unmarshall(m []byte) miop.MiopPacket {
+
+func (Jsonmarshaller) Unmarshall(m []byte) miop.MiopPacket {
 
 	r := miop.MiopPacket{}
 	err := json.Unmarshal(m, &r)
