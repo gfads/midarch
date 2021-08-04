@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"apps/businesses/calculatorimpl"
 	"fmt"
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
@@ -31,6 +32,9 @@ func (Calculatorinvoker) I_Beforeserver(id string, msg *messages.SAMessage, info
 		// Functional request
 		req2 := messages.FunctionalRequest{Op: req.Op, Params: params}
 		msg.Payload = &req2
+
+		reply := calculatorimpl.CalculatorImpl{}.Add(req.Params[0].(int), req.Params[1].(int))
+		msg.Payload = messages.FunctionalReply{Rep:reply}
 
 	default:
 		shared.ErrorHandler(shared.GetFunction(), "Operation '"+req.Op+"' not presente in Invoker")
