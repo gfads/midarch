@@ -16,24 +16,22 @@ func main() {
 	// The order of Ip/hosts must the same as one in which
 	// these elements appear in the configuration
 	args := make (map[string]messages.EndPoint)
-	args["crh"] = messages.EndPoint{Host:"localhost",Port:shared.NAMING_PORT}
+	args["crh"] = messages.EndPoint{Host:"localhost", Port:shared.NAMING_PORT}
 
 	// Deploy configuration
-	fe.Deploy("calculatordistributedclientmid.madl",args)
+	fe.Deploy("calculatordistributedclientmid.madl", args)
 
 	// proxy to naming service
-	endPoint := messages.EndPoint{Host:shared.NAMING_HOST,Port:shared.NAMING_PORT}
+	endPoint := messages.EndPoint{Host:shared.NAMING_HOST, Port:shared.NAMING_PORT}
 	namingProxy := namingproxy.NewNamingproxy(endPoint)
 
-	aux,ok := namingProxy.Lookup("Calculator")
-
-	calc := calculatorproxy.NewCalculatorProxy()
+	aux, ok := namingProxy.Lookup("Calculator")
 	if !ok {
 		shared.ErrorHandler(shared.GetFunction(),"Service 'Calculator' not found in Naming Service")
 	}
 
-	calc = aux.(calculatorproxy.Calculatorproxy)
-	fmt.Println(calc.Add(1,2))
+	calc := aux.(*calculatorproxy.Calculatorproxy)
+	fmt.Println("Result:", calc.Add(1,2))
 
 	fmt.Scanln()
 }

@@ -1,11 +1,12 @@
 Configuration calculatordistributedservermid :=
   Components
-      naming     : Namingproxy
-      requestor  : Requestor
-      cinvoker   : Calculatorinvoker
-      marshaller : Jsonmarshaller
-      crh        : CRHTCP
-      srh        : SRHTCP
+      naming      : Namingproxy
+      requestor   : Requestor
+      cinvoker    : Calculatorinvoker
+      marshaller  : Jsonmarshaller
+      marshaller2 : Jsonmarshaller
+      crh         : CRHTCP
+      srh         : SRHTCP
 
    Connectors
       t1 : Requestreply
@@ -19,7 +20,8 @@ Configuration calculatordistributedservermid :=
         requestor,t2,marshaller
         requestor,t3,crh
         srh,t4,cinvoker
-        cinvoker,t5,marshaller
+        cinvoker,t5,marshaller2
+
    Adaptability
       None
 

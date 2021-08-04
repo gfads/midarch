@@ -22,21 +22,21 @@ type ArchitecturalRepository struct {
 }
 
 // Set of existing Components
-var SetOfComponentTypesRAM = map[string]interface{}{
-	"Client":            apps.Client{},
-	"Server":            apps.Server{},
-	"Sender":            apps.Sender{},
-	"Receiver":          apps.Receiver{},
-	"Jsonmarshaller":   middleware.Jsonmarshaller{},
-	"Gobmarshaller":     middleware.Gobmarshaller{},
-	"CRHTCP":            middleware.CRHTCP{},
-	"SRHTCP":            middleware.SRHTCP{},
-	"Calculatorinvoker": middleware.Calculatorinvoker{},
-	"Requestor":         middleware.Requestor{},
-	"Naminginvoker":     middleware.Naminginvoker{},
-	"Namingserver":      middleware.Namingserver{},
-	"Namingproxy":       namingproxy.Namingproxy{},
-	"Calculatorproxy":   calculatorproxy.Calculatorproxy{}}
+var SetOfComponentTypesRAM = map[string]interface{} {
+	"Client":            	apps.Client{},
+	"Server":            	apps.Server{},
+	"Sender":            	apps.Sender{},
+	"Receiver":				apps.Receiver{},
+	"Jsonmarshaller":		middleware.Jsonmarshaller{},
+	"Gobmarshaller":     	middleware.Gobmarshaller{},
+	"CRHTCP":            	middleware.CRHTCP{},
+	"SRHTCP":            	middleware.SRHTCP{},
+	"Calculatorinvoker": 	middleware.Calculatorinvoker{},
+	"Requestor":         	middleware.Requestor{},
+	"Naminginvoker":     	middleware.Naminginvoker{},
+	"Namingserver":      	middleware.Namingserver{},
+	"Namingproxy":       	namingproxy.Namingproxy{},
+	"Calculatorproxy":   	calculatorproxy.Calculatorproxy{}}
 
 
 // Set of existing Connectors

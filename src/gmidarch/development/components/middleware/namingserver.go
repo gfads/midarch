@@ -43,7 +43,7 @@ func (Namingserver) Register(serviceName string, aor messages.AOR) bool {
 	return r
 }
 
-func (Namingserver) Lookup(s string) (interface{}, bool) {
+func (Namingserver) Lookup(s string) (interface{}, bool) { // TODO dcruzb: dont need to be an interface, change to messages.AOR
 	aor, ok := Repo[s]
 	return aor, ok
 }

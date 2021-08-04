@@ -9,26 +9,28 @@ import (
 
 //@Type: Namingproxy
 //@Behaviour: Behaviour = I_In -> InvR.e1 -> TerR.e1 -> I_Out -> Behaviour
-
-var ProxiesRepo = map[string]interface{}{ // Update for each new proxy
-	reflect.TypeOf(Namingproxy{}).Name():                     Namingproxy{},
-	reflect.TypeOf(calculatorproxy.Calculatorproxy{}).Name(): calculatorproxy.Calculatorproxy{}}
+var ProxiesRepo = map[string]generic.Proxy { // Update for each new proxy
+	reflect.TypeOf(Namingproxy{}).Name():                     &Namingproxy{},
+	reflect.TypeOf(calculatorproxy.Calculatorproxy{}).Name(): &calculatorproxy.Calculatorproxy{}}
 
 // Internal channels
 var ChOut, ChIn chan messages.SAMessage
 
 type Namingproxy struct {
-	GenericProxy generic.Proxy
+	Config generic.ProxyConfig
+}
+
+func (p *Namingproxy) Configure(config generic.ProxyConfig) {
+	p.Config = config
 }
 
 // Architectural operations
 func (Namingproxy) I_In(id string, msg *messages.SAMessage, info *interface{}) {
-
 	// Receive request from Request
 	*msg = <-ChIn
 }
-func (Namingproxy) I_Out(id string, msg *messages.SAMessage, info *interface{}) {
 
+func (Namingproxy) I_Out(id string, msg *messages.SAMessage, info *interface{}) {
 	ChOut <- *msg
 }
 
@@ -40,8 +42,8 @@ func NewNamingproxy(endPoint messages.EndPoint) Namingproxy {
 	ChOut = make(chan messages.SAMessage)
 
 	// Configure proxy
-	genericProxy := generic.Proxy{Host: endPoint.Host, Port: endPoint.Port, ProxyName: reflect.TypeOf(Namingproxy{}).Name()}
-	proxy = Namingproxy{GenericProxy: genericProxy}
+	proxyConfig := generic.ProxyConfig{Host: endPoint.Host, Port: endPoint.Port, ProxyName: reflect.TypeOf(Namingproxy{}).Name()}
+	proxy = Namingproxy{Config: proxyConfig}
 
 	return proxy
 }
@@ -49,7 +51,7 @@ func NewNamingproxy(endPoint messages.EndPoint) Namingproxy {
 // Functional operations
 func (Namingproxy) Register(_p1 string, _p2 interface{}) bool {
 
-	aux := reflect.ValueOf(_p2).FieldByName("GenericProxy")
+	aux := reflect.ValueOf(_p2).FieldByName("Config")
 	port := aux.FieldByName("Port").String()
 	host := aux.FieldByName("Host").String()
 	aor := messages.AOR{Host: host, Port: port, Id: 123456, ProxyName: reflect.TypeOf(_p2).Name()} // TODO
@@ -69,7 +71,7 @@ func (Namingproxy) Register(_p1 string, _p2 interface{}) bool {
 	return response.Payload.(messages.FunctionalReply).Rep.(bool)
 }
 
-func (p Namingproxy) Lookup(_p1 string) (interface{}, bool) {
+func (p Namingproxy) Lookup(_p1 string) (generic.Proxy, bool) {
 	_params := []interface{}{_p1}
 
 	_functionalRequest := messages.FunctionalRequest{Op: "Lookup", Params: _params}
@@ -82,10 +84,12 @@ func (p Namingproxy) Lookup(_p1 string) (interface{}, bool) {
 	// Receive response from I_Out
 	response := <-ChOut
 
-	aux := response.Payload.(messages.FunctionalReply).Rep.(map[string]interface{})
-	//host := aux["host"].(string)
-	//port:= aux["port"].(string)
-	proxy := ProxiesRepo[aux["proxy"].(string)]
+	aor := response.Payload.(messages.FunctionalReply).Rep.(map[string]interface{})
+	host := aor["host"].(string)
+	port:= aor["port"].(string)
+	proxy := ProxiesRepo[aor["proxy"].(string)]
+	proxyConfig := generic.ProxyConfig{Host: host, Port: port} // TODO dcruzb: Host and ports should not be constants, change to aor["host"].(string) and aor["port"].(string), uncomment previous lines
+	proxy.Configure(proxyConfig)
 
 	return proxy, bool(true) // TODO
 }

@@ -105,9 +105,9 @@ func getComponents(content []string) []component.Component {
 			if foundComponents && !shared.SkipLine(tempLine) && strings.Contains(tempLine, ":") {
 				compType := *new(string)
 				temp := strings.Split(tempLine, ":")
-					compId := strings.TrimSpace(temp[0])
-					compType = strings.TrimSpace(temp[1])
-					r = append(r, component.Component{Id: compId, TypeName: compType})
+				compId := strings.TrimSpace(temp[0])
+				compType = strings.TrimSpace(temp[1])
+				r = append(r, component.Component{Id: compId, TypeName: compType})
 			} else {
 				if foundComponents && !shared.SkipLine(tempLine) && !strings.Contains(tempLine, ":") {
 					break

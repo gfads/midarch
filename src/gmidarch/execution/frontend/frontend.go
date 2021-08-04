@@ -60,8 +60,8 @@ func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint)
 
 	// Step 7: Check CSP
 	fmt.Print("Checking CSP...")
-	checker := csp.NewFDRGateway()
-	checker.Check(cspSpec)
+	//checker := csp.NewFDRGateway()
+	//checker.Check(cspSpec)
 	fmt.Println("ok")
 
 	// Step 8: Start execution

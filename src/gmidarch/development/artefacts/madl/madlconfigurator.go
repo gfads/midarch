@@ -47,7 +47,7 @@ func (confImpl MADLConfiguratorImpl) configureComponents(m *MADL, archRepo archi
 	for i := range m.Components {
 
 		// Step 1 - Configure component's info
-		confImpl.configureInfo(m, archRepo, args)
+		confImpl.configureInfo(m, archRepo, args) // TODO dcruzb: this line should be here? This line don't use components, so probably should be outside the for loop
 
 		// Step 2 - Configure type
 		record, _ := archRepo.CompLibrary[m.Components[i].TypeName] // type from repositories

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gmidarch/development/components/proxies/calculatorproxy"
 	"gmidarch/development/components/proxies/namingproxy"
+	"gmidarch/development/generic"
 	"gmidarch/development/messages"
 	"gmidarch/execution/frontend"
 	"shared"
@@ -27,7 +28,10 @@ func main() {
 	namingProxy := namingproxy.NewNamingproxy(endPoint)
 
 	// Create proxy to calculatorimpl
-	calcProxy := calculatorproxy.NewCalculatorProxy()
+	calcProxy := calculatorproxy.NewCalculatorProxy(generic.ProxyConfig{
+		Host:      shared.CALCULATOR_HOST,
+		Port:      shared.CALCULATOR_PORT,
+	})
 
 	// Register calculatorimpl in Lookup
 	ok := namingProxy.Register("Calculator", calcProxy)
