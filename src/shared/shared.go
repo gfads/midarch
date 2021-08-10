@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"gmidarch/development/messages"
 	"os"
+	"plugin"
 	"reflect"
 	"runtime"
 	"strings"
@@ -64,7 +65,11 @@ const SIZE_OF_MESSAGE_SIZE = 4
 const NUM_MAX_MESSAGE_BYTES int = 1024
 const MAX_NUMBER_OF_RECEIVED_MESSAGES = 300 // messages received and not processed by srh
 
+const ATTEMPTS_TO_OPEN_A_PLUGIN = 1000
+
 // Evolution
+const FIRST_MONITOR_TIME time.Duration = 1 * time.Second
+const MONITOR_TIME time.Duration = 1 * time.Second
 var INJECTION_TIME time.Duration
 
 var SetOfPorts = map[string]string{
@@ -76,6 +81,27 @@ var SetOfPorts = map[string]string{
 var AdaptationTypes = map[string]string{
 	"EVOLUTIVE": "EVOLUTIVE",
 	"NONE":      "NONE"}
+
+type MonitoredEvolutiveData [] string // used in channel Monitor -> Analyser (Evolutive)
+
+type EvolutiveAnalysisResult struct {
+	NeedAdaptation         bool
+	MonitoredEvolutiveData MonitoredEvolutiveData
+}
+
+type AdaptationPlan struct {
+	Operations [] string
+	Params     map[string][]string
+}
+
+type UnitCommand struct {
+	Cmd      string
+	Params   plugin.Plugin
+	Type     interface{}
+	Selector func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}, *bool)
+}
+
+const REPLACE_COMPONENT = "REPLACE_COMPONENT"
 
 // CSP
 const RUNTIME_BEHAVIOUR = "RUNTIME"

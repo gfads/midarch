@@ -1,28 +1,14 @@
 package components
 
 import (
-	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"shared"
+	"shared/pluginUtils"
 )
 
-type Executor struct {
-	Behaviour string
-	Graph     graphs.ExecGraph
-}
-
-func NewExecutor() Executor {
-
-	// create a new instance of client
-	r := new(Executor)
-	r.Behaviour = "B = InvP.e1 -> I_Process -> InvR.e2 -> B"
-
-	return *r
-}
-
-func (e Executor) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
-	e.I_Process(msg, info)
-}
+//@Type: Executor
+//@Behaviour: Behaviour = B = InvP.e1 -> I_Process -> InvR.e2 -> B
+type Executor struct {}
 
 func (Executor) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 	plan := msg.Payload.(shared.AdaptationPlan)
@@ -30,7 +16,7 @@ func (Executor) I_Process(msg *messages.SAMessage, info [] *interface{}) {
 
 	if len(plan.Operations) > 0 { // TODO
 		pluginName := plan.Params[plan.Operations[0]][0]
-		plg := shared.LoadPlugin(pluginName)
+		plg := pluginUtils.LoadPlugin(pluginName)
 		getType, _ := plg.Lookup("Gettype")
 		elemType := getType.(func() interface{})()
 		getSelector, _ := plg.Lookup("Getselector")

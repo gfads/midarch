@@ -1,28 +1,13 @@
 package components
 
 import (
-	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
 	"shared"
 )
 
-type Planner struct {
-	Behaviour string
-	Graph     graphs.ExecGraph
-}
-
-func NewPlanner() Planner {
-
-	// create a new instance of Server
-	r := new(Planner)
-	r.Behaviour = "B = InvP.e1 -> I_Process -> InvR.e2 -> B"
-
-	return *r
-}
-
-func (e Planner) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
-	e.I_Process(msg, info)
-}
+//@Type: Planner
+//@Behaviour: Behaviour = B = InvP.e1 -> I_Process -> InvR.e2 -> B
+type Planner struct {}
 
 func (Planner) I_Process (msg *messages.SAMessage, info [] *interface{}) {
 	evolutiveAnalysisResult := msg.Payload.(shared.EvolutiveAnalysisResult)
