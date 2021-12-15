@@ -1,0 +1,4 @@
+digraph G {
+  0 -> 1 [ label="InvP.e1" ];
+  1 -> 0 [ label="InvR.e2" ];
+}
