@@ -1,10 +1,10 @@
-package components
+package adaptive
 
 import (
 	"fmt"
-	"gmidarch/development/artefacts/graphs"
+	"gmidarch/development/artefacts/graphs/exec"
 	"gmidarch/development/messages"
-	"gmidarch/execution/engine"
+	//	"gmidarch/execution/core/engine"
 	"os"
 	"reflect"
 	"shared"
@@ -14,18 +14,19 @@ import (
 var allUnitsType sync.Map
 var allUnitsGraph sync.Map
 
+//@Type: Unit
+//@Behaviour: Behaviour = RUNTIME
 type Unit struct {
 	UnitId         string
-	Behaviour      string
-	Graph          graphs.ExecGraph
+	Graph          exec.ExecGraph
 	ElemOfUnitInfo [] *interface{}
 	ElemOfUnit     interface{}
-	GraphOfElem    graphs.ExecGraph
+	GraphOfElem    exec.ExecGraph
 }
 
 func NewUnit() Unit {
 	r := new(Unit)
-	r.Behaviour = "B = " + shared.RUNTIME_BEHAVIOUR
+	//r.Behaviour = "B = " + shared.RUNTIME_BEHAVIOUR
 
 	return *r
 }
@@ -62,9 +63,10 @@ func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}, r *bool) 
 		os.Exit(0)
 	}
 
-	u.GraphOfElem = temp.(graphs.ExecGraph)
+	u.GraphOfElem = temp.(exec.ExecGraph)
 	//engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, !shared.EXECUTE_FOREVER)
-	engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, shared.EXECUTE_FOREVER)
+	//engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, shared.EXECUTE_FOREVER)
+	//engine.EngineImpl{}.Execute(u.ElemOfUnit, shared.EXECUTE_FOREVER)
 
 	return
 }
@@ -93,11 +95,11 @@ func (u Unit) I_Adaptunit(msg *messages.SAMessage, info [] *interface{}, r *bool
 	}
 }
 
-func (u *Unit) changeSelector(s func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}, *bool)) graphs.ExecGraph {
+func (u *Unit) changeSelector(s func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}, *bool)) exec.ExecGraph {
 	temp, _ := allUnitsGraph.Load(u.UnitId)
 
 	//t1 := time.Now()
-	g := temp.(graphs.ExecGraph)
+	g := temp.(exec.ExecGraph)
 	for e1 := range g.ExecEdges {
 		for e2 := range g.ExecEdges [e1] {
 			if g.ExecEdges [e1][e2].Info.IsInternal {

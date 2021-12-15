@@ -1,6 +1,7 @@
 package engine
 
 import (
+	"fmt"
 	"gmidarch/development/artefacts/graphs/dot"
 	"gmidarch/development/components/component"
 	"gmidarch/development/messages"
@@ -30,6 +31,7 @@ func NewEngine() Engine {
 
 func (EngineImpl) Execute(comp *component.Component, executeForever bool) {
 	node := 0
+	fmt.Println("comp", comp)
 
 	// Execute graph
 	for {

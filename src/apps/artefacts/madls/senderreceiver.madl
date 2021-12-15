@@ -11,5 +11,5 @@ Configuration senderreceiver :=
       s,t,r
 
    Adaptability
-      None
+      Evolutive
 Endconf

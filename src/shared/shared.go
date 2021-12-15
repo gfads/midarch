@@ -26,6 +26,7 @@ var DIR_GO = LocalizegGo()+"/bin"
 var DIR_BASE = LocalizegMidArch()
 var DIR_MADL = DIR_BASE + "/src/apps/artefacts/madls"
 var DIR_DOT = DIR_BASE + "/src/gmidarch/development/repositories/dot"
+var DIR_ADAPTIVE_COMPONENTS = DIR_BASE + "/src/gmidarch/development/components/adaptive"
 var DIR_APP_COMPONENTS = DIR_BASE + "/src/gmidarch/development/components/apps"
 var DIR_MIDDLEWARE_COMPONENTS = DIR_BASE + "/src/gmidarch/development/components/middleware"
 var DIR_PROXIES_COMPONENTS = DIR_BASE + "/src/gmidarch/development/components/proxies"
@@ -100,6 +101,9 @@ type UnitCommand struct {
 	Type     interface{}
 	Selector func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}, *bool)
 }
+
+const EVOLUTIVE_ADAPTATION string = "EVOLUTIVE"
+const NON_ADAPTIVE string = "NONE"
 
 const REPLACE_COMPONENT = "REPLACE_COMPONENT"
 

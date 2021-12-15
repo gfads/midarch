@@ -1,4 +1,4 @@
-package components
+package adaptive
 
 import (
 	"gmidarch/development/messages"
@@ -11,7 +11,7 @@ var isFirstTime = true
 var listOfOldPlugins map[string]time.Time
 
 //@Type: Monevolutive
-//@Behaviour: Behaviour = B = I_Hasnewplugins -> InvR.e1 -> B [] I_Nonewplugins -> B
+//@Behaviour: Behaviour = I_Hasnewplugins -> InvR.e1 -> B [] I_Nonewplugins -> Behaviour
 type Monevolutive struct {}
 
 func (Monevolutive) I_Nonewplugins(msg *messages.SAMessage, info [] *interface{}, r *bool) {

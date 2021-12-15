@@ -1,23 +1,20 @@
-package components
+package adaptive
 
 import (
 	"fmt"
-	"gmidarch/development/artefacts/graphs"
 	"gmidarch/development/messages"
-	"shared"
 )
 
 var count int
 
+//@Type: Core
+//@Behaviour: Behaviour = RUNTIME
 type Core struct {
-	Behaviour string
-	Graph     graphs.ExecGraph
+	//Graph     exec.ExecGraph
 }
 
 func NewCore() Core {
-
 	r := new(Core)
-	r.Behaviour = "B = " + shared.RUNTIME_BEHAVIOUR
 
 	return *r
 }

@@ -2,8 +2,12 @@ package deployer
 
 import (
 	"gmidarch/development/artefacts/madl"
+	"gmidarch/development/components/adaptive"
+	"gmidarch/development/components/component"
+	"gmidarch/development/connectors"
 	"gmidarch/development/messages"
 	"gmidarch/execution/core"
+	"reflect"
 	"shared"
 )
 
@@ -22,6 +26,30 @@ type DeployerImpl struct {
 
 func NewDeployer(m madl.MADL) Deployer {
 	return DeployerImpl{Madl: m}
+}
+
+func NewEEDeployer(m madl.MADL, mee madl.MADL) Deployer {
+	components := []component.Component{}
+	for i := range m.Components {
+		components = append(components, m.Components[i])
+	}
+	connectors := []connectors.Connector{}
+	for i := range m.Connectors {
+		connectors = append(connectors, m.Connectors[i])
+	}
+
+	idx := 0
+	for i := range mee.Components {
+		if mee.Components[i].TypeName == reflect.TypeOf(adaptive.Unit{}).Name() {
+			infoTemp := make([]*interface{}, 1)
+			infoTemp[0] = new(interface{})
+			*infoTemp[0] = components[idx]
+			mee.Components[i].Info = infoTemp
+			idx++
+		}
+	}
+
+	return NewDeployer(mee)
 }
 
 func (d DeployerImpl) Start() {

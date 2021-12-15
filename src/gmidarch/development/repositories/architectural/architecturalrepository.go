@@ -2,6 +2,7 @@ package architectural
 
 import (
 	"bufio"
+	"gmidarch/development/components/adaptive"
 	"gmidarch/development/components/apps"
 	"gmidarch/development/components/component"
 	"gmidarch/development/components/middleware"
@@ -27,6 +28,13 @@ var SetOfComponentTypesRAM = map[string]interface{} {
 	"Server":            	apps.Server{},
 	"Sender":            	apps.Sender{},
 	"Receiver":				apps.Receiver{},
+	"Core":					adaptive.Core{},
+	"Unit":					adaptive.Unit{},
+	"Monevolutive":			adaptive.Monevolutive{},
+	"Monitor":				adaptive.Monitor{},
+	"Planner":				adaptive.Planner{},
+	"Executor":				adaptive.Executor{},
+	"Analyser":				adaptive.Analyser{},
 	"Jsonmarshaller":		middleware.Jsonmarshaller{},
 	"Gobmarshaller":     	middleware.Gobmarshaller{},
 	"CRHTCP":            	middleware.CRHTCP{},
@@ -88,6 +96,18 @@ func LoadArchitecturalRepository() ArchitecturalRepository {
 
 func ReadComponentTypesFromDisk() map[string]string {
 	compLibrary := map[string]string{}
+
+	// Identify adaptive components
+	adaptiveFiles, err1 := ioutil.ReadDir(shared.DIR_ADAPTIVE_COMPONENTS)
+	if err1 != nil {
+		shared.ErrorHandler(shared.GetFunction(), err1.Error())
+	}
+
+	for file := range adaptiveFiles {
+		fullPathName := shared.DIR_ADAPTIVE_COMPONENTS + "/" + adaptiveFiles[file].Name()
+		typeName, behaviour := getTypeAndBehaviour(fullPathName)
+		compLibrary[typeName] = behaviour
+	}
 
 	// Identify application components
 	appFiles, err1 := ioutil.ReadDir(shared.DIR_APP_COMPONENTS)
