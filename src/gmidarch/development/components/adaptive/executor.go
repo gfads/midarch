@@ -10,7 +10,7 @@ import (
 //@Behaviour: Behaviour = InvP.e1 -> I_Process -> InvR.e2 -> Behaviour
 type Executor struct {}
 
-func (Executor) I_Process(msg *messages.SAMessage, info [] *interface{}) {
+func (Executor) I_Process(id string, msg *messages.SAMessage, info *interface{}) {
 	plan := msg.Payload.(shared.AdaptationPlan)
 	unitCommand := shared.UnitCommand{}
 

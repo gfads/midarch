@@ -1,9 +1,9 @@
 datatype PROCNAMES = r | s | t
 channel InvR,InvP : PROCNAMES
-channel I_Setmessagt,I_Setmessage2,I_Printmessage
-R = InvP.t -> I_Printmessage -> R
+channel I_Setmessage2,I_Printmessage,I_Setmessagt
 S = I_Setmessagt -> InvR.t -> S [] I_Setmessage2 -> InvR.t -> S
+R = InvP.t -> I_Printmessage -> R
 T = InvP.s -> InvR.r -> T
 
-senderreceiver = (R ||| S)[|{|InvR,InvP|}|](T[[InvP.s <- InvR.t,InvR.r <- InvP.t]])
+senderreceiver = (S ||| R)[|{|InvR,InvP|}|](T[[InvP.s <- InvR.t,InvR.r <- InvP.t]])
 assert senderreceiver :[deadlock free]

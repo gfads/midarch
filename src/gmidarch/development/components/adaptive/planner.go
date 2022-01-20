@@ -9,7 +9,7 @@ import (
 //@Behaviour: Behaviour = InvP.e1 -> I_Process -> InvR.e2 -> Behaviour
 type Planner struct {}
 
-func (Planner) I_Process (msg *messages.SAMessage, info [] *interface{}) {
+func (Planner) I_Process (id string, msg *messages.SAMessage, info *interface{}) {
 	evolutiveAnalysisResult := msg.Payload.(shared.EvolutiveAnalysisResult)
 
 	plan := shared.AdaptationPlan{}

@@ -45,7 +45,6 @@ func (confImpl MADLConfiguratorImpl) Configure(m *MADL, archRepo architectural.A
 
 func (confImpl MADLConfiguratorImpl) configureComponents(m *MADL, archRepo architectural.ArchitecturalRepository, args map[string]messages.EndPoint) {
 	for i := range m.Components {
-
 		// Step 1 - Configure component's info
 		confImpl.configureInfo(m, archRepo, args) // TODO dcruzb: this line should be here? This line don't use components, so probably should be outside the for loop
 

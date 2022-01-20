@@ -215,7 +215,7 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 	}
 
 	units := []string{}
-	for i := 0; i < len(mapp.Components)+len(mapp.Connectors); i++ {
+	for i := 0; i < len(mapp.Components); i++ { //+len(mapp.Connectors)
 		units = append(units, "unit"+strconv.Itoa(i+1))
 	}
 	for i := 0; i < len(units); i++ {
@@ -228,7 +228,7 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 	params := make([]interface{}, 1)
 	params[0] = len(units)
 
-	nAttT1 := len(mapp.Components) + len(mapp.Connectors)
+	nAttT1 := len(mapp.Components) //+ len(mapp.Connectors)
 
 	behaviour := "B = InvP.e1 -> " //InvR.e2 -> InvR.e3 -> InvR.e4 -> InvR.e5 -> InvR.e6 -> InvR.e7 -> B"
 	for i := 0; i < nAttT1; i++ {

@@ -23,6 +23,6 @@ func (Core) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg 
 //	Core{}.I_Debug(msg,info)
 }
 
-func (Core) I_Debug(msg *messages.SAMessage, info [] *interface{}) {
+func (Core) I_Debug(id string, msg *messages.SAMessage, info *interface{}) {
 	fmt.Printf("Core:: %v\n",msg.Payload)
 }

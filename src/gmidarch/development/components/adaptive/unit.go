@@ -31,25 +31,25 @@ func NewUnit() Unit {
 	return *r
 }
 
-func (u Unit) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
+func (u Unit) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg *messages.SAMessage, info *interface{}, r *bool) {
 
-	//	fmt.Printf("Unit:: HERE:: %v \n",op)
+	//fmt.Printf("Unit:: HERE:: %v \n",op, msg)
 	switch op[2] {
 	case 'E': //"I_Execute":
-		elem.(Unit).I_Execute(msg, info, r)
+		elem.(Unit).I_Execute(op, msg, info)
 	case 'I': //"I_Initialiseunit":
-		elem.(Unit).I_Initialiseunit(msg, info, r)
+		elem.(Unit).I_Initialiseunit(op, msg, info)
 	case 'A': //"I_Adaptunit":
-		elem.(Unit).I_Adaptunit(msg, info, r)
+		elem.(Unit).I_Adaptunit(op, msg, info)
 	}
 }
-
-func (u Unit) I_Initialiseunit(msg *messages.SAMessage, info [] *interface{}, r *bool) {
+//msg *messages.SAMessage, info [] *interface{}, r *bool
+func (u Unit) I_Initialiseunit(id string, msg *messages.SAMessage, info *interface{}) {
 	allUnitsType.Store(u.UnitId, u.ElemOfUnit)
 	allUnitsGraph.Store(u.UnitId, u.GraphOfElem)
 }
-
-func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}, r *bool) {
+//msg *messages.SAMessage, info [] *interface{}, r *bool
+func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}) {
 	var ok bool
 
 	u.ElemOfUnit, ok = allUnitsType.Load(u.UnitId)
@@ -70,8 +70,8 @@ func (u Unit) I_Execute(msg *messages.SAMessage, info [] *interface{}, r *bool) 
 
 	return
 }
-
-func (u Unit) I_Adaptunit(msg *messages.SAMessage, info [] *interface{}, r *bool) {
+//msg *messages.SAMessage, info [] *interface{}, r *bool
+func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{}) {
 	cmd := msg.Payload.(shared.UnitCommand)
 
 	//fmt.Printf("Unit:: I_Adapt:: %v [%v] %v\n", reflect.TypeOf(u.ElemOfUnit).Name(), cmd.Cmd, u.UnitId)
