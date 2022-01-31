@@ -24,6 +24,9 @@ func (g CSPGeneratorImpl) Generate(madl madl.MADL) CSP {
 	// File name
 	csp.CompositionName = madl.Configuration
 
+	// Update Runtime Behaviours
+	csp.ConfigureProcessBehaviours(madl)
+
 	// Step 1 - Identify processes
 	csp.identifyProcesses(madl)
 

@@ -17,6 +17,7 @@ type Action struct {
 	InternalAction func(interface{}, string, string, *messages.SAMessage, *interface{})
 	Conn           connectors.Connector  // used by external actions only
 }
+
 type DOTEdge struct {
 	From   int
 	To     int

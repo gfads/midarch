@@ -2,7 +2,9 @@ package csp
 
 import (
 	"gmidarch/development/artefacts/madl"
+	"gmidarch/development/components/adaptive"
 	"gmidarch/development/connectors"
+	"reflect"
 	"shared"
 	"strconv"
 	"strings"
@@ -10,8 +12,8 @@ import (
 
 type CompositionProcess struct {
 	Components    []string
-	Connectors    [] string
-	SyncPorts     [] string
+	Connectors    []string
+	SyncPorts     []string
 	RenamingPorts map[string][]Renaming
 }
 
@@ -91,7 +93,7 @@ func (c *CSP) createCompositeProcess() {
 			if shared.IsExternal(tokens[j]) {
 				actions = append(actions, tokens[j])
 			}
-			eChannels [i] = actions
+			eChannels[i] = actions
 		}
 	}
 
@@ -243,7 +245,7 @@ func (CSP) renameSubprocesses(p string) string {
 func (CSP) renameSyncPort(action string, processId string) string {
 	r1 := ""
 
-	action = action [0:strings.Index(action, ".")]
+	action = action[0:strings.Index(action, ".")]
 	switch action {
 	case shared.INVP:
 		r1 = shared.INVR + "." + strings.ToLower(processId)
@@ -261,12 +263,12 @@ func (c CSP) configureRuntimeBehaviourConnector(conn connectors.Connector) strin
 	r1 := ""
 
 	switch conn.TypeName {
-	case shared.NTOONE:    // TODO
+	case shared.NTOONE: // TODO
 		r1 = "B = "
 		for i := 0; i < conn.LeftArity; i++ {
-			r1 += " InvP.e" + strconv.Itoa(i+1) + " -> InvR.e"+strconv.Itoa(conn.LeftArity+1)+" -> B [] "
+			r1 += " InvP.e" + strconv.Itoa(i+1) + " -> InvR.e" + strconv.Itoa(conn.LeftArity+1) + " -> B [] "
 		}
-		r1 = r1[:strings.LastIndex(r1,"[]")]
+		r1 = r1[:strings.LastIndex(r1, "[]")]
 	case shared.ONETON: // TODO
 		r1 = "B = InvP.e1"
 		for i := 0; i < conn.RightArity; i++ {
@@ -303,33 +305,41 @@ func (c CSP) configureRuntimeBehaviourConnectorOld(madl madl.MADL, connId string
 func (CSP) configureRuntimeBehaviourComponent(madl madl.MADL, compId string) string {
 	r1 := ""
 
-	/*
-		// Define new behaviour      - TODO
-		for i := range madl.Components {
-			comp := madl.Components[i]
-			if strings.ToUpper(comp.Id) == strings.ToUpper(compId) {
-				if reflect.TypeOf(comp.Type) == reflect.TypeOf(components.Core{}) {
-					if (strings.ToUpper(madl.AppAdaptability[0]) == "NONE") { // TODO
-						r1 = "B = InvR.e1 -> B"
-					} else {
-						//r1 = "B = InvR.e1 -> P1 \n P1 = InvP.e2 -> I_Debug -> InvR.e1 -> P1"
-						//r1 = "B = InvP.e1 -> I_Debug -> InvR.e2 -> P1"
-						r1 = "B = InvP.e1 -> InvR.e2 -> P1"
-					}
-					break
+	// Define new behaviour      - TODO
+	for i := range madl.Components {
+		comp := madl.Components[i]
+		if strings.ToUpper(comp.Id) == strings.ToUpper(compId) {
+			if reflect.TypeOf(comp.Type) == reflect.TypeOf(adaptive.Core{}) {
+				if strings.ToUpper(madl.Adaptability[0]) == "NONE" { // TODO
+					r1 = "B = InvR.e1 -> B"
+				} else {
+					//r1 = "B = InvR.e1 -> P1 \n P1 = InvP.e2 -> I_Debug -> InvR.e1 -> P1"
+					//r1 = "B = InvP.e1 -> I_Debug -> InvR.e2 -> P1"
+					r1 = "B = InvP.e1 -> InvR.e2 -> P1"
 				}
-
-				if reflect.TypeOf(comp.Type) == reflect.TypeOf(components.Unit{}) {
-					if (strings.ToUpper(madl.AppAdaptability[0]) == "NONE") { // TODO
-						r1 = "B = I_InitialiseUnit -> P1\n P1 = I_Execute -> P1"
-					} else {
-						r1 = "B = I_Initialiseunit -> P1 \nP1 = I_Execute -> P1 [] InvP.e1 -> I_AdaptUnit -> P1"
-					}
-					break
-				}
+				break
 			}
-		}*/
+
+			if reflect.TypeOf(comp.Type) == reflect.TypeOf(adaptive.Unit{}) {
+				if strings.ToUpper(madl.Adaptability[0]) == "NONE" { // TODO
+					r1 = "B = I_InitialiseUnit -> P1\n P1 = I_Execute -> P1"
+				} else {
+					r1 = "B = I_Initialiseunit -> P1 \nP1 = I_Execute -> P1 [] InvP.e1 -> I_AdaptUnit -> P1"
+				}
+				break
+			}
+		}
+	}
 	return r1
+}
+
+func (c *CSP) ConfigureProcessBehaviours(madl madl.MADL) {
+	for i := range madl.Components {
+		// The Component has its behaviour defined at runtime
+		if strings.Contains(madl.Components[i].Behaviour, shared.RUNTIME_BEHAVIOUR) {
+			madl.Components[i].Behaviour = c.configureRuntimeBehaviourComponent(madl, madl.Components[i].Id)
+		}
+	}
 }
 
 func (CSP) countAttachments(madlGo madl.MADL, connectorId string) int {
