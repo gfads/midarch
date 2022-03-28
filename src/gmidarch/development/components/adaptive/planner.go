@@ -1,6 +1,7 @@
 package adaptive
 
 import (
+	"fmt"
 	"gmidarch/development/messages"
 	"shared"
 )
@@ -10,7 +11,9 @@ import (
 type Planner struct {}
 
 func (Planner) I_Process (id string, msg *messages.SAMessage, info *interface{}) {
+	fmt.Println("Planner::msg.Payload", msg.Payload)
 	evolutiveAnalysisResult := msg.Payload.(shared.EvolutiveAnalysisResult)
+	fmt.Println("Planner::evolutiveAnalysisResult", evolutiveAnalysisResult)
 
 	plan := shared.AdaptationPlan{}
 	plan.Operations = []string{}
@@ -22,4 +25,5 @@ func (Planner) I_Process (id string, msg *messages.SAMessage, info *interface{})
 	}
 
 	*msg = messages.SAMessage{Payload: plan}
+	fmt.Printf("Planner::msg.Payload %v\n",msg.Payload.(shared.AdaptationPlan))
 }

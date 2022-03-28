@@ -1,9 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"gmidarch/development/messages"
 	"gmidarch/execution/frontend"
+	evolutive "injector"
+	"sync"
+	"time"
 )
 
 func main() {
@@ -13,5 +15,10 @@ func main() {
 
 	fe.Deploy("senderreceiver.madl", args)
 
-	fmt.Scanln()
+	evolutive.EvolutiveInjector{}.Start("sender", 40*time.Second)
+
+	//fmt.Scanln()
+	var wg sync.WaitGroup
+	wg.Add(1)
+	wg.Wait()
 }

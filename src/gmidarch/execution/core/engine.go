@@ -6,11 +6,12 @@ import (
 	"gmidarch/development/components/component"
 	"gmidarch/development/messages"
 	"math/rand"
+	"reflect"
 	"shared"
 )
 
 type Engine interface {
-	Execute(*component.Component, bool)
+	Execute(*component.Component, *bool)
 	Stop()
 	Resume()
 }
@@ -29,9 +30,22 @@ func NewEngine() Engine {
 	return EngineImpl{}
 }
 
-func (EngineImpl) Execute(comp *component.Component, executeForever bool) {
+func (EngineImpl) Execute(comp *component.Component, executeForever *bool) {
 	node := 0
-	fmt.Println("comp", comp)
+	fmt.Println("EngineImpl.Execute::Component.Id:", comp.Id)
+	if comp.TypeName == "Unit" {
+		fmt.Println("EngineImpl.Execute::comp.Info.([]*interface{})[0]).(component.Component).Info:", (*comp.Info.([]*interface{})[0]).(*component.Component).Info)
+		//info := (*comp.Info.([]*interface{})[0]).(component.Component).Info
+		info := (*comp.Info.([]*interface{})[0]).(*component.Component)
+		fmt.Println("EngineImpl.Execute::info is", reflect.TypeOf(info.Type))
+		//unit := *comp.Type.(*adaptive.Unit)
+		reflect.ValueOf(comp.Type).MethodByName("PrintData").Call([]reflect.Value{})
+		//fmt.Println("EngineImpl.Execute::Unit.ElemOfUnit:", unit.ElemOfUnit)
+		//fmt.Println("EngineImpl.Execute::Unit.GraphOfElem:", unit.GraphOfElem)
+		//fmt.Println("EngineImpl.Execute::Unit.ElemOfUnitInfo:", unit.ElemOfUnitInfo)
+	}
+	fmt.Println("EngineImpl.Execute::info is", reflect.TypeOf(comp.Type))
+
 
 	// Execute graph
 	for {
@@ -43,12 +57,14 @@ func (EngineImpl) Execute(comp *component.Component, executeForever bool) {
 				edges[0].Action.ExternalAction(&comp.Buffer, edges[0].Action.Conn, comp.Id, &comp.Info)
 			}
 			node = edges[0].To // Next node
+			fmt.Println("EngineImpl.Execute unique", 0, "comp", comp.Id, "edges[0].To", edges[0].To, "len(edges)", len(edges))
 		} else {
 			chosen := choice(comp, edges)
 			node = edges[chosen].To
+			fmt.Println("EngineImpl.Execute chosen", chosen, "comp", comp.Id, "edges[chosen].To", edges[chosen].To, "len(edges)", len(edges))
 		}
 		if node == 0 {
-			if !executeForever {
+			if !*executeForever {
 				break
 			}
 		}
@@ -58,15 +74,22 @@ func (EngineImpl) Execute(comp *component.Component, executeForever bool) {
 
 func choice(comp *component.Component, edges []dot.DOTEdge) int {
 	nEdges := len(edges)
-	externalOnly := true
+	//externalOnly := true
 	internalOnly := true
-	r := 0
+	//r := 0
+	cases := make([]reflect.SelectCase, len(edges), len(edges))
 
 	for e := 0; e < nEdges; e++ {
 		if edges[e].Action.IsInternal {
-			externalOnly = false
+			//externalOnly = false
+			cases[e] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(edges[e].Action.Conn.Buffer)}
 		} else {
 			internalOnly = false
+			if edges[e].Action.Name == shared.INVP || edges[e].Action.Name == shared.TERR {
+				cases[e] = reflect.SelectCase{Dir: reflect.SelectRecv, Chan: reflect.ValueOf(edges[e].Action.Conn.Buffer)}
+			} else {
+				cases[e] = reflect.SelectCase{Dir: reflect.SelectSend, Chan: reflect.ValueOf(edges[e].Action.Conn.Buffer)} //, Send: reflect.ValueOf(edges[e].Action.)}
+			}
 		}
 	}
 
@@ -125,15 +148,27 @@ func choice(comp *component.Component, edges []dot.DOTEdge) int {
 		return chosen.Choice
 	}
 
-	if externalOnly {
-		shared.ErrorHandler(shared.GetFunction(), "TODO External only in choice")
+	chosen, value, _ := reflect.Select(cases) // External action selection
+	//edges[chosen].Action.Conn.Buffer <- value.Interface().(messages.SAMessage)
+	comp.Buffer = value.Interface().(messages.SAMessage)
+	// Execute action
+	if edges[chosen].Action.IsInternal {
+		edges[chosen].Action.InternalAction(comp.Type, comp.Id, edges[chosen].Action.Name, &comp.Buffer, &comp.Info)
+	} else {
+		edges[chosen].Action.ExternalAction(&comp.Buffer, edges[chosen].Action.Conn, comp.Id, &comp.Info)
 	}
 
-	if !internalOnly && !externalOnly {
-		shared.ErrorHandler(shared.GetFunction(), "TODO External/Internal choices")
-	}
+	return chosen
 
-	return r
+	//if externalOnly {
+	//	shared.ErrorHandler(shared.GetFunction(), "DONE External only in choice")
+	//}
+	//
+	//if !internalOnly && !externalOnly {
+	//	shared.ErrorHandler(shared.GetFunction(), "DONE External/Internal choices")
+	//}
+	//
+	//return r
 }
 
 func (EngineImpl) Stop()   {}

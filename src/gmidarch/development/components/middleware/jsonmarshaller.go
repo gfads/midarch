@@ -40,8 +40,8 @@ func (Jsonmarshaller) Marshall(m miop.MiopPacket) []byte {
 }
 
 func (Jsonmarshaller) Unmarshall(m []byte) miop.MiopPacket {
-
 	r := miop.MiopPacket{}
+
 	err := json.Unmarshal(m, &r)
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())

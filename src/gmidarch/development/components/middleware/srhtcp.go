@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"gmidarch/development/messages"
 	"io"
+	"log"
 	"net"
 	"shared"
 )
@@ -49,18 +50,17 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}) 
 }
 
 func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{}) {
-
-	fmt.Println(shared.GetFunction(),"HERE")
+	fmt.Println(shared.GetFunction(), "HERE")
 
 	infoTemp := *info
-	infoSrh := infoTemp.(messages.SRHInfo)
+	srhInfo := infoTemp.(messages.SRHInfo)
 
 	// Receive message from handlers
-	tempMsgReceived := <-infoSrh.RcvedMessages
-	infoSrh.CurrentConn = tempMsgReceived.Chn
+	tempMsgReceived := <-srhInfo.RcvedMessages
+	srhInfo.CurrentConn = tempMsgReceived.Chn
 
 	// Update info
-	*info = infoSrh
+	*info = srhInfo
 	msg.Payload = tempMsgReceived.Msg
 
 	return
@@ -104,8 +104,10 @@ func handler(info *interface{}) {
 		_, err := conn.Read(size)
 
 		if err == io.EOF {
-			shared.ErrorHandler(shared.GetFunction(), err.Error())
+			log.Println("Não Vai matar o app EOF")
+			//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		} else if err != nil && err != io.EOF {
+			log.Println("Vai matar o app, erro mas não EOF")
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
 
@@ -113,8 +115,10 @@ func handler(info *interface{}) {
 		msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
 		_, err = conn.Read(msgTemp)
 		if err == io.EOF {
-			shared.ErrorHandler(shared.GetFunction(), err.Error())
+			log.Println("Não Vai matar o app EOF")
+			//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		} else if err != nil && err != io.EOF {
+			log.Println("Vai matar o app, erro mas não EOF")
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
 		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Chn: conn}

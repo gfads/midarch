@@ -1,6 +1,7 @@
-package apps
+package main
 
 import (
+	"fmt"
 	"gmidarch/development/messages"
 	"strconv"
 )
@@ -20,4 +21,9 @@ func (s Sender) I_Setmessage1(id string, msg *messages.SAMessage, info *interfac
 func (s Sender) I_Setmessage2(id string, msg *messages.SAMessage, info *interface{}){
 	msg.Payload = "Message Adapted (type 2) ["+strconv.Itoa(idx)+"]"
 	idx++
+}
+
+func (s Sender) GetType() interface{} {
+	fmt.Println("Passou pelo gettype Sender 1")
+	return Sender{}
 }

@@ -74,7 +74,9 @@ func (Naminginvoker) I_Beforeserver(id string, msg *messages.SAMessage, info *in
 		msg.Payload = &req1
 
 	default:
-		shared.ErrorHandler(shared.GetFunction(), "Operation '"+req.Op+"' not present in Naming Invoker")
+		if req.Op != "" {
+			shared.ErrorHandler(shared.GetFunction(), "Operation '"+req.Op+"' not present in Naming Invoker")
+		}
 	}
 }
 

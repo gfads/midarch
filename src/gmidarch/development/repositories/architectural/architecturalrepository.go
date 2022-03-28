@@ -18,34 +18,33 @@ import (
 )
 
 type ArchitecturalRepository struct {
-	CompLibrary map[string]component.Component
+	CompLibrary map[string]*component.Component
 	ConnLibrary map[string]connectors.Connector
 }
 
 // Set of existing Components
 var SetOfComponentTypesRAM = map[string]interface{} {
-	"Client":            	apps.Client{},
-	"Server":            	apps.Server{},
-	"Sender":            	apps.Sender{},
-	"Receiver":				apps.Receiver{},
-	"Core":					adaptive.Core{},
-	"Unit":					adaptive.Unit{},
-	"Monevolutive":			adaptive.Monevolutive{},
-	"Monitor":				adaptive.Monitor{},
-	"Planner":				adaptive.Planner{},
-	"Executor":				adaptive.Executor{},
-	"Analyser":				adaptive.Analyser{},
-	"Jsonmarshaller":		middleware.Jsonmarshaller{},
-	"Gobmarshaller":     	middleware.Gobmarshaller{},
-	"CRHTCP":            	middleware.CRHTCP{},
-	"SRHTCP":            	middleware.SRHTCP{},
-	"Calculatorinvoker": 	middleware.Calculatorinvoker{},
-	"Requestor":         	middleware.Requestor{},
-	"Naminginvoker":     	middleware.Naminginvoker{},
-	"Namingserver":      	middleware.Namingserver{},
-	"Namingproxy":       	namingproxy.Namingproxy{},
-	"Calculatorproxy":   	calculatorproxy.Calculatorproxy{}}
-
+	"Client":            	&apps.Client{},
+	"Server":            	&apps.Server{},
+	"Sender":            	&apps.Sender{},
+	"Receiver":				&apps.Receiver{},
+	"Core":					&adaptive.Core{},
+	"Unit":					&adaptive.Unit{},
+	"Monevolutive":			&adaptive.Monevolutive{},
+	"Monitor":				&adaptive.Monitor{},
+	"Planner":				&adaptive.Planner{},
+	"Executor":				&adaptive.Executor{},
+	"Analyser":				&adaptive.Analyser{},
+	"Jsonmarshaller":		&middleware.Jsonmarshaller{},
+	"Gobmarshaller":     	&middleware.Gobmarshaller{},
+	"CRHTCP":            	&middleware.CRHTCP{},
+	"SRHTCP":            	&middleware.SRHTCP{},
+	"Calculatorinvoker": 	&middleware.Calculatorinvoker{},
+	"Requestor":         	&middleware.Requestor{},
+	"Naminginvoker":     	&middleware.Naminginvoker{},
+	"Namingserver":      	&middleware.Namingserver{},
+	"Namingproxy":       	&namingproxy.Namingproxy{},
+	"Calculatorproxy":   	&calculatorproxy.Calculatorproxy{}}
 
 // Set of existing Connectors
 var SetOfConnectorTypesRAM = map[string]connectors.Connector{
@@ -62,7 +61,7 @@ func LoadArchitecturalRepository() ArchitecturalRepository {
 	r := ArchitecturalRepository{}
 
 	// Initialize repositories
-	r.CompLibrary = make(map[string]component.Component)
+	r.CompLibrary = make(map[string]*component.Component)
 	r.ConnLibrary = make(map[string]connectors.Connector)
 
 	// Read type and behaviour from actual files
@@ -75,7 +74,7 @@ func LoadArchitecturalRepository() ArchitecturalRepository {
 
 	// Store components on the architectural repositories
 	for i := range SetOfComponentTypesFile {
-		newComp := component.Component{}
+		newComp := &component.Component{}
 		typeComp, ok := SetOfComponentTypesRAM[i]
 		if !ok {
 			shared.ErrorHandler(shared.GetFunction(), "Component '"+i+"' is in File, but not in RAM!!")
@@ -152,6 +151,10 @@ func ReadComponentTypesFromDisk() map[string]string {
 	}
 
 	return compLibrary
+}
+
+func GetTypeAndBehaviour(file string) (string, string) {
+	return getTypeAndBehaviour(file)
 }
 
 func getTypeAndBehaviour(file string) (string, string) {

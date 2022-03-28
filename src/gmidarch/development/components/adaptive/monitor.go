@@ -1,6 +1,7 @@
 package adaptive
 
 import (
+	"fmt"
 	"gmidarch/development/messages"
 )
 
@@ -9,5 +10,6 @@ import (
 type Monitor struct {}
 
 func (Monitor) I_Process(id string, msg *messages.SAMessage, info *interface{}) {
+	fmt.Println("Monitor.I_Process::Payload:", msg.Payload)
 	*msg = messages.SAMessage{Payload: msg.Payload}
 }

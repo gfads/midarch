@@ -47,6 +47,12 @@ func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint)
 	madlChecker.SemanticCheck(madlApp, archRepo)
 	fmt.Println("ok")
 
+	// Step 5: Configure madl
+	fmt.Print("Configuring MADL...")
+	madlConfigurator := madl.NewMADLConfigurator()
+	madlConfigurator.Configure(&madlApp, archRepo, args)
+	fmt.Println("ok")
+
 	if shared.Contains(madlApp.Adaptability, shared.EVOLUTIVE_ADAPTATION) {
 		fmt.Println("Creating mee")
 		crt := creator.Creator{}
@@ -87,12 +93,6 @@ func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint)
 		go deployer.Start()
 		fmt.Println("ok")
 	} else {
-		// Step 5: Configure madl
-		fmt.Print("Configuring MADL...")
-		madlConfigurator := madl.NewMADLConfigurator()
-		madlConfigurator.Configure(&madlApp, archRepo, args)
-		fmt.Println("ok")
-
 		// Step 6: Generate & save CSP
 		fmt.Print("Generating CSP...")
 		cspGenerator := csp.NewCSPGenerator()

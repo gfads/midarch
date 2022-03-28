@@ -58,9 +58,11 @@ func LoadPlugin(pluginName string) (plugin.Plugin) {
 	pluginFile := shared.DIR_PLUGINS + "/" + pluginName
 	attempts := 0
 	for {
+		fmt.Println("pluginUtils.LoadPlugin::will open plugin:", pluginFile)
 		plg, err = plugin.Open(pluginFile)
-
+		fmt.Println("pluginUtils.LoadPlugin::opened plugin:", pluginFile)
 		if err != nil {
+			fmt.Println("pluginUtils.LoadPlugin::error while opening plugin:", err)
 			if attempts >= shared.ATTEMPTS_TO_OPEN_A_PLUGIN { // TODO
 				fmt.Printf("Shared:: Error on trying open plugin '%v' \n", pluginFile)
 				os.Exit(0)

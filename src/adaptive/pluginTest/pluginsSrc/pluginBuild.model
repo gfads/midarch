@@ -1,0 +1,11 @@
+package main
+
+import (
+	"<pluginName>"
+	"fmt"
+)
+
+func GetType() interface{} {
+	fmt.Println("Chamou GetType")
+	return <pluginType>
+}

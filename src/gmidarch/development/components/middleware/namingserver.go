@@ -1,6 +1,7 @@
 package middleware
 
 import (
+	"fmt"
 	"gmidarch/development/messages"
 	"shared"
 )
@@ -10,8 +11,9 @@ import (
 type Namingserver struct{}
 
 func (s Namingserver) I_Process(id string, msg *messages.SAMessage, info *interface{}) {
+	fmt.Println("Namingserver.I_Process::msg.Payload:", msg.Payload)
 	request := msg.Payload.(*messages.FunctionalRequest)
-
+	fmt.Println("Namingserver.I_Process::Pós msg.Payload")
 	switch request.Op {
 	case "Register":
 		reply := Namingserver{}.Register(request.Params[0].(string), request.Params[1].(messages.AOR))
@@ -21,7 +23,7 @@ func (s Namingserver) I_Process(id string, msg *messages.SAMessage, info *interf
 		msg.Payload = messages.FunctionalReply{Rep: reply}
 	case "List":
 		reply := Namingserver{}.List()
-		msg.Payload = messages.FunctionalReply{Rep:reply}
+		msg.Payload = messages.FunctionalReply{Rep: reply}
 	default:
 		shared.ErrorHandler(shared.GetFunction(), "Operation '"+request.Op+"' not implemented by Calculator")
 	}

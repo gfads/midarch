@@ -327,7 +327,6 @@ func (MADLConfiguratorImpl) configureInfo(m *MADL, archRepo architectural.Archit
 }
 
 func (MADLConfiguratorImpl) checkInterface(elem interface{}, dot dot.DOTGraph) {
-
 	// Identify dot actions
 	dotActions := []string{}
 	for e1 := range dot.EdgesDot {
@@ -339,6 +338,26 @@ func (MADLConfiguratorImpl) checkInterface(elem interface{}, dot dot.DOTGraph) {
 			}
 		}
 	}
+
+	//if reflect.TypeOf(elem) == reflect.TypeOf(&adaptive.Unit{}) {
+	//	elem.(*adaptive.Unit).UnitId = "Teste"
+	//	//elem.(*adaptive.Unit).PrintId()
+	//	reflect.ValueOf(elem).MethodByName("PrintId").Call([]reflect.Value{})
+	//}
+
+	//fmt.Println("elem is", reflect.TypeOf(elem))
+	//fmt.Println("elem kind is", reflect.TypeOf(elem).Kind())
+	//fmt.Println("elem kind is", reflect.TypeOf(elem).Elem())
+	//fmt.Println("elem.Elem() kind is", reflect.TypeOf(elem).Elem().Kind())
+	//
+	//fmt.Println("elem value", reflect.ValueOf(elem))
+	//fmt.Println("elem value.Elem()", reflect.ValueOf(elem).Elem())
+	//fmt.Println("elem methods", reflect.ValueOf(elem).Elem().Type().NumMethod())
+	//
+	//
+	//fmt.Println("elem type name is", reflect.ValueOf(elem).Type().Name())
+	//fmt.Println("elem type name is", reflect.TypeOf(elem).Elem().Name())
+	//fmt.Println("elem has", reflect.ValueOf(elem).Type().NumMethod(), "methods")
 
 	// Identify interface actions
 	interfaceActions := []string{}

@@ -11,6 +11,8 @@ import (
 	"time"
 )
 
+var ExecuteForever = true
+
 // File extensions
 const MADL_EXTENSION = "madl"
 const DOT_EXTENSION = "dot"
@@ -22,7 +24,7 @@ const NUM_MAX_NODES int = 50
 const EXECUTE_FOREVER = true
 
 // Directories
-var DIR_GO = LocalizegGo()+"/bin"
+var DIR_GO = LocalizegGo() + "/bin"
 var DIR_BASE = LocalizegMidArch()
 var DIR_MADL = DIR_BASE + "/src/apps/artefacts/madls"
 var DIR_DOT = DIR_BASE + "/src/gmidarch/development/repositories/dot"
@@ -32,6 +34,7 @@ var DIR_MIDDLEWARE_COMPONENTS = DIR_BASE + "/src/gmidarch/development/components
 var DIR_PROXIES_COMPONENTS = DIR_BASE + "/src/gmidarch/development/components/proxies"
 var DIR_PLUGINS = DIR_BASE + "/src/gmidarch/execution/repositories/plugins"
 var DIR_PLUGINS_SOURCE = DIR_BASE + "/src/gmidarch/development/repositories/plugins"
+var DIR_PLUGINS_IMPORT = "gmidarch/development/repositories/plugins"
 
 // MADL
 const MADL_COMMENT = "//"
@@ -69,8 +72,9 @@ const MAX_NUMBER_OF_RECEIVED_MESSAGES = 300 // messages received and not process
 const ATTEMPTS_TO_OPEN_A_PLUGIN = 1000
 
 // Evolution
-const FIRST_MONITOR_TIME time.Duration = 1 * time.Second
-const MONITOR_TIME time.Duration = 1 * time.Second
+const FIRST_MONITOR_TIME time.Duration = 10 * time.Second
+const MONITOR_TIME time.Duration = 40 * time.Second
+
 var INJECTION_TIME time.Duration
 
 var SetOfPorts = map[string]string{
@@ -83,7 +87,7 @@ var AdaptationTypes = map[string]string{
 	"EVOLUTIVE": "EVOLUTIVE",
 	"NONE":      "NONE"}
 
-type MonitoredEvolutiveData [] string // used in channel Monitor -> Analyser (Evolutive)
+type MonitoredEvolutiveData []string // used in channel Monitor -> Analyser (Evolutive)
 
 type EvolutiveAnalysisResult struct {
 	NeedAdaptation         bool
@@ -91,7 +95,7 @@ type EvolutiveAnalysisResult struct {
 }
 
 type AdaptationPlan struct {
-	Operations [] string
+	Operations []string
 	Params     map[string][]string
 }
 
@@ -99,7 +103,7 @@ type UnitCommand struct {
 	Cmd      string
 	Params   plugin.Plugin
 	Type     interface{}
-	Selector func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}, *bool)
+	Selector func(interface{}, []*interface{}, string, *messages.SAMessage, []*interface{}, *bool)
 }
 
 const EVOLUTIVE_ADAPTATION string = "EVOLUTIVE"
@@ -131,7 +135,7 @@ func MyInvoke(compType interface{}, compId string, op string, msg *messages.SAMe
 	inputs[1] = reflect.ValueOf(msg)
 	inputs[2] = reflect.ValueOf(info)
 
-	fmt.Println("MyInvoke.compId:", compId, "- msg:", msg, "- info:", info, "- Method Name:", op)
+	fmt.Println("MyInvoke( compId:", compId, "- msg:", msg, "- info:", info, "- Method Name:", op, ")")
 	reflect.ValueOf(compType).MethodByName(op).Call(inputs)
 }
 
@@ -169,18 +173,19 @@ func LocalizegGo() string {
 
 	for _, e := range os.Environ() {
 		pair := strings.SplitN(e, "=", 2)
-		if pair[0] == "GOROOT"{
+		if pair[0] == "GOROOT" {
 			r = pair[1]
 			found = true
 		}
 	}
 
-	if !found{
+	if !found {
 		fmt.Println("Shared:: Error:: OS Environment variable 'GOROOT' not configured\n")
 		os.Exit(1)
 	}
 	return r
 }
+
 func LocalizegMidArch() string {
 	r := ""
 	found := false
@@ -277,7 +282,7 @@ func IsExternal(action string) bool {
 	return r
 }
 
-func MyTokenize(s string) [] string {
+func MyTokenize(s string) []string {
 	tokens := []string{}
 
 	token := ""

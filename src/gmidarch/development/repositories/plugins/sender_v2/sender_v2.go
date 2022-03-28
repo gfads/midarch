@@ -1,9 +1,9 @@
-package apps
+package main
 
 import (
+	"fmt"
 	"gmidarch/development/messages"
 	"strconv"
-	"time"
 )
 
 //@Type: Sender
@@ -13,14 +13,17 @@ type Sender struct{}
 var idx = 0  // REMOVE
 
 func (s Sender) I_Setmessage1(id string, msg *messages.SAMessage, info *interface{}){
-	time.Sleep(20*time.Second)
-	msg.Payload = "Message (type 1) ["+strconv.Itoa(idx)+"]"
+	msg.Payload = "Message Adapted (type 1) ["+strconv.Itoa(idx)+"]"
 	idx++
 }
 
 func (s Sender) I_Setmessage2(id string, msg *messages.SAMessage, info *interface{}){
-	time.Sleep(20*time.Second)
-	msg.Payload = "Message (type 2) ["+strconv.Itoa(idx)+"]"
+	msg.Payload = "Message Adapted (type 2) ["+strconv.Itoa(idx)+"]"
 	idx++
-	//shared.ExecuteForever = false
+}
+
+func (s Sender) GetType() interface{} {
+	fmt.Println("Passou pelo gettype Sender 2")
+
+	return Sender{}
 }
