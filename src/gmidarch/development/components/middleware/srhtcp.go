@@ -106,6 +106,7 @@ func handler(info *interface{}) {
 		if err == io.EOF {
 			log.Println("Não Vai matar o app EOF")
 			//shared.ErrorHandler(shared.GetFunction(), err.Error())
+			return
 		} else if err != nil && err != io.EOF {
 			log.Println("Vai matar o app, erro mas não EOF")
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
@@ -117,6 +118,7 @@ func handler(info *interface{}) {
 		if err == io.EOF {
 			log.Println("Não Vai matar o app EOF")
 			//shared.ErrorHandler(shared.GetFunction(), err.Error())
+			return
 		} else if err != nil && err != io.EOF {
 			log.Println("Vai matar o app, erro mas não EOF")
 			shared.ErrorHandler(shared.GetFunction(), err.Error())

@@ -6,4 +6,3 @@ type SAMessage struct {
 	To string     `json:"To"`
 	Payload interface{} `json:"Payload"`
 }
-
