@@ -1,11 +1,11 @@
 package main
 
 import (
-	"gmidarch/development/repositories/plugins/sender_v1"
+	"gmidarch/development/repositories/plugins/srhtcp_v2"
 	"fmt"
 )
 
 func GetType() interface{} {
 	fmt.Println("Chamou GetType do pluginBuild.model")
-	return sender.Sender{}
+	return srhtcp.SRHTCP{}
 }

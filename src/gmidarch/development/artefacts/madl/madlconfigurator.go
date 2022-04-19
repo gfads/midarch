@@ -6,6 +6,7 @@ import (
 	"gmidarch/development/connectors"
 	"gmidarch/development/messages"
 	"gmidarch/development/repositories/architectural"
+	"log"
 	"net"
 	"reflect"
 	"shared"
@@ -14,6 +15,7 @@ import (
 )
 
 type MADLConfigurator interface {
+	ConfigureEE(*MADL, architectural.ArchitecturalRepository, map[string]messages.EndPoint, MADL)
 	Configure(*MADL, architectural.ArchitecturalRepository, map[string]messages.EndPoint)
 	configureComponents(*MADL, architectural.ArchitecturalRepository, map[string]messages.EndPoint)
 	configureConnectors(*MADL, architectural.ArchitecturalRepository)
@@ -21,13 +23,20 @@ type MADLConfigurator interface {
 	checkInterface(interface{}, dot.DOTGraph)
 }
 
-type MADLConfiguratorImpl struct{}
+type MADLConfiguratorImpl struct{
+	madl MADL
+}
 
 func NewMADLConfigurator() MADLConfigurator {
 	var configurator MADLConfigurator
 	configurator = &MADLConfiguratorImpl{}
 
 	return configurator
+}
+
+func (confImpl MADLConfiguratorImpl) ConfigureEE(m *MADL, archRepo architectural.ArchitecturalRepository, args map[string]messages.EndPoint, madl MADL) {
+	confImpl.madl = madl
+	confImpl.Configure(m, archRepo, args)
 }
 
 // Configure MADL
@@ -291,14 +300,33 @@ func (MADLConfiguratorImpl) configureComponentGraph(comp *component.Component, m
 	}
 }
 
-func (MADLConfiguratorImpl) configureInfo(m *MADL, archRepo architectural.ArchitecturalRepository, args map[string]messages.EndPoint) {
+func (confImpl MADLConfiguratorImpl) configureInfo(m *MADL, archRepo architectural.ArchitecturalRepository, args map[string]messages.EndPoint) {
 
 	// Check if the number of parameters in deployment is one of CRH/SRH components (in order)
 	n := 0
+	unitIndex := 0
 	for i := range m.Components {
 		aux := m.Components[i].TypeName
+		log.Println("configureInfo-> TypeName:", m.Components[i].TypeName)
 		if strings.Contains(aux, "SRH") || strings.Contains(aux, "CRH") {
 			n++
+		}
+
+		if strings.Contains(aux, "Unit")  {
+			log.Println("configureInfo-> Unit madl TypeName:", confImpl.madl.Components[unitIndex].TypeName)
+
+			if strings.Contains(confImpl.madl.Components[unitIndex].TypeName, "SRH") {  // m.Components[i].Type.(adaptive.Unit).UnitId, "SRH") {
+				log.Println("configureInfo-> Unit TypeName:", m.Components[i].TypeName)
+				log.Println("configureInfo-> Unit Id:", m.Components[i].Id)
+				log.Println("configureInfo-> Unit Info", m.Components[i].Info)
+				//elementComponent := confImpl.madl.Components[unitIndex].Type.(component.Component) //(*(m.Components[i].Info).([]*interface{})[0]).(*component.Component)
+				//fmt.Println("EngineImpl.Execute::comp.Info.([]*interface{})[0]).(component.Component).Info:", (*elementComponent.Info.([]*interface{})[0]).(*component.Component).Info)
+				//info := (*comp.Info.([]*interface{})[0]).(component.Component).Info
+				//info := (*elementComponent.Info.([]*interface{})[0]).(*component.Component)
+				//fmt.Println("EngineImpl.Execute::info is", reflect.TypeOf(info.Type))
+				n++
+			}
+			unitIndex++
 		}
 	}
 

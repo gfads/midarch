@@ -1,0 +1,37 @@
+Configuration naming_ee.madl := 
+
+   Components 
+      core : Core 
+      monevolutive : Monevolutive 
+      monitor : Monitor 
+      analyser : Analyser 
+      planner : Planner 
+      executor : Executor 
+      unit1 : Unit 
+      unit2 : Unit 
+      unit3 : Unit 
+      unit4 : Unit 
+
+    Connectors 
+      t1 : Oneton 
+      t2 : Oneway 
+      t3 : Oneway 
+      t4 : Oneway 
+      t5 : Oneway 
+      t6 : Oneway 
+
+    Attachments 
+      monevolutive,t2,monitor 
+      monitor,t3,analyser 
+      analyser,t4,planner 
+      planner,t5,executor 
+      executor,t6,core 
+      core,t1,unit1 
+      core,t1,unit2 
+      core,t1,unit3 
+      core,t1,unit4 
+
+   Adaptability 
+      NONE 
+
+EndConf 

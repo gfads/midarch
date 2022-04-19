@@ -3,8 +3,10 @@ package main
 import (
 	"gmidarch/development/messages"
 	"gmidarch/execution/frontend"
+	evolutive "injector"
 	"shared"
 	"sync"
+	"time"
 )
 
 func main() {
@@ -18,6 +20,8 @@ func main() {
 
 	// Deploy configuration
 	fe.Deploy("naming.madl", args)
+
+	evolutive.EvolutiveInjector{}.Start("srhtcp", 40*time.Second)
 
 	//fmt.Scanln()
 	var wg sync.WaitGroup

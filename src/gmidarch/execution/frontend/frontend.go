@@ -70,8 +70,9 @@ func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint)
 		// Step 5: Configure madl
 		fmt.Print("Configuring MADL...")
 		madlConfigurator := madl.NewMADLConfigurator()
-		madlConfigurator.Configure(&mee, archRepo, args)
+		madlConfigurator.ConfigureEE(&mee, archRepo, args, madlApp)
 		fmt.Println("ok")
+
 
 		// Step 6: Generate & save CSP
 		fmt.Print("Generating Adaptive CSP...")
