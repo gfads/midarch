@@ -55,8 +55,9 @@ func (confImpl MADLConfiguratorImpl) Configure(m *MADL, archRepo architectural.A
 func (confImpl MADLConfiguratorImpl) configureComponents(m *MADL, archRepo architectural.ArchitecturalRepository, args map[string]messages.EndPoint) {
 	for i := range m.Components {
 		// Step 1 - Configure component's info
+		log.Println("Will call configureInfo with args", args)
 		confImpl.configureInfo(m, archRepo, args) // TODO dcruzb: this line should be here? This line don't use components, so probably should be outside the for loop
-
+		log.Println("Done with call configureInfo")
 		// Step 2 - Configure type
 		record, _ := archRepo.CompLibrary[m.Components[i].TypeName] // type from repositories
 		m.Components[i].Type = record.Type
@@ -301,29 +302,23 @@ func (MADLConfiguratorImpl) configureComponentGraph(comp *component.Component, m
 }
 
 func (confImpl MADLConfiguratorImpl) configureInfo(m *MADL, archRepo architectural.ArchitecturalRepository, args map[string]messages.EndPoint) {
-
-	// Check if the number of parameters in deployment is one of CRH/SRH components (in order)
+	// Check if the number of parameters in deployment is the same of CRH/SRH components (in order)
 	n := 0
 	unitIndex := 0
 	for i := range m.Components {
 		aux := m.Components[i].TypeName
-		log.Println("configureInfo-> TypeName:", m.Components[i].TypeName)
+		//log.Println("configureInfo-> TypeName:", m.Components[i].TypeName)
 		if strings.Contains(aux, "SRH") || strings.Contains(aux, "CRH") {
 			n++
 		}
 
 		if strings.Contains(aux, "Unit")  {
-			log.Println("configureInfo-> Unit madl TypeName:", confImpl.madl.Components[unitIndex].TypeName)
-
-			if strings.Contains(confImpl.madl.Components[unitIndex].TypeName, "SRH") {  // m.Components[i].Type.(adaptive.Unit).UnitId, "SRH") {
-				log.Println("configureInfo-> Unit TypeName:", m.Components[i].TypeName)
-				log.Println("configureInfo-> Unit Id:", m.Components[i].Id)
-				log.Println("configureInfo-> Unit Info", m.Components[i].Info)
-				//elementComponent := confImpl.madl.Components[unitIndex].Type.(component.Component) //(*(m.Components[i].Info).([]*interface{})[0]).(*component.Component)
-				//fmt.Println("EngineImpl.Execute::comp.Info.([]*interface{})[0]).(component.Component).Info:", (*elementComponent.Info.([]*interface{})[0]).(*component.Component).Info)
-				//info := (*comp.Info.([]*interface{})[0]).(component.Component).Info
-				//info := (*elementComponent.Info.([]*interface{})[0]).(*component.Component)
-				//fmt.Println("EngineImpl.Execute::info is", reflect.TypeOf(info.Type))
+			//log.Println("configureInfo-> Unit madl TypeName:", confImpl.madl.Components[unitIndex].TypeName)
+			if strings.Contains(confImpl.madl.Components[unitIndex].TypeName, "SRH") ||
+			   strings.Contains(confImpl.madl.Components[unitIndex].TypeName, "SRH") {  // m.Components[i].Type.(adaptive.Unit).UnitId, "SRH") {
+				//log.Println("configureInfo-> Unit TypeName:", m.Components[i].TypeName)
+				//log.Println("configureInfo-> Unit Id:", m.Components[i].Id)
+				//log.Println("configureInfo-> Unit Info", m.Components[i].Info)
 				n++
 			}
 			unitIndex++
@@ -337,15 +332,15 @@ func (confImpl MADLConfiguratorImpl) configureInfo(m *MADL, archRepo architectur
 	// Configure 'info' of components
 	for i := range m.Components {
 		if v, ok := args[m.Components[i].Id]; ok {
-			if strings.Contains(m.Components[i].TypeName, "SRH") {
+			if strings.Contains(m.Components[i].TypeName, "SRH") { // TODO dcruzb: what happens if TypeName == Unit?
 				endPoint := messages.EndPoint{Host: v.Host, Port: v.Port}
-				conns := []net.Conn{}
+				conns := []net.Conn{} // TODO dcruzb: MAX_NUMBER_OF_CONNECTIONS should be in server, not client
 				rcvedMsgChan := make(chan messages.ReceivedMessages, shared.MAX_NUMBER_OF_RECEIVED_MESSAGES)
-				srhInfo := messages.SRHInfo{EndPoint: endPoint, Conns: conns, RcvedMessages: rcvedMsgChan}
-				m.Components[i].Info = srhInfo
+				var clients []*messages.Client // TODO dcruzb: change to make to allocate and initialize the array with MAX_NUMBER_OF_CONNECTIONS size
+				srhInfo := messages.SRHInfo{EndPoint: endPoint, Conns: conns, RcvedMessages: rcvedMsgChan, Clients: clients}
 				m.Components[i].Info = &srhInfo
 			} else if strings.Contains(m.Components[i].TypeName, "CRH") {
-				conns := make(map[string]net.Conn, shared.MAX_NUMBER_OF_CONNECTIONS)
+				conns := make(map[string]net.Conn, shared.MAX_NUMBER_OF_CONNECTIONS) // TODO dcruzb: MAX_NUMBER_OF_CONNECTIONS should be in server, not client
 				endPoint := messages.EndPoint{Host: v.Host, Port: v.Port}
 				m.Components[i].Info = messages.CRHInfo{EndPoint: endPoint, Conns: conns}
 			}
