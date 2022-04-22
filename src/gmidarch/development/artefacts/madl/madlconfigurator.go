@@ -343,6 +343,7 @@ func (confImpl MADLConfiguratorImpl) configureInfo(m *MADL, archRepo architectur
 				rcvedMsgChan := make(chan messages.ReceivedMessages, shared.MAX_NUMBER_OF_RECEIVED_MESSAGES)
 				srhInfo := messages.SRHInfo{EndPoint: endPoint, Conns: conns, RcvedMessages: rcvedMsgChan}
 				m.Components[i].Info = srhInfo
+				m.Components[i].Info = &srhInfo
 			} else if strings.Contains(m.Components[i].TypeName, "CRH") {
 				conns := make(map[string]net.Conn, shared.MAX_NUMBER_OF_CONNECTIONS)
 				endPoint := messages.EndPoint{Host: v.Host, Port: v.Port}

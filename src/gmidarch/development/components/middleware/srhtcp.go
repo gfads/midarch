@@ -17,7 +17,7 @@ type SRHTCP struct{}
 func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}) {
 
 	infoTemp := *info
-	srhInfo := infoTemp.(messages.SRHInfo)
+	srhInfo := infoTemp.(*messages.SRHInfo)
 
 	// check if a listen has been already created
 	if srhInfo.Ln == nil { // no listen created
@@ -53,7 +53,7 @@ func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{})
 	fmt.Println(shared.GetFunction(), "HERE")
 
 	infoTemp := *info
-	srhInfo := infoTemp.(messages.SRHInfo)
+	srhInfo := infoTemp.(*messages.SRHInfo)
 
 	// Receive message from handlers
 	tempMsgReceived := <-srhInfo.RcvedMessages
@@ -68,7 +68,7 @@ func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{})
 
 func (s SRHTCP) I_Send(id string, msg *messages.SAMessage, info *interface{}) {
 	infoTemp := *info
-	srhInfo := infoTemp.(messages.SRHInfo)
+	srhInfo := infoTemp.(*messages.SRHInfo)
 	conn := srhInfo.CurrentConn
 
 	msgTemp := msg.Payload.([]byte)
@@ -96,7 +96,7 @@ func (s SRHTCP) I_Send(id string, msg *messages.SAMessage, info *interface{}) {
 func handler(info *interface{}) {
 
 	infoTemp := *info
-	srhInfo := infoTemp.(messages.SRHInfo)
+	srhInfo := infoTemp.(*messages.SRHInfo)
 	conn := srhInfo.CurrentConn
 
 	for {
