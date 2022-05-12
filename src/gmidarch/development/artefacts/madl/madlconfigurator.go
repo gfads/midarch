@@ -315,7 +315,7 @@ func (confImpl MADLConfiguratorImpl) configureInfo(m *MADL, archRepo architectur
 		if strings.Contains(aux, "Unit")  {
 			//log.Println("configureInfo-> Unit madl TypeName:", confImpl.madl.Components[unitIndex].TypeName)
 			if strings.Contains(confImpl.madl.Components[unitIndex].TypeName, "SRH") ||
-			   strings.Contains(confImpl.madl.Components[unitIndex].TypeName, "SRH") {  // m.Components[i].Type.(adaptive.Unit).UnitId, "SRH") {
+			   strings.Contains(confImpl.madl.Components[unitIndex].TypeName, "CRH") {  // m.Components[i].Type.(adaptive.Unit).UnitId, "SRH") {
 				//log.Println("configureInfo-> Unit TypeName:", m.Components[i].TypeName)
 				//log.Println("configureInfo-> Unit Id:", m.Components[i].Id)
 				//log.Println("configureInfo-> Unit Info", m.Components[i].Info)
