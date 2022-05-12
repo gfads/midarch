@@ -3,6 +3,8 @@ package middleware
 import (
 	"encoding/binary"
 	"gmidarch/development/messages"
+	"gmidarch/development/messages/miop"
+	"log"
 	"net"
 	"shared"
 )
@@ -63,20 +65,32 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		shared.ErrorHandler(shared.GetFunction(),err.Error())
 	}
 
+	msgFromServer := c.read(err, conn, size)
+	if changeProtocol, miop := c.isAdapt(msgFromServer); changeProtocol {
+		log.Println("Adapting, miop.Bd.ReqBody.Body:", miop.Bd.ReqBody.Body)
+		msgFromServer = c.read(err, conn, size)
+	}
+
+	*msg = messages.SAMessage{Payload: msgFromServer}
+}
+
+func (c CRHTCP) read(err error, conn net.Conn, size []byte) []byte {
 	// receive reply's size
 	_, err = conn.Read(size)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(),err.Error())
+		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
 
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
 	_, err = conn.Read(msgFromServer)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(),err.Error())
+		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
-
-	*msg = messages.SAMessage{Payload: msgFromServer}
+	return msgFromServer
 }
 
-
+func (c CRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
+	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
+}
