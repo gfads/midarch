@@ -13,8 +13,8 @@ type DOTGraph struct {
 type Action struct {
 	Name           string
 	IsInternal     bool
-	ExternalAction func(*messages.SAMessage, connectors.Connector, string, *interface{})
-	InternalAction func(interface{}, string, string, *messages.SAMessage, *interface{})
+	ExternalAction func(*messages.SAMessage, connectors.Connector, string, *interface{}, *bool)
+	InternalAction func(interface{}, string, string, *messages.SAMessage, *interface{}, *bool)
 	Conn           connectors.Connector  // used by external actions only
 }
 
