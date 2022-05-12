@@ -5,9 +5,13 @@ import (
 	"gmidarch/development/artefacts/graphs/dot"
 	"gmidarch/development/artefacts/graphs/exec"
 	"gmidarch/development/components/component"
+	"gmidarch/development/components/middleware"
 	"gmidarch/development/messages"
+	"gmidarch/development/messages/miop"
 	"gmidarch/execution/core"
 	"log"
+	"strings"
+	"time"
 
 	//	"gmidarch/execution/core/engine"
 	"os"
@@ -22,11 +26,11 @@ var allUnitsGraph sync.Map
 //@Type: Unit
 //@Behaviour: Behaviour = RUNTIME
 type Unit struct {
-	UnitId         string
-	Graph          dot.DOTGraph
-	ElemOfUnitInfo interface{} //[] *
-	ElemOfUnit     interface{}
-	GraphOfElem    dot.DOTGraph
+	UnitId         	string
+	Graph          	dot.DOTGraph
+	ElemOfUnitInfo 	interface{} //[] *
+	ElemOfUnit     	interface{}
+	GraphOfElem    	dot.DOTGraph
 }
 
 func NewUnit() Unit {
@@ -60,14 +64,14 @@ func (u Unit) PrintData() {
 //}
 
 //msg *messages.SAMessage, info [] *interface{}, r *bool
-func (u Unit) I_Initialiseunit(id string, msg *messages.SAMessage, info *interface{}) {
+func (u Unit) I_Initialiseunit(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	allUnitsType.Store(u.UnitId, u.ElemOfUnit)
 	allUnitsGraph.Store(u.UnitId, u.GraphOfElem)
 }
 
 //msg *messages.SAMessage, info [] *interface{}, r *bool
-func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}) {
-	fmt.Println("Unit.I_Execute::", u.UnitId, "::msg.Payload", msg.Payload, "::info:", info)
+func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+	fmt.Println("-----------------------------------------> Unit.I_Execute::", u.UnitId, "::TypeName:",(*(*info).([]*interface{})[0]).(*component.Component).TypeName,"::msg.Payload", msg.Payload, "::info:", info)
 	var ok bool
 
 	u.ElemOfUnit, ok = allUnitsType.Load(u.UnitId)
@@ -95,15 +99,18 @@ func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}) {
 	//engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, !shared.EXECUTE_FOREVER)
 	//engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, shared.EXECUTE_FOREVER)
 	//engine.EngineImpl{}.Execute(u.ElemOfUnit.(*component.Component), shared.EXECUTE_FOREVER)
-	executeForever := false                                        // TODO dcruzb: Create a list of executeForever values
-	engine.EngineImpl{}.Execute(elementComponent, &executeForever) //&shared.ExecuteForever) //shared.EXECUTE_FOREVER)
+	fmt.Println(">>>>>>>><<<<<<<<<<<<<>>>>>>>>>>>><<<<<<<<< Unit:", u.UnitId, "TypeName:", elementComponent.TypeName, "executing:", elementComponent.Executing)
+	if !elementComponent.Executing {
+		elementComponent.ExecuteForever = true
+		go engine.EngineImpl{}.Execute(elementComponent, &elementComponent.ExecuteForever) //&shared.ExecuteForever) //shared.EXECUTE_FOREVER)
+	}
 
 	return
 }
 
 //msg *messages.SAMessage, info [] *interface{}, r *bool
-func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{}) {
-	fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::msg.Payload", msg.Payload, "::info:", info)
+func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+	fmt.Println("-----------------------------------------> Unit.I_Adaptunit::", u.UnitId, "::TypeName:",(*(*info).([]*interface{})[0]).(*component.Component).TypeName,"::msg.Payload", msg.Payload, "::info:", info)
 	cmd := shared.UnitCommand{}
 	if msg.Payload != nil {
 		cmd = msg.Payload.(shared.UnitCommand)
@@ -111,24 +118,59 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{})
 		fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::msg.Payload->nil")
 	}
 
+
 	//fmt.Printf("Unit:: I_Adapt:: %v [%v] %v\n", reflect.TypeOf(u.ElemOfUnit).Name(), cmd.Cmd, u.UnitId)
 
 	if cmd.Cmd != "" && cmd.Cmd != "Nothing" {
 		elementComponent := (*(*info).([]*interface{})[0]).(*component.Component)
 		unitElemType := elementComponent.TypeName //reflect.TypeOf(u.ElemOfUnit).Name()
 		cmdElemType := reflect.TypeOf(cmd.Type).Name()
-		log.Println("--------------Unit.I_Adaptunit::", u.UnitId, ":: Adapt to ---->", cmdElemType)
+		//log.Println("")
+		//log.Println("")
+		//log.Println("--------------Unit.I_Adaptunit::", u.UnitId, ":: Adapt to ---->", cmdElemType)
+		//log.Println("")
+		//log.Println("")
 
 		// Check if the command is to this unit - check by type, i.e., all elements of a given type are adapted
 		if unitElemType == cmdElemType {
 			if cmd.Cmd == shared.REPLACE_COMPONENT { // TODO
+				log.Println("")
+				log.Println("")
+				log.Println("")
+				log.Println("")
+				log.Println("")
+				log.Println("")
 				//allUnitsType.LoadOrStore(u.UnitId, cmd.Type)
 				//g := u.changeSelector(cmd.Selector)
 				//allUnitsGraph.LoadOrStore(u.UnitId, g)
-				fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type", cmd.Type)
+				log.Println("--------------Unit.I_Adaptunit::unitElemType", unitElemType, ":: cmdElemType", cmdElemType)
+				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type", cmd.Type)
 				fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type is", reflect.TypeOf(cmd.Type))
 
 				fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::info:", elementComponent)
+				if strings.Contains(unitElemType, "SRH") {
+					reset := false
+
+					infoTemp := elementComponent.Info
+					srhInfo := infoTemp.(*messages.SRHInfo)
+					for _, client := range srhInfo.Clients {
+						// if Client from Connection Pool have a client connected
+						if client.Ip != "" {
+							miop := miop.CreateReqPacket("ChangeProtocol", []interface{}{"tcp"})
+							msg := &messages.SAMessage{}
+							msg.ToAddr = client.Ip
+							log.Println("msg.ToAddr:", msg.ToAddr)
+							msg.Payload = middleware.Jsonmarshaller{}.Marshall(miop)
+							// Coordinate the protocol change
+							shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
+						}
+					}
+				}
+
+				elementComponent.ExecuteForever = false
+				for elementComponent.Executing == true {
+					time.Sleep(200 * time.Millisecond)
+				}
 				elementComponent.Type = cmd.Type
 
 				//infoTemp := make([]*interface{}, 1)
@@ -151,7 +193,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{})
 }
 
 func (u *Unit) changeSelector(s func(interface{}, []*interface{}, string, *messages.SAMessage, []*interface{}, *bool)) exec.ExecGraph {
-	fmt.Println("Unit::changeSelector")
+	fmt.Println("-----------------------------------------> Unit::changeSelector")
 
 	temp, _ := allUnitsGraph.Load(u.UnitId)
 
