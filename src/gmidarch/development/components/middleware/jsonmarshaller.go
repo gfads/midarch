@@ -12,7 +12,7 @@ import (
 //@Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
 type Jsonmarshaller struct{}
 
-func (j Jsonmarshaller) I_Process(id string, msg *messages.SAMessage, info *interface{}) {
+func (j Jsonmarshaller) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	req := msg.Payload.(messages.FunctionalRequest)
 	op := req.Op
 

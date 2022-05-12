@@ -10,7 +10,7 @@ import (
 //@Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
 type Server struct{}
 
-func (s Server) I_Process(id string, msg *messages.SAMessage, info *interface{}) {
+func (s Server) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	request := msg.Payload.(*messages.FunctionalRequest)
 
 	switch request.Op {

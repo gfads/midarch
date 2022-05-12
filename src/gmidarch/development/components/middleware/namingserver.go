@@ -10,7 +10,7 @@ import (
 //@Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
 type Namingserver struct{}
 
-func (s Namingserver) I_Process(id string, msg *messages.SAMessage, info *interface{}) {
+func (s Namingserver) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	fmt.Println("Namingserver.I_Process::msg.Payload:", msg.Payload)
 	request := msg.Payload.(*messages.FunctionalRequest)
 	fmt.Println("Namingserver.I_Process::Pós msg.Payload")

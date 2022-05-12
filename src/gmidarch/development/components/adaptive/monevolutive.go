@@ -15,7 +15,7 @@ var listOfOldPlugins map[string]time.Time
 //@Behaviour: Behaviour = I_Hasnewplugins -> InvR.e1 -> Behaviour
 type Monevolutive struct {} //[] I_Nonewplugins -> Behaviour
 
-func (Monevolutive) I_Nonewplugins(id string, msg *messages.SAMessage, info *interface{}) { //, r *bool
+func (Monevolutive) I_Nonewplugins(id string, msg *messages.SAMessage, info *interface{}, reset *bool) { //, r *bool
 	listOfNewPlugins := pluginUtils.LoadPlugins()
 	newPlugins := pluginUtils.CheckForNewPlugins(listOfOldPlugins, listOfNewPlugins)
 	if len(newPlugins) != 0 {
@@ -24,7 +24,7 @@ func (Monevolutive) I_Nonewplugins(id string, msg *messages.SAMessage, info *int
 	}
 }
 
-func (Monevolutive) I_Hasnewplugins(id string, msg *messages.SAMessage, info *interface{}) { //, r *bool
+func (Monevolutive) I_Hasnewplugins(id string, msg *messages.SAMessage, info *interface{}, reset *bool) { //, r *bool
 	newPlugins := []string{}
 	listOfNewPlugins := make(map[string]time.Time)
 

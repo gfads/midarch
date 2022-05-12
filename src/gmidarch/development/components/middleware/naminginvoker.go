@@ -11,12 +11,12 @@ import (
 //@Behaviour: Behaviour = InvP.e1 -> I_Beforeunmarshalling -> InvR.e2 -> TerR.e2 -> I_Beforeserver -> InvR.e3 -> TerR.e3 -> I_Beforemarshalling -> InvR.e2 -> TerR.e2 -> I_Beforesend -> TerP.e1 -> Behaviour
 type Naminginvoker struct{}
 
-func (Naminginvoker) I_Beforeunmarshalling(id string, msg *messages.SAMessage, info *interface{}) {
+func (Naminginvoker) I_Beforeunmarshalling(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	tempParams := []interface{}{msg.Payload}
 	msg.Payload = messages.FunctionalRequest{Op: "unmarshall", Params: tempParams}
 }
 
-func (Naminginvoker) I_Beforeserver(id string, msg *messages.SAMessage, info *interface{}) {
+func (Naminginvoker) I_Beforeserver(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	miopPacket := msg.Payload.(messages.FunctionalReply).Rep.(miop.MiopPacket) // from marshaller
 
 	op := miopPacket.Bd.ReqHeader.Operation
@@ -80,13 +80,13 @@ func (Naminginvoker) I_Beforeserver(id string, msg *messages.SAMessage, info *in
 	}
 }
 
-func (Naminginvoker) I_Beforemarshalling(id string, msg *messages.SAMessage, info *interface{}) {
+func (Naminginvoker) I_Beforemarshalling(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	reply := msg.Payload.(messages.FunctionalReply)
 	repPacket := miop.CreateRepPacket(reply.Rep)
 	tempParams := []interface{}{repPacket}
 	msg.Payload = messages.FunctionalRequest{Op: "marshall", Params: tempParams}
 }
 
-func (Naminginvoker) I_Beforesend(id string, msg *messages.SAMessage, info *interface{}) {
+func (Naminginvoker) I_Beforesend(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	msg.Payload = msg.Payload.(messages.FunctionalReply).Rep
 }

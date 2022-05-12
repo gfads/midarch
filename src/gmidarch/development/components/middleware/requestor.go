@@ -11,7 +11,7 @@ import (
 //@Behaviour: Behaviour = InvP.e1 -> I_Beforemarshalling -> InvR.e2 -> TerR.e2 -> I_Beforesend -> InvR.e3 -> TerR.e3 -> I_Beforeunmarshalling -> InvR.e2 -> TerR.e2 -> I_Beforeproxy -> TerP.e1 -> Behaviour
 type Requestor struct{}
 
-func (Requestor) I_Beforemarshalling(id string, msg *messages.SAMessage, info *interface{}) {
+func (Requestor) I_Beforemarshalling(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 
 	fmt.Println(shared.GetFunction(),msg)
 
@@ -28,7 +28,7 @@ func (Requestor) I_Beforemarshalling(id string, msg *messages.SAMessage, info *i
 	msg.Payload = messages.FunctionalRequest{Op: "marshall", Params: tempParams}
 }
 
-func (Requestor) I_Beforesend(id string, msg *messages.SAMessage, info *interface{}) {
+func (Requestor) I_Beforesend(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 
 	// Response from Marhsaller (only bytes)
 	msgBytes := msg.Payload.(messages.FunctionalReply).Rep.([]byte)
@@ -41,12 +41,12 @@ func (Requestor) I_Beforesend(id string, msg *messages.SAMessage, info *interfac
 	msg.Payload = *info
 }
 
-func (Requestor) I_Beforeunmarshalling(id string, msg *messages.SAMessage, info *interface{}) {
+func (Requestor) I_Beforeunmarshalling(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	tempParams := []interface{}{msg.Payload}
 	msg.Payload = messages.FunctionalRequest{Op: "unmarshall", Params: tempParams}
 }
 
-func (Requestor) I_Beforeproxy(id string, msg *messages.SAMessage, info *interface{}) {
+func (Requestor) I_Beforeproxy(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	fmt.Println(shared.GetFunction(),msg)
 
 	temp1 := msg.Payload.(messages.FunctionalReply).Rep.(miop.MiopPacket)

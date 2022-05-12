@@ -24,6 +24,6 @@ func (Core) Selector(elem interface{}, elemInfo [] *interface{}, op string, msg 
 	fmt.Println("Core::Selector::msg.Payload", msg.Payload)
 }
 
-func (Core) I_Debug(id string, msg *messages.SAMessage, info *interface{}) {
+func (Core) I_Debug(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	fmt.Printf("Core:: %v\n",msg.Payload)
 }

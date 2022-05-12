@@ -38,7 +38,7 @@ func (p *Calculatorproxy) Configure(config generic.ProxyConfig) {
 }
 
 // Architectural operations
-func (Calculatorproxy) I_In(id string, msg *messages.SAMessage, info *interface{}) {
+func (Calculatorproxy) I_In(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 
 	// Create internal channels
 	ChIn = make(chan messages.SAMessage)
@@ -50,7 +50,7 @@ func (Calculatorproxy) I_In(id string, msg *messages.SAMessage, info *interface{
 	*msg = <-ChIn
 }
 
-func (Calculatorproxy) I_Out(id string, msg *messages.SAMessage, info *interface{}) {
+func (Calculatorproxy) I_Out(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 
 	fmt.Println(shared.GetFunction())
 

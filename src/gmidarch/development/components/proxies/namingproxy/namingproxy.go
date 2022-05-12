@@ -25,12 +25,12 @@ func (p *Namingproxy) Configure(config generic.ProxyConfig) {
 }
 
 // Architectural operations
-func (Namingproxy) I_In(id string, msg *messages.SAMessage, info *interface{}) {
+func (Namingproxy) I_In(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	// Receive request from Request
 	*msg = <-ChIn
 }
 
-func (Namingproxy) I_Out(id string, msg *messages.SAMessage, info *interface{}) {
+func (Namingproxy) I_Out(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	ChOut <- *msg
 }
 

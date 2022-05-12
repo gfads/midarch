@@ -10,7 +10,7 @@ import (
 //@Behaviour: Behaviour = InvP.e1 -> I_Process -> InvR.e2 -> Behaviour
 type Analyser struct{}
 
-func (Analyser) I_Process(id string, msg *messages.SAMessage, info *interface{}) {
+func (Analyser) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	monitoredEvolutiveData := msg.Payload.(shared.MonitoredEvolutiveData)
 	evolutiveAnalysisResult := shared.EvolutiveAnalysisResult{}
 

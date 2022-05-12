@@ -13,7 +13,7 @@ import (
 
 type Gobmarshaller struct{}
 
-func (g Gobmarshaller) I_Process(id string, msg *messages.SAMessage, info *interface{}) {
+func (g Gobmarshaller) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	gob.Register(messages.FunctionalRequest{})
 	gob.Register(messages.AOR{})               // TODO - perhaps put in init()
 

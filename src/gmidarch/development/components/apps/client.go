@@ -33,7 +33,7 @@ var i = 0
 
 // Naming client
 
-func (Client) I_Beforesend(id string, msg *messages.SAMessage, info *interface{}) {
+func (Client) I_Beforesend(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	if i == 0 {
 		aor := messages.AOR{Host: "localhost", Port: shared.NAMING_PORT, Id: 123456, ProxyName: "calculatorimpl"}
 		params := []interface{}{"Calculator", aor}
@@ -47,7 +47,7 @@ func (Client) I_Beforesend(id string, msg *messages.SAMessage, info *interface{}
 	}
 	i++
 }
-func (Client) I_Afterreceive(id string, msg *messages.SAMessage, info *interface{}) {
+func (Client) I_Afterreceive(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	fmt.Println(id, msg.Payload)
 	if i == 2 {
 		os.Exit(0)

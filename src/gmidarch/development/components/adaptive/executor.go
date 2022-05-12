@@ -13,7 +13,7 @@ import (
 //@Behaviour: Behaviour = InvP.e1 -> I_Process -> InvR.e2 -> Behaviour
 type Executor struct{}
 
-func (Executor) I_Process(id string, msg *messages.SAMessage, info *interface{}) {
+func (Executor) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	fmt.Println("Executor::msg.Payload", msg.Payload)
 	plan := msg.Payload.(shared.AdaptationPlan)
 	fmt.Println("Executor::plan", plan)

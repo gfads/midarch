@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"apps/businesses/calculatorimpl"
-	"fmt"
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
 	"shared"
@@ -12,15 +11,14 @@ import (
 //@Behaviour: Behaviour = InvP.e1 -> I_Beforeunmarshalling -> InvR.e2 -> TerR.e2 -> I_Beforeserver -> I_Beforemarshalling -> InvR.e2 -> TerR.e2 -> I_Beforesend -> TerP.e1 -> Behaviour
 type Calculatorinvoker struct{}
 
-func (Calculatorinvoker) I_Beforeunmarshalling(id string, msg *messages.SAMessage, info *interface{}) {
+func (Calculatorinvoker) I_Beforeunmarshalling(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	tempParams := []interface{}{msg.Payload}
 	msg.Payload = messages.FunctionalRequest{Op: "unmarshall", Params: tempParams}
 }
 
-func (Calculatorinvoker) I_Beforeserver(id string, msg *messages.SAMessage, info *interface{}) {
+func (Calculatorinvoker) I_Beforeserver(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	miopPacket := msg.Payload.(messages.FunctionalReply).Rep.(miop.MiopPacket) // from marshaller
 
-	fmt.Println(shared.GetFunction(),"TO AQUI")
 	req := messages.FunctionalRequest{Op:miopPacket.Bd.ReqHeader.Operation, Params:miopPacket.Bd.ReqBody.Body}
 
 	switch req.Op {
@@ -37,17 +35,17 @@ func (Calculatorinvoker) I_Beforeserver(id string, msg *messages.SAMessage, info
 		msg.Payload = messages.FunctionalReply{Rep:reply}
 
 	default:
-		shared.ErrorHandler(shared.GetFunction(), "Operation '"+req.Op+"' not presente in Invoker")
+		shared.ErrorHandler(shared.GetFunction(), "Operation '"+req.Op+"' not present in Invoker")
 	}
 }
 
-func (Calculatorinvoker) I_Beforemarshalling(id string, msg *messages.SAMessage, info *interface{}) {
+func (Calculatorinvoker) I_Beforemarshalling(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	reply := msg.Payload.(messages.FunctionalReply)
 	repPacket := miop.CreateRepPacket(reply.Rep)
 	tempParams := []interface{}{repPacket}
 	msg.Payload = messages.FunctionalRequest{Op: "marshall", Params: tempParams}
 }
 
-func (Calculatorinvoker) I_Beforesend(id string, msg *messages.SAMessage, info *interface{}) {
+func (Calculatorinvoker) I_Beforesend(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	msg.Payload = msg.Payload.(messages.FunctionalReply).Rep
 }
