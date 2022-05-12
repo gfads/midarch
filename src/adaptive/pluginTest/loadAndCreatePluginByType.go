@@ -36,7 +36,6 @@ func main() {
 	fmt.Println("e:", e)
 	f := e.Interface()
 	fmt.Println("f:", f)
-	log.Println("Teste")
 	reflect.ValueOf(f).MethodByName("Print").Call([]reflect.Value{}) //[]) //[])
 
 	//fmt.Println("Will set value for Name:", reflect.ValueOf(e).FieldByName("Name"))
@@ -96,7 +95,6 @@ func main() {
 	fmt.Println("e:", e)
 	f = e.Interface()
 	fmt.Println("f:", f)
-	log.Println("Teste")
 	reflect.ValueOf(f).MethodByName("Print").Call([]reflect.Value{}) //[]) //[])
 }
 

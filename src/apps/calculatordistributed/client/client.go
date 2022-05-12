@@ -33,7 +33,7 @@ func main() {
 	}
 
 	calc := aux.(*calculatorproxy.Calculatorproxy)
-	for x := 0; x < 20; x++ {
+	for x := 0; x < 1000; x++ {
 		fmt.Println("Result:", calc.Add(x, 1))
 		time.Sleep(200 * time.Millisecond)
 	}

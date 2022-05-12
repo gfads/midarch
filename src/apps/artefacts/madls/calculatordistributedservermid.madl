@@ -23,6 +23,6 @@ Configuration calculatordistributedservermid :=
         cinvoker,t5,marshaller2
 
    Adaptability
-      None
+      Evolutive
 
 EndConf
