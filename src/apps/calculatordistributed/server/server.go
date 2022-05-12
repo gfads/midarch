@@ -7,8 +7,10 @@ import (
 	"gmidarch/development/generic"
 	"gmidarch/development/messages"
 	"gmidarch/execution/frontend"
+	evolutive "injector"
 	"shared"
 	"sync"
+	"time"
 )
 
 func main() {
@@ -44,6 +46,7 @@ func main() {
 	fmt.Printf("Calculator server is running at Port: %v \n", shared.CALCULATOR_PORT)
 
 	//evolutive.EvolutiveInjector{}.Start("sender", 40*time.Second)
+	evolutive.EvolutiveInjector{}.Start("srhtcp", 40*time.Second)
 
 	//fmt.Scanln()
 	var wg sync.WaitGroup
