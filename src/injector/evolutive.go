@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"gmidarch/development/repositories/architectural"
 	"io/ioutil"
-	"log"
 	"os"
 	"os/exec"
 	"shared"
@@ -54,7 +53,6 @@ func alternatePlugins(elem string, interval time.Duration) {
 			currentPlugin = 2
 			elemOld = elem + "_v1"
 			elemNew = elem + "_v1"
-			log.Println("Teste")
 			GeneratePlugin(elemOld, elem, elemNew)
 		case 2: // Plugin 02
 			currentPlugin = 1
@@ -69,7 +67,7 @@ func alternatePlugins(elem string, interval time.Duration) {
 }
 
 func GeneratePlugin(source, pluginName, versionedPluginName string) {
-	log.Println("Vai ler:", shared.DIR_PLUGINS_SOURCE+"/pluginBuild.model")
+	//log.Println("Vai ler:", shared.DIR_PLUGINS_SOURCE+"/pluginBuild.model")
 	input, err := ioutil.ReadFile(shared.DIR_PLUGINS_SOURCE + "/pluginBuild.model")
 	if err != nil {
 		fmt.Println(err)
@@ -79,12 +77,12 @@ func GeneratePlugin(source, pluginName, versionedPluginName string) {
 	pluginType, _ := architectural.GetTypeAndBehaviour(shared.DIR_PLUGINS_SOURCE + "/" + versionedPluginName + "/" + pluginName + ".go")
 	pluginSourcePath := shared.DIR_PLUGINS_IMPORT + "/" + versionedPluginName
 
-	log.Println("pluginSourcePath:", pluginSourcePath)
+	//log.Println("pluginSourcePath:", pluginSourcePath)
 	//pluginSourcePath := "adaptive/pluginTest/pluginsSrc" + "/" + pluginName
 	output := bytes.Replace(input, []byte("<pluginName>"), []byte(pluginSourcePath), -1)
 	output = bytes.Replace(output, []byte("<pluginType>"), []byte(pluginName+"."+pluginType+"{}"), -1)
 
-	log.Println("Vai gravar:", shared.DIR_PLUGINS_SOURCE+"/pluginBuild.go")
+	//log.Println("Vai gravar:", shared.DIR_PLUGINS_SOURCE+"/pluginBuild.go")
 	if err = ioutil.WriteFile(shared.DIR_PLUGINS_SOURCE+"/pluginBuild.go", output, 0666); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -99,13 +97,13 @@ func generatePlugin(source, plugin string) {
 	//pIn := shared.DIR_PLUGINS_SOURCE + "/" + source + "/" + source + ".go"
 	pIn := shared.DIR_PLUGINS_SOURCE + "/pluginBuild.go"
 
-	fmt.Println("injector::evolutive.generatePlugin::will build plugin:", source)
-	fmt.Println("command:", shared.DIR_GO+"/go", "build", "-buildmode=plugin", "-o", pOut, pIn)
+	//fmt.Println("injector::evolutive.generatePlugin::will build plugin:", source)
+	//fmt.Println("command:", shared.DIR_GO+"/go", "build", "-buildmode=plugin", "-o", pOut, pIn)
 	_, err := exec.Command(shared.DIR_GO+"/go", "build", "-buildmode=plugin", "-o", pOut, pIn).CombinedOutput()
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), "Something wrong in generating plugin '"+pIn+"' in \n '"+pOut+"': "+err.Error()+"\n")
 	}
-	fmt.Println("injector::evolutive.generatePlugin::plugin built:", source)
+	//fmt.Println("injector::evolutive.generatePlugin::plugin built:", source)
 }
 
 func removeOldPlugins() {

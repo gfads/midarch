@@ -128,14 +128,15 @@ var DIR_CSP = DIR_BASE + "/src/apps/artefacts/csp"
 const FDR_COMMAND = "refines"
 
 // Utility functions
-func MyInvoke(compType interface{}, compId string, op string, msg *messages.SAMessage, info *interface{}) {
-	inputs := make([]reflect.Value, 3)
+func MyInvoke(compType interface{}, compId string, op string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+	inputs := make([]reflect.Value, 4)
 
 	inputs[0] = reflect.ValueOf(compId)
 	inputs[1] = reflect.ValueOf(msg)
 	inputs[2] = reflect.ValueOf(info)
+	inputs[3] = reflect.ValueOf(reset)
 
-	fmt.Println("MyInvoke( compId:", compId, "- msg:", msg, "- info:", info, "- Method Name:", op, ")")
+	//fmt.Println("MyInvoke( compId:", compId, "- msg:", msg, "- info:", info, "- Method Name:", op, ")")
 	reflect.ValueOf(compType).MethodByName(op).Call(inputs)
 }
 

@@ -32,6 +32,7 @@ func NewEngine() Engine {
 
 func (EngineImpl) Execute(comp *component.Component, executeForever *bool) {
 	node := 0
+	comp.Executing = true
 	fmt.Println("EngineImpl.Execute::Component.Id:", comp.Id)
 	if comp.TypeName == "Unit" {
 		fmt.Println("EngineImpl.Execute::comp.Info.([]*interface{})[0]).(component.Component).Info:", (*comp.Info.([]*interface{})[0]).(*component.Component).Info)
@@ -50,29 +51,39 @@ func (EngineImpl) Execute(comp *component.Component, executeForever *bool) {
 	// Execute graph
 	for {
 		edges := comp.Graph.AdjacentEdges(node)
+		reset := false
 		if len(edges) == 1 { // Internal action
+
 			if edges[0].Action.IsInternal { // Internal action
-				edges[0].Action.InternalAction(comp.Type, comp.Id, edges[0].Action.Name, &comp.Buffer, &comp.Info)
+				edges[0].Action.InternalAction(comp.Type, comp.Id, edges[0].Action.Name, &comp.Buffer, &comp.Info, &reset)
 			} else { // External action
-				edges[0].Action.ExternalAction(&comp.Buffer, edges[0].Action.Conn, comp.Id, &comp.Info)
+				edges[0].Action.ExternalAction(&comp.Buffer, edges[0].Action.Conn, comp.Id, &comp.Info, &reset)
 			}
+
 			node = edges[0].To // Next node
-			fmt.Println("EngineImpl.Execute unique", 0, "comp", comp.Id, "edges[0].To", edges[0].To, "len(edges)", len(edges))
+
+			//fmt.Println("EngineImpl.Execute unique", 0, "comp", comp.Id, "edges[0].To", edges[0].To, "len(edges)", len(edges))
 		} else {
-			chosen := choice(comp, edges)
+			chosen := choice(comp, edges, &reset)
 			node = edges[chosen].To
 			fmt.Println("EngineImpl.Execute chosen", chosen, "comp", comp.Id, "edges[chosen].To", edges[chosen].To, "len(edges)", len(edges))
 		}
+
+		if reset {
+			node = 0
+		}
+
 		if node == 0 {
 			if !*executeForever {
 				break
 			}
 		}
 	}
+	comp.Executing = false
 	return
 }
 
-func choice(comp *component.Component, edges []dot.DOTEdge) int {
+func choice(comp *component.Component, edges []dot.DOTEdge, reset *bool) int {
 	nEdges := len(edges)
 	//externalOnly := true
 	internalOnly := true
@@ -110,7 +121,7 @@ func choice(comp *component.Component, edges []dot.DOTEdge) int {
 					compInfo := comp.Info
 
 					// Execute action
-					edges[i].Action.InternalAction(comp.Type, comp.Id, edges[i].Action.Name, &compBuffer, &compInfo)
+					edges[i].Action.InternalAction(comp.Type, comp.Id, edges[i].Action.Name, &compBuffer, &compInfo, reset)
 
 					// First action to complete block the others
 					after <- Bufferinfo{Choice: i, Buffer: compBuffer, Info: compInfo}
@@ -127,7 +138,7 @@ func choice(comp *component.Component, edges []dot.DOTEdge) int {
 					compInfo := comp.Info
 
 					// Execute action
-					edges[i].Action.InternalAction(comp.Type, comp.Id, edges[i].Action.Name, &compBuffer, &compInfo)
+					edges[i].Action.InternalAction(comp.Type, comp.Id, edges[i].Action.Name, &compBuffer, &compInfo, reset)
 
 					// First action to complete block the others
 					after <- Bufferinfo{Choice: i, Buffer: compBuffer, Info: compInfo}
@@ -153,9 +164,9 @@ func choice(comp *component.Component, edges []dot.DOTEdge) int {
 	comp.Buffer = value.Interface().(messages.SAMessage)
 	// Execute action
 	if edges[chosen].Action.IsInternal {
-		edges[chosen].Action.InternalAction(comp.Type, comp.Id, edges[chosen].Action.Name, &comp.Buffer, &comp.Info)
+		edges[chosen].Action.InternalAction(comp.Type, comp.Id, edges[chosen].Action.Name, &comp.Buffer, &comp.Info, reset)
 	} else {
-		edges[chosen].Action.ExternalAction(&comp.Buffer, edges[chosen].Action.Conn, comp.Id, &comp.Info)
+		edges[chosen].Action.ExternalAction(&comp.Buffer, edges[chosen].Action.Conn, comp.Id, &comp.Info, reset)
 	}
 
 	return chosen
