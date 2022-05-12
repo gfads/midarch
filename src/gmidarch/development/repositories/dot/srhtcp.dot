@@ -1,6 +1,5 @@
 digraph G {
   0 -> 1 [ label="I_Accept" ];
-  1 -> 1 [ label="I_Accept" ];
   1 -> 2 [ label="I_Receive" ];
   2 -> 3 [ label="InvR.e1" ];
   3 -> 4 [ label="TerR.e1" ];
