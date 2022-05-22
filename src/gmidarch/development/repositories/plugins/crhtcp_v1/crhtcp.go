@@ -1,7 +1,8 @@
-package middleware
+package crhtcp
 
 import (
 	"encoding/binary"
+	"gmidarch/development/components/middleware"
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
 	evolutive "injector"
@@ -15,7 +16,7 @@ import (
 type CRHTCP struct {}
 
 func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version 1 adapted")
 	infoTemp := *info
 	crhInfo := infoTemp.(messages.CRHInfo)
 
@@ -70,9 +71,8 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	msgFromServer := c.read(err, conn, size)
 	if changeProtocol, miop := c.isAdapt(msgFromServer); changeProtocol {
 		log.Println("Adapting, miop.Bd.ReqBody.Body:", miop.Bd.ReqBody.Body)
-		if miop.Bd.ReqBody.Body[0] == "tcp" {
-			evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
-		}
+
+		evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
 		msgFromServer = c.read(err, conn, size)
 	}
 
@@ -96,6 +96,6 @@ func (c CRHTCP) read(err error, conn net.Conn, size []byte) []byte {
 }
 
 func (c CRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
-	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop := middleware.Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }
