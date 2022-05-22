@@ -1,8 +1,8 @@
 package main
 
 import (
-	"<pluginName>"
 	"fmt"
+	"<pluginName>"
 )
 
 func GetType() interface{} {

@@ -130,7 +130,9 @@ func (s SRHTCP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
+	log.Println("msg.ToAddr", msg.ToAddr, "srhInfo.Clients", srhInfo.Clients)
 	conn := srhInfo.GetClientFromAddr(msg.ToAddr, srhInfo.Clients).Connection //srhInfo.CurrentConn
+	log.Println("conn:", conn)
 	msgTemp := msg.Payload.([]byte)
 
 	// send message's size
