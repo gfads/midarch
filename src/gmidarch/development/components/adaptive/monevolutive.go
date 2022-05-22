@@ -43,10 +43,10 @@ func (Monevolutive) I_Hasnewplugins(id string, msg *messages.SAMessage, info *in
 	// return from this point if no new pluginsSrc detected
 	if len(newPlugins) == 0 {
 		fmt.Println("Monevolutive.I_Hasnewplugins::No new pluginsSrc found")
-		//*r = false
-		evolutiveMonitoredData := shared.MonitoredEvolutiveData{}
+		*reset = true
+		//evolutiveMonitoredData := shared.MonitoredEvolutiveData{}
 		//evolutiveMonitoredData = newPlugins
-		*msg = messages.SAMessage{Payload: evolutiveMonitoredData}
+		//*msg = messages.SAMessage{Payload: evolutiveMonitoredData}
 		return
 	}
 
