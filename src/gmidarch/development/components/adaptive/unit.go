@@ -132,7 +132,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 		//log.Println("")
 
 		// Check if the command is to this unit - check by type, i.e., all elements of a given type are adapted
-		if unitElemType == cmdElemType {
+		if shared.CompatibleComponents(unitElemType, cmdElemType) {
 			if cmd.Cmd == shared.REPLACE_COMPONENT { // TODO
 				log.Println("")
 				log.Println("")

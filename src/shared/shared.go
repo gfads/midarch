@@ -379,3 +379,9 @@ func SaveFile(path, name, ext string, content []string) {
 	}
 	defer file.Close()
 }
+
+func CompatibleComponents(componentTypeName1, componentTypeName2 string) bool {
+	return (strings.Contains(componentTypeName1, "SRH") && strings.Contains(componentTypeName2, "SRH")) ||
+		   (strings.Contains(componentTypeName1, "CRH") && strings.Contains(componentTypeName2, "CRH")) ||
+		   (componentTypeName1 == componentTypeName2)
+}
