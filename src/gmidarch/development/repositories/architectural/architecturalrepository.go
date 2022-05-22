@@ -1,7 +1,6 @@
 package architectural
 
 import (
-	"bufio"
 	"gmidarch/development/components/adaptive"
 	"gmidarch/development/components/apps"
 	"gmidarch/development/components/component"
@@ -11,10 +10,7 @@ import (
 	"gmidarch/development/connectors"
 	"gmidarch/development/messages"
 	"io/ioutil"
-	"log"
-	"os"
 	"shared"
-	"strings"
 )
 
 type ArchitecturalRepository struct {
@@ -104,7 +100,7 @@ func ReadComponentTypesFromDisk() map[string]string {
 
 	for file := range adaptiveFiles {
 		fullPathName := shared.DIR_ADAPTIVE_COMPONENTS + "/" + adaptiveFiles[file].Name()
-		typeName, behaviour := getTypeAndBehaviour(fullPathName)
+		typeName, behaviour := shared.GetTypeAndBehaviour(fullPathName)
 		compLibrary[typeName] = behaviour
 	}
 
@@ -116,7 +112,7 @@ func ReadComponentTypesFromDisk() map[string]string {
 
 	for file := range appFiles {
 		fullPathName := shared.DIR_APP_COMPONENTS + "/" + appFiles[file].Name()
-		typeName, behaviour := getTypeAndBehaviour(fullPathName)
+		typeName, behaviour := shared.GetTypeAndBehaviour(fullPathName)
 		compLibrary[typeName] = behaviour
 	}
 
@@ -128,7 +124,7 @@ func ReadComponentTypesFromDisk() map[string]string {
 
 	for file := range midFiles {
 		fullPathName := shared.DIR_MIDDLEWARE_COMPONENTS + "/" + midFiles[file].Name()
-		typeName, behaviour := getTypeAndBehaviour(fullPathName)
+		typeName, behaviour := shared.GetTypeAndBehaviour(fullPathName)
 		compLibrary[typeName] = behaviour
 	}
 
@@ -145,58 +141,10 @@ func ReadComponentTypesFromDisk() map[string]string {
 		}
 		for file := range temp {
 			fullPathName := shared.DIR_PROXIES_COMPONENTS + "/" + proxiesFolders[folder].Name() + "/" + temp[file].Name()
-			typeName, behaviour := getTypeAndBehaviour(fullPathName)
+			typeName, behaviour := shared.GetTypeAndBehaviour(fullPathName)
 			compLibrary[typeName] = behaviour
 		}
 	}
 
 	return compLibrary
-}
-
-func GetTypeAndBehaviour(file string) (string, string) {
-	return getTypeAndBehaviour(file)
-}
-
-func getTypeAndBehaviour(file string) (string, string) {
-	typeName := ""
-	behaviour := ""
-	foundType := false
-	foundBehaviour := false
-
-	// Open file
-	f, err := os.Open(file)
-	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
-	}
-	defer func() {
-		if err = f.Close(); err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	scanner := bufio.NewScanner(f)
-
-	// Read file & indentify types/behaviours
-	for scanner.Scan() {
-		line := scanner.Text()
-		if strings.Contains(line, shared.BEHAVIOUR_TAG) {
-			behaviour = line[strings.Index(line, shared.BEHAVIOUR_TAG)+len(shared.BEHAVIOUR_TAG)+1:]
-			foundBehaviour = true
-		}
-		if strings.Contains(line, shared.TYPE_TAG) {
-			typeName = strings.TrimSpace(line[strings.Index(line, shared.TYPE_TAG)+len(shared.TYPE_TAG)+1:])
-			foundType = true
-		}
-
-		if foundType && foundBehaviour {
-			break
-		}
-	}
-
-	// Check wether type/behaviour information is complete or not
-	if !foundType || !foundBehaviour {
-		shared.ErrorHandler(shared.GetFunction(), "Tags '"+shared.BEHAVIOUR_TAG+"' or '"+shared.TYPE_TAG+"' are missing in '"+file+"''")
-	}
-
-	return typeName, behaviour
 }

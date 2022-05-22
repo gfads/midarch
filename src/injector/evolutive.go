@@ -3,7 +3,6 @@ package evolutive
 import (
 	"bytes"
 	"fmt"
-	"gmidarch/development/repositories/architectural"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -15,7 +14,6 @@ import (
 type EvolutiveInjector struct{}
 
 func (EvolutiveInjector) Start(elem string, interval time.Duration) {
-
 	// Replacing strategies
 	//go noChange()
 	//go changeOnce(elem)
@@ -74,7 +72,7 @@ func GeneratePlugin(source, pluginName, versionedPluginName string) {
 		os.Exit(1)
 	}
 
-	pluginType, _ := architectural.GetTypeAndBehaviour(shared.DIR_PLUGINS_SOURCE + "/" + versionedPluginName + "/" + pluginName + ".go")
+	pluginType, _ := shared.GetTypeAndBehaviour(shared.DIR_PLUGINS_SOURCE + "/" + versionedPluginName + "/" + pluginName + ".go")
 	pluginSourcePath := shared.DIR_PLUGINS_IMPORT + "/" + versionedPluginName
 
 	//log.Println("pluginSourcePath:", pluginSourcePath)
@@ -83,7 +81,8 @@ func GeneratePlugin(source, pluginName, versionedPluginName string) {
 	output = bytes.Replace(output, []byte("<pluginType>"), []byte(pluginName+"."+pluginType+"{}"), -1)
 
 	//log.Println("Vai gravar:", shared.DIR_PLUGINS_SOURCE+"/pluginBuild.go")
-	if err = ioutil.WriteFile(shared.DIR_PLUGINS_SOURCE+"/pluginBuild.go", output, 0666); err != nil {
+	os.Mkdir(shared.DIR_PLUGINS_SOURCE+"/"+versionedPluginName+"/main", os.ModePerm)
+	if err = ioutil.WriteFile(shared.DIR_PLUGINS_SOURCE+"/"+versionedPluginName+"/main/pluginBuild.go", output, 0666); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
@@ -95,7 +94,7 @@ func generatePlugin(source, plugin string) {
 
 	pOut := shared.DIR_PLUGINS + "/" + plugin + ".so"
 	//pIn := shared.DIR_PLUGINS_SOURCE + "/" + source + "/" + source + ".go"
-	pIn := shared.DIR_PLUGINS_SOURCE + "/pluginBuild.go"
+	pIn := shared.DIR_PLUGINS_SOURCE + "/" + plugin + "/main/pluginBuild.go"
 
 	//fmt.Println("injector::evolutive.generatePlugin::will build plugin:", source)
 	//fmt.Println("command:", shared.DIR_GO+"/go", "build", "-buildmode=plugin", "-o", pOut, pIn)

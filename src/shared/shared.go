@@ -1,8 +1,10 @@
 package shared
 
 import (
+	"bufio"
 	"fmt"
 	"gmidarch/development/messages"
+	"log"
 	"os"
 	"plugin"
 	"reflect"
@@ -72,8 +74,8 @@ const MAX_NUMBER_OF_RECEIVED_MESSAGES = 300 // messages received and not process
 const ATTEMPTS_TO_OPEN_A_PLUGIN = 1000
 
 // Evolution
-const FIRST_MONITOR_TIME time.Duration = 10 * time.Second
-const MONITOR_TIME time.Duration = 40 * time.Second
+const FIRST_MONITOR_TIME time.Duration = 5 * time.Second
+const MONITOR_TIME time.Duration = 100 * time.Millisecond
 
 var INJECTION_TIME time.Duration
 
@@ -378,6 +380,50 @@ func SaveFile(path, name, ext string, content []string) {
 		ErrorHandler(GetFunction(), "File "+path+"/"+name+"."+ext+"not synced!!")
 	}
 	defer file.Close()
+}
+
+func GetTypeAndBehaviour(file string) (string, string) {
+	typeName := ""
+	behaviour := ""
+	foundType := false
+	foundBehaviour := false
+
+	// Open file
+	f, err := os.Open(file)
+	if err != nil {
+		ErrorHandler(GetFunction(), err.Error())
+	}
+	defer func() {
+		if err = f.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
+
+	scanner := bufio.NewScanner(f)
+
+	// Read file & indentify types/behaviours
+	for scanner.Scan() {
+		line := scanner.Text()
+		if strings.Contains(line, BEHAVIOUR_TAG) {
+			behaviour = line[strings.Index(line, BEHAVIOUR_TAG)+len(BEHAVIOUR_TAG)+1:]
+			foundBehaviour = true
+		}
+		if strings.Contains(line, TYPE_TAG) {
+			typeName = strings.TrimSpace(line[strings.Index(line, TYPE_TAG)+len(TYPE_TAG)+1:])
+			foundType = true
+		}
+
+		if foundType && foundBehaviour {
+			break
+		}
+	}
+
+	// Check wether type/behaviour information is complete or not
+	if !foundType || !foundBehaviour {
+		ErrorHandler(GetFunction(), "Tags '"+BEHAVIOUR_TAG+"' or '"+TYPE_TAG+"' are missing in '"+file+"''")
+	}
+
+	return typeName, behaviour
 }
 
 func CompatibleComponents(componentTypeName1, componentTypeName2 string) bool {
