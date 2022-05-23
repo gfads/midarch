@@ -35,6 +35,8 @@ var SetOfComponentTypesRAM = map[string]interface{} {
 	"Gobmarshaller":     	&middleware.Gobmarshaller{},
 	"CRHTCP":            	&middleware.CRHTCP{},
 	"SRHTCP":            	&middleware.SRHTCP{},
+	"CRHUDP":            	&middleware.CRHUDP{},
+	"SRHUDP":            	&middleware.SRHUDP{},
 	"Calculatorinvoker": 	&middleware.Calculatorinvoker{},
 	"Requestor":         	&middleware.Requestor{},
 	"Naminginvoker":     	&middleware.Naminginvoker{},
