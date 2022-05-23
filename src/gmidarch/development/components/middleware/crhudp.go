@@ -10,12 +10,12 @@ import (
 	"shared"
 )
 
-//@Type: CRHTCP
+//@Type: CRHUDP
 //@Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
-type CRHTCP struct {}
+type CRHUDP struct {}
 
-func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
 	infoTemp := *info
 	crhInfo := infoTemp.(messages.CRHInfo)
 
@@ -41,12 +41,12 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	key := host + ":" + port
 	var err error
 	if _, ok := crhInfo.Conns[key]; !ok { // no connection open yet
-		tcpAddr, err := net.ResolveTCPAddr("tcp", key)
+		udpAddr, err := net.ResolveUDPAddr("udp", key)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(),err.Error())
 		}
 
-		crhInfo.Conns[key], err = net.DialTCP("tcp", nil, tcpAddr)
+		crhInfo.Conns[key], err = net.DialUDP("udp", nil, udpAddr)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(),err.Error())
 		}
@@ -70,8 +70,8 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	msgFromServer := c.read(err, conn, size)
 	if changeProtocol, miop := c.isAdapt(msgFromServer); changeProtocol {
 		log.Println("Adapting, miop.Bd.ReqBody.Body:", miop.Bd.ReqBody.Body)
-		if miop.Bd.ReqBody.Body[0] == "tcp" {
-			evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
+		if miop.Bd.ReqBody.Body[0] == "udp" {
+			evolutive.GeneratePlugin("crhudp_v1", "crhudp", "crhudp_v1")
 		}
 		msgFromServer = c.read(err, conn, size)
 	}
@@ -79,7 +79,7 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
 
-func (c CRHTCP) read(err error, conn net.Conn, size []byte) []byte {
+func (c CRHUDP) read(err error, conn net.Conn, size []byte) []byte {
 	// receive reply's size
 	_, err = conn.Read(size)
 	if err != nil {
@@ -95,7 +95,7 @@ func (c CRHTCP) read(err error, conn net.Conn, size []byte) []byte {
 	return msgFromServer
 }
 
-func (c CRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
+func (c CRHUDP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }

@@ -38,7 +38,6 @@ func changeSamePluginSeveralTimes(elem string) {
 }
 
 func alternatePlugins(elem string, interval time.Duration) {
-
 	//removeOldPlugins()
 
 	elemNew := ""
@@ -91,7 +90,6 @@ func GeneratePlugin(source, pluginName, versionedPluginName string) {
 }
 
 func generatePlugin(source, plugin string) {
-
 	pOut := shared.DIR_PLUGINS + "/" + plugin + ".so"
 	//pIn := shared.DIR_PLUGINS_SOURCE + "/" + source + "/" + source + ".go"
 	pIn := shared.DIR_PLUGINS_SOURCE + "/" + plugin + "/main/pluginBuild.go"

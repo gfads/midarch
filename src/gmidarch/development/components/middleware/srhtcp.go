@@ -91,7 +91,7 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		*info = srhInfo
 
 		// Start goroutine
-		go handler(info, availableConenctionIndex)
+		go s.handler(info, availableConenctionIndex)
 	}()
 	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version Not adapted")
 	return
@@ -157,7 +157,7 @@ func (s SRHTCP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 	return
 }
 
-func handler(info *interface{}, connectionIndex int) {
+func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version Not adapted")
 
 	infoTemp := *info
