@@ -1,7 +1,8 @@
 package messages
 
 import (
-"net"
+	"log"
+	"net"
 )
 
 type SRHInfo struct {
@@ -13,6 +14,7 @@ type SRHInfo struct {
 	RcvedMessages 	chan ReceivedMessages	// Buffer of messages received by the server
 	Clients			[]*Client				// Connection Pool, possible connected
 	Counter			int
+	ExecuteForever	*bool
 }
 
 type ReceivedMessages struct {
@@ -24,7 +26,8 @@ type ReceivedMessages struct {
 type Client struct {
 	Ip				string
 	Connection		net.Conn
-	UDPConnection 	net.UDPConn
+	UDPConnection 	*net.UDPConn
+	AdaptId			int
 }
 
 func (i SRHInfo) GetClientFromAddr(addr string, clients []*Client) *Client {
@@ -32,6 +35,8 @@ func (i SRHInfo) GetClientFromAddr(addr string, clients []*Client) *Client {
 		if client.Ip == addr {
 			return client
 		}
+		log.Println("client without connection from the ip:", addr, " connection:", client.Connection)
 	}
+
 	return nil
 }

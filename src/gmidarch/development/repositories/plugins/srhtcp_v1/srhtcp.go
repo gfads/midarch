@@ -18,7 +18,7 @@ type SRHTCP struct{}
 func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client) (bool, int) {
 	clients := *clientsPtr
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total clients", len(clients))
-	if len(clients) < shared.MAX_NUMBER_OF_CONNECTIONS {
+	if len(clients) < 10 { //shared.MAX_NUMBER_OF_CONNECTIONS { TODO: dcruzb go back the env var
 		client := messages.Client{
 			Ip:         "",
 			Connection: nil,
@@ -72,7 +72,7 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 
 	go func() {
 		client := srhInfo.Clients[availableConenctionIndex]
-		log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients Index", availableConenctionIndex)
+		log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients Index:", availableConenctionIndex, " ip:", client.Ip)
 
 		// Accept connections
 		conn, err := srhInfo.Ln.Accept()
@@ -113,7 +113,11 @@ func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
-			msg.ToAddr = tempMsgReceived.Chn.RemoteAddr().String()
+			if tempMsgReceived.Chn == nil {
+				*reset = true
+				return
+			}
+			msg.ToAddr = tempMsgReceived.ToAddress //Chn.RemoteAddr().String()
 		}
 	default:
 		{
@@ -131,8 +135,13 @@ func (s SRHTCP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	log.Println("msg.ToAddr", msg.ToAddr, "srhInfo.Clients", srhInfo.Clients)
-	conn := srhInfo.GetClientFromAddr(msg.ToAddr, srhInfo.Clients).Connection //srhInfo.CurrentConn
-	log.Println("conn:", conn)
+	client := srhInfo.GetClientFromAddr(msg.ToAddr, srhInfo.Clients)
+	conn := client.Connection //srhInfo.CurrentConn
+	if conn == nil {
+		*reset = true
+		return
+	}
+	fmt.Println("SRHTCP Version 1 adapted   >>>>> TCP => msg.ToAddr:", msg.ToAddr, "TCP conn:", conn, "AdaptId:", client.AdaptId)
 	msgTemp := msg.Payload.([]byte)
 
 	// send message's size

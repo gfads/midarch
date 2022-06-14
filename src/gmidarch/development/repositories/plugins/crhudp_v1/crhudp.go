@@ -1,8 +1,8 @@
-package middleware
+package crhudp
 
 import (
 	"encoding/binary"
-	"fmt"
+	"gmidarch/development/components/middleware"
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
 	evolutive "injector"
@@ -39,48 +39,38 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 	msgToServer := payload
 
-	addr := host + ":" + port
+	key := host + ":" + port
 	var err error
-	if _, ok := crhInfo.Conns[addr]; !ok { // no connection open yet
-		udpAddr, err := net.ResolveUDPAddr("udp", addr)
+	if _, ok := crhInfo.Conns[key]; !ok { // no connection open yet
+		udpAddr, err := net.ResolveUDPAddr("udp", key)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(),err.Error())
 		}
 
-		localUdpAddr := c.getLocalUdpAddr()
-		crhInfo.Conns[addr], err = net.DialUDP("udp", localUdpAddr, udpAddr)
+		crhInfo.Conns[key], err = net.DialUDP("udp", nil, udpAddr)
 		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(), err.Error())
-		}
-		if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
-			fmt.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr())
-			log.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
-			shared.LocalAddr = crhInfo.Conns[addr].LocalAddr().String()
+			shared.ErrorHandler(shared.GetFunction(),err.Error())
 		}
 	}
 
 	// send message's size
-	conn := crhInfo.Conns[addr]
+	conn := crhInfo.Conns[key]
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	binary.LittleEndian.PutUint32(size, uint32(len(msgToServer)))
 	_, err = conn.Write(size)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
+		shared.ErrorHandler(shared.GetFunction(),err.Error())
 	}
 
 	// send message
 	_, err = conn.Write(msgToServer)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
+		shared.ErrorHandler(shared.GetFunction(),err.Error())
 	}
 
 	msgFromServer := c.read(err, conn, size)
 	if changeProtocol, miop := c.isAdapt(msgFromServer); changeProtocol {
 		log.Println("Adapting, miop.Bd.ReqBody.Body:", miop.Bd.ReqBody.Body)
-		log.Println("Adapting, miop.Bd.ReqBody.Body[0]:", miop.Bd.ReqBody.Body[0])
-		log.Println("Adapting, miop.Bd.ReqBody.Body[1]:", miop.Bd.ReqBody.Body[1])
-		log.Println("Adapting, shared.AdaptId:", shared.AdaptId)
-		shared.AdaptId = miop.Bd.ReqBody.Body[1].(int)
 		if miop.Bd.ReqBody.Body[0] == "udp" {
 			log.Println("Adapting => UDP")
 			evolutive.GeneratePlugin("crhudp_v1", "crhudp", "crhudp_v1")
@@ -93,20 +83,6 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	}
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
-}
-
-func (c CRHUDP) getLocalUdpAddr() (*net.UDPAddr) {
-	var err error = nil
-	var localUdpAddr *net.UDPAddr = nil
-	if shared.LocalAddr != "" {
-		fmt.Println("shared.LocalAddr:", shared.LocalAddr)
-		log.Println("shared.LocalAddr:", shared.LocalAddr)
-		localUdpAddr, err = net.ResolveUDPAddr("udp", shared.LocalAddr)
-		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(), err.Error())
-		}
-	}
-	return localUdpAddr
 }
 
 func (c CRHUDP) read(err error, conn net.Conn, size []byte) []byte {
@@ -126,6 +102,6 @@ func (c CRHUDP) read(err error, conn net.Conn, size []byte) []byte {
 }
 
 func (c CRHUDP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
-	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop := middleware.Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }

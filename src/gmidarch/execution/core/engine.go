@@ -32,7 +32,8 @@ func NewEngine() Engine {
 
 func (EngineImpl) Execute(comp *component.Component, executeForever *bool) {
 	node := 0
-	comp.Executing = true
+	var executing = true
+	comp.Executing = &executing
 	fmt.Println("EngineImpl.Execute::Component.Id:", comp.Id)
 	if comp.TypeName == "Unit" {
 		fmt.Println("EngineImpl.Execute::comp.Info.([]*interface{})[0]).(component.Component).Info:", (*comp.Info.([]*interface{})[0]).(*component.Component).Info)
@@ -79,7 +80,7 @@ func (EngineImpl) Execute(comp *component.Component, executeForever *bool) {
 			}
 		}
 	}
-	comp.Executing = false
+	*comp.Executing = false
 	return
 }
 

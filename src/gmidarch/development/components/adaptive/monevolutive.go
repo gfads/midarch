@@ -37,12 +37,12 @@ func (Monevolutive) I_Hasnewplugins(id string, msg *messages.SAMessage, info *in
 		time.Sleep(shared.MONITOR_TIME)
 		listOfNewPlugins = pluginUtils.LoadPlugins()
 		newPlugins = pluginUtils.CheckForNewPlugins(listOfOldPlugins, listOfNewPlugins)
-		fmt.Println("Monevolutive.I_Hasnewplugins::OldPlugins:", listOfOldPlugins, "NewPlugins:",newPlugins)
+		//fmt.Println("Monevolutive.I_Hasnewplugins::OldPlugins:", listOfOldPlugins, "NewPlugins:",newPlugins)
 	}
 
 	// return from this point if no new pluginsSrc detected
 	if len(newPlugins) == 0 {
-		fmt.Println("Monevolutive.I_Hasnewplugins::No new pluginsSrc found")
+		//fmt.Println("Monevolutive.I_Hasnewplugins::No new pluginsSrc found")
 		*reset = true
 		//evolutiveMonitoredData := shared.MonitoredEvolutiveData{}
 		//evolutiveMonitoredData = newPlugins

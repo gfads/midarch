@@ -42,7 +42,7 @@ type ReplyBody struct {
 	OperationResult interface{} `json:"operationresult"`
 }
 
-func CreateReqPacket(op string, params []interface{}) MiopPacket {
+func CreateReqPacket(op string, params []interface{}, adaptId int) MiopPacket {
 
 	// MIOP Header
 	hd := Header{}
@@ -56,7 +56,7 @@ func CreateReqPacket(op string, params []interface{}) MiopPacket {
 	bd := Body{}
 	reqHd := RequestHeader{}
 	reqHd.Operation = op
-	reqHd.RequestId = 0
+	reqHd.RequestId = adaptId
 	reqHd.Context = "context"
 	reqHd.Key = 1313
 	reqHd.ResponseExpected = true

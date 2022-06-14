@@ -6,7 +6,6 @@ import (
 	"gmidarch/development/connectors"
 	"gmidarch/development/messages"
 	"gmidarch/development/repositories/architectural"
-	"log"
 	"net"
 	"reflect"
 	"shared"
@@ -55,9 +54,9 @@ func (confImpl MADLConfiguratorImpl) Configure(m *MADL, archRepo architectural.A
 func (confImpl MADLConfiguratorImpl) configureComponents(m *MADL, archRepo architectural.ArchitecturalRepository, args map[string]messages.EndPoint) {
 	for i := range m.Components {
 		// Step 1 - Configure component's info
-		log.Println("Will call configureInfo with args", args)
+		//log.Println("Will call configureInfo with args", args)
 		confImpl.configureInfo(m, archRepo, args) // TODO dcruzb: this line should be here? This line don't use components, so probably should be outside the for loop
-		log.Println("Done with call configureInfo")
+		//log.Println("Done with call configureInfo")
 		// Step 2 - Configure type
 		record, _ := archRepo.CompLibrary[m.Components[i].TypeName] // type from repositories
 		m.Components[i].Type = record.Type

@@ -21,7 +21,7 @@ func (Requestor) I_Beforemarshalling(id string, msg *messages.SAMessage, info *i
 
 	//Create request
 	request := invocation.Functionalrequest
-	reqPacket := miop.CreateReqPacket(request.Op, request.Params)
+	reqPacket := miop.CreateReqPacket(request.Op, request.Params, shared.AdaptId)
 	tempParams := []interface{}{reqPacket}
 
 	// Configure message to marshaller

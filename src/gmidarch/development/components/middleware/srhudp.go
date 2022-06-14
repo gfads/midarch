@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"gmidarch/development/messages"
 	"io"
-	"log"
 	"net"
 	"shared"
 	"strconv"
@@ -79,7 +78,7 @@ func (s SRHUDP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 
 	go func() {
 		client := srhInfo.Clients[availableConenctionIndex]
-		log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients Index", availableConenctionIndex)
+		fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients Index", availableConenctionIndex)
 
 		// Accept connections
 		//conn, err := net.ListenUDP("udp4", servAddr) //, err := srhInfo.Ln.Accept()
@@ -91,7 +90,7 @@ func (s SRHUDP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		//srhInfo.CurrentConn = conn
 
 		client.Ip = ""//conn.RemoteAddr().String() UDP dont start with RemoteAddr
-		client.UDPConnection = *srhInfo.UDPConnection
+		client.UDPConnection = srhInfo.UDPConnection
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Connected Client", client)
 
 
@@ -120,6 +119,7 @@ func (s SRHUDP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
+			fmt.Println("SRHUDP Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", tempMsgReceived)
 			msg.ToAddr = tempMsgReceived.ToAddress
 		}
 	default:
@@ -137,9 +137,9 @@ func (s SRHUDP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHUDP Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
-	log.Println("msg.ToAddr", msg.ToAddr, "srhInfo.Clients", srhInfo.Clients)
+	fmt.Println("msg.ToAddr", msg.ToAddr, "srhInfo.Clients", srhInfo.Clients)
 	conn := srhInfo.GetClientFromAddr(msg.ToAddr, srhInfo.Clients).UDPConnection //srhInfo.CurrentConn
-	log.Println("conn:", conn)
+	fmt.Println("UDP conn:", conn)
 	msgTemp := msg.Payload.([]byte)
 	addr := strings.Split(msg.ToAddr, ":")
 	ip := net.ParseIP(addr[0])
@@ -155,7 +155,7 @@ func (s SRHUDP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 
 	json := Jsonmarshaller{}
 	unmarshalledMsg := json.Unmarshall(msgTemp)
-	log.Println("<<<<<<<<<<<<  <<<<<<<<<<  <<<<<<<<<  SRHUDP Version Not adapted => Msg: ", unmarshalledMsg.Bd.RepBody.OperationResult)
+	fmt.Println("<<<<<<<<<<<<  <<<<<<<<<<  <<<<<<<<<  SRHUDP Version Not adapted => Msg: ", unmarshalledMsg.Bd.RepBody.OperationResult)
 	// send message
 	_, err = conn.WriteTo(msgTemp, &net.UDPAddr{IP: ip, Port: port})
 	if err != nil {
@@ -168,14 +168,18 @@ func (s SRHUDP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 	return
 }
 
-func (s SRHUDP) handler(info *interface{}, connectionIndex int) {
+func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHUDP Version Not adapted")
 
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	conn := srhInfo.Clients[connectionIndex].UDPConnection //CurrentConn
+	executeForever := srhInfo.ExecuteForever
 
 	for {
+		if !*executeForever {
+			break
+		}
 		fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR", "SRHUDP Version Not adapted")
 		size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 		_, addr, err := conn.ReadFromUDP(size)
@@ -201,8 +205,11 @@ func (s SRHUDP) handler(info *interface{}, connectionIndex int) {
 			fmt.Println("Vai matar o app, erro mas não EOF")
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
+		fmt.Println("SRHUDP Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Chn: nil, ToAddress: addr.String()}
-
+		if !*executeForever {
+			break
+		}
 		srhInfo.RcvedMessages <- rcvMessage
 		fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHUDP Version Not adapted")
 	}

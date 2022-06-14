@@ -37,6 +37,8 @@ var DIR_PROXIES_COMPONENTS = DIR_BASE + "/src/gmidarch/development/components/pr
 var DIR_PLUGINS = DIR_BASE + "/src/gmidarch/execution/repositories/plugins"
 var DIR_PLUGINS_SOURCE = DIR_BASE + "/src/gmidarch/development/repositories/plugins"
 var DIR_PLUGINS_IMPORT = "gmidarch/development/repositories/plugins"
+var AdaptId = -1
+var LocalAddr = ""
 
 // MADL
 const MADL_COMMENT = "//"

@@ -100,9 +100,18 @@ func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, r
 	//engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, shared.EXECUTE_FOREVER)
 	//engine.EngineImpl{}.Execute(u.ElemOfUnit.(*component.Component), shared.EXECUTE_FOREVER)
 	fmt.Println(">>>>>>>><<<<<<<<<<<<<>>>>>>>>>>>><<<<<<<<< Unit:", u.UnitId, "TypeName:", elementComponent.TypeName, "executing:", elementComponent.Executing)
-	if !elementComponent.Executing {
-		elementComponent.ExecuteForever = true
-		go engine.EngineImpl{}.Execute(elementComponent, &elementComponent.ExecuteForever) //&shared.ExecuteForever) //shared.EXECUTE_FOREVER)
+	if elementComponent.Executing == nil || !*elementComponent.Executing {
+		var executeForever = true
+		elementComponent.ExecuteForever = &executeForever
+		fmt.Println("Setará executeforever:", elementComponent.TypeName)
+		if strings.Contains(elementComponent.TypeName, "SRH") {
+			fmt.Println("Setou executeforever")
+			log.Println("Setou executeforever")
+			infoTemp := elementComponent.Info
+			srhInfo := infoTemp.(*messages.SRHInfo)
+			srhInfo.ExecuteForever = elementComponent.ExecuteForever
+		}
+		go engine.EngineImpl{}.Execute(elementComponent, elementComponent.ExecuteForever) //&shared.ExecuteForever) //shared.EXECUTE_FOREVER)
 	}
 
 	return
@@ -153,25 +162,36 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 
 					infoTemp := elementComponent.Info
 					srhInfo := infoTemp.(*messages.SRHInfo)
-					for _, client := range srhInfo.Clients {
+					for idx, client := range srhInfo.Clients {
 						// if Client from Connection Pool have a client connected
 						if client.Ip != "" {
-							miop := miop.CreateReqPacket("ChangeProtocol", []interface{}{"tcp"})
+							client.AdaptId = idx
+							miop := miop.CreateReqPacket("ChangeProtocol", []interface{}{"tcp", client.AdaptId}, client.AdaptId) // idx is the Connection ID
 							msg := &messages.SAMessage{}
 							msg.ToAddr = client.Ip
 							log.Println("msg.ToAddr:", msg.ToAddr)
 							msg.Payload = middleware.Jsonmarshaller{}.Marshall(miop)
 							// Coordinate the protocol change
 							shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
+							time.Sleep(2 * time.Second)
 						}
 					}
+				} else if strings.Contains(unitElemType, "CRH") {
+					time.Sleep(10 * time.Second)
+					fmt.Println("Unit.I_Adaptunit:: 10 seconds passed", u.UnitId, "::info:", elementComponent)
 				}
 
-				elementComponent.ExecuteForever = false
-				for elementComponent.Executing == true {
+				*elementComponent.ExecuteForever = false
+				for *elementComponent.Executing == true {
 					time.Sleep(200 * time.Millisecond)
 				}
 				elementComponent.Type = cmd.Type
+
+				if strings.Contains(unitElemType, "CRH") {
+					time.Sleep(10 * time.Second)
+					fmt.Println("Unit.I_Adaptunit:: 10 seconds passed", u.UnitId, "::info:", elementComponent)
+					shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Process", msg, &elementComponent.Info, reset)
+				}
 
 				//infoTemp := make([]*interface{}, 1)
 				//infoTemp[0] = new(interface{})

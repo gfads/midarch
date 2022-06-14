@@ -7,8 +7,10 @@ import (
 	"gmidarch/development/components/component"
 	"gmidarch/development/messages"
 	"gmidarch/execution/core"
+	"log"
 	"reflect"
 	"shared"
+	"strings"
 )
 
 type DeployParameters struct {
@@ -90,7 +92,16 @@ func (d DeployerImpl) Start() {
 			//fmt.Println("Deployer.Start::element.Info:", element.Info)
 			//fmt.Println("Deployer.Start::Unit.ElemOfUnitInfo:", unit.ElemOfUnitInfo)
 		}
-		go engine.Execute(&d.Madl.Components[i], &shared.ExecuteForever) // EXECUTE_FOREVER)
+		d.Madl.Components[i].ExecuteForever = &shared.ExecuteForever
+		fmt.Println("Setará executeforever:", d.Madl.Components[i].TypeName)
+		if strings.Contains(d.Madl.Components[i].TypeName, "SRH") {
+			fmt.Println("Setou executeforever")
+			log.Println("Setou executeforever")
+			infoTemp := d.Madl.Components[i].Info
+			srhInfo := infoTemp.(*messages.SRHInfo)
+			srhInfo.ExecuteForever = d.Madl.Components[i].ExecuteForever
+		}
+		go engine.Execute(&d.Madl.Components[i], d.Madl.Components[i].ExecuteForever) // EXECUTE_FOREVER)
 	}
 }
 
