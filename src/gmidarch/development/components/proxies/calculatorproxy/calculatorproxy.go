@@ -79,10 +79,22 @@ func (p Calculatorproxy) Add(_p1,_p2 int) int {
 	// Send request to I_In
 	ChIn <- _samMsg
 
+	var response messages.SAMessage
 	// Receive response from I_Out
-	response := <-ChOut
+	response = <-ChOut
 
-	result := response.Payload.(messages.FunctionalReply).Rep.(float64)
+	var result float64
+	// Try again if there is no valid response
+	if response.Payload.(messages.FunctionalReply).Rep == nil {
+		//// Send request to I_In
+		//ChIn <- _samMsg
+		//
+		//// Receive response from I_Out
+		//response = <-ChOut
+		result = 0
+	} else {
+		result = response.Payload.(messages.FunctionalReply).Rep.(float64)
+	}
 	fmt.Println(shared.GetFunction(), result)
 
 	return int(result)

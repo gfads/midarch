@@ -92,7 +92,7 @@ func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, r
 	//(*d.Madl.Components[i].Info.([]*interface{})[0]).(component.Component)
 
 	elementComponent := (*(*info).([]*interface{})[0]).(*component.Component)
-	fmt.Println("Unit.I_Execute::", u.UnitId, "::info:", elementComponent)
+	//fmt.Println("Unit.I_Execute::", u.UnitId, "::info:", elementComponent)
 	//fmt.Println("Unit.I_Execute::elementComponent is", reflect.TypeOf(elementComponent))
 	//fmt.Println("Unit.I_Execute::elementComponent kind is", reflect.TypeOf(elementComponent).Kind())
 
@@ -133,7 +133,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 	if cmd.Cmd != "" && cmd.Cmd != "Nothing" {
 		elementComponent := (*(*info).([]*interface{})[0]).(*component.Component)
 		unitElemType := elementComponent.TypeName //reflect.TypeOf(u.ElemOfUnit).Name()
-		cmdElemType := reflect.TypeOf(cmd.Type).Name()
+		cmdElemType := reflect.ValueOf(cmd.Type).Elem().Type().Name()
 		//log.Println("")
 		//log.Println("")
 		//log.Println("--------------Unit.I_Adaptunit::", u.UnitId, ":: Adapt to ---->", cmdElemType)
@@ -141,7 +141,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 		//log.Println("")
 
 		// Check if the command is to this unit - check by type, i.e., all elements of a given type are adapted
-		if shared.CompatibleComponents(unitElemType, cmdElemType) {
+		if shared.CompatibleComponents(strings.ToUpper(unitElemType), strings.ToUpper(cmdElemType)) {
 			if cmd.Cmd == shared.REPLACE_COMPONENT { // TODO
 				log.Println("")
 				log.Println("")
@@ -156,7 +156,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type", cmd.Type)
 				fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type is", reflect.TypeOf(cmd.Type))
 
-				fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::info:", elementComponent)
+				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::info:", elementComponent)
 				if strings.Contains(unitElemType, "SRH") {
 					reset := false
 
@@ -177,8 +177,11 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 						}
 					}
 				} else if strings.Contains(unitElemType, "CRH") {
-					time.Sleep(10 * time.Second)
+					//time.Sleep(10 * time.Second)
 					fmt.Println("Unit.I_Adaptunit:: 10 seconds passed", u.UnitId, "::info:", elementComponent)
+					//cmd.Type = shared.GetComponentTypeByNameFromRAM(unitElemType)
+					fmt.Println("unitElemType", unitElemType, "cmd.Type", cmd.Type)
+					//shared.ErrorHandler(shared.GetFunction(), "Teste")
 				}
 
 				*elementComponent.ExecuteForever = false
@@ -190,7 +193,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				if strings.Contains(unitElemType, "CRH") {
 					time.Sleep(10 * time.Second)
 					fmt.Println("Unit.I_Adaptunit:: 10 seconds passed", u.UnitId, "::info:", elementComponent)
-					shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Process", msg, &elementComponent.Info, reset)
+					//shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Process", msg, &elementComponent.Info, reset)
 				}
 
 				//infoTemp := make([]*interface{}, 1)

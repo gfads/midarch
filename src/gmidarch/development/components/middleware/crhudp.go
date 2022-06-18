@@ -8,6 +8,7 @@ import (
 	evolutive "injector"
 	"log"
 	"net"
+	"reflect"
 	"shared"
 )
 
@@ -41,7 +42,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 	addr := host + ":" + port
 	var err error
-	if _, ok := crhInfo.Conns[addr]; !ok { // no connection open yet
+	if _, ok := crhInfo.Conns[addr]; !ok || reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name() != "UDPConn" { // no connection open yet
 		udpAddr, err := net.ResolveUDPAddr("udp", addr)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(),err.Error())
@@ -84,12 +85,12 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		if miop.Bd.ReqBody.Body[0] == "udp" {
 			log.Println("Adapting => UDP")
 			evolutive.GeneratePlugin("crhudp_v1", "crhudp", "crhudp_v1")
-		}
-		if miop.Bd.ReqBody.Body[0] == "tcp" {
+		} else if miop.Bd.ReqBody.Body[0] == "tcp" {
 			log.Println("Adapting => TCP")
 			evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
+		} else {
+			msgFromServer = c.read(err, conn, size)
 		}
-		msgFromServer = c.read(err, conn, size)
 	}
 
 	*msg = messages.SAMessage{Payload: msgFromServer}

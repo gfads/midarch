@@ -7,5 +7,5 @@ import (
 
 func GetType() interface{} {
 	fmt.Println("Chamou GetType do pluginBuild.model")
-	return srhtcp.SRHTCP{}
+	return &srhtcp.SRHTCP{}
 }

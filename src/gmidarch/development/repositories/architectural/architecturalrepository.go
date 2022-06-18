@@ -57,6 +57,7 @@ var SetOfConnectorTypesRAM = map[string]connectors.Connector{
 
 func LoadArchitecturalRepository() ArchitecturalRepository {
 	r := ArchitecturalRepository{}
+	shared.ArchitecturalComponentTypes = SetOfComponentTypesRAM
 
 	// Initialize repositories
 	r.CompLibrary = make(map[string]*component.Component)

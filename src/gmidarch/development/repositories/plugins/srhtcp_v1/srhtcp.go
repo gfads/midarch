@@ -43,7 +43,7 @@ func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client) (boo
 }
 
 func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 1 adapted")
+	//fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 1 adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	srhInfo.Counter++
@@ -99,7 +99,7 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 }
 
 func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 1 adapted")
+	//fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 1 adapted")
 	//fmt.Println(shared.GetFunction(), "HERE")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)

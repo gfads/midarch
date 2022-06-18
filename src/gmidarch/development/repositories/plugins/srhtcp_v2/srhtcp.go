@@ -60,7 +60,7 @@ func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip s
 }
 
 func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 2 adapted")
+	//fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 2 adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	srhInfo.Counter++
@@ -83,7 +83,7 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	connectionAvailable, availableConenctionIndex := s.availableConnectionFromPool(&srhInfo.Clients, "")
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
 	if !connectionAvailable {
-		fmt.Println("------------------------------>", shared.GetFunction(), "end", "SRHTCP Version 2 adapted - No connection available")
+		//fmt.Println("------------------------------>", shared.GetFunction(), "end", "SRHTCP Version 2 adapted - No connection available")
 		return
 	}
 
@@ -125,7 +125,7 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 }
 
 func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 2 adapted")
+	//fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 2 adapted")
 	//fmt.Println(shared.GetFunction(), "HERE")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
@@ -159,7 +159,7 @@ func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 }
 
 func (s SRHTCP) I_Send(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 2 adapted")
+	//fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 2 adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	fmt.Println("msg.ToAddr", msg.ToAddr, "srhInfo.Clients", srhInfo.Clients)

@@ -34,6 +34,7 @@ func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint)
 	fmt.Print("Loading MADL[", fileName, "]...")
 	madlLoader := madl.NewMADLLoader()
 	madlApp := madlLoader.Load(fileName)
+	shared.Adaptability = madlApp.Adaptability
 	fmt.Println("ok")
 
 	// Step 3: Syntax check of madl
@@ -53,7 +54,8 @@ func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint)
 	madlConfigurator.Configure(&madlApp, archRepo, args)
 	fmt.Println("ok")
 
-	if shared.Contains(madlApp.Adaptability, shared.EVOLUTIVE_ADAPTATION) {
+	if shared.Contains(madlApp.Adaptability, shared.EVOLUTIVE_ADAPTATION) ||
+	   shared.Contains(madlApp.Adaptability, shared.EVOLUTIVE_PROTOCOL_ADAPTATION) {
 		fmt.Println("Creating mee")
 		crt := creator.Creator{}
 		meeTemp := crt.Create(madlApp, madlApp.Adaptability)

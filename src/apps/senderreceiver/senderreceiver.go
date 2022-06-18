@@ -15,7 +15,7 @@ func main() {
 
 	fe.Deploy("senderreceiver.madl", args)
 
-	evolutive.EvolutiveInjector{}.Start("sender", 40*time.Second)
+	evolutive.EvolutiveInjector{}.Start("sender", 20*time.Second)
 
 	//fmt.Scanln()
 	var wg sync.WaitGroup

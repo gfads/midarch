@@ -13,19 +13,21 @@ import (
 
 type EvolutiveInjector struct{}
 
-func (EvolutiveInjector) Start(elem string, interval time.Duration) {
+func (EvolutiveInjector) Start(firstElem, secondElem string, interval time.Duration) {
 	// Replacing strategies
 	//go noChange()
-	//go changeOnce(elem)
+	go changeOnce(firstElem, interval)
 	//go changeSamePluginSeveralTimes(elem)
-	go alternatePlugins(elem, interval)
+	//go alternatePlugins(firstElem, secondElem, interval)
 }
 
 func noChange() {}
 
-func changeOnce(elem string) {
-	removeOldPlugins()
-	generatePlugin(elem, elem+"_v1")
+func changeOnce(elem string, interval time.Duration) {
+	//removeOldPlugins()
+	time.Sleep(interval)
+	elemNew := elem + "_v2"
+	GeneratePlugin(elemNew, elem, elemNew)
 }
 
 func changeSamePluginSeveralTimes(elem string) {
@@ -37,7 +39,7 @@ func changeSamePluginSeveralTimes(elem string) {
 	}
 }
 
-func alternatePlugins(elem string, interval time.Duration) {
+func alternatePlugins(firstElem, secondElem string, interval time.Duration) {
 	//removeOldPlugins()
 
 	elemNew := ""
@@ -48,14 +50,14 @@ func alternatePlugins(elem string, interval time.Duration) {
 		switch currentPlugin {
 		case 1: // Plugin 01
 			currentPlugin = 2
-			elemOld = elem + "_v1"
-			elemNew = elem + "_v1"
-			GeneratePlugin(elemOld, elem, elemNew)
+			elemOld = firstElem + "_v1"
+			elemNew = firstElem + "_v1"
+			GeneratePlugin(elemOld, firstElem, elemNew)
 		case 2: // Plugin 02
 			currentPlugin = 1
-			elemOld = elem + "_v2"
-			elemNew = elem + "_v2"
-			GeneratePlugin(elemOld, elem, elemNew)
+			elemOld = secondElem + "_v2"
+			elemNew = secondElem + "_v2"
+			GeneratePlugin(elemOld, secondElem, elemNew)
 		}
 
 		fmt.Printf("Evolutive:: Next plugin '%v' will be generated in %v !! \n", elemNew, interval)
@@ -96,7 +98,7 @@ func generatePlugin(source, plugin string) {
 
 	//fmt.Println("injector::evolutive.generatePlugin::will build plugin:", source)
 	//fmt.Println("command:", shared.DIR_GO+"/go", "build", "-buildmode=plugin", "-o", pOut, pIn)
-	_, err := exec.Command(shared.DIR_GO+"/go", "build", "-buildmode=plugin", "-o", pOut, pIn).CombinedOutput()
+	_, err := exec.Command(shared.DIR_GO+"/go", "build", "-buildmode=plugin", "-o", pOut, pIn).CombinedOutput() //"-gcflags", "all=-N -l",
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), "Something wrong in generating plugin '"+pIn+"' in \n '"+pOut+"': "+err.Error()+"\n")
 	}

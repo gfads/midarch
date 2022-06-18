@@ -39,6 +39,8 @@ var DIR_PLUGINS_SOURCE = DIR_BASE + "/src/gmidarch/development/repositories/plug
 var DIR_PLUGINS_IMPORT = "gmidarch/development/repositories/plugins"
 var AdaptId = -1
 var LocalAddr = ""
+var ArchitecturalComponentTypes = map[string]interface{}{}
+var Adaptability []string
 
 // MADL
 const MADL_COMMENT = "//"
@@ -89,6 +91,7 @@ var SetOfPorts = map[string]string{
 
 var AdaptationTypes = map[string]string{
 	"EVOLUTIVE": "EVOLUTIVE",
+	"EVOLUTIVE_PROTOCOL": "EVOLUTIVE_PROTOCOL",
 	"NONE":      "NONE"}
 
 type MonitoredEvolutiveData []string // used in channel Monitor -> Analyser (Evolutive)
@@ -111,6 +114,7 @@ type UnitCommand struct {
 }
 
 const EVOLUTIVE_ADAPTATION string = "EVOLUTIVE"
+const EVOLUTIVE_PROTOCOL_ADAPTATION string = "EVOLUTIVE_PROTOCOL"
 const NON_ADAPTIVE string = "NONE"
 
 const REPLACE_COMPONENT = "REPLACE_COMPONENT"
@@ -432,4 +436,8 @@ func CompatibleComponents(componentTypeName1, componentTypeName2 string) bool {
 	return (strings.Contains(componentTypeName1, "SRH") && strings.Contains(componentTypeName2, "SRH")) ||
 		   (strings.Contains(componentTypeName1, "CRH") && strings.Contains(componentTypeName2, "CRH")) ||
 		   (componentTypeName1 == componentTypeName2)
+}
+
+func GetComponentTypeByNameFromRAM(componentName string) interface{} {
+	return ArchitecturalComponentTypes[componentName]
 }
