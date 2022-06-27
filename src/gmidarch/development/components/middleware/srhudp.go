@@ -4,7 +4,9 @@ import (
 	"encoding/binary"
 	"fmt"
 	"gmidarch/development/messages"
+	"gmidarch/development/messages/miop"
 	"io"
+	"log"
 	"net"
 	"shared"
 	"strconv"
@@ -205,6 +207,13 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 			fmt.Println("Vai matar o app, erro mas não EOF")
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
+
+		if changeProtocol, miopPacket := s.isAdapt(msgTemp); changeProtocol {
+			if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
+				fmt.Println("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHUDP Version Not adapted")
+				break
+			}
+		}
 		fmt.Println("SRHUDP Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Chn: nil, ToAddress: addr.String()}
 		if !*executeForever {
@@ -214,4 +223,10 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 		fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHUDP Version Not adapted")
 	}
 	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
+}
+
+func (s SRHUDP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
+	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }

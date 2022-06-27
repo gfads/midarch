@@ -93,9 +93,6 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
 
 		miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{miopPacket.Bd.ReqBody.Body[0], shared.AdaptId, "Ok"}, shared.AdaptId) // idx is the Connection ID
-		//msg := &messages.SAMessage{}
-		//msg.ToAddr = addr
-		//log.Println("msg.ToAddr:", msg.ToAddr)
 		msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
 		c.send(sizeOfMsgSize, msgPayload, conn)
 

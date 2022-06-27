@@ -5,8 +5,8 @@ Configuration calculatordistributedservermid :=
       cinvoker    : Calculatorinvoker
       marshaller  : Jsonmarshaller
       marshaller2 : Jsonmarshaller
-      crh         : CRHTCP
-      srh         : SRHTCP
+      crh         : CRHUDP
+      srh         : SRHUDP
 
    Connectors
       t1 : Requestreply

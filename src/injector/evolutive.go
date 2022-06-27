@@ -16,9 +16,9 @@ type EvolutiveInjector struct{}
 func (EvolutiveInjector) Start(firstElem, secondElem string, interval time.Duration) {
 	// Replacing strategies
 	//go noChange()
-	go changeOnce(firstElem, interval)
+	//go changeOnce(firstElem, interval)
 	//go changeSamePluginSeveralTimes(elem)
-	//go alternatePlugins(firstElem, secondElem, interval)
+	go alternatePlugins(firstElem, secondElem, interval)
 }
 
 func noChange() {}

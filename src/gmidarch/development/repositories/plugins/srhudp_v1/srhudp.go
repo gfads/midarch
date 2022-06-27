@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"gmidarch/development/components/middleware"
 	"gmidarch/development/messages"
+	"gmidarch/development/messages/miop"
 	"io"
+	"log"
 	"net"
 	"shared"
 	"strconv"
@@ -99,7 +101,7 @@ func (s SRHUDP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	connectionAvailable, availableConenctionIndex := s.availableConnectionFromPool(&srhInfo.Clients, "")
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
 	if !connectionAvailable {
-		//log.Println("------------------------------>", shared.GetFunction(), "end", "SRHUDP Version Not adapted - No connection available")
+		//log.Println("------------------------------>", shared.GetFunction(), "end", "SRHUDP Version 1 adapted - No connection available")
 		return
 	}
 
@@ -127,12 +129,12 @@ func (s SRHUDP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		// Start goroutine
 		go s.handler(info, availableConenctionIndex)
 	}()
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
+	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version 1 adapted")
 	return
 }
 
 func (s SRHUDP) I_Receive(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	//fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHUDP Version Not adapted")
+	//fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHUDP Version 1 adapted")
 	//fmt.Println(shared.GetFunction(), "HERE")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
@@ -146,7 +148,7 @@ func (s SRHUDP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
-			fmt.Println("SRHUDP Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", tempMsgReceived)
+			fmt.Println("SRHUDP Version 1 adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", tempMsgReceived)
 			msg.ToAddr = tempMsgReceived.ToAddress
 		}
 	default:
@@ -156,12 +158,12 @@ func (s SRHUDP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 		}
 	}
 
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
+	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version 1 adapted")
 	return
 }
 
 func (s SRHUDP) I_Send(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHUDP Version Not adapted")
+	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHUDP Version 1 adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	fmt.Println("msg.ToAddr", msg.ToAddr, "srhInfo.Clients", srhInfo.Clients)
@@ -182,7 +184,7 @@ func (s SRHUDP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 
 	json := middleware.Jsonmarshaller{}
 	unmarshalledMsg := json.Unmarshall(msgTemp)
-	fmt.Println("<<<<<<<<<<<<  <<<<<<<<<<  <<<<<<<<<  SRHUDP Version Not adapted => Msg: ", unmarshalledMsg.Bd.RepBody.OperationResult)
+	fmt.Println("<<<<<<<<<<<<  <<<<<<<<<<  <<<<<<<<<  SRHUDP Version 1 adapted => Msg: ", unmarshalledMsg.Bd.RepBody.OperationResult)
 	// send message
 	_, err = conn.WriteTo(msgTemp, &net.UDPAddr{IP: ip, Port: port})
 	if err != nil {
@@ -191,12 +193,12 @@ func (s SRHUDP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 
 	// update info
 	*info = srhInfo
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
+	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version 1 adapted")
 	return
 }
 
 func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHUDP Version Not adapted")
+	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHUDP Version 1 adapted")
 
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
@@ -207,11 +209,11 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 		if !*executeForever {
 			break
 		}
-		fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR", "SRHUDP Version Not adapted")
+		fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR", "SRHUDP Version 1 adapted")
 		size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 		_, addr, err := conn.ReadFromUDP(size)
 		srhInfo.Clients[connectionIndex].Ip = addr.String()
-		fmt.Println("----------------------------------------->", shared.GetFunction(), "Read efetuado", "SRHUDP Version Not adapted")
+		fmt.Println("----------------------------------------->", shared.GetFunction(), "Read efetuado", "SRHUDP Version 1 adapted")
 		if err == io.EOF {
 			srhInfo.Clients[connectionIndex] = nil
 			fmt.Println("Não Vai matar o app EOF")
@@ -232,13 +234,26 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 			fmt.Println("Vai matar o app, erro mas não EOF")
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
-		fmt.Println("SRHUDP Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+
+		if changeProtocol, miopPacket := s.isAdapt(msgTemp); changeProtocol {
+			if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
+				fmt.Println("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHUDP Version Not adapted")
+				break
+			}
+		}
+		fmt.Println("SRHUDP Version 1 adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Chn: nil, ToAddress: addr.String()}
 		if !*executeForever {
 			break
 		}
 		srhInfo.RcvedMessages <- rcvMessage
-		fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHUDP Version Not adapted")
+		fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHUDP Version 1 adapted")
 	}
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
+	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version 1 adapted")
+}
+
+func (s SRHUDP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
+	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	miop := middleware.Jsonmarshaller{}.Unmarshall(msgFromServer)
+	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }

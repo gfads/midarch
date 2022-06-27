@@ -5,7 +5,7 @@ Configuration calculatordistributedclientmid :=
       calculatorproxy  : Calculatorproxy
       requestor        : Requestor
       marshaller       : Jsonmarshaller
-      crh              : CRHTCP
+      crh              : CRHUDP
 
    Connectors
       t1 : Ntoonereqrep

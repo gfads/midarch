@@ -62,42 +62,51 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 	// send message's size
 	conn := crhInfo.Conns[addr]
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	binary.LittleEndian.PutUint32(size, uint32(len(msgToServer)))
-	_, err = conn.Write(size)
-	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
-	}
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu size")
+	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	c.send(sizeOfMsgSize, msgToServer, conn)
 
-	// send message
-	_, err = conn.Write(msgToServer)
-	if err != nil {
-		fmt.Println("Erro no envio do size(", size, ") Connection:", reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name())
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
-	}
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu msg")
-
-	msgFromServer := c.read(err, conn, size)
-	if changeProtocol, miop := c.isAdapt(msgFromServer); changeProtocol {
-		log.Println("Adapting, miop.Bd.ReqBody.Body:", miop.Bd.ReqBody.Body)
-		log.Println("Adapting, miop.Bd.ReqBody.Body[0]:", miop.Bd.ReqBody.Body[0])
-		log.Println("Adapting, miop.Bd.ReqBody.Body[1]:", miop.Bd.ReqBody.Body[1])
+	msgFromServer := c.read(err, conn, sizeOfMsgSize)
+	if changeProtocol, miopPacket := c.isAdapt(msgFromServer); changeProtocol {
+		log.Println("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
+		log.Println("Adapting, miopPacket.Bd.ReqBody.Body[0]:", miopPacket.Bd.ReqBody.Body[0])
+		log.Println("Adapting, miopPacket.Bd.ReqBody.Body[1]:", miopPacket.Bd.ReqBody.Body[1])
 		log.Println("Adapting, shared.AdaptId:", shared.AdaptId)
-		shared.AdaptId = miop.Bd.ReqBody.Body[1].(int)
-		if miop.Bd.ReqBody.Body[0] == "udp" {
+		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
+
+		miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{miopPacket.Bd.ReqBody.Body[0], shared.AdaptId, "Ok"}, shared.AdaptId) // idx is the Connection ID
+		msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+		c.send(sizeOfMsgSize, msgPayload, conn)
+
+		if miopPacket.Bd.ReqBody.Body[0] == "udp" {
 			log.Println("Adapting => UDP")
 			evolutive.GeneratePlugin("crhudp_v1", "crhudp", "crhudp_v1")
-		} else if miop.Bd.ReqBody.Body[0] == "tcp" {
+		} else if miopPacket.Bd.ReqBody.Body[0] == "tcp" {
 			log.Println("Adapting => TCP")
 			evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
 		} else {
-			msgFromServer = c.read(err, conn, size)
+			msgFromServer = c.read(err, conn, sizeOfMsgSize)
 		}
 	}
 	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Leu")
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
+}
+
+func (c CRHUDP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) {
+	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
+	_, err := conn.Write(sizeOfMsgSize)
+	if err != nil {
+		shared.ErrorHandler(shared.GetFunction(), err.Error())
+	}
+	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu sizeOfMsgSize")
+
+	// send message
+	_, err = conn.Write(msgToServer)
+	if err != nil {
+		//fmt.Println("Erro no envio do sizeOfMsgSize(", sizeOfMsgSize, ") Connection:", reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name())
+		shared.ErrorHandler(shared.GetFunction(), err.Error())
+	}
+	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu msg")
 }
 
 func (c CRHUDP) getLocalUdpAddr() (*net.UDPAddr) {
