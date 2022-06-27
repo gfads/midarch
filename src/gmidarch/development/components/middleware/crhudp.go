@@ -68,12 +68,15 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
+	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu size")
 
 	// send message
 	_, err = conn.Write(msgToServer)
 	if err != nil {
+		fmt.Println("Erro no envio do size(", size, ") Connection:", reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name())
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
+	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu msg")
 
 	msgFromServer := c.read(err, conn, size)
 	if changeProtocol, miop := c.isAdapt(msgFromServer); changeProtocol {
@@ -92,6 +95,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 			msgFromServer = c.read(err, conn, size)
 		}
 	}
+	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Leu")
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }

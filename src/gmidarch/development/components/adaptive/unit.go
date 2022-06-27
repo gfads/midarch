@@ -152,12 +152,18 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				//allUnitsType.LoadOrStore(u.UnitId, cmd.Type)
 				//g := u.changeSelector(cmd.Selector)
 				//allUnitsGraph.LoadOrStore(u.UnitId, g)
-				log.Println("--------------Unit.I_Adaptunit::unitElemType", unitElemType, ":: cmdElemType", cmdElemType)
+				log.Println("--------------Unit.I_Adaptunit::unitElemType(from)", unitElemType, ":: cmdElemType(to)", cmdElemType)
 				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type", cmd.Type)
 				fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type is", reflect.TypeOf(cmd.Type))
 
 				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::info:", elementComponent)
-				if strings.Contains(unitElemType, "SRH") {
+				var adaptTo string
+				if strings.Contains(cmdElemType, "SRHTCP") {
+					adaptTo = "tcp"
+				} else if strings.Contains(cmdElemType, "SRHUDP") {
+					adaptTo = "udp"
+				}
+				if adaptTo == "tcp" || adaptTo == "udp" {
 					reset := false
 
 					infoTemp := elementComponent.Info
@@ -166,11 +172,11 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 						// if Client from Connection Pool have a client connected
 						if client.Ip != "" {
 							client.AdaptId = idx
-							miop := miop.CreateReqPacket("ChangeProtocol", []interface{}{"tcp", client.AdaptId}, client.AdaptId) // idx is the Connection ID
+							miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{adaptTo, client.AdaptId}, client.AdaptId) // idx is the Connection ID
 							msg := &messages.SAMessage{}
 							msg.ToAddr = client.Ip
 							log.Println("msg.ToAddr:", msg.ToAddr)
-							msg.Payload = middleware.Jsonmarshaller{}.Marshall(miop)
+							msg.Payload = middleware.Jsonmarshaller{}.Marshall(miopPacket)
 							// Coordinate the protocol change
 							shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
 							time.Sleep(2 * time.Second)
@@ -178,7 +184,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 					}
 				} else if strings.Contains(unitElemType, "CRH") {
 					//time.Sleep(10 * time.Second)
-					fmt.Println("Unit.I_Adaptunit:: 10 seconds passed", u.UnitId, "::info:", elementComponent)
+					//fmt.Println("Unit.I_Adaptunit:: 10 seconds passed", u.UnitId, "::info:", elementComponent)
 					//cmd.Type = shared.GetComponentTypeByNameFromRAM(unitElemType)
 					fmt.Println("unitElemType", unitElemType, "cmd.Type", cmd.Type)
 					//shared.ErrorHandler(shared.GetFunction(), "Teste")

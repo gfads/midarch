@@ -35,8 +35,8 @@ func (i SRHInfo) GetClientFromAddr(addr string, clients []*Client) *Client {
 		if client.Ip == addr {
 			return client
 		}
-		log.Println("client without connection from the ip:", addr, " connection:", client.Connection)
 	}
+	log.Println("IP without client from the ip:", addr)
 
 	return nil
 }

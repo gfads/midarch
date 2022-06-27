@@ -11,7 +11,7 @@ import (
 )
 
 //@Type: SRHTCP
-//@Behaviour: Behaviour = I_Accept -> P1 ++ P1 = I_Accept -> P1 [] I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> P1
+//@Behaviour: Behaviour = I_Accept -> I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> Behaviour
 type SRHTCP struct{}
 
 func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip string) (bool, int) {

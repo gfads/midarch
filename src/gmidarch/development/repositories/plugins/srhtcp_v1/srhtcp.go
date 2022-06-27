@@ -199,8 +199,8 @@ func handler(info *interface{}, connectionIndex int) {
 			fmt.Println("Vai matar o app, erro mas não EOF")
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
-		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Chn: conn}
-
+		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Chn: conn, ToAddress: srhInfo.Clients[connectionIndex].Ip}
+		fmt.Println("SRHTCP Version 1 adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		srhInfo.RcvedMessages <- rcvMessage
 		fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHTCP Version 1 adapted")
 	}
