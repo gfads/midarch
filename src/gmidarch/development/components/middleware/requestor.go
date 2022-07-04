@@ -49,6 +49,10 @@ func (Requestor) I_Beforeunmarshalling(id string, msg *messages.SAMessage, info 
 func (Requestor) I_Beforeproxy(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	fmt.Println(shared.GetFunction(),msg)
 
-	temp1 := msg.Payload.(messages.FunctionalReply).Rep.(miop.MiopPacket)
-	msg.Payload = messages.FunctionalReply{Rep: temp1.Bd.RepBody.OperationResult}
+	if msg.Payload.(messages.FunctionalReply).Rep == nil {
+		msg.Payload = messages.FunctionalReply{Rep: nil}
+	}else {
+		temp1 := msg.Payload.(messages.FunctionalReply).Rep.(miop.MiopPacket)
+		msg.Payload = messages.FunctionalReply{Rep: temp1.Bd.RepBody.OperationResult}
+	}
 }

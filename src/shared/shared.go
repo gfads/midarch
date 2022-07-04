@@ -150,7 +150,7 @@ func MyInvoke(compType interface{}, compId string, op string, msg *messages.SAMe
 
 func ErrorHandler(f string, msg string) {
 	fmt.Println(f + "::" + msg)
-	os.Exit(0)
+	os.Exit(1)
 }
 
 func GetFunction() string {

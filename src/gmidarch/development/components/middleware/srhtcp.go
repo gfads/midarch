@@ -53,6 +53,7 @@ func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip s
 			return true, idx
 		}
 		if client.UDPConnection != nil {
+			client.UDPConnection.Close()
 			client.UDPConnection = nil
 			return true, idx
 		}

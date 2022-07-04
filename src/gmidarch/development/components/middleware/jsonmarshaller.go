@@ -21,9 +21,13 @@ func (j Jsonmarshaller) I_Process(id string, msg *messages.SAMessage, info *inte
 		r := j.Marshall(req.Params[0].(miop.MiopPacket))
 		msg.Payload = messages.FunctionalReply{Rep: r}
 	case "unmarshall":
-		temp := req.Params[0].([]byte)
-		r := j.Unmarshall(temp)
-		msg.Payload = messages.FunctionalReply{Rep: r}
+		if req.Params[0] == nil {
+			msg.Payload = messages.FunctionalReply{Rep: nil}
+		}else{
+			temp := req.Params[0].([]byte)
+			r := j.Unmarshall(temp)
+			msg.Payload = messages.FunctionalReply{Rep: r}
+		}
 	default:
 		shared.ErrorHandler(shared.GetFunction(), "Marshaller:: Operation '"+op+"' not supported!")
 	}

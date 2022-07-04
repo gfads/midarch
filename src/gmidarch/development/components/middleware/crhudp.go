@@ -85,6 +85,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 			evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
 		} else {
 			msgFromServer = c.read(err, conn, sizeOfMsgSize)
+			fmt.Println("=================> ############### ============> ########### UDP: Leu o read")
 		}
 	}
 	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Leu")
@@ -112,6 +113,7 @@ func (c CRHUDP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) {
 func (c CRHUDP) getLocalUdpAddr() (*net.UDPAddr) {
 	var err error = nil
 	var localUdpAddr *net.UDPAddr = nil
+	//shared.LocalAddr = "127.0.0.1:37522"
 	if shared.LocalAddr != "" {
 		fmt.Println("shared.LocalAddr:", shared.LocalAddr)
 		log.Println("shared.LocalAddr:", shared.LocalAddr)
@@ -119,6 +121,8 @@ func (c CRHUDP) getLocalUdpAddr() (*net.UDPAddr) {
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
+	}else{
+		fmt.Println("else shared.LocalAddr:", shared.LocalAddr)
 	}
 	return localUdpAddr
 }

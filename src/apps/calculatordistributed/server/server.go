@@ -45,7 +45,7 @@ func main() {
 
 	fmt.Printf("Calculator server is running at Port: %v \n", shared.CALCULATOR_PORT)
 
-	evolutive.EvolutiveInjector{}.Start("srhtcp", "srhudp", 20*time.Second)
+	evolutive.EvolutiveInjector{}.Start("srhtcp", "srhudp", 15*time.Second)
 
 	//fmt.Scanln()
 	var wg sync.WaitGroup

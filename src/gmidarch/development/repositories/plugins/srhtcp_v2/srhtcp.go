@@ -40,7 +40,7 @@ func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip s
 		}
 		*clientsPtr = append(clients, &client)
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients", len(*clientsPtr))
-		return true, len(*clientsPtr) -1
+		return true, len(*clientsPtr) - 1
 	}
 
 	for idx, client := range clients {
@@ -54,6 +54,7 @@ func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip s
 			return true, idx
 		}
 		if client.UDPConnection != nil {
+			client.UDPConnection.Close()
 			client.UDPConnection = nil
 			return true, idx
 		}
@@ -102,14 +103,14 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		srhInfo.Conns = append(srhInfo.Conns, conn)
 		//srhInfo.CurrentConn = conn
 
-		fmt.Println("SRHTCP Version 2 adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Buscou nova conexão")
-		connectionAvailable, availableConenctionIndex := s.availableConnectionFromPool(&srhInfo.Clients, conn.RemoteAddr().String())
-		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(
-		//srhInfo.Clients))
-		if !connectionAvailable {
-			fmt.Println("------------------------------>", shared.GetFunction(), "end", "SRHTCP Version 2 adapted - No connection available")
-			return
-		}
+		fmt.Println("SRHTCP Version 2 adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Buscou nova conexão, ip:", conn.RemoteAddr().String())
+		//connectionAvailable, availableConenctionIndex := s.availableConnectionFromPool(&srhInfo.Clients, conn.RemoteAddr().String())
+		////log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(
+		////srhInfo.Clients))
+		//if !connectionAvailable {
+		//	fmt.Println("------------------------------>", shared.GetFunction(), "end", "SRHTCP Version 2 adapted - No connection available")
+		//	return
+		//}
 
 		client := srhInfo.Clients[availableConenctionIndex]
 		client.Ip = conn.RemoteAddr().String()
@@ -249,7 +250,6 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 		}
 		srhInfo.RcvedMessages <- rcvMessage
 		fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHTCP Version 2 adapted")
-		// TODO dcruzb: break if not ExecuteForever
 	}
 	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version 2 adapted")
 }

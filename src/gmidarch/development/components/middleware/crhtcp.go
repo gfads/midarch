@@ -22,6 +22,7 @@ func (c CRHTCP) getLocalTcpAddr() (*net.TCPAddr) {
 	log.Println("shared.LocalAddr:", shared.LocalAddr)
 	var err error = nil
 	var localTCPAddr *net.TCPAddr = nil
+	//shared.LocalAddr = "127.0.0.1:37521"
 	if shared.LocalAddr != "" {
 		localTCPAddr, err = net.ResolveTCPAddr("tcp", shared.LocalAddr)
 		if err != nil {
@@ -67,8 +68,8 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 			shared.ErrorHandler(shared.GetFunction(),err.Error())
 		}
 
-		localTcpAddr := c.getLocalTcpAddr()
-		crhInfo.Conns[addr], err = net.DialTCP("tcp", localTcpAddr, tcpAddr)
+		//localTcpAddr := c.getLocalTcpAddr()
+		crhInfo.Conns[addr], err = net.DialTCP("tcp", nil, tcpAddr)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(),err.Error())
 		}
@@ -84,7 +85,15 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	// send message's size
 	conn := crhInfo.Conns[addr]
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	c.send(sizeOfMsgSize, msgToServer, conn)
+	err = c.send(sizeOfMsgSize, msgToServer, conn)
+	if err != nil {
+		*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
+		crhInfo.Conns[addr].Close()
+		crhInfo.Conns[addr] = nil
+		delete(crhInfo.Conns, addr)
+		fmt.Println("Error after trying to send message:", err.Error())
+		return
+	}
 
 	msgFromServer := c.read(err, conn, sizeOfMsgSize)
 	if changeProtocol, miopPacket := c.isAdapt(msgFromServer); changeProtocol {
@@ -104,24 +113,28 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 			evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
 		} else {
 			msgFromServer = c.read(err, conn, sizeOfMsgSize)
+			fmt.Println("=================> ############### ============> ########### TCP: Leu o read")
 		}
 	}
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
 
-func (c CRHTCP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) {
+func (c CRHTCP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error {
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
 	_, err := conn.Write(sizeOfMsgSize)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return err
 	}
 
 	// send message
 	_, err = conn.Write(msgToServer)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return err
 	}
+	return nil
 }
 
 func (c CRHTCP) read(err error, conn net.Conn, size []byte) []byte {

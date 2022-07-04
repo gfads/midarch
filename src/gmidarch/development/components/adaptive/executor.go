@@ -67,6 +67,10 @@ func (Executor) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		//unitCommand.Type = elemType
 		//unitCommand.Selector = funcSelector
 	}
+	if unitCommand.Cmd == "Nothing" {
+		*reset = true
+		return
+	}
 	*msg = messages.SAMessage{Payload: unitCommand}
 	fmt.Println("Executor::msg.Payload", msg.Payload)
 }

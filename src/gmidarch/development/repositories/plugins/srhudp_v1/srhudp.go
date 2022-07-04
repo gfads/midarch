@@ -51,6 +51,9 @@ func (s SRHUDP) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip s
 
 	//fmt.Println("Chegou Aqui for idx, client := range clients")
 	for idx, client := range clients {
+		if idx >= 1 { //shared.MAX_NUMBER_OF_CONNECTIONS
+			break
+		}
 		if client == nil {
 			fmt.Println("Zerou client")
 			client := messages.Client{
@@ -63,7 +66,12 @@ func (s SRHUDP) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip s
 		}
 		if client.Connection != nil {
 			fmt.Println("Zerou Connection")
+			client.Ip = ""
+			client.Connection.Close()
 			client.Connection = nil
+			return true, idx
+		}
+		if client.UDPConnection == nil {
 			return true, idx
 		}
 	}
@@ -82,20 +90,20 @@ func (s SRHUDP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	var servAddr *net.UDPAddr
 	var err error
 	// check if a listen has been already created
-	if srhInfo.UDPConnection == nil { // no listen created
-		servAddr, err = net.ResolveUDPAddr("udp4", srhInfo.EndPoint.Host+":"+srhInfo.EndPoint.Port)
-		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(), err.Error())
-		}
-		//srhInfo.Ln, err = net.ListenUDP("udp4", servAddr)
-		//if err != nil {
-		//	shared.ErrorHandler(shared.GetFunction(), err.Error())
-		//}
-		srhInfo.UDPConnection, err = net.ListenUDP("udp4", servAddr) //, err := srhInfo.Ln.Accept()
-		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(), err.Error())
-		}
-	}
+	//if srhInfo.UDPConnection == nil { // no listen created
+	//	servAddr, err = net.ResolveUDPAddr("udp4", srhInfo.EndPoint.Host+":"+srhInfo.EndPoint.Port)
+	//	if err != nil {
+	//		shared.ErrorHandler(shared.GetFunction(), err.Error())
+	//	}
+	//	//srhInfo.Ln, err = net.ListenUDP("udp4", servAddr)
+	//	//if err != nil {
+	//	//	shared.ErrorHandler(shared.GetFunction(), err.Error())
+	//	//}
+	//	srhInfo.UDPConnection, err = net.ListenUDP("udp4", servAddr) //, err := srhInfo.Ln.Accept()
+	//	if err != nil {
+	//		shared.ErrorHandler(shared.GetFunction(), err.Error())
+	//	}
+	//}
 
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
 	connectionAvailable, availableConenctionIndex := s.availableConnectionFromPool(&srhInfo.Clients, "")
@@ -105,7 +113,7 @@ func (s SRHUDP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		return
 	}
 
-	go func() {
+	//go func() {
 		client := srhInfo.Clients[availableConenctionIndex]
 		fmt.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients Index", availableConenctionIndex)
 
@@ -115,11 +123,26 @@ func (s SRHUDP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		//	shared.ErrorHandler(shared.GetFunction(), err.Error())
 		//}
 
-		srhInfo.Conns = append(srhInfo.Conns, srhInfo.UDPConnection)
+		if client.UDPConnection == nil { // no listen created
+			servAddr, err = net.ResolveUDPAddr("udp4", srhInfo.EndPoint.Host+":"+srhInfo.EndPoint.Port)
+			if err != nil {
+				shared.ErrorHandler(shared.GetFunction(), err.Error())
+			}
+			//srhInfo.Ln, err = net.ListenUDP("udp4", servAddr)
+			//if err != nil {
+			//	shared.ErrorHandler(shared.GetFunction(), err.Error())
+			//}
+			client.UDPConnection, err = net.ListenUDP("udp4", servAddr) //, err := srhInfo.Ln.Accept()
+			if err != nil {
+				shared.ErrorHandler(shared.GetFunction(), err.Error())
+			}
+		}
+
+		srhInfo.Conns = append(srhInfo.Conns, client.UDPConnection)
 		//srhInfo.CurrentConn = conn
 
 		client.Ip = ""//conn.RemoteAddr().String() UDP dont start with RemoteAddr
-		client.UDPConnection = srhInfo.UDPConnection
+		//client.UDPConnection = srhInfo.UDPConnection
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Connected Client", client)
 
 
@@ -128,7 +151,7 @@ func (s SRHUDP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 
 		// Start goroutine
 		go s.handler(info, availableConenctionIndex)
-	}()
+	//}()
 	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version 1 adapted")
 	return
 }
@@ -167,7 +190,12 @@ func (s SRHUDP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	fmt.Println("msg.ToAddr", msg.ToAddr, "srhInfo.Clients", srhInfo.Clients)
-	conn := srhInfo.GetClientFromAddr(msg.ToAddr, srhInfo.Clients).UDPConnection //srhInfo.CurrentConn
+	client := srhInfo.GetClientFromAddr(msg.ToAddr, srhInfo.Clients)
+	conn := client.UDPConnection //srhInfo.CurrentConn
+	if conn == nil {
+		*reset = true
+		return
+	}
 	fmt.Println("UDP conn:", conn)
 	msgTemp := msg.Payload.([]byte)
 	addr := strings.Split(msg.ToAddr, ":")
@@ -177,6 +205,10 @@ func (s SRHUDP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 	// send message's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	binary.LittleEndian.PutUint32(size, uint32(len(msgTemp)))
+
+	miop := middleware.Jsonmarshaller{}.Unmarshall(msgTemp)
+	//return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
+	fmt.Println("SRHUDP_v1 Client:", client.Ip, client.Connection, client.UDPConnection, "Connection is:", conn, "msg.ToAddr is:", msg.ToAddr, "msgTemp is:", miop.Bd.ReqHeader.Operation, miop.Bd.RepBody)
 	_, err := conn.WriteTo(size, &net.UDPAddr{IP: ip, Port: port})
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
@@ -214,25 +246,29 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 		_, addr, err := conn.ReadFromUDP(size)
 		srhInfo.Clients[connectionIndex].Ip = addr.String()
 		fmt.Println("----------------------------------------->", shared.GetFunction(), "Read efetuado", "SRHUDP Version 1 adapted")
-		if err == io.EOF {
-			srhInfo.Clients[connectionIndex] = nil
-			fmt.Println("Não Vai matar o app EOF")
-			break
-		} else if err != nil && err != io.EOF {
-			fmt.Println("Vai matar o app, erro mas não EOF")
-			shared.ErrorHandler(shared.GetFunction(), err.Error())
+		if err != nil {
+			if err == io.EOF || strings.Contains(err.Error(), "use of closed network connection")	{
+				srhInfo.Clients[connectionIndex] = nil
+				fmt.Println("Não Vai matar o app EOF")
+				break
+			} else if err != nil && err != io.EOF {
+				fmt.Println("Vai matar o app, erro mas não EOF")
+				shared.ErrorHandler(shared.GetFunction(), err.Error())
+			}
 		}
 
 		// receive message
 		msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
 		_, err = conn.Read(msgTemp)
-		if err == io.EOF {
-			srhInfo.Clients[connectionIndex] = nil
-			fmt.Println("Não Vai matar o app EOF")
-			break
-		} else if err != nil && err != io.EOF {
-			fmt.Println("Vai matar o app, erro mas não EOF")
-			shared.ErrorHandler(shared.GetFunction(), err.Error())
+		if err != nil {
+			if err == io.EOF || strings.Contains(err.Error(), "use of closed network connection") {
+				srhInfo.Clients[connectionIndex] = nil
+				fmt.Println("Não Vai matar o app EOF")
+				break
+			} else if err != nil && err != io.EOF {
+				fmt.Println("Vai matar o app, erro mas não EOF")
+				shared.ErrorHandler(shared.GetFunction(), err.Error())
+			}
 		}
 
 		if changeProtocol, miopPacket := s.isAdapt(msgTemp); changeProtocol {
@@ -241,7 +277,7 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 				break
 			}
 		}
-		fmt.Println("SRHUDP Version 1 adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+		fmt.Println("SRHUDP Version 1 adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message from", addr)
 		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Chn: nil, ToAddress: addr.String()}
 		if !*executeForever {
 			break

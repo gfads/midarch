@@ -169,8 +169,16 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 					infoTemp := elementComponent.Info
 					srhInfo := infoTemp.(*messages.SRHInfo)
 					for idx, client := range srhInfo.Clients {
+						fmt.Println("Vai adaptar")
 						// if Client from Connection Pool have a client connected
 						if client.Ip != "" {
+							fmt.Println("Vai adaptar: IP:", client.Ip)
+							if (strings.Contains(unitElemType, "UDP") && client.UDPConnection == nil) ||
+							   (strings.Contains(unitElemType, "TCP") && client.Connection == nil) {
+								fmt.Println("Vai adaptar: pulou sem conexão")
+								continue
+							}
+							fmt.Println("Vai adaptar: entrou AdaptId:", client.AdaptId)
 							client.AdaptId = idx
 							miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{adaptTo, client.AdaptId}, client.AdaptId) // idx is the Connection ID
 							msg := &messages.SAMessage{}
@@ -179,9 +187,9 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 							msg.Payload = middleware.Jsonmarshaller{}.Marshall(miopPacket)
 							// Coordinate the protocol change
 							shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
-							time.Sleep(2 * time.Second)
 						}
 					}
+					time.Sleep(2 * time.Second)
 				} else if strings.Contains(unitElemType, "CRH") {
 					//time.Sleep(10 * time.Second)
 					//fmt.Println("Unit.I_Adaptunit:: 10 seconds passed", u.UnitId, "::info:", elementComponent)
@@ -194,12 +202,28 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				for *elementComponent.Executing == true {
 					time.Sleep(200 * time.Millisecond)
 				}
+				time.Sleep(2 * time.Second)
 				elementComponent.Type = cmd.Type
+				elementComponent.TypeName = cmdElemType
 
 				if strings.Contains(unitElemType, "CRH") {
-					time.Sleep(10 * time.Second)
+					time.Sleep(2000 * time.Millisecond)
 					fmt.Println("Unit.I_Adaptunit:: 10 seconds passed", u.UnitId, "::info:", elementComponent)
+					infoTemp := elementComponent.Info
+					crhInfo := infoTemp.(messages.CRHInfo)
+					for _, conn := range crhInfo.Conns {
+						conn.Close()
+					}
 					//shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Process", msg, &elementComponent.Info, reset)
+				} else if adaptTo == "tcp" || adaptTo == "udp" {
+					infoTemp := elementComponent.Info
+					srhInfo := infoTemp.(*messages.SRHInfo)
+					for len(srhInfo.Clients) > 0 {
+						fmt.Println("Will initialize")
+						srhInfo.Clients[len(srhInfo.Clients)-1].Initialize()
+						srhInfo.Clients = messages.Remove(srhInfo.Clients, len(srhInfo.Clients)-1)
+						fmt.Println("Initialized")
+					}
 				}
 
 				//infoTemp := make([]*interface{}, 1)
