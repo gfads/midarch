@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"encoding/binary"
-	"fmt"
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
 	evolutive "injector"
@@ -17,9 +16,9 @@ import (
 type CRHTCP struct {}
 
 func (c CRHTCP) getLocalTcpAddr() (*net.TCPAddr) {
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	fmt.Println("shared.LocalAddr:", shared.LocalAddr)
-	log.Println("shared.LocalAddr:", shared.LocalAddr)
+	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	//fmt.Println("shared.LocalAddr:", shared.LocalAddr)
+	//log.Println("shared.LocalAddr:", shared.LocalAddr)
 	var err error = nil
 	var localTCPAddr *net.TCPAddr = nil
 	//shared.LocalAddr = "127.0.0.1:37521"
@@ -33,7 +32,7 @@ func (c CRHTCP) getLocalTcpAddr() (*net.TCPAddr) {
 }
 
 func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	infoTemp := *info
 	crhInfo := infoTemp.(messages.CRHInfo)
 
@@ -58,11 +57,11 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 	addr := host + ":" + port
 	var err error
-	fmt.Println("Vai conectar", crhInfo.Conns[addr])
-	log.Println("Vai conectar", crhInfo.Conns[addr])
+	//fmt.Println("Vai conectar", crhInfo.Conns[addr])
+	//log.Println("Vai conectar", crhInfo.Conns[addr])
 	if _, ok := crhInfo.Conns[addr]; !ok || reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name() != "TCPConn" { // no connection open yet
-		fmt.Println("Entrou", crhInfo.Conns[addr])
-		log.Println("Entrou", crhInfo.Conns[addr])
+		//fmt.Println("Entrou", crhInfo.Conns[addr])
+		//log.Println("Entrou", crhInfo.Conns[addr])
 		tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(),err.Error())
@@ -74,13 +73,13 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 			shared.ErrorHandler(shared.GetFunction(),err.Error())
 		}
 		if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
-			fmt.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr())
-			log.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
+			//fmt.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr())
+			//log.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 			shared.LocalAddr = crhInfo.Conns[addr].LocalAddr().String()
 		}
 	}
-	fmt.Println("Terminou", crhInfo.Conns[addr])
-	log.Println("Terminou", crhInfo.Conns[addr])
+	//fmt.Println("Terminou", crhInfo.Conns[addr])
+	//log.Println("Terminou", crhInfo.Conns[addr])
 
 	// send message's size
 	conn := crhInfo.Conns[addr]
@@ -91,13 +90,13 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		crhInfo.Conns[addr].Close()
 		crhInfo.Conns[addr] = nil
 		delete(crhInfo.Conns, addr)
-		fmt.Println("Error after trying to send message:", err.Error())
+		//fmt.Println("Error after trying to send message:", err.Error())
 		return
 	}
 
 	msgFromServer := c.read(err, conn, sizeOfMsgSize)
 	if changeProtocol, miopPacket := c.isAdapt(msgFromServer); changeProtocol {
-		log.Println("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
+		//log.Println("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
 
 		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
 
@@ -113,7 +112,7 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 			evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
 		} else {
 			msgFromServer = c.read(err, conn, sizeOfMsgSize)
-			fmt.Println("=================> ############### ============> ########### TCP: Leu o read")
+			//fmt.Println("=================> ############### ============> ########### TCP: Leu o read")
 		}
 	}
 
@@ -138,7 +137,7 @@ func (c CRHTCP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) er
 }
 
 func (c CRHTCP) read(err error, conn net.Conn, size []byte) []byte {
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	// receive reply's size
 	_, err = conn.Read(size)
 	if err != nil {
@@ -155,7 +154,7 @@ func (c CRHTCP) read(err error, conn net.Conn, size []byte) []byte {
 }
 
 func (c CRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }

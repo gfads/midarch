@@ -1,7 +1,6 @@
 package adaptive
 
 import (
-	"fmt"
 	"gmidarch/development/messages"
 	"shared"
 	"shared/pluginUtils"
@@ -32,7 +31,7 @@ func (Monevolutive) I_Hasnewplugins(id string, msg *messages.SAMessage, info *in
 		time.Sleep(shared.FIRST_MONITOR_TIME) // only first time
 		isFirstTime = false
 		listOfOldPlugins = pluginUtils.LoadPlugins()
-		fmt.Println("Monevolutive.I_Hasnewplugins::FirstTime - OldPlugins:", listOfOldPlugins)
+		//fmt.Println("Monevolutive.I_Hasnewplugins::FirstTime - OldPlugins:", listOfOldPlugins)
 	} else {
 		time.Sleep(shared.MONITOR_TIME)
 		listOfNewPlugins = pluginUtils.LoadPlugins()
@@ -50,7 +49,7 @@ func (Monevolutive) I_Hasnewplugins(id string, msg *messages.SAMessage, info *in
 		return
 	}
 
-	fmt.Println("Monevolutive.I_Hasnewplugins::Found new pluginsSrc")
+	//fmt.Println("Monevolutive.I_Hasnewplugins::Found new pluginsSrc")
 	evolutiveMonitoredData := shared.MonitoredEvolutiveData{} // Todo dcruzb: remove this line, it's overridden by the next one, make some tests on types
 	evolutiveMonitoredData = newPlugins
 	*msg = messages.SAMessage{Payload: evolutiveMonitoredData}

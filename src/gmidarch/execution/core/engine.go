@@ -34,18 +34,18 @@ func (EngineImpl) Execute(comp *component.Component, executeForever *bool) {
 	node := 0
 	var executing = true
 	comp.Executing = &executing
-	fmt.Println("EngineImpl.Execute::Component.Id:", comp.Id)
-	if comp.TypeName == "Unit" {
-		fmt.Println("EngineImpl.Execute::comp.Info.([]*interface{})[0]).(component.Component).Info:", (*comp.Info.([]*interface{})[0]).(*component.Component).Info)
+	//fmt.Println("EngineImpl.Execute::Component.Id:", comp.Id)
+	//if comp.TypeName == "Unit" {
+		//fmt.Println("EngineImpl.Execute::comp.Info.([]*interface{})[0]).(component.Component).Info:", (*comp.Info.([]*interface{})[0]).(*component.Component).Info)
 		//info := (*comp.Info.([]*interface{})[0]).(component.Component).Info
-		info := (*comp.Info.([]*interface{})[0]).(*component.Component)
-		fmt.Println("EngineImpl.Execute::info is", reflect.TypeOf(info.Type))
+		//info := (*comp.Info.([]*interface{})[0]).(*component.Component)
+		//fmt.Println("EngineImpl.Execute::info is", reflect.TypeOf(info.Type))
 		//unit := *comp.Type.(*adaptive.Unit)
-		reflect.ValueOf(comp.Type).MethodByName("PrintData").Call([]reflect.Value{})
+		//reflect.ValueOf(comp.Type).MethodByName("PrintData").Call([]reflect.Value{})
 		//fmt.Println("EngineImpl.Execute::Unit.ElemOfUnit:", unit.ElemOfUnit)
 		//fmt.Println("EngineImpl.Execute::Unit.GraphOfElem:", unit.GraphOfElem)
 		//fmt.Println("EngineImpl.Execute::Unit.ElemOfUnitInfo:", unit.ElemOfUnitInfo)
-	}
+	//}
 	fmt.Println("EngineImpl.Execute::info is", reflect.TypeOf(comp.Type))
 
 

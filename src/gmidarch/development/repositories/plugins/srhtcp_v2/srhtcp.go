@@ -2,12 +2,10 @@ package srhtcp
 
 import (
 	"encoding/binary"
-	"fmt"
 	"gmidarch/development/components/middleware"
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
 	"io"
-	"log"
 	"net"
 	"shared"
 )
@@ -92,7 +90,7 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	}
 
 	go func() {
-		fmt.Println("SRHTCP Version 2 adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients Index", availableConenctionIndex, " ip:", srhInfo.Clients[availableConenctionIndex].Ip)
+		//fmt.Println("SRHTCP Version 2 adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients Index", availableConenctionIndex, " ip:", srhInfo.Clients[availableConenctionIndex].Ip)
 
 		// Accept connections
 		conn, err := srhInfo.Ln.Accept()
@@ -103,7 +101,7 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		srhInfo.Conns = append(srhInfo.Conns, conn)
 		//srhInfo.CurrentConn = conn
 
-		fmt.Println("SRHTCP Version 2 adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Buscou nova conexão, ip:", conn.RemoteAddr().String())
+		//fmt.Println("SRHTCP Version 2 adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Buscou nova conexão, ip:", conn.RemoteAddr().String())
 		//connectionAvailable, availableConenctionIndex := s.availableConnectionFromPool(&srhInfo.Clients, conn.RemoteAddr().String())
 		////log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(
 		////srhInfo.Clients))
@@ -115,7 +113,7 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		client := srhInfo.Clients[availableConenctionIndex]
 		client.Ip = conn.RemoteAddr().String()
 		client.Connection = conn
-		fmt.Println("SRHTCP Version 2 adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Connected Client", client)
+		//fmt.Println("SRHTCP Version 2 adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Connected Client", client)
 
 
 		// Update info
@@ -124,7 +122,7 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		// Start goroutine
 		go s.handler(info, availableConenctionIndex)
 	}()
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version 2 adapted")
+	//fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version 2 adapted")
 	return
 }
 
@@ -143,8 +141,8 @@ func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
-			fmt.Println("SRHTCP Version 2 adapted: tempMsgReceived", tempMsgReceived)
-			fmt.Println("SRHTCP Version 2 adapted: tempMsgReceived.Chn", tempMsgReceived.Chn)
+			//fmt.Println("SRHTCP Version 2 adapted: tempMsgReceived", tempMsgReceived)
+			//fmt.Println("SRHTCP Version 2 adapted: tempMsgReceived.Chn", tempMsgReceived.Chn)
 			if tempMsgReceived.Chn == nil {
 				*reset = true
 				return
@@ -158,7 +156,7 @@ func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 		}
 	}
 
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version 2 adapted")
+	//fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version 2 adapted")
 	return
 }
 
@@ -166,14 +164,14 @@ func (s SRHTCP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 	//fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 2 adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
-	fmt.Println("msg.ToAddr", msg.ToAddr, "srhInfo.Clients", srhInfo.Clients)
+	//fmt.Println("msg.ToAddr", msg.ToAddr, "srhInfo.Clients", srhInfo.Clients)
 	client := srhInfo.GetClientFromAddr(msg.ToAddr, srhInfo.Clients)
 	conn := client.Connection //srhInfo.CurrentConn
 	if conn == nil {
 		*reset = true
 		return
 	}
-	fmt.Println("SRHTCP Version 2 adapted   >>>>> TCP => msg.ToAddr:", msg.ToAddr, "TCP conn:", conn, "AdaptId:", client.AdaptId)
+	//fmt.Println("SRHTCP Version 2 adapted   >>>>> TCP => msg.ToAddr:", msg.ToAddr, "TCP conn:", conn, "AdaptId:", client.AdaptId)
 	msgTemp := msg.Payload.([]byte)
 
 	// send message's size
@@ -184,9 +182,9 @@ func (s SRHTCP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
 
-	json := middleware.Jsonmarshaller{}
-	unmarshalledMsg := json.Unmarshall(msgTemp)
-	fmt.Println("<<<<<<<<<<<<  <<<<<<<<<<  <<<<<<<<<  SRHTCP Version 2 adapted => Msg: ", unmarshalledMsg.Bd.RepBody.OperationResult)
+	//json := middleware.Jsonmarshaller{}
+	//unmarshalledMsg := json.Unmarshall(msgTemp)
+	//fmt.Println("<<<<<<<<<<<<  <<<<<<<<<<  <<<<<<<<<  SRHTCP Version 2 adapted => Msg: ", unmarshalledMsg.Bd.RepBody.OperationResult)
 	// send message
 	_, err = conn.Write(msgTemp)
 	if err != nil {
@@ -195,12 +193,12 @@ func (s SRHTCP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 
 	// update info
 	*info = srhInfo
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version 2 adapted")
+	//fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version 2 adapted")
 	return
 }
 
 func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 2 adapted")
+	//fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 2 adapted")
 
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
@@ -211,16 +209,16 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 		if !*executeForever {
 			break
 		}
-		fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR", "SRHTCP Version 2 adapted")
+		//fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR", "SRHTCP Version 2 adapted")
 		size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 		_, err := conn.Read(size)
-		fmt.Println("----------------------------------------->", shared.GetFunction(), "Read efetuado", "SRHTCP Version 2 adapted")
+		//fmt.Println("----------------------------------------->", shared.GetFunction(), "Read efetuado", "SRHTCP Version 2 adapted")
 		if err == io.EOF {
 			srhInfo.Clients[connectionIndex] = nil
-			fmt.Println("Não Vai matar o app EOF")
+			//fmt.Println("Não Vai matar o app EOF")
 			break
 		} else if err != nil && err != io.EOF {
-			fmt.Println("Vai matar o app, erro mas não EOF")
+			//fmt.Println("Vai matar o app, erro mas não EOF")
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
 
@@ -229,34 +227,34 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 		_, err = conn.Read(msgTemp)
 		if err == io.EOF {
 			srhInfo.Clients[connectionIndex] = nil
-			fmt.Println("Não Vai matar o app EOF")
+			//fmt.Println("Não Vai matar o app EOF")
 			break
 		} else if err != nil && err != io.EOF {
-			fmt.Println("Vai matar o app, erro mas não EOF")
+			//fmt.Println("Vai matar o app, erro mas não EOF")
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
 
 		if changeProtocol, miopPacket := s.isAdapt(msgTemp); changeProtocol {
 			if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
-				fmt.Println("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHTCP Version 2 adapted")
+				//fmt.Println("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHTCP Version 2 adapted")
 				break
 			}
 		}
 
 		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Chn: conn, ToAddress: srhInfo.Clients[connectionIndex].Ip}
-		fmt.Println("SRHTCP Version 2 adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+		//fmt.Println("SRHTCP Version 2 adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		if !*executeForever {
 			break
 		}
 		srhInfo.RcvedMessages <- rcvMessage
-		fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHTCP Version 2 adapted")
+		//fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHTCP Version 2 adapted")
 	}
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version 2 adapted")
+	//fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version 2 adapted")
 }
 
 
 func (s SRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	miop := middleware.Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }

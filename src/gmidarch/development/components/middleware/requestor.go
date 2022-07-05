@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"fmt"
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
 	"shared"
@@ -13,7 +12,7 @@ type Requestor struct{}
 
 func (Requestor) I_Beforemarshalling(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 
-	fmt.Println(shared.GetFunction(),msg)
+	//fmt.Println(shared.GetFunction(),msg)
 
 	// Create invocation (to CRH/SRH) and Configure Info
 	invocation := msg.Payload.(messages.Invocation)
@@ -47,7 +46,7 @@ func (Requestor) I_Beforeunmarshalling(id string, msg *messages.SAMessage, info 
 }
 
 func (Requestor) I_Beforeproxy(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	fmt.Println(shared.GetFunction(),msg)
+	//fmt.Println(shared.GetFunction(),msg)
 
 	if msg.Payload.(messages.FunctionalReply).Rep == nil {
 		msg.Payload = messages.FunctionalReply{Rep: nil}

@@ -7,7 +7,6 @@ import (
 	"gmidarch/development/messages"
 	"gmidarch/execution/frontend"
 	"shared"
-	"sync"
 	"time"
 )
 
@@ -39,7 +38,7 @@ func main() {
 	}
 
 	//fmt.Scanln()
-	var wg sync.WaitGroup
-	wg.Add(1)
-	wg.Wait()
+	//var wg sync.WaitGroup
+	//wg.Add(1)
+	//wg.Wait()
 }

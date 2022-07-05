@@ -2,11 +2,9 @@ package middleware
 
 import (
 	"encoding/binary"
-	"fmt"
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
 	evolutive "injector"
-	"log"
 	"net"
 	"reflect"
 	"shared"
@@ -17,7 +15,7 @@ import (
 type CRHUDP struct {}
 
 func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
+	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
 	infoTemp := *info
 	crhInfo := infoTemp.(messages.CRHInfo)
 
@@ -54,8 +52,8 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
 		if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
-			fmt.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr())
-			log.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
+			//fmt.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr())
+			//log.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 			shared.LocalAddr = crhInfo.Conns[addr].LocalAddr().String()
 		}
 	}
@@ -67,10 +65,10 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 	msgFromServer := c.read(err, conn, sizeOfMsgSize)
 	if changeProtocol, miopPacket := c.isAdapt(msgFromServer); changeProtocol {
-		log.Println("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
-		log.Println("Adapting, miopPacket.Bd.ReqBody.Body[0]:", miopPacket.Bd.ReqBody.Body[0])
-		log.Println("Adapting, miopPacket.Bd.ReqBody.Body[1]:", miopPacket.Bd.ReqBody.Body[1])
-		log.Println("Adapting, shared.AdaptId:", shared.AdaptId)
+		//log.Println("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
+		//log.Println("Adapting, miopPacket.Bd.ReqBody.Body[0]:", miopPacket.Bd.ReqBody.Body[0])
+		//log.Println("Adapting, miopPacket.Bd.ReqBody.Body[1]:", miopPacket.Bd.ReqBody.Body[1])
+		//log.Println("Adapting, shared.AdaptId:", shared.AdaptId)
 		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
 
 		miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{miopPacket.Bd.ReqBody.Body[0], shared.AdaptId, "Ok"}, shared.AdaptId) // idx is the Connection ID
@@ -78,17 +76,17 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		c.send(sizeOfMsgSize, msgPayload, conn)
 
 		if miopPacket.Bd.ReqBody.Body[0] == "udp" {
-			log.Println("Adapting => UDP")
+			//log.Println("Adapting => UDP")
 			evolutive.GeneratePlugin("crhudp_v1", "crhudp", "crhudp_v1")
 		} else if miopPacket.Bd.ReqBody.Body[0] == "tcp" {
-			log.Println("Adapting => TCP")
+			//log.Println("Adapting => TCP")
 			evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
 		} else {
 			msgFromServer = c.read(err, conn, sizeOfMsgSize)
-			fmt.Println("=================> ############### ============> ########### UDP: Leu o read")
+			//fmt.Println("=================> ############### ============> ########### UDP: Leu o read")
 		}
 	}
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Leu")
+	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Leu")
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
@@ -99,7 +97,7 @@ func (c CRHUDP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) {
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu sizeOfMsgSize")
+	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu sizeOfMsgSize")
 
 	// send message
 	_, err = conn.Write(msgToServer)
@@ -107,7 +105,7 @@ func (c CRHUDP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) {
 		//fmt.Println("Erro no envio do sizeOfMsgSize(", sizeOfMsgSize, ") Connection:", reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name())
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu msg")
+	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu msg")
 }
 
 func (c CRHUDP) getLocalUdpAddr() (*net.UDPAddr) {
@@ -115,15 +113,15 @@ func (c CRHUDP) getLocalUdpAddr() (*net.UDPAddr) {
 	var localUdpAddr *net.UDPAddr = nil
 	//shared.LocalAddr = "127.0.0.1:37522"
 	if shared.LocalAddr != "" {
-		fmt.Println("shared.LocalAddr:", shared.LocalAddr)
-		log.Println("shared.LocalAddr:", shared.LocalAddr)
+		//fmt.Println("shared.LocalAddr:", shared.LocalAddr)
+		//log.Println("shared.LocalAddr:", shared.LocalAddr)
 		localUdpAddr, err = net.ResolveUDPAddr("udp", shared.LocalAddr)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
-	}else{
-		fmt.Println("else shared.LocalAddr:", shared.LocalAddr)
-	}
+	}//else{
+		//fmt.Println("else shared.LocalAddr:", shared.LocalAddr)
+	//}
 	return localUdpAddr
 }
 

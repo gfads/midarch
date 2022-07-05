@@ -71,7 +71,7 @@ func (u Unit) I_Initialiseunit(id string, msg *messages.SAMessage, info *interfa
 
 //msg *messages.SAMessage, info [] *interface{}, r *bool
 func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	fmt.Println("-----------------------------------------> Unit.I_Execute::", u.UnitId, "::TypeName:",(*(*info).([]*interface{})[0]).(*component.Component).TypeName,"::msg.Payload", msg.Payload, "::info:", info)
+	//fmt.Println("-----------------------------------------> Unit.I_Execute::", u.UnitId, "::TypeName:",(*(*info).([]*interface{})[0]).(*component.Component).TypeName,"::msg.Payload", msg.Payload, "::info:", info)
 	var ok bool
 
 	u.ElemOfUnit, ok = allUnitsType.Load(u.UnitId)
@@ -99,14 +99,14 @@ func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, r
 	//engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, !shared.EXECUTE_FOREVER)
 	//engine.Engine{}.Execute(u.ElemOfUnit, u.ElemOfUnitInfo, u.GraphOfElem, shared.EXECUTE_FOREVER)
 	//engine.EngineImpl{}.Execute(u.ElemOfUnit.(*component.Component), shared.EXECUTE_FOREVER)
-	fmt.Println(">>>>>>>><<<<<<<<<<<<<>>>>>>>>>>>><<<<<<<<< Unit:", u.UnitId, "TypeName:", elementComponent.TypeName, "executing:", elementComponent.Executing)
+	//fmt.Println(">>>>>>>><<<<<<<<<<<<<>>>>>>>>>>>><<<<<<<<< Unit:", u.UnitId, "TypeName:", elementComponent.TypeName, "executing:", elementComponent.Executing)
 	if elementComponent.Executing == nil || !*elementComponent.Executing {
 		var executeForever = true
 		elementComponent.ExecuteForever = &executeForever
-		fmt.Println("Setará executeforever:", elementComponent.TypeName)
+		//fmt.Println("Setará executeforever:", elementComponent.TypeName)
 		if strings.Contains(elementComponent.TypeName, "SRH") {
-			fmt.Println("Setou executeforever")
-			log.Println("Setou executeforever")
+			//fmt.Println("Setou executeforever")
+			//log.Println("Setou executeforever")
 			infoTemp := elementComponent.Info
 			srhInfo := infoTemp.(*messages.SRHInfo)
 			srhInfo.ExecuteForever = elementComponent.ExecuteForever
@@ -119,7 +119,7 @@ func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, r
 
 //msg *messages.SAMessage, info [] *interface{}, r *bool
 func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	fmt.Println("-----------------------------------------> Unit.I_Adaptunit::", u.UnitId, "::TypeName:",(*(*info).([]*interface{})[0]).(*component.Component).TypeName,"::msg.Payload", msg.Payload, "::info:", info)
+	//fmt.Println("-----------------------------------------> Unit.I_Adaptunit::", u.UnitId, "::TypeName:",(*(*info).([]*interface{})[0]).(*component.Component).TypeName,"::msg.Payload", msg.Payload, "::info:", info)
 	cmd := shared.UnitCommand{}
 	if msg.Payload != nil {
 		cmd = msg.Payload.(shared.UnitCommand)
@@ -143,18 +143,18 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 		// Check if the command is to this unit - check by type, i.e., all elements of a given type are adapted
 		if shared.CompatibleComponents(strings.ToUpper(unitElemType), strings.ToUpper(cmdElemType)) {
 			if cmd.Cmd == shared.REPLACE_COMPONENT { // TODO
-				log.Println("")
-				log.Println("")
-				log.Println("")
-				log.Println("")
-				log.Println("")
-				log.Println("")
+				//log.Println("")
+				//log.Println("")
+				//log.Println("")
+				//log.Println("")
+				//log.Println("")
+				//log.Println("")
 				//allUnitsType.LoadOrStore(u.UnitId, cmd.Type)
 				//g := u.changeSelector(cmd.Selector)
 				//allUnitsGraph.LoadOrStore(u.UnitId, g)
 				log.Println("--------------Unit.I_Adaptunit::unitElemType(from)", unitElemType, ":: cmdElemType(to)", cmdElemType)
 				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type", cmd.Type)
-				fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type is", reflect.TypeOf(cmd.Type))
+				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type is", reflect.TypeOf(cmd.Type))
 
 				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::info:", elementComponent)
 				var adaptTo string
@@ -169,21 +169,21 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 					infoTemp := elementComponent.Info
 					srhInfo := infoTemp.(*messages.SRHInfo)
 					for idx, client := range srhInfo.Clients {
-						fmt.Println("Vai adaptar")
+						//fmt.Println("Vai adaptar")
 						// if Client from Connection Pool have a client connected
 						if client.Ip != "" {
-							fmt.Println("Vai adaptar: IP:", client.Ip)
+							//fmt.Println("Vai adaptar: IP:", client.Ip)
 							if (strings.Contains(unitElemType, "UDP") && client.UDPConnection == nil) ||
 							   (strings.Contains(unitElemType, "TCP") && client.Connection == nil) {
-								fmt.Println("Vai adaptar: pulou sem conexão")
+								//fmt.Println("Vai adaptar: pulou sem conexão")
 								continue
 							}
-							fmt.Println("Vai adaptar: entrou AdaptId:", client.AdaptId)
+							//fmt.Println("Vai adaptar: entrou AdaptId:", client.AdaptId)
 							client.AdaptId = idx
 							miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{adaptTo, client.AdaptId}, client.AdaptId) // idx is the Connection ID
 							msg := &messages.SAMessage{}
 							msg.ToAddr = client.Ip
-							log.Println("msg.ToAddr:", msg.ToAddr)
+							//log.Println("msg.ToAddr:", msg.ToAddr)
 							msg.Payload = middleware.Jsonmarshaller{}.Marshall(miopPacket)
 							// Coordinate the protocol change
 							shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
@@ -194,7 +194,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 					//time.Sleep(10 * time.Second)
 					//fmt.Println("Unit.I_Adaptunit:: 10 seconds passed", u.UnitId, "::info:", elementComponent)
 					//cmd.Type = shared.GetComponentTypeByNameFromRAM(unitElemType)
-					fmt.Println("unitElemType", unitElemType, "cmd.Type", cmd.Type)
+					//fmt.Println("unitElemType", unitElemType, "cmd.Type", cmd.Type)
 					//shared.ErrorHandler(shared.GetFunction(), "Teste")
 				}
 
@@ -208,7 +208,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 
 				if strings.Contains(unitElemType, "CRH") {
 					time.Sleep(2000 * time.Millisecond)
-					fmt.Println("Unit.I_Adaptunit:: 10 seconds passed", u.UnitId, "::info:", elementComponent)
+					fmt.Println("Unit.I_Adaptunit:: 2 seconds passed", u.UnitId) //, "::info:", elementComponent)
 					infoTemp := elementComponent.Info
 					crhInfo := infoTemp.(messages.CRHInfo)
 					for _, conn := range crhInfo.Conns {
@@ -219,10 +219,10 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 					infoTemp := elementComponent.Info
 					srhInfo := infoTemp.(*messages.SRHInfo)
 					for len(srhInfo.Clients) > 0 {
-						fmt.Println("Will initialize")
+						//fmt.Println("Will initialize")
 						srhInfo.Clients[len(srhInfo.Clients)-1].Initialize()
 						srhInfo.Clients = messages.Remove(srhInfo.Clients, len(srhInfo.Clients)-1)
-						fmt.Println("Initialized")
+						//fmt.Println("Initialized")
 					}
 				}
 
@@ -246,7 +246,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 }
 
 func (u *Unit) changeSelector(s func(interface{}, []*interface{}, string, *messages.SAMessage, []*interface{}, *bool)) exec.ExecGraph {
-	fmt.Println("-----------------------------------------> Unit::changeSelector")
+	//fmt.Println("-----------------------------------------> Unit::changeSelector")
 
 	temp, _ := allUnitsGraph.Load(u.UnitId)
 

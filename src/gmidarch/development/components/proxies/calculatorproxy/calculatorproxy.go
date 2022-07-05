@@ -1,10 +1,8 @@
 package calculatorproxy
 
 import (
-	"fmt"
 	"gmidarch/development/generic"
 	"gmidarch/development/messages"
-	"shared"
 )
 
 //@Type: Calculatorproxy
@@ -24,7 +22,7 @@ func NewCalculatorProxy(proxyConfig generic.ProxyConfig) Calculatorproxy { // TO
 	//ChIn = make(chan messages.SAMessage)
 	//ChOut = make(chan messages.SAMessage)
 
-	fmt.Println(shared.GetFunction())
+	//fmt.Println(shared.GetFunction())
 
 	// Configure proxy
     //genericProxy := generic.Proxy{Host: shared.CALCULATOR_HOST, Port: shared.CALCULATOR_PORT} // TODO dcruzb: Host and ports should not be constants
@@ -44,7 +42,7 @@ func (Calculatorproxy) I_In(id string, msg *messages.SAMessage, info *interface{
 	ChIn = make(chan messages.SAMessage)
 	ChOut = make(chan messages.SAMessage)
 
-	fmt.Println(shared.GetFunction(),ChIn)
+	//fmt.Println(shared.GetFunction(),ChIn)
 
 	// Receive request from Client through the invocation of operations of the functional interface
 	*msg = <-ChIn
@@ -52,7 +50,7 @@ func (Calculatorproxy) I_In(id string, msg *messages.SAMessage, info *interface{
 
 func (Calculatorproxy) I_Out(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 
-	fmt.Println(shared.GetFunction())
+	//fmt.Println(shared.GetFunction())
 
 	// Send message to Client
 	ChOut <- *msg
@@ -65,7 +63,7 @@ func (p Calculatorproxy) Add(_p1,_p2 int) int {
 	host := p.Config.Host
 	_endPoint := messages.EndPoint{Host:host, Port:port}
 
-	fmt.Println(shared.GetFunction(), _endPoint.Host)
+	//fmt.Println(shared.GetFunction(), _endPoint.Host)
 
 	_params := []interface{}{_p1, _p2}
 
@@ -74,7 +72,7 @@ func (p Calculatorproxy) Add(_p1,_p2 int) int {
 
 	_samMsg := messages.SAMessage{Payload: _msg}
 
-	fmt.Println(shared.GetFunction(), ChIn)
+	//fmt.Println(shared.GetFunction(), ChIn)
 
 	// Send request to I_In
 	ChIn <- _samMsg
@@ -95,7 +93,7 @@ func (p Calculatorproxy) Add(_p1,_p2 int) int {
 	} else {
 		result = response.Payload.(messages.FunctionalReply).Rep.(float64)
 	}
-	fmt.Println(shared.GetFunction(), result)
+	//fmt.Println(shared.GetFunction(), result)
 
 	return int(result)
 }

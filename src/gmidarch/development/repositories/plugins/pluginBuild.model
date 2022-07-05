@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"<pluginName>"
 )
 
 func GetType() interface{} {
-	fmt.Println("Chamou GetType do pluginBuild.model")
+	// fmt.Println("Chamou GetType do pluginBuild.model")
 	return &<pluginType>
 }

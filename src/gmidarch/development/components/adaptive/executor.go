@@ -1,11 +1,8 @@
 package adaptive
 
 import (
-	"fmt"
 	"gmidarch/development/messages"
-	"log"
 	"plugin"
-	"reflect"
 	"shared"
 	"shared/pluginUtils"
 	"strings"
@@ -16,19 +13,19 @@ import (
 type Executor struct{}
 
 func (Executor) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	fmt.Println("Executor::msg.Payload", msg.Payload)
+	//fmt.Println("Executor::msg.Payload", msg.Payload)
 	plan := msg.Payload.(shared.AdaptationPlan)
-	fmt.Println("Executor::plan", plan)
+	//fmt.Println("Executor::plan", plan)
 	unitCommand := shared.UnitCommand{Cmd: "Nothing"}
 	//fmt.Println("plan", plan, "plan.Operations", plan.Operations, "plan.Params", plan.Params)
 	//shared.ErrorHandler(shared.GetFunction(), "Teste")
 
 	if len(plan.Operations) > 0 { // TODO
 		pluginName := plan.Params[plan.Operations[0]][0]
-		fmt.Println("Executor.I_Process::will load plugin:", pluginName)
+		//fmt.Println("Executor.I_Process::will load plugin:", pluginName)
 
 		if shared.Contains(shared.Adaptability, shared.EVOLUTIVE_PROTOCOL_ADAPTATION) {//strings.Contains(pluginName, "crh") {
-			fmt.Println("EVOLUTIVE_PROTOCOL_ADAPTATION no executor:", pluginName)
+			//fmt.Println("EVOLUTIVE_PROTOCOL_ADAPTATION no executor:", pluginName)
 			unitCommand.Cmd = shared.REPLACE_COMPONENT
 			unitCommand.Params = plugin.Plugin{} //plg
 			componentName := strings.ToUpper(strings.ReplaceAll(pluginName, ".so", ""))
@@ -37,14 +34,14 @@ func (Executor) I_Process(id string, msg *messages.SAMessage, info *interface{},
 			//shared.ErrorHandler(shared.GetFunction(), "Teste")
 		} else if shared.Contains(shared.Adaptability, shared.EVOLUTIVE_ADAPTATION) &&
 			strings.Contains(pluginName, "srh") { // TODO dcruzb: remove test condition
-			fmt.Println("EVOLUTIVE_ADAPTATION no executor")
+			//fmt.Println("EVOLUTIVE_ADAPTATION no executor")
 			plg := pluginUtils.LoadPlugin(pluginName)
-			fmt.Println("Executor.I_Process::plugin loaded:", pluginName)
-			log.Println("Executor.I_Process::Will lookup Gettype:", pluginName)
+			//fmt.Println("Executor.I_Process::plugin loaded:", pluginName)
+			//log.Println("Executor.I_Process::Will lookup Gettype:", pluginName)
 			getType, _ := plg.Lookup("GetType")
 			elemType := getType.(func() interface{})()
 
-			log.Println("--------------Executor Adapt to ---->", reflect.TypeOf(elemType).Name())
+			//log.Println("--------------Executor Adapt to ---->", reflect.TypeOf(elemType).Name())
 
 			//fmt.Println("Executor.I_Process::will lookup Getselector:", pluginName)
 			//getSelector, _ := plg.Lookup("Getselector")
@@ -72,5 +69,5 @@ func (Executor) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		return
 	}
 	*msg = messages.SAMessage{Payload: unitCommand}
-	fmt.Println("Executor::msg.Payload", msg.Payload)
+	//fmt.Println("Executor::msg.Payload", msg.Payload)
 }

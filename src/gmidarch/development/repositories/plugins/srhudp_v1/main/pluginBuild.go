@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"gmidarch/development/repositories/plugins/srhudp_v1"
 )
 
 func GetType() interface{} {
-	fmt.Println("Chamou GetType do pluginBuild.model")
+	// fmt.Println("Chamou GetType do pluginBuild.model")
 	return &srhudp.SRHUDP{}
 }
