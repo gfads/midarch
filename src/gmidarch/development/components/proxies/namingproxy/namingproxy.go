@@ -2,16 +2,19 @@ package namingproxy
 
 import (
 	"gmidarch/development/components/proxies/calculatorproxy"
+	"gmidarch/development/components/proxies/fibonacciProxy"
 	"gmidarch/development/generic"
 	"gmidarch/development/messages"
 	"reflect"
+	"shared"
 )
 
 //@Type: Namingproxy
 //@Behaviour: Behaviour = I_In -> InvR.e1 -> TerR.e1 -> I_Out -> Behaviour
 var ProxiesRepo = map[string]generic.Proxy { // Update for each new proxy
 	reflect.TypeOf(Namingproxy{}).Name():                     &Namingproxy{},
-	reflect.TypeOf(calculatorproxy.Calculatorproxy{}).Name(): &calculatorproxy.Calculatorproxy{}}
+	reflect.TypeOf(calculatorproxy.Calculatorproxy{}).Name(): &calculatorproxy.Calculatorproxy{},
+	reflect.TypeOf(fibonacciProxy.FibonacciProxy{}).Name(): &fibonacciProxy.FibonacciProxy{}}
 
 // Internal channels
 var ChOut, ChIn chan messages.SAMessage
@@ -88,6 +91,9 @@ func (p Namingproxy) Lookup(_p1 string) (generic.Proxy, bool) {
 	host := aor["host"].(string)
 	port:= aor["port"].(string)
 	proxy := ProxiesRepo[aor["proxy"].(string)]
+	if proxy == nil {
+		shared.ErrorHandler(shared.GetFunction(), "Proxy("+aor["proxy"].(string)+") not found!!")
+	}
 	proxyConfig := generic.ProxyConfig{Host: host, Port: port} // TODO dcruzb: Host and ports should not be constants, change to aor["host"].(string) and aor["port"].(string), uncomment previous lines
 	proxy.Configure(proxyConfig)
 

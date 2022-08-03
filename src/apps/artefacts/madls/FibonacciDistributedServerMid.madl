@@ -1,0 +1,28 @@
+Configuration calculatordistributedservermid :=
+  Components
+      naming            : Namingproxy
+      requestor         : Requestor
+      fibonacciinvoker  : FibonacciInvoker
+      marshaller        : Jsonmarshaller
+      marshaller2       : Jsonmarshaller
+      crh               : CRHUDP
+      srh               : SRHUDP
+
+   Connectors
+      t1 : Requestreply
+      t2 : Requestreply
+      t3 : Requestreply
+      t4 : Requestreply
+      t5 : Requestreply
+
+   Attachments
+        naming,t1,requestor
+        requestor,t2,marshaller
+        requestor,t3,crh
+        srh,t4,fibonacciinvoker
+        fibonacciinvoker,t5,marshaller2
+
+   Adaptability
+      Evolutive
+
+EndConf

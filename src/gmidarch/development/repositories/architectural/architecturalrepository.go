@@ -6,11 +6,13 @@ import (
 	"gmidarch/development/components/component"
 	"gmidarch/development/components/middleware"
 	"gmidarch/development/components/proxies/calculatorproxy"
+	"gmidarch/development/components/proxies/fibonacciProxy"
 	"gmidarch/development/components/proxies/namingproxy"
 	"gmidarch/development/connectors"
 	"gmidarch/development/messages"
 	"io/ioutil"
 	"shared"
+	"strconv"
 )
 
 type ArchitecturalRepository struct {
@@ -38,11 +40,13 @@ var SetOfComponentTypesRAM = map[string]interface{} {
 	"CRHUDP":            	&middleware.CRHUDP{},
 	"SRHUDP":            	&middleware.SRHUDP{},
 	"Calculatorinvoker": 	&middleware.Calculatorinvoker{},
+	"FibonacciInvoker": 	&middleware.FibonacciInvoker{},
 	"Requestor":         	&middleware.Requestor{},
 	"Naminginvoker":     	&middleware.Naminginvoker{},
 	"Namingserver":      	&middleware.Namingserver{},
 	"Namingproxy":       	&namingproxy.Namingproxy{},
-	"Calculatorproxy":   	&calculatorproxy.Calculatorproxy{}}
+	"Calculatorproxy":   	&calculatorproxy.Calculatorproxy{},
+	"FibonacciProxy":   	&fibonacciProxy.FibonacciProxy{}}
 
 // Set of existing Connectors
 var SetOfConnectorTypesRAM = map[string]connectors.Connector{
@@ -68,7 +72,8 @@ func LoadArchitecturalRepository() ArchitecturalRepository {
 
 	// Check the consistency of RAM/File repositories
 	if len(SetOfComponentTypesRAM) != len(SetOfComponentTypesFile) {
-		shared.ErrorHandler(shared.GetFunction(), "The set of components in RAM and Disk are inconsistent!!")
+		shared.ErrorHandler(shared.GetFunction(),
+			"The set of components in RAM("+strconv.Itoa(len(SetOfComponentTypesRAM))+") and Disk("+strconv.Itoa(len(SetOfComponentTypesFile))+") are inconsistent!!")
 	}
 
 	// Store components on the architectural repositories
