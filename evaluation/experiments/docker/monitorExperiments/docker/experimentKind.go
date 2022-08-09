@@ -14,6 +14,7 @@ const (
 	E_Rpc
 	E_Grpc
 	E_Rmq
+	UdpTcp
 )
 
 func (kind Kind) toString() string{
@@ -29,6 +30,7 @@ func (kind Kind) toString() string{
 	case E_Rpc: return "E_RPC"
 	case E_Grpc: return "E_GRPC"
 	case E_Rmq: return "E_RMQ"
+	case UdpTcp: return "UdpTcp"
 	}
 	panic("Kind conversion to string using unlisted kind")
 }
@@ -46,6 +48,7 @@ func (kind Kind) createStackCommand() string {
 	case E_Rpc: return "docker stack deploy -c ./evaluation/experiments/docker/dc-fiborpc.yml fiborpc"
 	case E_Grpc: return "docker stack deploy -c ./evaluation/experiments/docker/dc-fibogrpc.yml fibogrpc"
 	case E_Rmq: return "docker stack deploy -c ./evaluation/experiments/docker/dc-fibormq.yml fibormq"
+	case UdpTcp: return "docker stack deploy -c ./evaluation/experiments/docker/dc-newfibomiddleware-udptcp.yml newfibomiddleware-udptcp"
 	}
 	panic("Kind create stack command using unlisted kind")
 }
@@ -63,6 +66,7 @@ func (kind Kind) removeStackCommand() string {
 	case E_Rpc: return "docker stack rm fiborpc"
 	case E_Grpc: return "docker stack rm fibogrpc"
 	case E_Rmq: return "docker stack rm fibormq"
+	case UdpTcp: return "docker stack rm newfibomiddleware-udptcp"
 	}
 	panic("Kind remove stack command using unlisted kind")
 }
