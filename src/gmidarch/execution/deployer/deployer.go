@@ -1,13 +1,11 @@
 package deployer
 
 import (
-	"fmt"
 	"gmidarch/development/artefacts/madl"
 	"gmidarch/development/components/adaptive"
 	"gmidarch/development/components/component"
 	"gmidarch/development/messages"
 	"gmidarch/execution/core"
-	"log"
 	"reflect"
 	"shared"
 	"strings"
@@ -47,8 +45,8 @@ func NewEEDeployer(m madl.MADL, mee madl.MADL) Deployer {
 			infoTemp[0] = new(interface{})
 			*infoTemp[0] = components[idx]
 
-			fmt.Println("NewEEDeployer::Unit.Type", components[idx].Type)
-			fmt.Println("NewEEDeployer::Unit.Type is", reflect.TypeOf(components[idx].Type))
+			//fmt.Println("NewEEDeployer::Unit.Type", components[idx].Type)
+			//fmt.Println("NewEEDeployer::Unit.Type is", reflect.TypeOf(components[idx].Type))
 			//fmt.Println("NewEEDeployer::Unit.Graph", components[idx].Graph)
 			//fmt.Println("NewEEDeployer::Unit.Info", components[idx].Info)
 
@@ -93,10 +91,10 @@ func (d DeployerImpl) Start() {
 			//fmt.Println("Deployer.Start::Unit.ElemOfUnitInfo:", unit.ElemOfUnitInfo)
 		}
 		d.Madl.Components[i].ExecuteForever = &shared.ExecuteForever
-		fmt.Println("Setará executeforever:", d.Madl.Components[i].TypeName)
+		//fmt.Println("Setará executeforever:", d.Madl.Components[i].TypeName)
 		if strings.Contains(d.Madl.Components[i].TypeName, "SRH") {
-			fmt.Println("Setou executeforever")
-			log.Println("Setou executeforever")
+			//fmt.Println("Setou executeforever")
+			//log.Println("Setou executeforever")
 			infoTemp := d.Madl.Components[i].Info
 			srhInfo := infoTemp.(*messages.SRHInfo)
 			srhInfo.ExecuteForever = d.Madl.Components[i].ExecuteForever

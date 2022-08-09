@@ -47,7 +47,7 @@ func alternatePlugins(firstElem, secondElem string, interval time.Duration) {
 
 	currentPlugin := 1
 	for {
-		fmt.Printf("Evolutive:: Next plugin '%v' will be generated in %v !! \n", elemNew, interval)
+		//fmt.Printf("Evolutive:: Next plugin '%v' will be generated in %v !! \n", elemNew, interval)
 		time.Sleep(interval)
 
 		switch currentPlugin {

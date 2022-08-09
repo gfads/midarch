@@ -5,6 +5,7 @@ import (
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
 	evolutive "injector"
+	"log"
 	"net"
 	"reflect"
 	"shared"
@@ -76,10 +77,10 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		c.send(sizeOfMsgSize, msgPayload, conn)
 
 		if miopPacket.Bd.ReqBody.Body[0] == "udp" {
-			//log.Println("Adapting => UDP")
+			log.Println("Adapting => UDP")
 			evolutive.GeneratePlugin("crhudp_v1", "crhudp", "crhudp_v1")
 		} else if miopPacket.Bd.ReqBody.Body[0] == "tcp" {
-			//log.Println("Adapting => TCP")
+			log.Println("Adapting => TCP")
 			evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
 		} else {
 			msgFromServer = c.read(err, conn, sizeOfMsgSize)

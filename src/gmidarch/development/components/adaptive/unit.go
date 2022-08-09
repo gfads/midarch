@@ -9,7 +9,6 @@ import (
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
 	"gmidarch/execution/core"
-	"log"
 	"strings"
 	"time"
 
@@ -124,7 +123,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 	if msg.Payload != nil {
 		cmd = msg.Payload.(shared.UnitCommand)
 	} else {
-		fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::msg.Payload->nil")
+		//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::msg.Payload->nil")
 	}
 
 
@@ -152,7 +151,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				//allUnitsType.LoadOrStore(u.UnitId, cmd.Type)
 				//g := u.changeSelector(cmd.Selector)
 				//allUnitsGraph.LoadOrStore(u.UnitId, g)
-				log.Println("--------------Unit.I_Adaptunit::unitElemType(from)", unitElemType, ":: cmdElemType(to)", cmdElemType)
+				//log.Println("--------------Unit.I_Adaptunit::unitElemType(from)", unitElemType, ":: cmdElemType(to)", cmdElemType)
 				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type", cmd.Type)
 				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type is", reflect.TypeOf(cmd.Type))
 
@@ -208,7 +207,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 
 				if strings.Contains(unitElemType, "CRH") {
 					time.Sleep(2000 * time.Millisecond)
-					fmt.Println("Unit.I_Adaptunit:: 2 seconds passed", u.UnitId) //, "::info:", elementComponent)
+					//fmt.Println("Unit.I_Adaptunit:: 2 seconds passed", u.UnitId) //, "::info:", elementComponent)
 					infoTemp := elementComponent.Info
 					crhInfo := infoTemp.(messages.CRHInfo)
 					for _, conn := range crhInfo.Conns {
@@ -241,7 +240,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 			return
 		}
 	} else {
-		fmt.Println("Unit::msg.Payload.Cmd->empty")
+		//fmt.Println("Unit::msg.Payload.Cmd->empty")
 	}
 }
 

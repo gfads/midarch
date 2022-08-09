@@ -1,7 +1,6 @@
 package frontend
 
 import (
-	"fmt"
 	"gmidarch/development/artefacts/csp"
 	"gmidarch/development/artefacts/madl"
 	"gmidarch/development/messages"
@@ -31,89 +30,89 @@ func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint)
 	archRepo := arm.GetRepository()
 
 	// Step 2: Load madl
-	fmt.Print("Loading MADL[", fileName, "]...")
+	//fmt.Print("Loading MADL[", fileName, "]...")
 	madlLoader := madl.NewMADLLoader()
 	madlApp := madlLoader.Load(fileName)
 	shared.Adaptability = madlApp.Adaptability
-	fmt.Println("ok")
+	//fmt.Println("ok")
 
 	// Step 3: Syntax check of madl
-	fmt.Print("Syntax checking of MADL...")
+	//fmt.Print("Syntax checking of MADL...")
 	madlChecker := madl.NewMADLChecker()
 	madlChecker.SyntaxCheck(madlApp)
-	fmt.Println("ok")
+	//fmt.Println("ok")
 
 	// Step 4: Semantic check of madl
-	fmt.Print("Semantic checking of MADL...")
+	//fmt.Print("Semantic checking of MADL...")
 	madlChecker.SemanticCheck(madlApp, archRepo)
-	fmt.Println("ok")
+	//fmt.Println("ok")
 
 	// Step 5: Configure madl
-	fmt.Print("Configuring MADL...")
+	//fmt.Print("Configuring MADL...")
 	madlConfigurator := madl.NewMADLConfigurator()
 	madlConfigurator.Configure(&madlApp, archRepo, args)
-	fmt.Println("ok")
+	//fmt.Println("ok")
 
 	if shared.Contains(madlApp.Adaptability, shared.EVOLUTIVE_ADAPTATION) ||
 	   shared.Contains(madlApp.Adaptability, shared.EVOLUTIVE_PROTOCOL_ADAPTATION) {
-		fmt.Println("Creating mee")
+		//fmt.Println("Creating mee")
 		crt := creator.Creator{}
 		meeTemp := crt.Create(madlApp, madlApp.Adaptability)
 		meeTemp.Configuration = madlApp.Configuration + "_ee" +"."+ shared.MADL_EXTENSION
 		crt.Save(meeTemp)
-		fmt.Println("Creating mee ok")
+		//fmt.Println("Creating mee ok")
 
 		// Step 2: Load madl
-		fmt.Print("Loading MADL[", meeTemp.Configuration, "]...")
+		//fmt.Print("Loading MADL[", meeTemp.Configuration, "]...")
 		madlLoader := madl.NewMADLLoader()
 		mee := madlLoader.Load(meeTemp.Configuration)
-		fmt.Println("ok")
+		//fmt.Println("ok")
 
 		// Step 5: Configure madl
-		fmt.Print("Configuring MADL...")
+		//fmt.Print("Configuring MADL...")
 		madlConfigurator := madl.NewMADLConfigurator()
 		madlConfigurator.ConfigureEE(&mee, archRepo, args, madlApp)
-		fmt.Println("ok")
+		//fmt.Println("ok")
 
 
 		// Step 6: Generate & save CSP
-		fmt.Print("Generating Adaptive CSP...")
+		//fmt.Print("Generating Adaptive CSP...")
 		cspGenerator := csp.NewCSPGenerator()
 		cspSpec := cspGenerator.Generate(mee)
 		cspGenerator.Save(cspSpec)
-		fmt.Println("Generating Adaptive CSP ok")
+		//fmt.Println("Generating Adaptive CSP ok")
 
 		// Step 7: Check CSP
-		fmt.Print("Checking CSP...")
+		//fmt.Print("Checking CSP...")
 		//checker := csp.NewFDRGateway()
 		//checker.Check(cspSpec)
-		fmt.Println("ok")
+		//fmt.Println("ok")
 
 		// Step 8: Start execution
-		fmt.Print("Starting execution...")
+		//fmt.Print("Starting execution...")
 		deployer := deployer.NewEEDeployer(madlApp, mee)
 		//dep.Deploy(madlApp) // Deploy App into EE & start EE
 		go deployer.Start()
-		fmt.Println("ok")
+		//fmt.Println("ok")
 	} else {
 		// Step 6: Generate & save CSP
-		fmt.Print("Generating CSP...")
+		//fmt.Print("Generating CSP...")
 		cspGenerator := csp.NewCSPGenerator()
 		cspSpec := cspGenerator.Generate(madlApp)
 		cspGenerator.Save(cspSpec)
-		fmt.Println("ok")
+		//fmt.Println("ok")
 
 		// Step 7: Check CSP
-		fmt.Print("Checking CSP...")
+		//fmt.Print("Checking CSP...")
 		//checker := csp.NewFDRGateway()
 		//checker.Check(cspSpec)
-		fmt.Println("ok")
+		//fmt.Println("ok")
 
 		// Step 8: Start execution
-		fmt.Print("Starting execution...")
+		//fmt.Print("Starting execution...")
 		deployer := deployer.NewDeployer(madlApp)
 		//dep.Deploy(madlApp) // Deploy App into EE & start EE
 		go deployer.Start()
-		fmt.Println("ok")
+		//fmt.Println("ok")
 	}
 }

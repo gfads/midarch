@@ -1,7 +1,6 @@
 package engine
 
 import (
-	"fmt"
 	"gmidarch/development/artefacts/graphs/dot"
 	"gmidarch/development/components/component"
 	"gmidarch/development/messages"
@@ -46,7 +45,7 @@ func (EngineImpl) Execute(comp *component.Component, executeForever *bool) {
 		//fmt.Println("EngineImpl.Execute::Unit.GraphOfElem:", unit.GraphOfElem)
 		//fmt.Println("EngineImpl.Execute::Unit.ElemOfUnitInfo:", unit.ElemOfUnitInfo)
 	//}
-	fmt.Println("EngineImpl.Execute::info is", reflect.TypeOf(comp.Type))
+	//fmt.Println("EngineImpl.Execute::info is", reflect.TypeOf(comp.Type))
 
 
 	// Execute graph
@@ -67,7 +66,7 @@ func (EngineImpl) Execute(comp *component.Component, executeForever *bool) {
 		} else {
 			chosen := choice(comp, edges, &reset)
 			node = edges[chosen].To
-			fmt.Println("EngineImpl.Execute chosen", chosen, "comp", comp.Id, "edges[chosen].To", edges[chosen].To, "len(edges)", len(edges))
+			//fmt.Println("EngineImpl.Execute chosen", chosen, "comp", comp.Id, "edges[chosen].To", edges[chosen].To, "len(edges)", len(edges))
 		}
 
 		if reset {

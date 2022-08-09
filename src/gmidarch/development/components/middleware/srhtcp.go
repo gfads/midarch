@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"encoding/binary"
-	"fmt"
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
 	"io"
@@ -162,7 +161,7 @@ func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 }
 
 func (s SRHTCP) I_Send(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version Not adapted")
+	//fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	//fmt.Println("msg.ToAddr", msg.ToAddr, "srhInfo.Clients", srhInfo.Clients)
