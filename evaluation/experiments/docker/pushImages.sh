@@ -49,12 +49,12 @@ echo
 #echo
 #echo
 
-echo "Pushing RPC images"
+#echo "Pushing RPC images"
 #docker push midarch/fibomiddleware:1.0.2-namingserver-rpc
 #docker push midarch/fibomiddleware:1.0.2-server-rpc
-docker push midarch/fibomiddleware:1.0.3-client-rpc
-echo
-echo
+#docker push midarch/fibomiddleware:1.0.3-client-rpc
+#echo
+#echo
 
 #echo "Pushing non gMidArch RPC images"
 #docker push midarch/fiborpc:1.0.3-server-rpc
@@ -73,3 +73,10 @@ echo
 #docker push midarch/fibormq:1.0.3-client-rmq
 #echo
 #echo
+
+echo "Pushing new UDPTCP images"
+docker push midarch/newfibomiddleware:1.0.0-namingserver-udptcp
+docker push midarch/newfibomiddleware:1.0.0-server-udptcp
+docker push midarch/newfibomiddleware:1.0.0-client-udptcp
+echo
+echo
