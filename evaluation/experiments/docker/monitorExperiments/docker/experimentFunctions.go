@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -25,7 +26,10 @@ func removeStack(kind Kind) error {
 
 func executeCommand(command string) error {
 	log.Printf("Running command and waiting for it to finish...")
-	out, err := exec.Command("cmd", "/C", command).Output()
+	//out, err := exec.Command("cmd", "/C", command).Output() // Windows
+	log.Printf("Command: %s", command)
+	commands := strings.Split(command, " ")
+	out, err := exec.Command(commands[0], commands[1:]...).Output() // Linux
 	if err != nil {
 		log.Printf("Command finished with error: %v", err)
 	}
