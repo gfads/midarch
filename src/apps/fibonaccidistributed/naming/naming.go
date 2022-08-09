@@ -14,7 +14,7 @@ func main() {
 	// The order of Ip/hosts must the same as one in which
 	// these elements appear in the configuration
 	args := make(map[string]messages.EndPoint)
-	args["srh"] = messages.EndPoint{Host: "localhost", Port: shared.NAMING_PORT}
+	args["srh"] = messages.EndPoint{Host: "0.0.0.0", Port: shared.NAMING_PORT}
 
 	// Deploy configuration
 	fe.Deploy("naming.madl", args)

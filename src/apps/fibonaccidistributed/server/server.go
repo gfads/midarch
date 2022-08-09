@@ -14,14 +14,17 @@ import (
 )
 
 func main() {
+	// Wait for namingserver to get up
+	time.Sleep(10 * time.Second)
+
 	fe := frontend.NewFrontend()
 
 	// Configure port of SRHs/CRHs used in the configuration.
 	// The order of Ip/hosts must the same as one in which
 	// these elements appear in the configuration
 	args := make(map[string]messages.EndPoint)
-	args["crh"] = messages.EndPoint{Host: "localhost", Port: shared.NAMING_PORT}
-	args["srh"] = messages.EndPoint{Host: "localhost", Port: shared.CALCULATOR_PORT}
+	args["crh"] = messages.EndPoint{Host: "namingserver", Port: shared.NAMING_PORT}
+	args["srh"] = messages.EndPoint{Host: "0.0.0.0", Port: shared.CALCULATOR_PORT}
 
 	// Deploy configuration
 	fe.Deploy("FibonacciDistributedServerMid.madl", args)

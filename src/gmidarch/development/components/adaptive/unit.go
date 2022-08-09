@@ -200,9 +200,9 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 
 				*elementComponent.ExecuteForever = false
 				for *elementComponent.Executing == true {
-					time.Sleep(200 * time.Millisecond)
+					time.Sleep(600 * time.Millisecond)
 				}
-				time.Sleep(2 * time.Second)
+				time.Sleep(6 * time.Second)
 				elementComponent.Type = cmd.Type
 				elementComponent.TypeName = cmdElemType
 
