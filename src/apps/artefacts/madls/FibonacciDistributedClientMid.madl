@@ -19,6 +19,6 @@ Configuration calculatordistributedclientmid :=
       requestor, t3, crh
 
    Adaptability
-      Evolutive_Protocol
+      None
 EndConf
 

@@ -7,7 +7,6 @@ import (
 	"gmidarch/development/generic"
 	"gmidarch/development/messages"
 	"gmidarch/execution/frontend"
-	evolutive "injector"
 	"shared"
 	"sync"
 	"time"
@@ -48,7 +47,7 @@ func main() {
 
 	fmt.Printf("Fibonacci server is running at Port: %v \n", shared.CALCULATOR_PORT)
 
-	evolutive.EvolutiveInjector{}.Start("srhtcp", "srhudp", 15*time.Second)
+	//evolutive.EvolutiveInjector{}.Start("srhtcp", "srhudp", 20*time.Second)
 
 	//fmt.Scanln()
 	var wg sync.WaitGroup

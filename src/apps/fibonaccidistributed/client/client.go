@@ -6,6 +6,8 @@ import (
 	"gmidarch/development/components/proxies/namingproxy"
 	"gmidarch/development/messages"
 	"gmidarch/execution/frontend"
+	"math"
+	"math/rand"
 	"os"
 	"shared"
 	"strconv"
@@ -50,9 +52,25 @@ func main() {
 	}
 
 	fibonacci := aux.(*fibonacciProxy.FibonacciProxy)
+
+	rand.Seed(time.Now().UnixNano())
 	for x := 0; x < SAMPLE_SIZE; x++ {
-		fmt.Println("Result:", fibonacci.F(n))
-		time.Sleep(200 * time.Millisecond)
+		t1 := time.Now()
+		//fmt.Println("Result:", fibonacci.F(n))
+		fibonacci.F(n)
+		//time.Sleep(200 * time.Millisecond)
+
+		t2 := time.Now()
+
+		duration := t2.Sub(t1)
+
+		fmt.Printf("%v\n",float64(duration.Nanoseconds())/1000000)
+
+		// Normally distributed waiting time between calls with an average of 60 milliseconds and standard deviation of 20 milliseconds
+		var rd = int(math.Round((rand.NormFloat64()+3) * float64(AVERAGE_WAITING_TIME/3)))
+		if rd > 0 {
+			time.Sleep(time.Duration(rd) * time.Millisecond)
+		}
 	}
 
 	//fmt.Scanln()

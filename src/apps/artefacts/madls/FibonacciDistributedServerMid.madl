@@ -23,6 +23,6 @@ Configuration calculatordistributedservermid :=
         fibonacciinvoker,t5,marshaller2
 
    Adaptability
-      Evolutive
+      None
 
 EndConf
