@@ -1,20 +1,18 @@
-datatype PROCNAMES = cinvoker | marshaller | marshaller2 | crh | srh | naming | requestor | t1 | t2 | t3 | t4 | t5
-channel InvR,TerR,InvP,TerP : PROCNAMES
-channel I_In,I_Out,I_Beforesend,I_Beforeproxy,I_Beforeserver,I_Process,I_Accept,I_Receive,I_Send,I_Beforemarshalling,I_Beforeunmarshalling
-MARSHALLER = InvP.t2 -> I_Process -> TerP.t2 -> MARSHALLER
-MARSHALLER2 = InvP.t5 -> I_Process -> TerP.t5 -> MARSHALLER2
+datatype PROCNAMES = marshaller2 | crh | srh | naming | requestor | fibonacciinvoker | marshaller | t1 | t2 | t3 | t4 | t5
+channel TerP,InvR,TerR,InvP : PROCNAMES
+channel I_Out,I_Beforemarshalling,I_Beforesend,I_Beforeproxy,I_Beforeserver,I_Process,I_Receive,I_In,I_Beforeunmarshalling,I_Accept,I_Send
 CRH = InvP.t3 -> I_Process -> TerP.t3 -> CRH
-SRH = I_Accept -> SRHP1 
- SRHP1 = I_Accept -> SRHP1 [] I_Receive -> InvR.t4 -> TerR.t4 -> I_Send -> SRHP1
-
+SRH = I_Accept -> I_Receive -> InvR.t4 -> TerR.t4 -> I_Send -> SRH
 NAMING = I_In -> InvR.t1 -> TerR.t1 -> I_Out -> NAMING
 REQUESTOR = InvP.t1 -> I_Beforemarshalling -> InvR.t2 -> TerR.t2 -> I_Beforesend -> InvR.t3 -> TerR.t3 -> I_Beforeunmarshalling -> InvR.t2 -> TerR.t2 -> I_Beforeproxy -> TerP.t1 -> REQUESTOR
-CINVOKER = InvP.t4 -> I_Beforeunmarshalling -> InvR.t5 -> TerR.t5 -> I_Beforeserver -> I_Beforemarshalling -> InvR.t5 -> TerR.t5 -> I_Beforesend -> TerP.t4 -> CINVOKER
-T3 = InvP.requestor -> InvR.crh-> TerR.crh -> TerP.requestor ->T3
-T4 = InvP.srh -> InvR.cinvoker-> TerR.cinvoker -> TerP.srh ->T4
-T5 = InvP.cinvoker -> InvR.marshaller2-> TerR.marshaller2 -> TerP.cinvoker ->T5
-T1 = InvP.naming -> InvR.requestor-> TerR.requestor -> TerP.naming ->T1
+FIBONACCIINVOKER = InvP.t4 -> I_Beforeunmarshalling -> InvR.t5 -> TerR.t5 -> I_Beforeserver -> I_Beforemarshalling -> InvR.t5 -> TerR.t5 -> I_Beforesend -> TerP.t4 -> FIBONACCIINVOKER
+MARSHALLER = InvP.t2 -> I_Process -> TerP.t2 -> MARSHALLER
+MARSHALLER2 = InvP.t5 -> I_Process -> TerP.t5 -> MARSHALLER2
 T2 = InvP.requestor -> InvR.marshaller-> TerR.marshaller -> TerP.requestor ->T2
+T3 = InvP.requestor -> InvR.crh-> TerR.crh -> TerP.requestor ->T3
+T4 = InvP.srh -> InvR.fibonacciinvoker-> TerR.fibonacciinvoker -> TerP.srh ->T4
+T5 = InvP.fibonacciinvoker -> InvR.marshaller2-> TerR.marshaller2 -> TerP.fibonacciinvoker ->T5
+T1 = InvP.naming -> InvR.requestor-> TerR.requestor -> TerP.naming ->T1
 
-calculatordistributedservermid = (MARSHALLER2 ||| CRH ||| SRH ||| NAMING ||| REQUESTOR ||| CINVOKER ||| MARSHALLER)[|{|InvR,TerR,InvP,TerP|}|](T5[[InvP.cinvoker <- InvR.t5,InvR.marshaller2 <- InvP.t5,TerR.marshaller2 <- TerP.t5,TerP.cinvoker <- TerR.t5]] ||| T1[[InvP.cinvoker <- InvR.t5,InvR.marshaller2 <- InvP.t5,TerR.marshaller2 <- TerP.t5,TerP.cinvoker <- TerR.t5,InvP.naming <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.naming <- TerR.t1]] ||| T2[[InvP.cinvoker <- InvR.t5,InvR.marshaller2 <- InvP.t5,TerR.marshaller2 <- TerP.t5,TerP.cinvoker <- TerR.t5,InvP.naming <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.naming <- TerR.t1,InvP.requestor <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.requestor <- TerR.t2]] ||| T3[[InvP.cinvoker <- InvR.t5,InvR.marshaller2 <- InvP.t5,TerR.marshaller2 <- TerP.t5,TerP.cinvoker <- TerR.t5,InvP.naming <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.naming <- TerR.t1,InvP.requestor <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.requestor <- TerR.t2,InvP.requestor <- InvR.t3,InvR.crh <- InvP.t3,TerR.crh <- TerP.t3,TerP.requestor <- TerR.t3]] ||| T4[[InvP.cinvoker <- InvR.t5,InvR.marshaller2 <- InvP.t5,TerR.marshaller2 <- TerP.t5,TerP.cinvoker <- TerR.t5,InvP.naming <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.naming <- TerR.t1,InvP.requestor <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.requestor <- TerR.t2,InvP.requestor <- InvR.t3,InvR.crh <- InvP.t3,TerR.crh <- TerP.t3,TerP.requestor <- TerR.t3,InvP.srh <- InvR.t4,InvR.cinvoker <- InvP.t4,TerR.cinvoker <- TerP.t4,TerP.srh <- TerR.t4]])
+calculatordistributedservermid = (NAMING ||| REQUESTOR ||| FIBONACCIINVOKER ||| MARSHALLER ||| MARSHALLER2 ||| CRH ||| SRH)[|{|InvR,TerR,InvP,TerP|}|](T4[[InvP.srh <- InvR.t4,InvR.fibonacciinvoker <- InvP.t4,TerR.fibonacciinvoker <- TerP.t4,TerP.srh <- TerR.t4]] ||| T5[[InvP.srh <- InvR.t4,InvR.fibonacciinvoker <- InvP.t4,TerR.fibonacciinvoker <- TerP.t4,TerP.srh <- TerR.t4,InvP.fibonacciinvoker <- InvR.t5,InvR.marshaller2 <- InvP.t5,TerR.marshaller2 <- TerP.t5,TerP.fibonacciinvoker <- TerR.t5]] ||| T1[[InvP.srh <- InvR.t4,InvR.fibonacciinvoker <- InvP.t4,TerR.fibonacciinvoker <- TerP.t4,TerP.srh <- TerR.t4,InvP.fibonacciinvoker <- InvR.t5,InvR.marshaller2 <- InvP.t5,TerR.marshaller2 <- TerP.t5,TerP.fibonacciinvoker <- TerR.t5,InvP.naming <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.naming <- TerR.t1]] ||| T2[[InvP.srh <- InvR.t4,InvR.fibonacciinvoker <- InvP.t4,TerR.fibonacciinvoker <- TerP.t4,TerP.srh <- TerR.t4,InvP.fibonacciinvoker <- InvR.t5,InvR.marshaller2 <- InvP.t5,TerR.marshaller2 <- TerP.t5,TerP.fibonacciinvoker <- TerR.t5,InvP.naming <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.naming <- TerR.t1,InvP.requestor <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.requestor <- TerR.t2]] ||| T3[[InvP.srh <- InvR.t4,InvR.fibonacciinvoker <- InvP.t4,TerR.fibonacciinvoker <- TerP.t4,TerP.srh <- TerR.t4,InvP.fibonacciinvoker <- InvR.t5,InvR.marshaller2 <- InvP.t5,TerR.marshaller2 <- TerP.t5,TerP.fibonacciinvoker <- TerR.t5,InvP.naming <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.naming <- TerR.t1,InvP.requestor <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.requestor <- TerR.t2,InvP.requestor <- InvR.t3,InvR.crh <- InvP.t3,TerR.crh <- TerP.t3,TerP.requestor <- TerR.t3]])
 assert calculatordistributedservermid :[deadlock free]

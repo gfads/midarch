@@ -8,9 +8,11 @@ services:
         condition: none
       resources:
         limits:
-          memory: 1024M
+          cpus: '1'
+          memory: 64M
         reservations:
-          memory: 1024M
+          cpus: '1'
+          memory: 64M
 
   server:
     image: midarch/newfibomiddleware:1.0.1-server-udptcp
@@ -20,9 +22,11 @@ services:
         condition: none
       resources:
         limits:
-          memory: 1024M
+          cpus: '1'
+          memory: 64M
         reservations:
-          memory: 1024M
+          cpus: '1'
+          memory: 64M
 
   client:
     image: midarch/newfibomiddleware:1.0.1-client-udptcp
@@ -32,9 +36,11 @@ services:
         condition: none
       resources:
         limits:
-          memory: 1024M
+          cpus: '1'
+          memory: 64M
         reservations:
-          memory: 1024M
+          cpus: '1'
+          memory: 64M
     environment:
       FIBONACCI_PLACE: "2"
       SAMPLE_SIZE: "10000"

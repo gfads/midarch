@@ -67,7 +67,7 @@ func main() {
 		fmt.Printf("%v\n",float64(duration.Nanoseconds())/1000000)
 
 		// Normally distributed waiting time between calls with an average of 60 milliseconds and standard deviation of 20 milliseconds
-		var rd = int(math.Round((rand.NormFloat64()+3) * float64(AVERAGE_WAITING_TIME/3)))
+		var rd = int(math.Round((rand.NormFloat64() * float64(AVERAGE_WAITING_TIME/5)) + float64(AVERAGE_WAITING_TIME)))
 		if rd > 0 {
 			time.Sleep(time.Duration(rd) * time.Millisecond)
 		}

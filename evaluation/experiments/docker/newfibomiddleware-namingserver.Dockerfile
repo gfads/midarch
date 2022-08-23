@@ -1,5 +1,5 @@
 # Building app
-FROM golang:1.18-buster as build
+FROM golang:1.18-bullseye as build
 WORKDIR /go
 
 ENV GOPATH /go

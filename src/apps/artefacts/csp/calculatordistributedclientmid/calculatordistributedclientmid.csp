@@ -1,14 +1,14 @@
-datatype PROCNAMES = requestor | marshaller | crh | namingproxy | calculatorproxy | t1 | t2 | t3
-channel InvR,TerR,InvP,TerP : PROCNAMES
-channel I_Beforeproxy,I_Process,I_In,I_Out,I_Beforemarshalling,I_Beforesend,I_Beforeunmarshalling
-CALCULATORPROXY = I_In -> InvR.t1 -> TerR.t1 -> I_Out -> CALCULATORPROXY
-REQUESTOR = InvP.t1 -> I_Beforemarshalling -> InvR.t2 -> TerR.t2 -> I_Beforesend -> InvR.t3 -> TerR.t3 -> I_Beforeunmarshalling -> InvR.t2 -> TerR.t2 -> I_Beforeproxy -> TerP.t1 -> REQUESTOR
+datatype PROCNAMES = requestor | marshaller | crh | namingproxy | fibonacciproxy | t1 | t2 | t3
+channel InvP,InvR,TerR,TerP : PROCNAMES
+channel I_Beforemarshalling,I_Beforesend,I_Beforeunmarshalling,I_Beforeproxy,I_Process,I_In,I_Out
 MARSHALLER = InvP.t2 -> I_Process -> TerP.t2 -> MARSHALLER
 CRH = InvP.t3 -> I_Process -> TerP.t3 -> CRH
 NAMINGPROXY = I_In -> InvR.t1 -> TerR.t1 -> I_Out -> NAMINGPROXY
-T1 = InvP.calculatorproxy -> InvR.requestor -> TerR.requestor -> TerP.calculatorproxy -> T1 [] InvP.namingproxy -> InvR.requestor -> TerR.requestor -> TerP.namingproxy -> T1 
+FIBONACCIPROXY = I_In -> InvR.t1 -> TerR.t1 -> I_Out -> FIBONACCIPROXY
+REQUESTOR = InvP.t1 -> I_Beforemarshalling -> InvR.t2 -> TerR.t2 -> I_Beforesend -> InvR.t3 -> TerR.t3 -> I_Beforeunmarshalling -> InvR.t2 -> TerR.t2 -> I_Beforeproxy -> TerP.t1 -> REQUESTOR
+T1 = InvP.fibonacciproxy -> InvR.requestor -> TerR.requestor -> TerP.fibonacciproxy -> T1 [] InvP.namingproxy -> InvR.requestor -> TerR.requestor -> TerP.namingproxy -> T1 
 T2 = InvP.requestor -> InvR.marshaller-> TerR.marshaller -> TerP.requestor ->T2
 T3 = InvP.requestor -> InvR.crh-> TerR.crh -> TerP.requestor ->T3
 
-calculatordistributedclientmid = (CRH ||| NAMINGPROXY ||| CALCULATORPROXY ||| REQUESTOR ||| MARSHALLER)[|{|InvR,TerR,InvP,TerP|}|](T2[[InvP.requestor <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.requestor <- TerR.t2]] ||| T3[[InvP.requestor <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.requestor <- TerR.t2,InvP.requestor <- InvR.t3,InvR.crh <- InvP.t3,TerR.crh <- TerP.t3,TerP.requestor <- TerR.t3]] ||| T1[[InvP.requestor <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.requestor <- TerR.t2,InvP.requestor <- InvR.t3,InvR.crh <- InvP.t3,TerR.crh <- TerP.t3,TerP.requestor <- TerR.t3,InvP.calculatorproxy <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.calculatorproxy <- TerR.t1,InvP.namingproxy <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.namingproxy <- TerR.t1]])
+calculatordistributedclientmid = (CRH ||| NAMINGPROXY ||| FIBONACCIPROXY ||| REQUESTOR ||| MARSHALLER)[|{|InvP,InvR,TerR,TerP|}|](T2[[InvP.requestor <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.requestor <- TerR.t2]] ||| T3[[InvP.requestor <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.requestor <- TerR.t2,InvP.requestor <- InvR.t3,InvR.crh <- InvP.t3,TerR.crh <- TerP.t3,TerP.requestor <- TerR.t3]] ||| T1[[InvP.requestor <- InvR.t2,InvR.marshaller <- InvP.t2,TerR.marshaller <- TerP.t2,TerP.requestor <- TerR.t2,InvP.requestor <- InvR.t3,InvR.crh <- InvP.t3,TerR.crh <- TerP.t3,TerP.requestor <- TerR.t3,InvP.fibonacciproxy <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.fibonacciproxy <- TerR.t1,InvP.namingproxy <- InvR.t1,InvR.requestor <- InvP.t1,TerR.requestor <- TerP.t1,TerP.namingproxy <- TerR.t1]])
 assert calculatordistributedclientmid :[deadlock free]
