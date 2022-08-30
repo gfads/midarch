@@ -48,10 +48,16 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		}
 
 		localUdpAddr := c.getLocalUdpAddr()
-		crhInfo.Conns[addr], err = net.DialUDP("udp", localUdpAddr, udpAddr)
-		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(), err.Error())
+		for {
+			crhInfo.Conns[addr], err = net.DialUDP("udp", localUdpAddr, udpAddr)
+			if err != nil {
+				log.Println("Erro na discagem", crhInfo.Conns[addr])
+				//shared.ErrorHandler(shared.GetFunction(), err.Error())
+			}else{
+				break
+			}
 		}
+
 		if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 			//fmt.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr())
 			//log.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())

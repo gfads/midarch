@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"encoding/binary"
+	"fmt"
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
 	"io"
@@ -120,6 +121,11 @@ func (s SRHUDP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
 			//fmt.Println("SRHUDP Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", tempMsgReceived)
+			if isNewConnection, miopPacket := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
+				fmt.Println("SRHUDP Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
+				*reset = true
+				return
+			}
 			msg.ToAddr = tempMsgReceived.ToAddress
 		}
 	default:
@@ -145,10 +151,19 @@ func (s SRHUDP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 	ip := net.ParseIP(addr[0])
 	port, _ := strconv.Atoi(addr[1])
 
+	s.send(conn, &net.UDPAddr{IP: ip, Port: port}, msgTemp)
+
+	// update info
+	*info = srhInfo
+	//fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
+	return
+}
+
+func (s SRHUDP) send(conn *net.UDPConn, addr *net.UDPAddr, msgTemp []byte) {
 	// send message's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	binary.LittleEndian.PutUint32(size, uint32(len(msgTemp)))
-	_, err := conn.WriteTo(size, &net.UDPAddr{IP: ip, Port: port})
+	_, err := conn.WriteTo(size, addr)
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
@@ -157,15 +172,10 @@ func (s SRHUDP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 	//unmarshalledMsg := json.Unmarshall(msgTemp)
 	//fmt.Println("<<<<<<<<<<<<  <<<<<<<<<<  <<<<<<<<<  SRHUDP Version Not adapted => Msg: ", unmarshalledMsg.Bd.RepBody.OperationResult)
 	// send message
-	_, err = conn.WriteTo(msgTemp, &net.UDPAddr{IP: ip, Port: port})
+	_, err = conn.WriteTo(msgTemp, addr)
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
-
-	// update info
-	*info = srhInfo
-	//fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
-	return
 }
 
 func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
@@ -175,10 +185,13 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	conn := srhInfo.Clients[connectionIndex].UDPConnection //CurrentConn
 	executeForever := srhInfo.ExecuteForever
-
+	newConnection := false
 	for {
 		if !*executeForever {
 			break
+		}
+		if newConnection {
+			fmt.Println("For Beginning")
 		}
 		//fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR", "SRHUDP Version Not adapted")
 		size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
@@ -191,12 +204,14 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 			break
 		} else if err != nil && err != io.EOF {
 			//fmt.Println("Vai matar o app, erro mas não EOF")
-			shared.ErrorHandler(shared.GetFunction(), err.Error())
+			//shared.ErrorHandler(shared.GetFunction(),"Erro aqui " + err.Error())
+			fmt.Println(shared.GetFunction(),"Erro aqui " + err.Error())
+			continue
 		}
 
 		// receive message
 		msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-		_, err = conn.Read(msgTemp)
+		_, _, err = conn.ReadFromUDP(msgTemp)
 		if err == io.EOF {
 			srhInfo.Clients[connectionIndex] = nil
 			//fmt.Println("Não Vai matar o app EOF")
@@ -211,6 +226,23 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 				//fmt.Println("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHUDP Version Not adapted")
 				break
 			}
+		}
+		if isNewConnection, miopPacket := s.isNewConnection(msgTemp); isNewConnection { // TODO dcruzb: move to I_Receive
+			newConnection = true
+			fmt.Println("Is New Connection")
+			miopPacket := miop.CreateReqPacket("Connect", []interface{}{miopPacket.Bd.ReqBody.Body[0], "Ok"}, miopPacket.Bd.ReqBody.Body[0].(int)) // idx is the Connection ID
+			msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+
+			fmt.Println("Before send")
+			s.send(conn, addr, msgPayload)
+			fmt.Println("After send")
+			//if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
+			//	//fmt.Println("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHUDP Version Not adapted")
+			//	break
+			//}
+			continue
+		} else {
+			newConnection = false
 		}
 		//fmt.Println("SRHUDP Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Chn: nil, ToAddress: addr.String()}
@@ -227,4 +259,10 @@ func (s SRHUDP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
+}
+
+func (s SRHUDP) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
+	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	return miop.Bd.ReqHeader.Operation == "Connect", miop
 }
