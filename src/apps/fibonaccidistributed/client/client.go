@@ -16,13 +16,13 @@ import (
 
 func main() {
 	// Wait for namingserver and server to get up
-	time.Sleep(15 * time.Second)
+	time.Sleep(10 * time.Second)
 
 	var n, SAMPLE_SIZE, AVERAGE_WAITING_TIME int
 	if len(os.Args) >= 2 {
 		n, _ = strconv.Atoi(os.Args[1])
 		SAMPLE_SIZE, _ = strconv.Atoi(os.Args[2])
-		AVERAGE_WAITING_TIME = 60
+		AVERAGE_WAITING_TIME, _ = strconv.Atoi(os.Args[3])
 	}else{
 		n, _ = strconv.Atoi(shared.EnvironmentVariableValue("FIBONACCI_PLACE"))
 		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValue("SAMPLE_SIZE"))
@@ -37,7 +37,7 @@ func main() {
 	// The order of Ip/hosts must the same as one in which
 	// these elements appear in the configuration
 	args := make(map[string]messages.EndPoint)
-	args["crh"] = messages.EndPoint{Host: "namingserver", Port: shared.NAMING_PORT}
+	args["crh"] = messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
 
 	// Deploy configuration
 	fe.Deploy("FibonacciDistributedClientMid.madl", args)

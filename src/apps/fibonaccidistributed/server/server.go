@@ -7,6 +7,7 @@ import (
 	"gmidarch/development/generic"
 	"gmidarch/development/messages"
 	"gmidarch/execution/frontend"
+	evolutive "injector"
 	"shared"
 	"sync"
 	"time"
@@ -14,7 +15,7 @@ import (
 
 func main() {
 	// Wait for namingserver to get up
-	time.Sleep(10 * time.Second)
+	time.Sleep(5 * time.Second)
 
 	fe := frontend.NewFrontend()
 
@@ -22,7 +23,7 @@ func main() {
 	// The order of Ip/hosts must the same as one in which
 	// these elements appear in the configuration
 	args := make(map[string]messages.EndPoint)
-	args["crh"] = messages.EndPoint{Host: "namingserver", Port: shared.NAMING_PORT}
+	args["crh"] = messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
 	args["srh"] = messages.EndPoint{Host: "0.0.0.0", Port: shared.CALCULATOR_PORT}
 
 	// Deploy configuration
@@ -47,7 +48,7 @@ func main() {
 
 	fmt.Printf("Fibonacci server is running at Port: %v \n", shared.CALCULATOR_PORT)
 
-	//evolutive.EvolutiveInjector{}.Start("srhtcp", "srhudp", 20*time.Second)
+	evolutive.EvolutiveInjector{}.Start("srhtcp", "srhudp", 20*time.Second)
 
 	//fmt.Scanln()
 	var wg sync.WaitGroup

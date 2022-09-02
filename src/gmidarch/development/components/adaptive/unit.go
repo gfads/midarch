@@ -9,6 +9,7 @@ import (
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
 	"gmidarch/execution/core"
+	"shared/lib"
 	"strings"
 	"time"
 
@@ -70,7 +71,7 @@ func (u Unit) I_Initialiseunit(id string, msg *messages.SAMessage, info *interfa
 
 //msg *messages.SAMessage, info [] *interface{}, r *bool
 func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	//fmt.Println("-----------------------------------------> Unit.I_Execute::", u.UnitId, "::TypeName:",(*(*info).([]*interface{})[0]).(*component.Component).TypeName,"::msg.Payload", msg.Payload, "::info:", info)
+	lib.PrintlnDebug("-----------------------------------------> Unit.I_Execute::", u.UnitId, "::TypeName:",(*(*info).([]*interface{})[0]).(*component.Component).TypeName,"::msg.Payload", msg.Payload, "::info:", info)
 	var ok bool
 
 	u.ElemOfUnit, ok = allUnitsType.Load(u.UnitId)
@@ -100,6 +101,7 @@ func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, r
 	//engine.EngineImpl{}.Execute(u.ElemOfUnit.(*component.Component), shared.EXECUTE_FOREVER)
 	//fmt.Println(">>>>>>>><<<<<<<<<<<<<>>>>>>>>>>>><<<<<<<<< Unit:", u.UnitId, "TypeName:", elementComponent.TypeName, "executing:", elementComponent.Executing)
 	if elementComponent.Executing == nil || !*elementComponent.Executing {
+		lib.PrintlnDebug("Will execute elementComponent.TypeName:", elementComponent.TypeName)
 		var executeForever = true
 		elementComponent.ExecuteForever = &executeForever
 		//fmt.Println("Setará executeforever:", elementComponent.TypeName)
@@ -111,7 +113,7 @@ func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, r
 			srhInfo.ExecuteForever = elementComponent.ExecuteForever
 		}
 		go engine.EngineImpl{}.Execute(elementComponent, elementComponent.ExecuteForever) //&shared.ExecuteForever) //shared.EXECUTE_FOREVER)
-	}
+	} // TODO dcruzb: add sleep no else do executing para melhorar consumo de CPU
 
 	return
 }
@@ -135,7 +137,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 		cmdElemType := reflect.ValueOf(cmd.Type).Elem().Type().Name()
 		//log.Println("")
 		//log.Println("")
-		//log.Println("--------------Unit.I_Adaptunit::", u.UnitId, ":: Adapt to ---->", cmdElemType)
+		lib.PrintlnDebug("--------------Unit.I_Adaptunit::", u.UnitId, ":: Adapt to ---->", cmdElemType)
 		//log.Println("")
 		//log.Println("")
 
@@ -151,7 +153,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				//allUnitsType.LoadOrStore(u.UnitId, cmd.Type)
 				//g := u.changeSelector(cmd.Selector)
 				//allUnitsGraph.LoadOrStore(u.UnitId, g)
-				//log.Println("--------------Unit.I_Adaptunit::unitElemType(from)", unitElemType, ":: cmdElemType(to)", cmdElemType)
+				lib.PrintlnDebug("--------------Unit.I_Adaptunit::unitElemType(from)", unitElemType, ":: cmdElemType(to)", cmdElemType)
 				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type", cmd.Type)
 				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type is", reflect.TypeOf(cmd.Type))
 
@@ -188,7 +190,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 							shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
 						}
 					}
-					time.Sleep(2 * time.Second)
+					time.Sleep(200 * time.Millisecond)
 				} else if strings.Contains(unitElemType, "CRH") {
 					//time.Sleep(10 * time.Second)
 					//fmt.Println("Unit.I_Adaptunit:: 10 seconds passed", u.UnitId, "::info:", elementComponent)
@@ -199,29 +201,33 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 
 				*elementComponent.ExecuteForever = false
 				for *elementComponent.Executing == true {
+					lib.PrintlnDebug("Awaiting to stop executing")
 					time.Sleep(600 * time.Millisecond)
 				}
-				time.Sleep(6 * time.Second)
+				//time.Sleep(6 * time.Second)
 				elementComponent.Type = cmd.Type
 				elementComponent.TypeName = cmdElemType
 
 				if strings.Contains(unitElemType, "CRH") {
-					time.Sleep(2000 * time.Millisecond)
+					//time.Sleep(2000 * time.Millisecond)
 					//fmt.Println("Unit.I_Adaptunit:: 2 seconds passed", u.UnitId) //, "::info:", elementComponent)
+					lib.PrintlnDebug("Will close CRH connections")
 					infoTemp := elementComponent.Info
 					crhInfo := infoTemp.(messages.CRHInfo)
 					for _, conn := range crhInfo.Conns {
 						conn.Close()
 					}
+					lib.PrintlnDebug("CRH connections closed")
 					//shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Process", msg, &elementComponent.Info, reset)
 				} else if adaptTo == "tcp" || adaptTo == "udp" {
 					infoTemp := elementComponent.Info
 					srhInfo := infoTemp.(*messages.SRHInfo)
 					for len(srhInfo.Clients) > 0 {
-						//fmt.Println("Will initialize")
-						srhInfo.Clients[len(srhInfo.Clients)-1].Initialize()
+						lib.PrintlnDebug("Will initialize")
+						tmpClient := srhInfo.Clients[len(srhInfo.Clients)-1]
 						srhInfo.Clients = messages.Remove(srhInfo.Clients, len(srhInfo.Clients)-1)
-						//fmt.Println("Initialized")
+						tmpClient.Initialize()
+						lib.PrintlnDebug("Initialized")
 					}
 				}
 

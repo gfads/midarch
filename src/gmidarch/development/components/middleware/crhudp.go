@@ -5,10 +5,11 @@ import (
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
 	evolutive "injector"
-	"log"
 	"net"
 	"reflect"
 	"shared"
+	"shared/lib"
+	"time"
 )
 
 //@Type: CRHUDP
@@ -16,9 +17,10 @@ import (
 type CRHUDP struct {}
 
 func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
 	infoTemp := *info
 	crhInfo := infoTemp.(messages.CRHInfo)
+	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 
 	// check message
 	//payload := msg.Payload.([]byte)
@@ -40,7 +42,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	msgToServer := payload
 
 	addr := host + ":" + port
-	var err error
+	//var err error
 	if _, ok := crhInfo.Conns[addr]; !ok || reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name() != "UDPConn" { // no connection open yet
 		udpAddr, err := net.ResolveUDPAddr("udp", addr)
 		if err != nil {
@@ -48,34 +50,62 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		}
 
 		localUdpAddr := c.getLocalUdpAddr()
+
+		crhInfo.Conns[addr], err = net.DialUDP("udp", localUdpAddr, udpAddr)
+		if err != nil {
+			lib.PrintlnError("Erro na discagem", crhInfo.Conns[addr], err)
+			shared.ErrorHandler(shared.GetFunction(), err.Error())
+		} //else{
+
 		for {
-			crhInfo.Conns[addr], err = net.DialUDP("udp", localUdpAddr, udpAddr)
-			if err != nil {
-				log.Println("Erro na discagem", crhInfo.Conns[addr])
-				//shared.ErrorHandler(shared.GetFunction(), err.Error())
-			}else{
-				break
-			}
+			time.Sleep(200 * time.Millisecond)
+				miopPacket := miop.CreateReqPacket("Connect", []interface{}{shared.AdaptId}, shared.AdaptId) // idx is the Connection ID
+				msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+				err = c.send(sizeOfMsgSize, msgPayload, crhInfo.Conns[addr])
+				if err != nil {
+					lib.PrintlnError("Erro no send após discagem", crhInfo.Conns[addr], err)
+					continue
+					//shared.ErrorHandler(shared.GetFunction(), err.Error())
+				} //else{
+				//	break
+				//}
+				msgFromServer, err := c.read(crhInfo.Conns[addr], sizeOfMsgSize)
+				if err != nil {
+					lib.PrintlnDebug("Error while reading Connect msg. Error:", err)
+					*reset = true
+					return
+				}
+				if isNewConnection, miopPacket := c.isNewConnection(msgFromServer); isNewConnection {
+					if miopPacket.Bd.ReqBody.Body[1] == "Ok" {
+						break
+					}
+				}
+			//}
 		}
+
 
 		if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 			//fmt.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr())
-			//log.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
+			lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 			shared.LocalAddr = crhInfo.Conns[addr].LocalAddr().String()
 		}
 	}
 
 	// send message's size
 	conn := crhInfo.Conns[addr]
-	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	c.send(sizeOfMsgSize, msgToServer, conn)
 
-	msgFromServer := c.read(err, conn, sizeOfMsgSize)
+	msgFromServer, err := c.read(conn, sizeOfMsgSize)
+	if err != nil {
+		lib.PrintlnDebug("Error while reading crh msg. Error:", err)
+		*reset = true
+		return
+	}
 	if changeProtocol, miopPacket := c.isAdapt(msgFromServer); changeProtocol {
-		//log.Println("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
-		//log.Println("Adapting, miopPacket.Bd.ReqBody.Body[0]:", miopPacket.Bd.ReqBody.Body[0])
-		//log.Println("Adapting, miopPacket.Bd.ReqBody.Body[1]:", miopPacket.Bd.ReqBody.Body[1])
-		//log.Println("Adapting, shared.AdaptId:", shared.AdaptId)
+		lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
+		//lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body[0]:", miopPacket.Bd.ReqBody.Body[0])
+		//lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body[1]:", miopPacket.Bd.ReqBody.Body[1])
+		//lib.PrintlnDebug("Adapting, shared.AdaptId:", shared.AdaptId)
 		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
 
 		miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{miopPacket.Bd.ReqBody.Body[0], shared.AdaptId, "Ok"}, shared.AdaptId) // idx is the Connection ID
@@ -83,36 +113,41 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		c.send(sizeOfMsgSize, msgPayload, conn)
 
 		if miopPacket.Bd.ReqBody.Body[0] == "udp" {
-			log.Println("Adapting => UDP")
+			lib.PrintlnInfo("Adapting => UDP")
 			evolutive.GeneratePlugin("crhudp_v1", "crhudp", "crhudp_v1")
 		} else if miopPacket.Bd.ReqBody.Body[0] == "tcp" {
-			log.Println("Adapting => TCP")
+			lib.PrintlnInfo("Adapting => TCP")
 			evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
 		} else {
-			msgFromServer = c.read(err, conn, sizeOfMsgSize)
+			msgFromServer, _ = c.read(conn, sizeOfMsgSize)
 			//fmt.Println("=================> ############### ============> ########### UDP: Leu o read")
 		}
 	}
-	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Leu")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Leu")
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
 
-func (c CRHUDP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) {
+func (c CRHUDP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error {
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
 	_, err := conn.Write(sizeOfMsgSize)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		lib.PrintlnError("Erro no send 1, retornou o erro", err)
+		return err
 	}
-	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu sizeOfMsgSize")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu sizeOfMsgSize")
 
 	// send message
 	_, err = conn.Write(msgToServer)
 	if err != nil {
 		//fmt.Println("Erro no envio do sizeOfMsgSize(", sizeOfMsgSize, ") Connection:", reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name())
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		lib.PrintlnError("Erro no send 2, retornou o erro", err)
+		return err
 	}
-	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu msg")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu msg")
+	return nil
 }
 
 func (c CRHUDP) getLocalUdpAddr() (*net.UDPAddr) {
@@ -121,7 +156,7 @@ func (c CRHUDP) getLocalUdpAddr() (*net.UDPAddr) {
 	//shared.LocalAddr = "127.0.0.1:37522"
 	if shared.LocalAddr != "" {
 		//fmt.Println("shared.LocalAddr:", shared.LocalAddr)
-		//log.Println("shared.LocalAddr:", shared.LocalAddr)
+		lib.PrintlnDebug("shared.LocalAddr:", shared.LocalAddr)
 		localUdpAddr, err = net.ResolveUDPAddr("udp", shared.LocalAddr)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
@@ -132,23 +167,40 @@ func (c CRHUDP) getLocalUdpAddr() (*net.UDPAddr) {
 	return localUdpAddr
 }
 
-func (c CRHUDP) read(err error, conn net.Conn, size []byte) []byte {
+func (c CRHUDP) read(conn net.Conn, size []byte) ([]byte, error) {
 	// receive reply's size
+	err := conn.SetReadDeadline(time.Now().Add(10*time.Second))
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err.Error())
+	}
 	_, err = conn.Read(size)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
+		lib.PrintlnError(shared.GetFunction(), err.Error())
+		return nil, err
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
 
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
+	err = conn.SetReadDeadline(time.Now().Add(10*time.Second))
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err.Error())
+	}
 	_, err = conn.Read(msgFromServer)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		lib.PrintlnError(shared.GetFunction(), err.Error())
+		return nil, err
 	}
-	return msgFromServer
+	return msgFromServer, nil
 }
 
 func (c CRHUDP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
+}
+
+func (c CRHUDP) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
+	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	return miop.Bd.ReqHeader.Operation == "Connect", miop
 }
