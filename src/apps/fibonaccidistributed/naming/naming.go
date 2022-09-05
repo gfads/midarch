@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"gmidarch/development/messages"
 	"gmidarch/execution/frontend"
 	"shared"
@@ -19,6 +20,7 @@ func main() {
 	// Deploy configuration
 	fe.Deploy("naming.madl", args)
 
+	fmt.Printf("Naming server is running at Port: %v \n", shared.NAMING_PORT)
 	//evolutive.EvolutiveInjector{}.Start("srhtcp", 40*time.Second)
 
 	//fmt.Scanln()

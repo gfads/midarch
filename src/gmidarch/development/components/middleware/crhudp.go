@@ -72,7 +72,10 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 				msgFromServer, err := c.read(crhInfo.Conns[addr], sizeOfMsgSize)
 				if err != nil {
 					lib.PrintlnDebug("Error while reading Connect msg. Error:", err)
-					*reset = true
+					*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
+					crhInfo.Conns[addr].Close()
+					crhInfo.Conns[addr] = nil
+					delete(crhInfo.Conns, addr)
 					return
 				}
 				if isNewConnection, miopPacket := c.isNewConnection(msgFromServer); isNewConnection {
@@ -97,8 +100,11 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 	msgFromServer, err := c.read(conn, sizeOfMsgSize)
 	if err != nil {
-		lib.PrintlnDebug("Error while reading crh msg. Error:", err)
-		*reset = true
+		lib.PrintlnError("Error trying to read message:", err.Error())
+		*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
+		crhInfo.Conns[addr].Close()
+		crhInfo.Conns[addr] = nil
+		delete(crhInfo.Conns, addr)
 		return
 	}
 	if changeProtocol, miopPacket := c.isAdapt(msgFromServer); changeProtocol {
@@ -169,7 +175,7 @@ func (c CRHUDP) getLocalUdpAddr() (*net.UDPAddr) {
 
 func (c CRHUDP) read(conn net.Conn, size []byte) ([]byte, error) {
 	// receive reply's size
-	err := conn.SetReadDeadline(time.Now().Add(10*time.Second))
+	err := conn.SetReadDeadline(time.Now().Add(500*time.Millisecond))
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err.Error())
 	}
@@ -182,7 +188,7 @@ func (c CRHUDP) read(conn net.Conn, size []byte) ([]byte, error) {
 
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
-	err = conn.SetReadDeadline(time.Now().Add(10*time.Second))
+	err = conn.SetReadDeadline(time.Now().Add(500*time.Millisecond))
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err.Error())
 	}

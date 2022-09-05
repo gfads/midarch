@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"encoding/binary"
-	"fmt"
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
 	evolutive "injector"
@@ -96,18 +95,21 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	err = c.send(sizeOfMsgSize, msgToServer, conn)
 	if err != nil {
+		lib.PrintlnError("Error trying to send message:", err.Error())
 		*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
 		crhInfo.Conns[addr].Close()
 		crhInfo.Conns[addr] = nil
 		delete(crhInfo.Conns, addr)
-		fmt.Println("Error after trying to send message:", err.Error())
 		return
 	}
 
 	msgFromServer, err := c.read(conn, sizeOfMsgSize)
 	if err != nil {
-		lib.PrintlnError("Error after read, will reset. Error:", err)
-		*reset = true
+		lib.PrintlnError("Error trying to read message:", err.Error())
+		*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
+		crhInfo.Conns[addr].Close()
+		crhInfo.Conns[addr] = nil
+		delete(crhInfo.Conns, addr)
 		return
 	}
 	if changeProtocol, miopPacket := c.isAdapt(msgFromServer); changeProtocol {
@@ -157,7 +159,7 @@ func (c CRHTCP) read(conn net.Conn, size []byte) ([]byte, error){
 	// receive reply's size
 	_, err := conn.Read(size)
 	if err != nil {
-		fmt.Println(shared.GetFunction(), err)
+		lib.PrintlnError(shared.GetFunction(), err)
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
@@ -166,7 +168,7 @@ func (c CRHTCP) read(conn net.Conn, size []byte) ([]byte, error){
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
 	_, err = conn.Read(msgFromServer)
 	if err != nil {
-		fmt.Println(shared.GetFunction(), err)
+		lib.PrintlnError(shared.GetFunction(), err)
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}

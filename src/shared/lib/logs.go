@@ -1,7 +1,6 @@
 package lib
 
 import (
-	"fmt"
 	"log"
 	"os"
 	"runtime"
@@ -9,7 +8,7 @@ import (
 	"strings"
 )
 
-var SHOW_MESSAGES = []DebugLevel{ERROR, INFO, MESSAGE, DEBUG}
+var SHOW_MESSAGES = []DebugLevel{ERROR, INFO, MESSAGE} //, DEBUG}
 
 type DebugLevel int
 
@@ -53,10 +52,9 @@ func Println(messageLevel DebugLevel, message ...interface{}) {
 				logs = append(logs, message...)
 				log.Println(logs...)
 			case MESSAGE:
-				fmt.Println(message...)
+				log.Println(message...)
 			case ERROR:
-				log.Println(file+":"+strconv.Itoa(line), "\n          ***** ERROR *****",
-					"\n          Message:\n               ", message)
+				log.Println(file+":"+strconv.Itoa(line), "***** ERROR *****", message)
 			}
 		}
 	}

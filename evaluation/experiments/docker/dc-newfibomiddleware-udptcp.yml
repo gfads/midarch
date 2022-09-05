@@ -1,47 +1,47 @@
 version: '3.1'
 services:
   namingserver:
-    image: midarch/newfibomiddleware:1.0.1-namingserver-udptcp
+    image: midarch/newfibomiddleware:1.0.2-namingserver-udptcp
     deploy:
       replicas: 1
       restart_policy:
         condition: none
       resources:
         limits:
-          cpus: '1'
-          memory: 64M
+          cpus: '2'
+          memory: 1000M
         reservations:
-          cpus: '1'
-          memory: 64M
+          cpus: '2'
+          memory: 1000M
 
   server:
-    image: midarch/newfibomiddleware:1.0.1-server-udptcp
+    image: midarch/newfibomiddleware:1.0.2-server-udptcp
     deploy:
       replicas: 1
       restart_policy:
         condition: none
       resources:
         limits:
-          cpus: '1'
-          memory: 64M
+          cpus: '2'
+          memory: 1000M
         reservations:
-          cpus: '1'
-          memory: 64M
+          cpus: '2'
+          memory: 1000M
 
   client:
-    image: midarch/newfibomiddleware:1.0.1-client-udptcp
+    image: midarch/newfibomiddleware:1.0.2-client-udptcp
     deploy:
       replicas: 1
       restart_policy:
         condition: none
       resources:
         limits:
-          cpus: '1'
-          memory: 64M
+          cpus: '2'
+          memory: 1000M
         reservations:
-          cpus: '1'
-          memory: 64M
+          cpus: '2'
+          memory: 1000M
     environment:
-      FIBONACCI_PLACE: "2"
-      SAMPLE_SIZE: "10000"
+      FIBONACCI_PLACE: "38"
+      SAMPLE_SIZE: "1000"
       AVERAGE_WAITING_TIME: "200"
