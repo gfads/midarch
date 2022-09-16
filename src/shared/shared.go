@@ -78,8 +78,8 @@ const MAX_NUMBER_OF_RECEIVED_MESSAGES = 300 // messages received and not process
 const ATTEMPTS_TO_OPEN_A_PLUGIN = 1000
 
 // Evolution
-const FIRST_MONITOR_TIME time.Duration = 5 * time.Second
-const MONITOR_TIME time.Duration = 100 * time.Millisecond
+const FIRST_MONITOR_TIME time.Duration = 50 * time.Second
+const MONITOR_TIME time.Duration = 10 * time.Second
 
 var INJECTION_TIME time.Duration
 

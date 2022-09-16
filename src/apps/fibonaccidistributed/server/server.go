@@ -48,7 +48,7 @@ func main() {
 
 	fmt.Printf("Fibonacci server is running at Port: %v \n", shared.CALCULATOR_PORT)
 
-	evolutive.EvolutiveInjector{}.Start("srhtcp", "srhudp", 20*time.Second)
+	evolutive.EvolutiveInjector{}.Start("srhtcp", "srhudp", 90*time.Second)
 
 	//fmt.Scanln()
 	var wg sync.WaitGroup

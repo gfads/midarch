@@ -56,17 +56,21 @@ func main() {
 
 	rand.Seed(time.Now().UnixNano())
 	for x := 0; x < SAMPLE_SIZE; x++ {
-		t1 := time.Now()
-		//fmt.Println("Result:", fibonacci.F(n))
-		fibonacci.F(n)
-		//time.Sleep(200 * time.Millisecond)
+		ok := false
+		for !ok {
+			t1 := time.Now()
+			//fmt.Println("Result:", fibonacci.F(n))
+			r := fibonacci.F(n)
+			//time.Sleep(200 * time.Millisecond)
 
-		t2 := time.Now()
+			t2 := time.Now()
 
-		duration := t2.Sub(t1)
-
-		lib.PrintlnMessage(x+1, float64(duration.Nanoseconds())/1000000)
-
+			duration := t2.Sub(t1)
+			if r != 0 {
+				ok = true
+				lib.PrintlnMessage(x+1, float64(duration.Nanoseconds())/1000000)
+			}
+		}
 
 		// Normally distributed waiting time between calls with an average of 60 milliseconds and standard deviation of 20 milliseconds
 		var rd = int(math.Round((rand.NormFloat64() * float64(AVERAGE_WAITING_TIME/5)) + float64(AVERAGE_WAITING_TIME)))

@@ -4,34 +4,47 @@ import (
 	"context"
 	"encoding/binary"
 	"errors"
-	"fmt"
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 	"io"
 	"os"
 	"path/filepath"
+	"shared/lib"
 	"strconv"
 	"strings"
 	"time"
 )
 
-func getClientContainer(ctx context.Context, cli *client.Client) *types.Container {
+func getClientContainer(ctx context.Context, cli *client.Client) map[string]types.Container {
+	filteredContainers := make(map[string]types.Container)
+	clientOk := false
+	serverOk := false
 	for i := 0; i < 20; i++ {
 		containers, err := cli.ContainerList(ctx, types.ContainerListOptions{})
 		if err != nil {
 			panic(err)
 		}
-
+		lib.PrintlnDebug("containers:", len(containers))
 		for _, containerItem := range containers {
-			fmt.Println(containerItem.ID, containerItem.Image, containerItem.Names, containerItem.Ports, containerItem.Status, "State:", containerItem.State)
+			//fmt.Println(containerItem.ID, containerItem.Image, containerItem.Names, containerItem.Ports, containerItem.Status, "State:", containerItem.State)
 			if strings.Contains(containerItem.Image, "client") {
-				return &containerItem
+				lib.PrintlnDebug("Found client:", containerItem.Image)
+				filteredContainers["client"] = containerItem
+				clientOk = true
+			} else if !strings.Contains(containerItem.Image, "naming") && strings.Contains(containerItem.Image, "server") {
+				lib.PrintlnDebug("Found server:", containerItem.Image)
+				filteredContainers["server"] = containerItem
+				serverOk = true
 			}
+		}
+		if clientOk && serverOk {
+			return filteredContainers
 		}
 		time.Sleep(1 * time.Second)
 	}
-	return nil
+	lib.PrintlnDebug("filteredContainers:", len(filteredContainers))
+	return filteredContainers
 }
 
 func getContainerStatus(ctx context.Context, cli *client.Client, containerID string) string {
@@ -52,7 +65,7 @@ func getContainerStatus(ctx context.Context, cli *client.Client, containerID str
 	return "no container"
 }
 
-func saveContainerLogsToFile(ctx context.Context, cli *client.Client, containerID string, kind Kind, fiboPlace int, sampleSize int) error {
+func saveContainerLogsToFile(ctx context.Context, cli *client.Client, containerID string, containerType string, kind Kind, fiboPlace int, sampleSize int) error {
 	options := types.ContainerLogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
@@ -70,7 +83,7 @@ func saveContainerLogsToFile(ctx context.Context, cli *client.Client, containerI
 		"results",
 		"docker",
 		"log_" +
-			kind.toString() + "_" +
+			kind.toString() + "_" + containerType + "_" +
 			strconv.Itoa(fiboPlace) + "_" +
 			strconv.Itoa(sampleSize) + "_" +
 			time.Now().Format("20060102_150405")  + ".results.txt")
@@ -100,7 +113,7 @@ func saveContainerLogsToFile(ctx context.Context, cli *client.Client, containerI
 		lines++
 	}
 
-	if lines < sampleSize {
+	if containerType == "client" && lines < sampleSize {
 		return errors.New("saveContainerLogsToFile: less line logs than sample size")
 	}
 
