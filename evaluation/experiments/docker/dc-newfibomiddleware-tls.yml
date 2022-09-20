@@ -1,0 +1,56 @@
+version: '3.1'
+services:
+  namingserver:
+    image: midarch/newfibomiddleware:1.0.3-namingserver-tls
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          cpus: '1'
+          memory: 128M
+        reservations:
+          cpus: '1'
+          memory: 128M
+    environment:
+      CA_PATH: "/go/src/ssl/myCA.pem"
+      CRT_PATH: "/go/src/ssl/namingserver.crt"
+      KEY_PATH: "/go/src/ssl/namingserver.key"
+
+  server:
+    image: midarch/newfibomiddleware:1.0.3-server-tls
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          cpus: '1'
+          memory: 128M
+        reservations:
+          cpus: '1'
+          memory: 128M
+    environment:
+      CA_PATH: "/go/src/ssl/myCA.pem"
+      CRT_PATH: "/go/src/ssl/server.crt"
+      KEY_PATH: "/go/src/ssl/server.key"
+
+  client:
+    image: midarch/newfibomiddleware:1.0.3-client-tls
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          cpus: '1'
+          memory: 128M
+        reservations:
+          cpus: '1'
+          memory: 128M
+    environment:
+      FIBONACCI_PLACE: "38"
+      SAMPLE_SIZE: "10000"
+      AVERAGE_WAITING_TIME: "200"
+      CA_PATH: "/go/src/ssl/myCA.pem"
