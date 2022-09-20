@@ -116,6 +116,10 @@ func processExperiment(kind Kind, fiboPlace int, sampleSize int) []error {
 			experimentErrors = append(experimentErrors, err)
 		}
 		wg.Done()
+		if !stackRemoved {
+			stackRemoved = true
+			removeStack(kind)
+		}
 	}()
 	wg.Wait()
 	return experimentErrors

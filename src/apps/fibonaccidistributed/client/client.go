@@ -17,7 +17,7 @@ import (
 
 func main() {
 	// Wait for namingserver and server to get up
-	time.Sleep(10 * time.Second)
+	time.Sleep(13 * time.Second)
 
 	var n, SAMPLE_SIZE, AVERAGE_WAITING_TIME int
 	if len(os.Args) >= 2 {
@@ -70,12 +70,12 @@ func main() {
 				ok = true
 				lib.PrintlnMessage(x+1, float64(duration.Nanoseconds())/1000000)
 			}
-		}
 
-		// Normally distributed waiting time between calls with an average of 60 milliseconds and standard deviation of 20 milliseconds
-		var rd = int(math.Round((rand.NormFloat64() * float64(AVERAGE_WAITING_TIME/5)) + float64(AVERAGE_WAITING_TIME)))
-		if rd > 0 {
-			time.Sleep(time.Duration(rd) * time.Millisecond)
+			// Normally distributed waiting time between calls with an average of 60 milliseconds and standard deviation of 20 milliseconds
+			var rd = int(math.Round((rand.NormFloat64() * float64(AVERAGE_WAITING_TIME/5)) + float64(AVERAGE_WAITING_TIME)))
+			if rd > 0 {
+				time.Sleep(time.Duration(rd) * time.Millisecond)
+			}
 		}
 	}
 

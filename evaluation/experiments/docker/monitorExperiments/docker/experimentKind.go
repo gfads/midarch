@@ -37,8 +37,8 @@ func (kind Kind) toString() string{
 
 func (kind Kind) createStackCommand() string {
 	switch kind {
-	case Udp:   return "docker stack deploy -c ./evaluation/experiments/docker/dc-fibomiddleware-udp.yml fibomiddleware-udp"
-	case Tcp:   return "docker stack deploy -c ./evaluation/experiments/docker/dc-fibomiddleware-tcp.yml fibomiddleware-tcp"
+	case Udp:   return "docker stack deploy -c ./evaluation/experiments/docker/dc-newfibomiddleware-udp.yml newfibomiddleware-udp"
+	case Tcp:   return "docker stack deploy -c ./evaluation/experiments/docker/dc-newfibomiddleware-tcp.yml newfibomiddleware-tcp"
 	case Ssl:   return "docker stack deploy -c ./evaluation/experiments/docker/dc-fibomiddleware-ssl.yml fibomiddleware-ssl"
 	case Quic:  return "docker stack deploy -c ./evaluation/experiments/docker/dc-fibomiddleware-quic.yml fibomiddleware-quic"
 	case Rpc:   return "docker stack deploy -c ./evaluation/experiments/docker/dc-fibomiddleware-rpc.yml fibomiddleware-rpc"
@@ -55,8 +55,8 @@ func (kind Kind) createStackCommand() string {
 
 func (kind Kind) removeStackCommand() string {
 	switch kind {
-	case Udp: return "docker stack rm fibomiddleware-udp"
-	case Tcp: return "docker stack rm fibomiddleware-tcp"
+	case Udp: return "docker stack rm newfibomiddleware-udp"
+	case Tcp: return "docker stack rm newfibomiddleware-tcp"
 	case Ssl: return "docker stack rm fibomiddleware-ssl"
 	case Quic: return "docker stack rm fibomiddleware-quic"
 	case Rpc: return "docker stack rm fibomiddleware-rpc"

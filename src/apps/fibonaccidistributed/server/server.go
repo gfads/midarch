@@ -15,7 +15,7 @@ import (
 
 func main() {
 	// Wait for namingserver to get up
-	time.Sleep(5 * time.Second)
+	time.Sleep(8 * time.Second)
 
 	fe := frontend.NewFrontend()
 
