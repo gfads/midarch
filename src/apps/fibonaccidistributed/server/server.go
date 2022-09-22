@@ -9,6 +9,7 @@ import (
 	"gmidarch/execution/frontend"
 	evolutive "injector"
 	"shared"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -48,7 +49,8 @@ func main() {
 
 	fmt.Printf("Fibonacci server is running at Port: %v \n", shared.CALCULATOR_PORT)
 
-	evolutive.EvolutiveInjector{}.Start("srhtcp", "srhudp", 90*time.Second)
+	intervalBetweenInjections, _ := strconv.Atoi(shared.EnvironmentVariableValueWithDefault("INJECTION_INTERVAL", "90"))
+	evolutive.EvolutiveInjector{}.StartEvolutiveProtocolInjection("srhtcp", "srhudp", time.Duration(intervalBetweenInjections)*time.Second)
 
 	//fmt.Scanln()
 	var wg sync.WaitGroup
