@@ -29,6 +29,7 @@ var SetOfComponentTypesRAM = map[string]interface{} {
 	"Core":					&adaptive.Core{},
 	"Unit":					&adaptive.Unit{},
 	"Monevolutive":			&adaptive.Monevolutive{},
+	"EvolutiveProtocol":	&adaptive.EvolutiveProtocol{},
 	"Monitor":				&adaptive.Monitor{},
 	"Planner":				&adaptive.Planner{},
 	"Executor":				&adaptive.Executor{},

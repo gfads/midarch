@@ -1,7 +1,7 @@
 version: '3.1'
 services:
   namingserver:
-    image: midarch/newfibomiddleware:1.0.3-namingserver-udptcp
+    image: midarch/newfibomiddleware:1.0.4-namingserver-udptcp
     deploy:
       replicas: 1
       restart_policy:
@@ -15,7 +15,7 @@ services:
           memory: 128M
 
   server:
-    image: midarch/newfibomiddleware:1.0.3-server-udptcp
+    image: midarch/newfibomiddleware:1.0.4-server-udptcp
     deploy:
       replicas: 1
       restart_policy:
@@ -27,9 +27,12 @@ services:
         reservations:
           cpus: '1'
           memory: 128M
+    environment:
+      INJECTION_INTERVAL: 20
+#      DEBUG_LEVEL: "ERROR, INFO, MESSAGE, DEBUG"
 
   client:
-    image: midarch/newfibomiddleware:1.0.3-client-udptcp
+    image: midarch/newfibomiddleware:1.0.4-client-udptcp
     deploy:
       replicas: 1
       restart_policy:
@@ -45,3 +48,4 @@ services:
       FIBONACCI_PLACE: "38"
       SAMPLE_SIZE: "10000"
       AVERAGE_WAITING_TIME: "200"
+#      DEBUG_LEVEL: "ERROR, INFO, MESSAGE, DEBUG"

@@ -4,11 +4,12 @@ import (
 	"log"
 	"os"
 	"runtime"
+	"shared"
 	"strconv"
 	"strings"
 )
 
-var SHOW_MESSAGES = []DebugLevel{ERROR, INFO, MESSAGE} //, DEBUG}
+var SHOW_MESSAGES = []DebugLevel{} //ERROR, INFO, MESSAGE} //, DEBUG}
 
 type DebugLevel int
 
@@ -21,6 +22,22 @@ const (
 
 func (d DebugLevel) ToInt() int {
 	return [...]int{0, 1, 2, 3}[d]
+}
+
+func ConfigureDebugLevel() {
+	debugLevel := shared.EnvironmentVariableValueWithDefault("DEBUG_LEVEL", "ERROR, INFO, MESSAGE")
+	if strings.Contains(debugLevel, "ERROR") {
+		SHOW_MESSAGES = append(SHOW_MESSAGES, ERROR)
+	}
+	if strings.Contains(debugLevel, "INFO") {
+		SHOW_MESSAGES = append(SHOW_MESSAGES, INFO)
+	}
+	if strings.Contains(debugLevel, "MESSAGE") {
+		SHOW_MESSAGES = append(SHOW_MESSAGES, MESSAGE)
+	}
+	if strings.Contains(debugLevel, "DEBUG") {
+		SHOW_MESSAGES = append(SHOW_MESSAGES, DEBUG)
+	}
 }
 
 func FunctionName() string {
@@ -49,7 +66,7 @@ func Println(messageLevel DebugLevel, message ...interface{}) {
 				log.Println(logs...)
 			case DEBUG:
 				var logs []interface{}
-				logs = append(logs, file+":"+strconv.Itoa(line), "- DEBUG -")
+				logs = append(logs, file+":"+strconv.Itoa(line), "- DEBUG -", FunctionName())
 				logs = append(logs, message...)
 				log.Println(logs...)
 			case MESSAGE:

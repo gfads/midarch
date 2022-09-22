@@ -207,7 +207,12 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 	comps = append(comps, component.Component{Id: "core", TypeName: reflect.TypeOf(adaptive.Core{}).Name()}) // TODO dcruzb: verify if this component is necessary
 
 	if appIsAdaptive {
-		comps = append(comps, component.Component{Id: "monevolutive", TypeName: reflect.TypeOf(adaptive.Monevolutive{}).Name()})
+		if appKindOfAdaptability[0] == shared.EVOLUTIVE_ADAPTATION {
+			comps = append(comps, component.Component{Id: "monevolutive", TypeName: reflect.TypeOf(adaptive.Monevolutive{}).Name()})
+		}
+		if appKindOfAdaptability[0] == shared.EVOLUTIVE_PROTOCOL_ADAPTATION {
+			comps = append(comps, component.Component{Id: "evolutiveprotocol", TypeName: reflect.TypeOf(adaptive.EvolutiveProtocol{}).Name()})
+		}
 		comps = append(comps, component.Component{Id: "monitor", TypeName: reflect.TypeOf(adaptive.Monitor{}).Name()})
 		comps = append(comps, component.Component{Id: "analyser", TypeName: reflect.TypeOf(adaptive.Analyser{}).Name()})
 		comps = append(comps, component.Component{Id: "planner", TypeName: reflect.TypeOf(adaptive.Planner{}).Name()})
@@ -272,7 +277,13 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 		cncts = append(cncts, connectors.NewConnector("t5", shared.ONEWAY, "B = InvP.e1 -> InvR.e2 -> B", 1, 1))
 		cncts = append(cncts, connectors.NewConnector("t6", shared.ONEWAY, "B = InvP.e1 -> InvR.e2 -> B", 1, 1))
 
-		attC1 := component.Component{Id: "monevolutive", TypeName: reflect.TypeOf(adaptive.Monevolutive{}).Name()}
+
+		var attC1 component.Component
+		if appKindOfAdaptability[0] == shared.EVOLUTIVE_ADAPTATION {
+			attC1 = component.Component{Id: "monevolutive", TypeName: reflect.TypeOf(adaptive.Monevolutive{}).Name()}
+		} else {
+			attC1 = component.Component{Id: "evolutiveprotocol", TypeName: reflect.TypeOf(adaptive.EvolutiveProtocol{}).Name()}
+		}
 		attT := connectors.NewConnector("t2", shared.ONEWAY, "B = InvP.e1 -> InvR.e2 -> B", 1, 1)
 		attC2 := component.Component{Id: "monitor", TypeName: reflect.TypeOf(adaptive.Monitor{}).Name()}
 		atts = append(atts, madl.Attachment{attC1, attT, attC2})

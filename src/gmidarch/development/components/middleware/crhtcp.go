@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"gmidarch/development/messages"
 	"gmidarch/development/messages/miop"
-	evolutive "injector"
 	"net"
 	"reflect"
 	"shared"
@@ -123,10 +122,12 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 		if miopPacket.Bd.ReqBody.Body[0] == "udp" {
 			lib.PrintlnInfo("Adapting => UDP")
-			evolutive.GeneratePlugin("crhudp_v1", "crhudp", "crhudp_v1")
+			//evolutive.GeneratePlugin("crhudp_v1", "crhudp", "crhudp_v1")
+			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhudp")
 		} else if miopPacket.Bd.ReqBody.Body[0] == "tcp" {
 			lib.PrintlnInfo("Adapting => TCP")
-			evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
+			//evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
+			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhtcp")
 		} else {
 			msgFromServer, _ = c.read(conn, sizeOfMsgSize)
 			//fmt.Println("=================> ############### ============> ########### TCP: Leu o read")

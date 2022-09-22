@@ -8,6 +8,7 @@ import (
 	"gmidarch/execution/creator"
 	"gmidarch/execution/deployer"
 	"shared"
+	"shared/lib"
 )
 
 type Frontend interface {
@@ -19,6 +20,8 @@ type FrontendImpl struct{}
 func NewFrontend() Frontend {
 	var fe Frontend
 	fe = FrontendImpl{}
+
+	lib.ConfigureDebugLevel()
 
 	return fe
 }

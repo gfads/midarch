@@ -44,6 +44,7 @@ var AdaptId = -1
 var LocalAddr = ""
 var ArchitecturalComponentTypes = map[string]interface{}{}
 var Adaptability []string
+var ListOfComponentsToAdaptTo MonitoredEvolutiveData
 
 // MADL
 const MADL_COMMENT = "//"
@@ -81,7 +82,7 @@ const MAX_NUMBER_OF_RECEIVED_MESSAGES = 300 // messages received and not process
 const ATTEMPTS_TO_OPEN_A_PLUGIN = 1000
 
 // Evolution
-const FIRST_MONITOR_TIME time.Duration = 50 * time.Second
+const FIRST_MONITOR_TIME time.Duration = 10 * time.Second
 const MONITOR_TIME time.Duration = 100 * time.Millisecond
 
 var INJECTION_TIME time.Duration
