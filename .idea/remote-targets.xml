@@ -1,21 +1,3 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="RemoteTargetsManager">
-    <option name="projectDefaultTargetUuid" value="9dce455e-6ab6-4dbf-9c8e-3595922f70fa" />
-    <targets>
-      <target name="WSL - Ubuntu" type="wsl" uuid="9dce455e-6ab6-4dbf-9c8e-3595922f70fa">
-        <config>
-          <option name="distributionMsId" value="Ubuntu" />
-          <option name="projectRootOnTarget" value="/mnt/c/Program Files/JetBrains/GoLand 2020.3.3/jbr/bin&#10;/go" />
-        </config>
-        <ContributedStateBase type="GoLanguageRuntime">
-          <config>
-            <option name="goPath" value="/home/dcruzb/go" />
-            <option name="goRoot" value="/usr/bin/go" />
-            <option name="goVersion" value="go1.13.8 linux/amd64" />
-          </config>
-        </ContributedStateBase>
-      </target>
-    </targets>
-  </component>
 </project>

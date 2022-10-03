@@ -9,6 +9,7 @@ import (
 	"shared"
 	"shared/lib"
 	"strings"
+	"time"
 )
 
 //@Type: SRHTCP
@@ -33,20 +34,20 @@ func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip s
 	//lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total clients", len(clients))
 	if len(clients) < 1 { //shared.MAX_NUMBER_OF_CONNECTIONS { TODO: dcruzb go back the env var
 		client := messages.Client{
-			Ip:         "",
-			Connection: nil,
+			Ip:            "",
+			Connection:    nil,
 			UDPConnection: nil,
 		}
 		*clientsPtr = append(clients, &client)
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients", len(*clientsPtr))
-		return true, len(*clientsPtr) -1
+		return true, len(*clientsPtr) - 1
 	}
 
 	for idx, client := range clients {
 		if client == nil {
 			client := messages.Client{
-				Ip:         "",
-				Connection: nil,
+				Ip:            "",
+				Connection:    nil,
 				UDPConnection: nil,
 			}
 			clients[idx] = &client
@@ -87,6 +88,7 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
 	if !connectionAvailable {
 		//lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHTCP Version 2 adapted - No connection available")
+		time.Sleep(1 * time.Millisecond)
 		return
 	}
 
@@ -119,7 +121,6 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		client.Ip = conn.RemoteAddr().String()
 		client.Connection = conn
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Connected Client", client)
-
 
 		// Update info
 		*info = srhInfo
@@ -280,7 +281,6 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 	}
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version Not adapted")
 }
-
 
 func (s SRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")

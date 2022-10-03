@@ -11,6 +11,7 @@ import (
 	"shared"
 	"shared/lib"
 	"strings"
+	"time"
 )
 
 //@Type: SRHTLS
@@ -35,20 +36,20 @@ func (s SRHTLS) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip s
 	//lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total clients", len(clients))
 	if len(clients) < 2 { //shared.MAX_NUMBER_OF_CONNECTIONS { TODO: dcruzb go back the env var
 		client := messages.Client{
-			Ip:         "",
-			Connection: nil,
+			Ip:            "",
+			Connection:    nil,
 			UDPConnection: nil,
 		}
 		*clientsPtr = append(clients, &client)
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients", len(*clientsPtr))
-		return true, len(*clientsPtr) -1
+		return true, len(*clientsPtr) - 1
 	}
 
 	for idx, client := range clients {
 		if client == nil {
 			client := messages.Client{
-				Ip:         "",
-				Connection: nil,
+				Ip:            "",
+				Connection:    nil,
 				UDPConnection: nil,
 			}
 			clients[idx] = &client
@@ -78,7 +79,7 @@ func (s SRHTLS) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
-		srhInfo.Ln, err = tls.Listen("tcp4", servAddr.String(), getServerTLSConfig())//net.ListenTCP("tcp", servAddr)
+		srhInfo.Ln, err = tls.Listen("tcp4", servAddr.String(), getServerTLSConfig()) //net.ListenTCP("tcp", servAddr)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
@@ -89,6 +90,7 @@ func (s SRHTLS) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
 	if !connectionAvailable {
 		//lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHTLS Version 2 adapted - No connection available")
+		time.Sleep(1 * time.Millisecond)
 		return
 	}
 
@@ -121,7 +123,6 @@ func (s SRHTLS) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		client.Ip = conn.RemoteAddr().String()
 		client.Connection = conn
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Connected Client", client)
-
 
 		// Update info
 		*info = srhInfo
@@ -282,7 +283,6 @@ func (s SRHTLS) handler(info *interface{}, connectionIndex int) {
 	}
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTLS Version Not adapted")
 }
-
 
 func (s SRHTLS) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTLS Version Not adapted")

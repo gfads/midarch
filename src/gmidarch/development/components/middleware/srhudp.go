@@ -11,6 +11,7 @@ import (
 	"shared/lib"
 	"strconv"
 	"strings"
+	"time"
 )
 
 //@Type: SRHUDP
@@ -22,14 +23,14 @@ func (s SRHUDP) availableConnectionFromPool(clientsPtr *[]*messages.Client) (boo
 	//lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total clients", len(clients))
 	if len(clients) < 1 { //shared.MAX_NUMBER_OF_CONNECTIONS { // UDP don't open different connections
 		client := messages.Client{
-			Ip:         "",
-			Connection: nil,
+			Ip:            "",
+			Connection:    nil,
 			UDPConnection: nil,
 		}
 		*clientsPtr = append(clients, &client)
 		lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients", len(*clientsPtr))
 		lib.PrintlnDebug("len(clients) < 1")
-		return true, len(*clientsPtr) -1
+		return true, len(*clientsPtr) - 1
 	}
 
 	for idx, client := range clients {
@@ -40,8 +41,8 @@ func (s SRHUDP) availableConnectionFromPool(clientsPtr *[]*messages.Client) (boo
 		if client == nil {
 			lib.PrintlnDebug("client == nil")
 			client := messages.Client{
-				Ip:         "",
-				Connection: nil,
+				Ip:            "",
+				Connection:    nil,
 				UDPConnection: nil,
 			}
 			clients[idx] = &client
@@ -93,53 +94,53 @@ func (s SRHUDP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	connectionAvailable, availableConenctionIndex := s.availableConnectionFromPool(&srhInfo.Clients)
 	//lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
 	if !connectionAvailable {
+		time.Sleep(1 * time.Millisecond)
 		//log.Println("------------------------------>", shared.GetFunction(), "end", "SRHUDP Version Not adapted - No connection available")
 		return
 	}
 
 	//go func() {
-		client := srhInfo.Clients[availableConenctionIndex]
-		lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients Index", availableConenctionIndex)
-		lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients", srhInfo.Clients, srhInfo.Clients[availableConenctionIndex])
+	client := srhInfo.Clients[availableConenctionIndex]
+	lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients Index", availableConenctionIndex)
+	lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients", srhInfo.Clients, srhInfo.Clients[availableConenctionIndex])
 
-		// Accept connections
-		//conn, err := net.ListenUDP("udp4", servAddr) //, err := srhInfo.Ln.Accept()
+	// Accept connections
+	//conn, err := net.ListenUDP("udp4", servAddr) //, err := srhInfo.Ln.Accept()
+	//if err != nil {
+	//	shared.ErrorHandler(shared.GetFunction(), err.Error())
+	//}
+	if client == nil {
+		*reset = true
+		return
+	}
+
+	if client.UDPConnection == nil { // no listen created
+		servAddr, err = net.ResolveUDPAddr("udp4", srhInfo.EndPoint.Host+":"+srhInfo.EndPoint.Port)
+		if err != nil {
+			shared.ErrorHandler(shared.GetFunction(), err.Error())
+		}
+		//srhInfo.Ln, err = net.ListenUDP("udp4", servAddr)
 		//if err != nil {
 		//	shared.ErrorHandler(shared.GetFunction(), err.Error())
 		//}
-		if client == nil {
-			*reset = true
-			return
+		client.UDPConnection, err = net.ListenUDP("udp4", servAddr) //, err := srhInfo.Ln.Accept()
+		if err != nil {
+			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
+	}
 
-		if client.UDPConnection == nil { // no listen created
-			servAddr, err = net.ResolveUDPAddr("udp4", srhInfo.EndPoint.Host+":"+srhInfo.EndPoint.Port)
-			if err != nil {
-				shared.ErrorHandler(shared.GetFunction(), err.Error())
-			}
-			//srhInfo.Ln, err = net.ListenUDP("udp4", servAddr)
-			//if err != nil {
-			//	shared.ErrorHandler(shared.GetFunction(), err.Error())
-			//}
-			client.UDPConnection, err = net.ListenUDP("udp4", servAddr) //, err := srhInfo.Ln.Accept()
-			if err != nil {
-				shared.ErrorHandler(shared.GetFunction(), err.Error())
-			}
-		}
+	srhInfo.Conns = append(srhInfo.Conns, client.UDPConnection)
+	//srhInfo.CurrentConn = conn
 
-		srhInfo.Conns = append(srhInfo.Conns, client.UDPConnection)
-		//srhInfo.CurrentConn = conn
+	client.Ip = "" //conn.RemoteAddr().String() UDP dont start with RemoteAddr
+	//client.UDPConnection = srhInfo.UDPConnection
+	lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Connected Client", client)
 
-		client.Ip = ""//conn.RemoteAddr().String() UDP dont start with RemoteAddr
-		//client.UDPConnection = srhInfo.UDPConnection
-		lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Connected Client", client)
+	// Update info
+	*info = srhInfo
 
-
-		// Update info
-		*info = srhInfo
-
-		// Start goroutine
-		go s.handler(info, availableConenctionIndex)
+	// Start goroutine
+	go s.handler(info, availableConenctionIndex)
 	//}()
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
 	return
@@ -250,8 +251,8 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Read efetuado", "SRHUDP Version Not adapted")
 		if err != nil {
 			if err == io.EOF ||
-			   strings.Contains(err.Error(), "use of closed network connection") ||
-   			   strings.Contains(err.Error(), "i/o timeout") {
+				strings.Contains(err.Error(), "use of closed network connection") ||
+				strings.Contains(err.Error(), "i/o timeout") {
 				srhInfo.Clients[connectionIndex] = nil
 				lib.PrintlnDebug("Não Vai matar o app EOF", err)
 				break
@@ -270,8 +271,8 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 		_, err = conn.Read(msgTemp)
 		if err != nil {
 			if err == io.EOF ||
-			   strings.Contains(err.Error(), "use of closed network connection") ||
-			   strings.Contains(err.Error(), "i/o timeout") {
+				strings.Contains(err.Error(), "use of closed network connection") ||
+				strings.Contains(err.Error(), "i/o timeout") {
 				srhInfo.Clients[connectionIndex] = nil
 				lib.PrintlnDebug("Não Vai matar o app EOF")
 				break
