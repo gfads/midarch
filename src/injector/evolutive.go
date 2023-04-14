@@ -3,10 +3,10 @@ package evolutive
 import (
 	"bytes"
 	"fmt"
+	"github.com/gfads/midarch/src/shared"
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"shared"
 	"strings"
 	"time"
 )

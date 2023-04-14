@@ -2,10 +2,10 @@ package madl
 
 import (
 	"fmt"
-	"gmidarch/development/components/component"
-	"gmidarch/development/connectors"
+	"github.com/gfads/midarch/src/gmidarch/development/components/component"
+	"github.com/gfads/midarch/src/gmidarch/development/connectors"
+	"github.com/gfads/midarch/src/shared"
 	"reflect"
-	"shared"
 	"strings"
 )
 

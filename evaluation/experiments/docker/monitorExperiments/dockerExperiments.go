@@ -1,7 +1,7 @@
 package main
 
 import (
-	"./docker"
+	"github.com/gfads/midarch/evaluation/experiments/docker/monitorExperiments/docker"
 )
 
 func main() {

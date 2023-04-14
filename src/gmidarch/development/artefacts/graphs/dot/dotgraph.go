@@ -1,8 +1,8 @@
 package dot
 
 import (
-	"gmidarch/development/connectors"
-	"gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/connectors"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
 )
 
 type DOTGraph struct {
@@ -15,7 +15,7 @@ type Action struct {
 	IsInternal     bool
 	ExternalAction func(*messages.SAMessage, connectors.Connector, string, *interface{}, *bool)
 	InternalAction func(interface{}, string, string, *messages.SAMessage, *interface{}, *bool)
-	Conn           connectors.Connector  // used by external actions only
+	Conn           connectors.Connector // used by external actions only
 }
 
 type DOTEdge struct {

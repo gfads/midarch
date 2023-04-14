@@ -2,8 +2,8 @@ package dot
 
 import (
 	"bufio"
+	"github.com/gfads/midarch/src/shared"
 	"os"
-	"shared"
 	"strconv"
 	"strings"
 )

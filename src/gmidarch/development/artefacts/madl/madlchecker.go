@@ -1,8 +1,8 @@
 package madl
 
 import (
-	"gmidarch/development/repositories/architectural"
-	"shared"
+	"github.com/gfads/midarch/src/gmidarch/development/repositories/architectural"
+	"github.com/gfads/midarch/src/shared"
 )
 
 type MADLChecker interface {

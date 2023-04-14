@@ -1,9 +1,9 @@
 package main
 
 import (
-	"gmidarch/development/messages"
-	"gmidarch/execution/frontend"
-	evolutive "injector"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/execution/frontend"
+	evolutive "github.com/gfads/midarch/src/injector"
 	"sync"
 	"time"
 )
@@ -11,7 +11,7 @@ import (
 func main() {
 	fe := frontend.NewFrontend()
 
-	args := make (map[string]messages.EndPoint)
+	args := make(map[string]messages.EndPoint)
 
 	fe.Deploy("senderreceiver.madl", args)
 

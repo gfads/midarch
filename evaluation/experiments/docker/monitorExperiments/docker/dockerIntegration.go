@@ -7,10 +7,10 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
+	"github.com/gfads/midarch/src/shared/lib"
 	"io"
 	"os"
 	"path/filepath"
-	"shared/lib"
 	"strconv"
 	"strings"
 	"time"
@@ -82,11 +82,11 @@ func saveContainerLogsToFile(ctx context.Context, cli *client.Client, containerI
 	filename := filepath.Join("evaluation",
 		"results",
 		"docker",
-		"log_" +
-			kind.toString() + "_" + containerType + "_" +
-			strconv.Itoa(fiboPlace) + "_" +
-			strconv.Itoa(sampleSize) + "_" +
-			time.Now().Format("20060102_150405")  + ".results.txt")
+		"log_"+
+			kind.toString()+"_"+containerType+"_"+
+			strconv.Itoa(fiboPlace)+"_"+
+			strconv.Itoa(sampleSize)+"_"+
+			time.Now().Format("20060102_150405")+".results.txt")
 	file, err := os.Create(filename)
 	if err != nil {
 		return err
@@ -103,7 +103,7 @@ func saveContainerLogsToFile(ctx context.Context, cli *client.Client, containerI
 		if err != nil {
 			return err
 		}
-		size := binary.BigEndian.Uint32(header[4 : 8])
+		size := binary.BigEndian.Uint32(header[4:8])
 		payload := make([]byte, size)
 		_, err = logs.Read(payload)
 		if err != nil && err != io.EOF {

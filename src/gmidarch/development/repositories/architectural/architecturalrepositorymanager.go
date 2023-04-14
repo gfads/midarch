@@ -1,12 +1,12 @@
 package architectural
 
 import (
-	"shared"
+	"github.com/gfads/midarch/src/shared"
 )
 
 type ArchitecturalRepositoryManager interface {
 	GetRepository() ArchitecturalRepository
-	GetConnectorDefaultArities(string) (int,int)
+	GetConnectorDefaultArities(string) (int, int)
 	TypeExist(string) bool
 }
 
@@ -26,23 +26,23 @@ func NewArchitecturalRepositoryManager() ArchitecturalRepositoryManager {
 	return arm
 }
 
-func (armImpl ArchitecturalRepositoryManagerImpl) GetRepository () ArchitecturalRepository {
+func (armImpl ArchitecturalRepositoryManagerImpl) GetRepository() ArchitecturalRepository {
 	return armImpl.Repository
 }
 
 func (armImpl ArchitecturalRepositoryManagerImpl) TypeExist(t string) bool {
-    foundComp := false
-    foundConn := false
+	foundComp := false
+	foundConn := false
 
-    compLibrary := armImpl.Repository.CompLibrary
-    for i := range  compLibrary {
-    	if t == i {
+	compLibrary := armImpl.Repository.CompLibrary
+	for i := range compLibrary {
+		if t == i {
 			foundComp = true
 		}
 	}
 
 	connLibrary := armImpl.Repository.ConnLibrary
-	for i := range  connLibrary {
+	for i := range connLibrary {
 		if t == i {
 			foundConn = true
 		}
@@ -55,13 +55,13 @@ func (armImpl ArchitecturalRepositoryManagerImpl) TypeExist(t string) bool {
 	}
 }
 
-func (armImpl ArchitecturalRepositoryManagerImpl) GetConnectorDefaultArities(t string) (int,int) { // TODO
-    lArity := 0
-    rArity := 0
-    foundConn := false
+func (armImpl ArchitecturalRepositoryManagerImpl) GetConnectorDefaultArities(t string) (int, int) { // TODO
+	lArity := 0
+	rArity := 0
+	foundConn := false
 
 	connLibrary := armImpl.Repository.ConnLibrary
-	for i := range  connLibrary {
+	for i := range connLibrary {
 		if t == i {
 			foundConn = true
 			lArity = connLibrary[i].DefaultLeftArity
@@ -69,9 +69,9 @@ func (armImpl ArchitecturalRepositoryManagerImpl) GetConnectorDefaultArities(t s
 		}
 	}
 
-	if !foundConn{
-		shared.ErrorHandler(shared.GetFunction(),"Connector type'"+t+"' does not exist. Not possible to define its arities!")
+	if !foundConn {
+		shared.ErrorHandler(shared.GetFunction(), "Connector type'"+t+"' does not exist. Not possible to define its arities!")
 	}
 
-	return lArity,rArity
+	return lArity, rArity
 }

@@ -2,11 +2,11 @@ package main
 
 import (
 	"fmt"
-	"gmidarch/development/components/proxies/calculatorproxy"
-	"gmidarch/development/components/proxies/namingproxy"
-	"gmidarch/development/messages"
-	"gmidarch/execution/frontend"
-	"shared"
+	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/calculatorproxy"
+	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/namingproxy"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/execution/frontend"
+	"github.com/gfads/midarch/src/shared"
 	"time"
 )
 

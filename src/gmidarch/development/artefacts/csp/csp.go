@@ -1,11 +1,11 @@
 package csp
 
 import (
-	"gmidarch/development/artefacts/madl"
-	"gmidarch/development/components/adaptive"
-	"gmidarch/development/connectors"
+	"github.com/gfads/midarch/src/gmidarch/development/artefacts/madl"
+	"github.com/gfads/midarch/src/gmidarch/development/components/adaptive"
+	"github.com/gfads/midarch/src/gmidarch/development/connectors"
+	"github.com/gfads/midarch/src/shared"
 	"reflect"
-	"shared"
 	"strconv"
 	"strings"
 )

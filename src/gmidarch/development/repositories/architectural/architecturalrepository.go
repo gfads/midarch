@@ -1,17 +1,17 @@
 package architectural
 
 import (
-	"gmidarch/development/components/adaptive"
-	"gmidarch/development/components/apps"
-	"gmidarch/development/components/component"
-	"gmidarch/development/components/middleware"
-	"gmidarch/development/components/proxies/calculatorproxy"
-	"gmidarch/development/components/proxies/fibonacciProxy"
-	"gmidarch/development/components/proxies/namingproxy"
-	"gmidarch/development/connectors"
-	"gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/components/adaptive"
+	"github.com/gfads/midarch/src/gmidarch/development/components/apps"
+	"github.com/gfads/midarch/src/gmidarch/development/components/component"
+	"github.com/gfads/midarch/src/gmidarch/development/components/middleware"
+	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/calculatorproxy"
+	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/fibonacciProxy"
+	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/namingproxy"
+	"github.com/gfads/midarch/src/gmidarch/development/connectors"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/shared"
 	"io/ioutil"
-	"shared"
 	"strconv"
 )
 
@@ -21,35 +21,35 @@ type ArchitecturalRepository struct {
 }
 
 // Set of existing Components
-var SetOfComponentTypesRAM = map[string]interface{} {
-	"Client":            	&apps.Client{},
-	"Server":            	&apps.Server{},
-	"Sender":            	&apps.Sender{},
-	"Receiver":				&apps.Receiver{},
-	"Core":					&adaptive.Core{},
-	"Unit":					&adaptive.Unit{},
-	"Monevolutive":			&adaptive.Monevolutive{},
-	"EvolutiveProtocol":	&adaptive.EvolutiveProtocol{},
-	"Monitor":				&adaptive.Monitor{},
-	"Planner":				&adaptive.Planner{},
-	"Executor":				&adaptive.Executor{},
-	"Analyser":				&adaptive.Analyser{},
-	"Jsonmarshaller":		&middleware.Jsonmarshaller{},
-	"Gobmarshaller":     	&middleware.Gobmarshaller{},
-	"CRHTCP":            	&middleware.CRHTCP{},
-	"SRHTCP":            	&middleware.SRHTCP{},
-	"CRHUDP":            	&middleware.CRHUDP{},
-	"SRHUDP":            	&middleware.SRHUDP{},
-	"CRHTLS":            	&middleware.CRHTLS{},
-	"SRHTLS":            	&middleware.SRHTLS{},
-	"Calculatorinvoker": 	&middleware.Calculatorinvoker{},
-	"FibonacciInvoker": 	&middleware.FibonacciInvoker{},
-	"Requestor":         	&middleware.Requestor{},
-	"Naminginvoker":     	&middleware.Naminginvoker{},
-	"Namingserver":      	&middleware.Namingserver{},
-	"Namingproxy":       	&namingproxy.Namingproxy{},
-	"Calculatorproxy":   	&calculatorproxy.Calculatorproxy{},
-	"FibonacciProxy":   	&fibonacciProxy.FibonacciProxy{}}
+var SetOfComponentTypesRAM = map[string]interface{}{
+	"Client":            &apps.Client{},
+	"Server":            &apps.Server{},
+	"Sender":            &apps.Sender{},
+	"Receiver":          &apps.Receiver{},
+	"Core":              &adaptive.Core{},
+	"Unit":              &adaptive.Unit{},
+	"Monevolutive":      &adaptive.Monevolutive{},
+	"EvolutiveProtocol": &adaptive.EvolutiveProtocol{},
+	"Monitor":           &adaptive.Monitor{},
+	"Planner":           &adaptive.Planner{},
+	"Executor":          &adaptive.Executor{},
+	"Analyser":          &adaptive.Analyser{},
+	"Jsonmarshaller":    &middleware.Jsonmarshaller{},
+	"Gobmarshaller":     &middleware.Gobmarshaller{},
+	"CRHTCP":            &middleware.CRHTCP{},
+	"SRHTCP":            &middleware.SRHTCP{},
+	"CRHUDP":            &middleware.CRHUDP{},
+	"SRHUDP":            &middleware.SRHUDP{},
+	"CRHTLS":            &middleware.CRHTLS{},
+	"SRHTLS":            &middleware.SRHTLS{},
+	"Calculatorinvoker": &middleware.Calculatorinvoker{},
+	"FibonacciInvoker":  &middleware.FibonacciInvoker{},
+	"Requestor":         &middleware.Requestor{},
+	"Naminginvoker":     &middleware.Naminginvoker{},
+	"Namingserver":      &middleware.Namingserver{},
+	"Namingproxy":       &namingproxy.Namingproxy{},
+	"Calculatorproxy":   &calculatorproxy.Calculatorproxy{},
+	"FibonacciProxy":    &fibonacciProxy.FibonacciProxy{}}
 
 // Set of existing Connectors
 var SetOfConnectorTypesRAM = map[string]connectors.Connector{

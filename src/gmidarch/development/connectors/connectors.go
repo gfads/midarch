@@ -1,8 +1,8 @@
 package connectors
 
 import (
-	"gmidarch/development/messages"
-	"shared"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/shared"
 )
 
 type Connector struct {

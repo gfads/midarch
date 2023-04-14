@@ -1,14 +1,14 @@
 package middleware
 
 import (
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/shared"
 	"reflect"
-	"shared"
 )
 
-//@Type: Naminginvoker
-//@Behaviour: Behaviour = InvP.e1 -> I_Beforeunmarshalling -> InvR.e2 -> TerR.e2 -> I_Beforeserver -> InvR.e3 -> TerR.e3 -> I_Beforemarshalling -> InvR.e2 -> TerR.e2 -> I_Beforesend -> TerP.e1 -> Behaviour
+// @Type: Naminginvoker
+// @Behaviour: Behaviour = InvP.e1 -> I_Beforeunmarshalling -> InvR.e2 -> TerR.e2 -> I_Beforeserver -> InvR.e3 -> TerR.e3 -> I_Beforemarshalling -> InvR.e2 -> TerR.e2 -> I_Beforesend -> TerP.e1 -> Behaviour
 type Naminginvoker struct{}
 
 func (Naminginvoker) I_Beforeunmarshalling(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {

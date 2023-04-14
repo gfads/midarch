@@ -1,13 +1,13 @@
 package middleware
 
 import (
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
-	"shared"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/shared"
 )
 
-//@Type: Requestor
-//@Behaviour: Behaviour = InvP.e1 -> I_Beforemarshalling -> InvR.e2 -> TerR.e2 -> I_Beforesend -> InvR.e3 -> TerR.e3 -> I_Beforeunmarshalling -> InvR.e2 -> TerR.e2 -> I_Beforeproxy -> TerP.e1 -> Behaviour
+// @Type: Requestor
+// @Behaviour: Behaviour = InvP.e1 -> I_Beforemarshalling -> InvR.e2 -> TerR.e2 -> I_Beforesend -> InvR.e3 -> TerR.e3 -> I_Beforeunmarshalling -> InvR.e2 -> TerR.e2 -> I_Beforeproxy -> TerP.e1 -> Behaviour
 type Requestor struct{}
 
 func (Requestor) I_Beforemarshalling(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
@@ -16,7 +16,7 @@ func (Requestor) I_Beforemarshalling(id string, msg *messages.SAMessage, info *i
 
 	// Create invocation (to CRH/SRH) and Configure Info
 	invocation := msg.Payload.(messages.Invocation)
-	*info = messages.RequestorInfo{Inv:invocation}
+	*info = messages.RequestorInfo{Inv: invocation}
 
 	//Create request
 	request := invocation.Functionalrequest
@@ -50,7 +50,7 @@ func (Requestor) I_Beforeproxy(id string, msg *messages.SAMessage, info *interfa
 
 	if msg.Payload.(messages.FunctionalReply).Rep == nil {
 		msg.Payload = messages.FunctionalReply{Rep: nil}
-	}else {
+	} else {
 		temp1 := msg.Payload.(messages.FunctionalReply).Rep.(miop.MiopPacket)
 		msg.Payload = messages.FunctionalReply{Rep: temp1.Bd.RepBody.OperationResult}
 	}

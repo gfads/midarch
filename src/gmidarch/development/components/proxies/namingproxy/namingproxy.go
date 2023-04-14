@@ -1,20 +1,20 @@
 package namingproxy
 
 import (
-	"gmidarch/development/components/proxies/calculatorproxy"
-	"gmidarch/development/components/proxies/fibonacciProxy"
-	"gmidarch/development/generic"
-	"gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/calculatorproxy"
+	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/fibonacciProxy"
+	"github.com/gfads/midarch/src/gmidarch/development/generic"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/shared"
 	"reflect"
-	"shared"
 )
 
-//@Type: Namingproxy
-//@Behaviour: Behaviour = I_In -> InvR.e1 -> TerR.e1 -> I_Out -> Behaviour
-var ProxiesRepo = map[string]generic.Proxy { // Update for each new proxy
+// @Type: Namingproxy
+// @Behaviour: Behaviour = I_In -> InvR.e1 -> TerR.e1 -> I_Out -> Behaviour
+var ProxiesRepo = map[string]generic.Proxy{ // Update for each new proxy
 	reflect.TypeOf(Namingproxy{}).Name():                     &Namingproxy{},
 	reflect.TypeOf(calculatorproxy.Calculatorproxy{}).Name(): &calculatorproxy.Calculatorproxy{},
-	reflect.TypeOf(fibonacciProxy.FibonacciProxy{}).Name(): &fibonacciProxy.FibonacciProxy{}}
+	reflect.TypeOf(fibonacciProxy.FibonacciProxy{}).Name():   &fibonacciProxy.FibonacciProxy{}}
 
 // Internal channels
 var ChOut, ChIn chan messages.SAMessage
@@ -61,7 +61,7 @@ func (Namingproxy) Register(_p1 string, _p2 interface{}) bool {
 	_params := []interface{}{_p1, aor}
 
 	_functionalRequest := messages.FunctionalRequest{Op: "Register", Params: _params}
-	_msg := messages.Invocation{Endpoint:messages.EndPoint{},Functionalrequest:_functionalRequest} // Naming endpoint defined at architectural level
+	_msg := messages.Invocation{Endpoint: messages.EndPoint{}, Functionalrequest: _functionalRequest} // Naming endpoint defined at architectural level
 
 	_samMsg := messages.SAMessage{Payload: _msg}
 
@@ -78,7 +78,7 @@ func (p Namingproxy) Lookup(_p1 string) (generic.Proxy, bool) {
 	_params := []interface{}{_p1}
 
 	_functionalRequest := messages.FunctionalRequest{Op: "Lookup", Params: _params}
-	_msg := messages.Invocation{Endpoint:messages.EndPoint{},Functionalrequest:_functionalRequest} // Naming endpoint defined at architectural level
+	_msg := messages.Invocation{Endpoint: messages.EndPoint{}, Functionalrequest: _functionalRequest} // Naming endpoint defined at architectural level
 	_samMsg := messages.SAMessage{Payload: _msg}
 
 	// Send request to I_In
@@ -89,7 +89,7 @@ func (p Namingproxy) Lookup(_p1 string) (generic.Proxy, bool) {
 
 	aor := response.Payload.(messages.FunctionalReply).Rep.(map[string]interface{})
 	host := aor["host"].(string)
-	port:= aor["port"].(string)
+	port := aor["port"].(string)
 	proxy := ProxiesRepo[aor["proxy"].(string)]
 	if proxy == nil {
 		shared.ErrorHandler(shared.GetFunction(), "Proxy("+aor["proxy"].(string)+") not found!!")
@@ -100,6 +100,6 @@ func (p Namingproxy) Lookup(_p1 string) (generic.Proxy, bool) {
 	return proxy, bool(true) // TODO
 }
 
-func (p Namingproxy) List() [] interface{} {
+func (p Namingproxy) List() []interface{} {
 	return *new([]interface{})
 }

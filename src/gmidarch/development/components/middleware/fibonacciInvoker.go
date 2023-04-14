@@ -1,14 +1,14 @@
 package middleware
 
 import (
-	"apps/businesses/fibonacciImpl"
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
-	"shared"
+	"github.com/gfads/midarch/src/apps/businesses/fibonacciImpl"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/shared"
 )
 
-//@Type: FibonacciInvoker
-//@Behaviour: Behaviour = InvP.e1 -> I_Beforeunmarshalling -> InvR.e2 -> TerR.e2 -> I_Beforeserver -> I_Beforemarshalling -> InvR.e2 -> TerR.e2 -> I_Beforesend -> TerP.e1 -> Behaviour
+// @Type: FibonacciInvoker
+// @Behaviour: Behaviour = InvP.e1 -> I_Beforeunmarshalling -> InvR.e2 -> TerR.e2 -> I_Beforeserver -> I_Beforemarshalling -> InvR.e2 -> TerR.e2 -> I_Beforesend -> TerP.e1 -> Behaviour
 type FibonacciInvoker struct{}
 
 func (FibonacciInvoker) I_Beforeunmarshalling(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
@@ -19,7 +19,7 @@ func (FibonacciInvoker) I_Beforeunmarshalling(id string, msg *messages.SAMessage
 func (FibonacciInvoker) I_Beforeserver(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	miopPacket := msg.Payload.(messages.FunctionalReply).Rep.(miop.MiopPacket) // from marshaller
 
-	req := messages.FunctionalRequest{Op:miopPacket.Bd.ReqHeader.Operation, Params:miopPacket.Bd.ReqBody.Body}
+	req := messages.FunctionalRequest{Op: miopPacket.Bd.ReqHeader.Operation, Params: miopPacket.Bd.ReqBody.Body}
 
 	switch req.Op {
 	case "F":

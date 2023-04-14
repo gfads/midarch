@@ -1,9 +1,9 @@
 package main
 
 import (
-	"gmidarch/development/messages"
-	"gmidarch/execution/frontend"
-	"shared"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/execution/frontend"
+	"github.com/gfads/midarch/src/shared"
 	"sync"
 )
 

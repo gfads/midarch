@@ -3,23 +3,23 @@ package crhtcp
 import (
 	"encoding/binary"
 	"fmt"
-	"gmidarch/development/components/middleware"
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
-	evolutive "injector"
+	"github.com/gfads/midarch/src/gmidarch/development/components/middleware"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	evolutive "github.com/gfads/midarch/src/injector"
+	"github.com/gfads/midarch/src/shared"
 	"log"
 	"net"
-	"shared"
 )
 
-//@Type: CRHTCP
-//@Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
-type CRHTCP struct {}
+// @Type: CRHTCP
+// @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
+type CRHTCP struct{}
 
-func (c CRHTCP) getLocalTcpAddr() (*net.TCPAddr) {
+func (c CRHTCP) getLocalTcpAddr() *net.TCPAddr {
 	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version 1 adapted")
-	fmt.Println("shared.LocalAddr:", shared.LocalAddr)
-	log.Println("shared.LocalAddr:", shared.LocalAddr)
+	fmt.Println("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
+	log.Println("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
 	var err error = nil
 	var localTCPAddr *net.TCPAddr = nil
 	if shared.LocalAddr != "" {
@@ -45,7 +45,7 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	host := ""
 	port := ""
 
-	if (h == "" || p == "") {
+	if h == "" || p == "" {
 		host = crhInfo.EndPoint.Host
 		port = crhInfo.EndPoint.Port
 	} else {
@@ -64,13 +64,13 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		log.Println("Entrou", crhInfo.Conns[addr])
 		tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(),err.Error())
+			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
 
 		localTcpAddr := c.getLocalTcpAddr()
 		crhInfo.Conns[addr], err = net.DialTCP("tcp", localTcpAddr, tcpAddr)
 		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(),err.Error())
+			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
 		if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 			fmt.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr())
@@ -87,13 +87,13 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	binary.LittleEndian.PutUint32(size, uint32(len(msgToServer)))
 	_, err = conn.Write(size)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(),err.Error())
+		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
 
 	// send message
 	_, err = conn.Write(msgToServer)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(),err.Error())
+		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
 
 	msgFromServer := c.read(err, conn, size)

@@ -1,8 +1,8 @@
 package exec
 
 import (
-	"gmidarch/development/messages"
-	"shared"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/shared"
 )
 
 type ExecGraph struct {
@@ -22,8 +22,8 @@ type ExecEdgeInfo struct { // TODO define a Action type
 	ActionChannel  *chan messages.SAMessage // Channel
 	Message        *messages.SAMessage      // Message
 	ExternalAction func(*chan messages.SAMessage, *messages.SAMessage)
-	InternalAction func(interface{}, [] *interface{}, string, *messages.SAMessage, []*interface{}, *bool)
-	Info [] *interface{}
+	InternalAction func(interface{}, []*interface{}, string, *messages.SAMessage, []*interface{}, *bool)
+	Info           []*interface{}
 }
 
 func NewExecGraph(n int) *ExecGraph {

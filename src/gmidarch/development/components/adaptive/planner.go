@@ -1,15 +1,15 @@
 package adaptive
 
 import (
-	"gmidarch/development/messages"
-	"shared"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/shared"
 )
 
-//@Type: Planner
-//@Behaviour: Behaviour = InvP.e1 -> I_Process -> InvR.e2 -> Behaviour
-type Planner struct {}
+// @Type: Planner
+// @Behaviour: Behaviour = InvP.e1 -> I_Process -> InvR.e2 -> Behaviour
+type Planner struct{}
 
-func (Planner) I_Process (id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+func (Planner) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	//fmt.Println("Planner::msg.Payload", msg.Payload)
 	evolutiveAnalysisResult := msg.Payload.(shared.EvolutiveAnalysisResult)
 	//fmt.Println("Planner::evolutiveAnalysisResult", evolutiveAnalysisResult)

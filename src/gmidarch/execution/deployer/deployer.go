@@ -1,13 +1,13 @@
 package deployer
 
 import (
-	"gmidarch/development/artefacts/madl"
-	"gmidarch/development/components/adaptive"
-	"gmidarch/development/components/component"
-	"gmidarch/development/messages"
-	"gmidarch/execution/core"
+	"github.com/gfads/midarch/src/gmidarch/development/artefacts/madl"
+	"github.com/gfads/midarch/src/gmidarch/development/components/adaptive"
+	"github.com/gfads/midarch/src/gmidarch/development/components/component"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/execution/core"
+	"github.com/gfads/midarch/src/shared"
 	"reflect"
-	"shared"
 	"strings"
 )
 

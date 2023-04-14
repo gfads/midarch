@@ -2,16 +2,16 @@ package srhtcp
 
 import (
 	"encoding/binary"
-	"gmidarch/development/components/middleware"
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/gmidarch/development/components/middleware"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/shared"
 	"io"
 	"net"
-	"shared"
 )
 
-//@Type: SRHTCP
-//@Behaviour: Behaviour = I_Accept -> I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> Behaviour
+// @Type: SRHTCP
+// @Behaviour: Behaviour = I_Accept -> I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> Behaviour
 type SRHTCP struct{}
 
 func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip string) (bool, int) {
@@ -32,8 +32,8 @@ func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip s
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total clients", len(clients))
 	if len(clients) < 10 { //shared.MAX_NUMBER_OF_CONNECTIONS { TODO: dcruzb go back the env var
 		client := messages.Client{
-			Ip:         "",
-			Connection: nil,
+			Ip:            "",
+			Connection:    nil,
 			UDPConnection: nil,
 		}
 		*clientsPtr = append(clients, &client)
@@ -44,8 +44,8 @@ func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip s
 	for idx, client := range clients {
 		if client == nil {
 			client := messages.Client{
-				Ip:         "",
-				Connection: nil,
+				Ip:            "",
+				Connection:    nil,
 				UDPConnection: nil,
 			}
 			clients[idx] = &client
@@ -114,7 +114,6 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		client.Ip = conn.RemoteAddr().String()
 		client.Connection = conn
 		//fmt.Println("SRHTCP Version 2 adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Connected Client", client)
-
 
 		// Update info
 		*info = srhInfo
@@ -251,7 +250,6 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 	}
 	//fmt.Println("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version 2 adapted")
 }
-
 
 func (s SRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")

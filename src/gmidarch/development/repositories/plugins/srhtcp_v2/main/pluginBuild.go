@@ -2,7 +2,7 @@ package main
 
 import (
 	// "fmt"
-	"gmidarch/development/repositories/plugins/srhtcp_v2"
+	"github.com/gfads/midarch/src/gmidarch/development/repositories/plugins/srhtcp_v2"
 )
 
 func GetType() interface{} {

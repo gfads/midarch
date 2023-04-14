@@ -1,14 +1,14 @@
 package frontend
 
 import (
-	"gmidarch/development/artefacts/csp"
-	"gmidarch/development/artefacts/madl"
-	"gmidarch/development/messages"
-	"gmidarch/development/repositories/architectural"
-	"gmidarch/execution/creator"
-	"gmidarch/execution/deployer"
-	"shared"
-	"shared/lib"
+	"github.com/gfads/midarch/src/gmidarch/development/artefacts/csp"
+	"github.com/gfads/midarch/src/gmidarch/development/artefacts/madl"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/repositories/architectural"
+	"github.com/gfads/midarch/src/gmidarch/execution/creator"
+	"github.com/gfads/midarch/src/gmidarch/execution/deployer"
+	"github.com/gfads/midarch/src/shared"
+	"github.com/gfads/midarch/src/shared/lib"
 )
 
 type Frontend interface {
@@ -57,11 +57,11 @@ func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint)
 	//fmt.Println("ok")
 
 	if shared.Contains(madlApp.Adaptability, shared.EVOLUTIVE_ADAPTATION) ||
-	   shared.Contains(madlApp.Adaptability, shared.EVOLUTIVE_PROTOCOL_ADAPTATION) {
+		shared.Contains(madlApp.Adaptability, shared.EVOLUTIVE_PROTOCOL_ADAPTATION) {
 		//fmt.Println("Creating mee")
 		crt := creator.Creator{}
 		meeTemp := crt.Create(madlApp, madlApp.Adaptability)
-		meeTemp.Configuration = madlApp.Configuration + "_ee" +"."+ shared.MADL_EXTENSION
+		meeTemp.Configuration = madlApp.Configuration + "_ee" + "." + shared.MADL_EXTENSION
 		crt.Save(meeTemp)
 		//fmt.Println("Creating mee ok")
 
@@ -76,7 +76,6 @@ func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint)
 		madlConfigurator := madl.NewMADLConfigurator()
 		madlConfigurator.ConfigureEE(&mee, archRepo, args, madlApp)
 		//fmt.Println("ok")
-
 
 		// Step 6: Generate & save CSP
 		//fmt.Print("Generating Adaptive CSP...")

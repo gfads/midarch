@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"gmidarch/execution/frontend"
+	"github.com/gfads/midarch/src/gmidarch/execution/frontend"
 )
 
 func main() {

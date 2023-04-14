@@ -2,13 +2,13 @@ package apps
 
 import (
 	"fmt"
-	"gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/shared"
 	"os"
-	"shared"
 )
 
-//@Type: Client
-//@Behaviour: Behaviour = I_Beforesend -> InvR.e1 -> TerR.e1 -> I_Afterreceive -> Behaviour
+// @Type: Client
+// @Behaviour: Behaviour = I_Beforesend -> InvR.e1 -> TerR.e1 -> I_Afterreceive -> Behaviour
 type Client struct{}
 
 // Calculator client
@@ -37,12 +37,12 @@ func (Client) I_Beforesend(id string, msg *messages.SAMessage, info *interface{}
 	if i == 0 {
 		aor := messages.AOR{Host: "localhost", Port: shared.NAMING_PORT, Id: 123456, ProxyName: "calculatorimpl"}
 		params := []interface{}{"Calculator", aor}
-		req := messages.FunctionalRequest{Op:"Register",Params:params}
+		req := messages.FunctionalRequest{Op: "Register", Params: params}
 		msg.Payload = req
 	}
 	if i == 1 {
 		params := []interface{}{"Calculator"}
-		req := messages.FunctionalRequest{Op:"Lookup",Params:params}
+		req := messages.FunctionalRequest{Op: "Lookup", Params: params}
 		msg.Payload = req
 	}
 	i++
@@ -53,4 +53,3 @@ func (Client) I_Afterreceive(id string, msg *messages.SAMessage, info *interface
 		os.Exit(0)
 	}
 }
-

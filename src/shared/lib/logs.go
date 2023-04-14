@@ -1,10 +1,10 @@
 package lib
 
 import (
+	"github.com/gfads/midarch/src/shared"
 	"log"
 	"os"
 	"runtime"
-	"shared"
 	"strconv"
 	"strings"
 )
@@ -62,7 +62,7 @@ func Println(messageLevel DebugLevel, message ...interface{}) {
 				var logs []interface{}
 				logs = append(logs, "- \"", file+":"+strconv.Itoa(line), "- INFO -")
 				logs = append(logs, message...)
-				logs = append(logs,"\"")
+				logs = append(logs, "\"")
 				log.Println(logs...)
 			case DEBUG:
 				var logs []interface{}

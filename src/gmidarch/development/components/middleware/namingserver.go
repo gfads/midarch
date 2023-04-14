@@ -1,12 +1,12 @@
 package middleware
 
 import (
-	"gmidarch/development/messages"
-	"shared"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/shared"
 )
 
-//@Type: Namingserver
-//@Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
+// @Type: Namingserver
+// @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
 type Namingserver struct{}
 
 func (s Namingserver) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {

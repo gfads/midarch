@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"gmidarch/development/repositories/architectural"
-	evolutive "injector"
+	"github.com/gfads/midarch/src/gmidarch/development/repositories/architectural"
+	evolutive "github.com/gfads/midarch/src/injector"
+	"github.com/gfads/midarch/src/shared"
+	"github.com/gfads/midarch/src/shared/pluginUtils"
 	"log"
 	"reflect"
-	"shared"
-	"shared/pluginUtils"
 )
 
 func main() {
@@ -26,7 +26,7 @@ func client() {
 func server() {
 	pluginName := "srhtcp_v2"
 	evolutive.GeneratePlugin(pluginName, "srhtcp", pluginName)
-	plg := pluginUtils.LoadPlugin(pluginName+".so")
+	plg := pluginUtils.LoadPlugin(pluginName + ".so")
 	fmt.Println("Executor.I_Process::plugin loaded:", pluginName)
 	log.Println("Executor.I_Process::Will lookup Gettype:", pluginName)
 	getType, _ := plg.Lookup("GetType")

@@ -2,12 +2,12 @@ package creator
 
 import (
 	"fmt"
-	"gmidarch/development/artefacts/madl"
-	"gmidarch/development/components/adaptive"
-	"gmidarch/development/components/component"
-	"gmidarch/development/connectors"
+	"github.com/gfads/midarch/src/gmidarch/development/artefacts/madl"
+	"github.com/gfads/midarch/src/gmidarch/development/components/adaptive"
+	"github.com/gfads/midarch/src/gmidarch/development/components/component"
+	"github.com/gfads/midarch/src/gmidarch/development/connectors"
+	"github.com/gfads/midarch/src/shared"
 	"reflect"
-	"shared"
 	"strconv"
 	"strings"
 )
@@ -188,7 +188,7 @@ type Creator struct{}
 //	return mEE
 //}
 
-func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL) {
+func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) madl.MADL {
 	mEE := madl.MADL{}
 	appIsAdaptive := true
 
@@ -277,7 +277,6 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 		cncts = append(cncts, connectors.NewConnector("t5", shared.ONEWAY, "B = InvP.e1 -> InvR.e2 -> B", 1, 1))
 		cncts = append(cncts, connectors.NewConnector("t6", shared.ONEWAY, "B = InvP.e1 -> InvR.e2 -> B", 1, 1))
 
-
 		var attC1 component.Component
 		if appKindOfAdaptability[0] == shared.EVOLUTIVE_ADAPTATION {
 			attC1 = component.Component{Id: "monevolutive", TypeName: reflect.TypeOf(adaptive.Monevolutive{}).Name()}
@@ -319,10 +318,10 @@ func (Creator) Create(mapp madl.MADL, appKindOfAdaptability []string) (madl.MADL
 		behaviour += "B"
 
 		attT := connectors.NewConnector(
-					"t1",
-					shared.ONETON,
-					behaviour,
-					1, nAttT1)
+			"t1",
+			shared.ONETON,
+			behaviour,
+			1, nAttT1)
 		attC2 := component.Component{Id: units[i], TypeName: reflect.TypeOf(adaptive.Unit{}).Name()}
 		atts = append(atts, madl.Attachment{attC1, attT, attC2})
 

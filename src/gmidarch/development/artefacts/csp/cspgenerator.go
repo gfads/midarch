@@ -1,8 +1,8 @@
 package csp
 
 import (
-	"gmidarch/development/artefacts/madl"
-	"shared"
+	"github.com/gfads/midarch/src/gmidarch/development/artefacts/madl"
+	"github.com/gfads/midarch/src/shared"
 	"strings"
 )
 

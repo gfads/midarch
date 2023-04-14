@@ -2,18 +2,18 @@ package middleware
 
 import (
 	"encoding/binary"
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/shared"
+	"github.com/gfads/midarch/src/shared/lib"
 	"io"
 	"net"
-	"shared"
-	"shared/lib"
 	"strings"
 	"time"
 )
 
-//@Type: SRHTCP
-//@Behaviour: Behaviour = I_Accept -> I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> Behaviour
+// @Type: SRHTCP
+// @Behaviour: Behaviour = I_Accept -> I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> Behaviour
 type SRHTCP struct{}
 
 func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip string) (bool, int) {

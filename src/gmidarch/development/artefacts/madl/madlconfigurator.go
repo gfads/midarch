@@ -1,14 +1,14 @@
 package madl
 
 import (
-	"gmidarch/development/artefacts/graphs/dot"
-	"gmidarch/development/components/component"
-	"gmidarch/development/connectors"
-	"gmidarch/development/messages"
-	"gmidarch/development/repositories/architectural"
+	"github.com/gfads/midarch/src/gmidarch/development/artefacts/graphs/dot"
+	"github.com/gfads/midarch/src/gmidarch/development/components/component"
+	"github.com/gfads/midarch/src/gmidarch/development/connectors"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/repositories/architectural"
+	"github.com/gfads/midarch/src/shared"
 	"net"
 	"reflect"
-	"shared"
 	"strconv"
 	"strings"
 )
@@ -22,7 +22,7 @@ type MADLConfigurator interface {
 	checkInterface(interface{}, dot.DOTGraph)
 }
 
-type MADLConfiguratorImpl struct{
+type MADLConfiguratorImpl struct {
 	madl MADL
 }
 
@@ -254,7 +254,7 @@ func (confImpl MADLConfiguratorImpl) configureOneton(conn *connectors.Connector,
 func (MADLConfiguratorImpl) configureComponentGraph(comp *component.Component, m MADL) {
 
 	for e1 := range comp.Graph.EdgesDot {
-		for e2 := range comp.Graph.EdgesDot [e1] {
+		for e2 := range comp.Graph.EdgesDot[e1] {
 			if shared.IsInternal(comp.Graph.EdgesDot[e1][e2].Action.Name) { // Internal action
 
 				// Configure type of action
@@ -311,10 +311,10 @@ func (confImpl MADLConfiguratorImpl) configureInfo(m *MADL, archRepo architectur
 			n++
 		}
 
-		if strings.Contains(aux, "Unit")  {
+		if strings.Contains(aux, "Unit") {
 			//log.Println("configureInfo-> Unit madl TypeName:", confImpl.madl.Components[unitIndex].TypeName)
 			if strings.Contains(confImpl.madl.Components[unitIndex].TypeName, "SRH") ||
-			   strings.Contains(confImpl.madl.Components[unitIndex].TypeName, "CRH") {  // m.Components[i].Type.(adaptive.Unit).UnitId, "SRH") {
+				strings.Contains(confImpl.madl.Components[unitIndex].TypeName, "CRH") { // m.Components[i].Type.(adaptive.Unit).UnitId, "SRH") {
 				//log.Println("configureInfo-> Unit TypeName:", m.Components[i].TypeName)
 				//log.Println("configureInfo-> Unit Id:", m.Components[i].Id)
 				//log.Println("configureInfo-> Unit Info", m.Components[i].Info)
@@ -353,7 +353,7 @@ func (MADLConfiguratorImpl) checkInterface(elem interface{}, dot dot.DOTGraph) {
 	// Identify dot actions
 	dotActions := []string{}
 	for e1 := range dot.EdgesDot {
-		for e2 := range dot.EdgesDot [e1] {
+		for e2 := range dot.EdgesDot[e1] {
 			edgeTemp := dot.EdgesDot[e1][e2]
 			actionNameFDR := edgeTemp.Action.Name
 			if shared.IsInternal(actionNameFDR) {

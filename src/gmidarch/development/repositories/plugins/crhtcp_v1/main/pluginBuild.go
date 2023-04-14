@@ -2,7 +2,7 @@ package main
 
 import (
 	// "fmt"
-	"gmidarch/development/repositories/plugins/crhtcp_v1"
+	"github.com/gfads/midarch/src/gmidarch/development/repositories/plugins/crhtcp_v1"
 )
 
 func GetType() interface{} {

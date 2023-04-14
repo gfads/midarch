@@ -3,19 +3,19 @@ package middleware
 import (
 	"encoding/binary"
 	"fmt"
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/shared"
+	"github.com/gfads/midarch/src/shared/lib"
 	"io"
 	"net"
-	"shared"
-	"shared/lib"
 	"strconv"
 	"strings"
 	"time"
 )
 
-//@Type: SRHUDP
-//@Behaviour: Behaviour = I_Accept -> I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> Behaviour
+// @Type: SRHUDP
+// @Behaviour: Behaviour = I_Accept -> I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> Behaviour
 type SRHUDP struct{}
 
 func (s SRHUDP) availableConnectionFromPool(clientsPtr *[]*messages.Client) (bool, int) {

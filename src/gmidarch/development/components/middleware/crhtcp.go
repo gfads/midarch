@@ -2,23 +2,23 @@ package middleware
 
 import (
 	"encoding/binary"
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/shared"
+	"github.com/gfads/midarch/src/shared/lib"
 	"net"
 	"reflect"
-	"shared"
-	"shared/lib"
 	"time"
 )
 
-//@Type: CRHTCP
-//@Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.eNot -> Behaviour
-type CRHTCP struct {}
+// @Type: CRHTCP
+// @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.eNot -> Behaviour
+type CRHTCP struct{}
 
-func (c CRHTCP) getLocalTcpAddr() (*net.TCPAddr) {
+func (c CRHTCP) getLocalTcpAddr() *net.TCPAddr {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	//fmt.Println("shared.LocalAddr:", shared.LocalAddr)
-	lib.PrintlnDebug("shared.LocalAddr:", shared.LocalAddr)
+	//fmt.Println("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
+	lib.PrintlnDebug("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
 	var err error = nil
 	var localTCPAddr *net.TCPAddr = nil
 	//shared.LocalAddr = "127.0.0.1:37521"
@@ -45,7 +45,7 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	host := ""
 	port := ""
 
-	if (h == "" || p == "") {
+	if h == "" || p == "" {
 		host = crhInfo.EndPoint.Host
 		port = crhInfo.EndPoint.Port
 	} else {
@@ -64,7 +64,7 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		lib.PrintlnDebug("Entrou", crhInfo.Conns[addr])
 		tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(),err.Error())
+			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
 		//log.Println("Resolveu", crhInfo.Conns[addr])
 		//localTcpAddr := c.getLocalTcpAddr()
@@ -76,7 +76,7 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 				lib.PrintlnError("Erro na discagem", crhInfo.Conns[addr], err)
 				time.Sleep(200 * time.Millisecond)
 				//shared.ErrorHandler(shared.GetFunction(), err.Error())
-			}else{
+			} else {
 				break
 			}
 		}
@@ -155,7 +155,7 @@ func (c CRHTCP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) er
 	return nil
 }
 
-func (c CRHTCP) read(conn net.Conn, size []byte) ([]byte, error){
+func (c CRHTCP) read(conn net.Conn, size []byte) ([]byte, error) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	// receive reply's size
 	_, err := conn.Read(size)

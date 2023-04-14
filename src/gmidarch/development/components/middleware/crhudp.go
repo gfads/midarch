@@ -2,18 +2,18 @@ package middleware
 
 import (
 	"encoding/binary"
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/shared"
+	"github.com/gfads/midarch/src/shared/lib"
 	"net"
 	"reflect"
-	"shared"
-	"shared/lib"
 	"time"
 )
 
-//@Type: CRHUDP
-//@Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
-type CRHUDP struct {}
+// @Type: CRHUDP
+// @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
+type CRHUDP struct{}
 
 func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
@@ -30,7 +30,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	host := ""
 	port := ""
 
-	if (h == "" || p == "") {
+	if h == "" || p == "" {
 		host = crhInfo.EndPoint.Host
 		port = crhInfo.EndPoint.Port
 	} else {
@@ -45,7 +45,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	if _, ok := crhInfo.Conns[addr]; !ok || reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name() != "UDPConn" { // no connection open yet
 		udpAddr, err := net.ResolveUDPAddr("udp", addr)
 		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(),err.Error())
+			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
 
 		localUdpAddr := c.getLocalUdpAddr()
@@ -58,33 +58,32 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 		for {
 			time.Sleep(200 * time.Millisecond)
-				miopPacket := miop.CreateReqPacket("Connect", []interface{}{shared.AdaptId}, shared.AdaptId) // idx is the Connection ID
-				msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
-				err = c.send(sizeOfMsgSize, msgPayload, crhInfo.Conns[addr])
-				if err != nil {
-					lib.PrintlnError("Erro no send após discagem", crhInfo.Conns[addr], err)
-					continue
-					//shared.ErrorHandler(shared.GetFunction(), err.Error())
-				} //else{
-				//	break
-				//}
-				msgFromServer, err := c.read(crhInfo.Conns[addr], sizeOfMsgSize)
-				if err != nil {
-					lib.PrintlnDebug("Error while reading Connect msg. Error:", err)
-					*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
-					crhInfo.Conns[addr].Close()
-					crhInfo.Conns[addr] = nil
-					delete(crhInfo.Conns, addr)
-					return
+			miopPacket := miop.CreateReqPacket("Connect", []interface{}{shared.AdaptId}, shared.AdaptId) // idx is the Connection ID
+			msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+			err = c.send(sizeOfMsgSize, msgPayload, crhInfo.Conns[addr])
+			if err != nil {
+				lib.PrintlnError("Erro no send após discagem", crhInfo.Conns[addr], err)
+				continue
+				//shared.ErrorHandler(shared.GetFunction(), err.Error())
+			} //else{
+			//	break
+			//}
+			msgFromServer, err := c.read(crhInfo.Conns[addr], sizeOfMsgSize)
+			if err != nil {
+				lib.PrintlnDebug("Error while reading Connect msg. Error:", err)
+				*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
+				crhInfo.Conns[addr].Close()
+				crhInfo.Conns[addr] = nil
+				delete(crhInfo.Conns, addr)
+				return
+			}
+			if isNewConnection, miopPacket := c.isNewConnection(msgFromServer); isNewConnection {
+				if miopPacket.Bd.ReqBody.Body[1] == "Ok" {
+					break
 				}
-				if isNewConnection, miopPacket := c.isNewConnection(msgFromServer); isNewConnection {
-					if miopPacket.Bd.ReqBody.Body[1] == "Ok" {
-						break
-					}
-				}
+			}
 			//}
 		}
-
 
 		if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 			//fmt.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr())
@@ -157,26 +156,26 @@ func (c CRHUDP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) er
 	return nil
 }
 
-func (c CRHUDP) getLocalUdpAddr() (*net.UDPAddr) {
+func (c CRHUDP) getLocalUdpAddr() *net.UDPAddr {
 	var err error = nil
 	var localUdpAddr *net.UDPAddr = nil
 	//shared.LocalAddr = "127.0.0.1:37522"
 	if shared.LocalAddr != "" {
-		//fmt.Println("shared.LocalAddr:", shared.LocalAddr)
-		lib.PrintlnDebug("shared.LocalAddr:", shared.LocalAddr)
+		//fmt.Println("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
+		lib.PrintlnDebug("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
 		localUdpAddr, err = net.ResolveUDPAddr("udp", shared.LocalAddr)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
-	}//else{
-		//fmt.Println("else shared.LocalAddr:", shared.LocalAddr)
+	} //else{
+	//fmt.Println("else shared.LocalAddr:", shared.LocalAddr)
 	//}
 	return localUdpAddr
 }
 
 func (c CRHUDP) read(conn net.Conn, size []byte) ([]byte, error) {
 	// receive reply's size
-	err := conn.SetReadDeadline(time.Now().Add(500*time.Millisecond))
+	err := conn.SetReadDeadline(time.Now().Add(500 * time.Millisecond))
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err.Error())
 	}
@@ -189,7 +188,7 @@ func (c CRHUDP) read(conn net.Conn, size []byte) ([]byte, error) {
 
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
-	err = conn.SetReadDeadline(time.Now().Add(500*time.Millisecond))
+	err = conn.SetReadDeadline(time.Now().Add(500 * time.Millisecond))
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err.Error())
 	}

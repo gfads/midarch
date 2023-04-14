@@ -1,12 +1,12 @@
 package adaptive
 
 import (
-	"gmidarch/development/messages"
-	"shared"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/shared"
 )
 
-//@Type: Analyser
-//@Behaviour: Behaviour = InvP.e1 -> I_Process -> InvR.e2 -> Behaviour
+// @Type: Analyser
+// @Behaviour: Behaviour = InvP.e1 -> I_Process -> InvR.e2 -> Behaviour
 type Analyser struct{}
 
 func (Analyser) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {

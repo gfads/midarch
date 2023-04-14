@@ -2,13 +2,13 @@ package main
 
 import (
 	"fmt"
-	"gmidarch/development/components/proxies/calculatorproxy"
-	"gmidarch/development/components/proxies/namingproxy"
-	"gmidarch/development/generic"
-	"gmidarch/development/messages"
-	"gmidarch/execution/frontend"
-	evolutive "injector"
-	"shared"
+	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/calculatorproxy"
+	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/namingproxy"
+	"github.com/gfads/midarch/src/gmidarch/development/generic"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/execution/frontend"
+	evolutive "github.com/gfads/midarch/src/injector"
+	"github.com/gfads/midarch/src/shared"
 	"sync"
 	"time"
 )

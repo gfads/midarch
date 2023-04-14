@@ -1,18 +1,18 @@
 package adaptive
 
 import (
-	"gmidarch/development/messages"
-	"shared"
-	"shared/pluginUtils"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/shared"
+	"github.com/gfads/midarch/src/shared/pluginUtils"
 	"time"
 )
 
 var isFirstTime = true
 var listOfOldPlugins map[string]time.Time
 
-//@Type: Monevolutive
-//@Behaviour: Behaviour = I_Hasnewplugins -> InvR.e1 -> Behaviour
-type Monevolutive struct {} //[] I_Nonewplugins -> Behaviour
+// @Type: Monevolutive
+// @Behaviour: Behaviour = I_Hasnewplugins -> InvR.e1 -> Behaviour
+type Monevolutive struct{} //[] I_Nonewplugins -> Behaviour
 
 func (Monevolutive) I_Nonewplugins(id string, msg *messages.SAMessage, info *interface{}, reset *bool) { //, r *bool
 	listOfNewPlugins := pluginUtils.LoadPlugins()

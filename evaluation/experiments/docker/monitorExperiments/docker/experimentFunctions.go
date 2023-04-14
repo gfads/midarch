@@ -6,12 +6,12 @@ import (
 	"errors"
 	"fmt"
 	"github.com/docker/docker/client"
+	"github.com/gfads/midarch/src/shared/lib"
 	"io"
 	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
-	"shared/lib"
 	"strconv"
 	"strings"
 	"sync"
@@ -41,7 +41,7 @@ func executeCommand(command string) error {
 
 func RunExperiment(kind Kind, fiboPlace int, sampleSize int) {
 	for {
-		log.Println("Preparing to run", kind.toString(), "(fiboPlace:",fiboPlace,"sampleSize:",sampleSize,") experiment fiboPlace!")
+		log.Println("Preparing to run", kind.toString(), "(fiboPlace:", fiboPlace, "sampleSize:", sampleSize, ") experiment fiboPlace!")
 		log.Println()
 		err := processExperiment(kind, fiboPlace, sampleSize)
 		if err != nil {
@@ -50,10 +50,10 @@ func RunExperiment(kind Kind, fiboPlace int, sampleSize int) {
 			log.Println()
 			log.Println()
 			time.Sleep(10 * time.Second)
-		}else {
+		} else {
 			log.Println()
 			log.Println()
-			log.Println("Finished running", kind.toString(), "(fiboPlace:",fiboPlace,"sampleSize:",sampleSize,") experiment fiboPlace!")
+			log.Println("Finished running", kind.toString(), "(fiboPlace:", fiboPlace, "sampleSize:", sampleSize, ") experiment fiboPlace!")
 			log.Println("Waiting 10 seconds to exit")
 			time.Sleep(10 * time.Second)
 			return

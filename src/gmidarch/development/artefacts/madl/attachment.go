@@ -1,8 +1,8 @@
 package madl
 
 import (
-	"gmidarch/development/components/component"
-	"gmidarch/development/connectors"
+	"github.com/gfads/midarch/src/gmidarch/development/components/component"
+	"github.com/gfads/midarch/src/gmidarch/development/connectors"
 )
 
 type Attachment struct {
@@ -10,4 +10,3 @@ type Attachment struct {
 	T  connectors.Connector
 	C2 component.Component
 }
-

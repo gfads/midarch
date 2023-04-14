@@ -1,14 +1,14 @@
 package middleware
 
 import (
-	"apps/businesses/calculatorimpl"
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
-	"shared"
+	"github.com/gfads/midarch/src/apps/businesses/calculatorimpl"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/shared"
 )
 
-//@Type: Calculatorinvoker
-//@Behaviour: Behaviour = InvP.e1 -> I_Beforeunmarshalling -> InvR.e2 -> TerR.e2 -> I_Beforeserver -> I_Beforemarshalling -> InvR.e2 -> TerR.e2 -> I_Beforesend -> TerP.e1 -> Behaviour
+// @Type: Calculatorinvoker
+// @Behaviour: Behaviour = InvP.e1 -> I_Beforeunmarshalling -> InvR.e2 -> TerR.e2 -> I_Beforeserver -> I_Beforemarshalling -> InvR.e2 -> TerR.e2 -> I_Beforesend -> TerP.e1 -> Behaviour
 type Calculatorinvoker struct{}
 
 func (Calculatorinvoker) I_Beforeunmarshalling(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
@@ -19,7 +19,7 @@ func (Calculatorinvoker) I_Beforeunmarshalling(id string, msg *messages.SAMessag
 func (Calculatorinvoker) I_Beforeserver(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	miopPacket := msg.Payload.(messages.FunctionalReply).Rep.(miop.MiopPacket) // from marshaller
 
-	req := messages.FunctionalRequest{Op:miopPacket.Bd.ReqHeader.Operation, Params:miopPacket.Bd.ReqBody.Body}
+	req := messages.FunctionalRequest{Op: miopPacket.Bd.ReqHeader.Operation, Params: miopPacket.Bd.ReqBody.Body}
 
 	switch req.Op {
 	case "Add":
@@ -32,7 +32,7 @@ func (Calculatorinvoker) I_Beforeserver(id string, msg *messages.SAMessage, info
 		msg.Payload = &req2
 
 		reply := calculatorimpl.CalculatorImpl{}.Add(req.Params[0].(int), req.Params[1].(int))
-		msg.Payload = messages.FunctionalReply{Rep:reply}
+		msg.Payload = messages.FunctionalReply{Rep: reply}
 
 	default:
 		shared.ErrorHandler(shared.GetFunction(), "Operation '"+req.Op+"' not present in Invoker")

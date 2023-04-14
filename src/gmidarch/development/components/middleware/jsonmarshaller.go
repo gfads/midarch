@@ -2,14 +2,14 @@ package middleware
 
 import (
 	"encoding/json"
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/shared"
 	"reflect"
-	"shared"
 )
 
-//@Type: Jsonmarshaller
-//@Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
+// @Type: Jsonmarshaller
+// @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
 type Jsonmarshaller struct{}
 
 func (j Jsonmarshaller) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
@@ -23,7 +23,7 @@ func (j Jsonmarshaller) I_Process(id string, msg *messages.SAMessage, info *inte
 	case "unmarshall":
 		if req.Params[0] == nil {
 			msg.Payload = messages.FunctionalReply{Rep: nil}
-		}else{
+		} else {
 			temp := req.Params[0].([]byte)
 			r := j.Unmarshall(temp)
 			msg.Payload = messages.FunctionalReply{Rep: r}

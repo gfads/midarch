@@ -3,19 +3,19 @@ package middleware
 import (
 	"crypto/tls"
 	"encoding/binary"
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/shared"
+	"github.com/gfads/midarch/src/shared/lib"
 	"io"
 	"log"
 	"net"
-	"shared"
-	"shared/lib"
 	"strings"
 	"time"
 )
 
-//@Type: SRHTLS
-//@Behaviour: Behaviour = I_Accept -> I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> Behaviour
+// @Type: SRHTLS
+// @Behaviour: Behaviour = I_Accept -> I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> Behaviour
 type SRHTLS struct{}
 
 func (s SRHTLS) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip string) (bool, int) {

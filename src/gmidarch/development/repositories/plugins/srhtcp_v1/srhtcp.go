@@ -3,16 +3,16 @@ package srhtcp
 import (
 	"encoding/binary"
 	"fmt"
-	"gmidarch/development/components/middleware"
-	"gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/components/middleware"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/shared"
 	"io"
 	"log"
 	"net"
-	"shared"
 )
 
-//@Type: SRHTCP
-//@Behaviour: Behaviour = I_Accept -> P1 ++ P1 = I_Accept -> P1 [] I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> P1
+// @Type: SRHTCP
+// @Behaviour: Behaviour = I_Accept -> P1 ++ P1 = I_Accept -> P1 [] I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> P1
 type SRHTCP struct{}
 
 func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client) (bool, int) {
@@ -25,7 +25,7 @@ func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client) (boo
 		}
 		*clientsPtr = append(clients, &client)
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients", len(*clientsPtr))
-		return true, len(*clientsPtr) -1
+		return true, len(*clientsPtr) - 1
 	}
 
 	for idx, client := range clients {
@@ -86,7 +86,6 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		client.Ip = conn.RemoteAddr().String()
 		client.Connection = conn
 		log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Connected Client", client)
-
 
 		// Update info
 		*info = srhInfo

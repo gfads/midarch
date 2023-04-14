@@ -1,12 +1,12 @@
 package sender
 
 import (
-	"gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
 	"strconv"
 )
 
-//@Type: Sender
-//@Behaviour: Behaviour = I_Setmessage1 -> InvR.e1 -> Behaviour [] I_Setmessage2 -> InvR.e1 -> Behaviour
+// @Type: Sender
+// @Behaviour: Behaviour = I_Setmessage1 -> InvR.e1 -> Behaviour [] I_Setmessage2 -> InvR.e1 -> Behaviour
 type Sender struct{}
 
 var idx = 0 // REMOVE

@@ -2,20 +2,20 @@ package madl
 
 import (
 	"bufio"
-	"gmidarch/development/components/component"
-	"gmidarch/development/connectors"
+	"github.com/gfads/midarch/src/gmidarch/development/components/component"
+	"github.com/gfads/midarch/src/gmidarch/development/connectors"
+	"github.com/gfads/midarch/src/shared"
 	"os"
-	"shared"
 	"strings"
 )
 
-type MADLLoader interface{
-	Load (string) MADL
+type MADLLoader interface {
+	Load(string) MADL
 }
 
-type MADLLoaderImpl struct {}
+type MADLLoaderImpl struct{}
 
-func NewMADLLoader() MADLLoader{
+func NewMADLLoader() MADLLoader {
 	var mp MADLLoader
 
 	mp = MADLLoaderImpl{}
@@ -23,12 +23,11 @@ func NewMADLLoader() MADLLoader{
 	return mp
 }
 
-
 func (m MADLLoaderImpl) Load(fileName string) MADL {
 	r := MADL{}
 
 	// Check file name
-	shared.CheckFileName(fileName,shared.MADL_EXTENSION)
+	shared.CheckFileName(fileName, shared.MADL_EXTENSION)
 
 	// Configure File & Path
 	r.FileName = fileName
@@ -83,11 +82,11 @@ func getConfigurationName(content []string) string {
 			break
 		}
 	}
-	if !found{
-		shared.ErrorHandler(shared.GetFunction(),"Command 'Configuration' not found!!")
+	if !found {
+		shared.ErrorHandler(shared.GetFunction(), "Command 'Configuration' not found!!")
 	}
 	if r == "" {
-		shared.ErrorHandler(shared.GetFunction(),"Configuration name not defined.")
+		shared.ErrorHandler(shared.GetFunction(), "Configuration name not defined.")
 	}
 	return r
 }
@@ -117,10 +116,10 @@ func getComponents(content []string) []component.Component {
 	}
 
 	if !foundComponents {
-		shared.ErrorHandler(shared.GetFunction(),"Command 'Components' not found.")
+		shared.ErrorHandler(shared.GetFunction(), "Command 'Components' not found.")
 	}
 	if len(r) == 0 {
-		shared.ErrorHandler(shared.GetFunction(),"'Components' not well formed.")
+		shared.ErrorHandler(shared.GetFunction(), "'Components' not well formed.")
 	}
 
 	return r
@@ -142,7 +141,7 @@ func getConnectors(content []string) []connectors.Connector {
 				connType := strings.TrimSpace(temp[1])
 				connTypeName := connType
 				newConn := connectors.NewConnector(connId, connTypeName, "", 0, 0)
-				r = append(r,  newConn)
+				r = append(r, newConn)
 			} else {
 				if foundConnectors && tempLine != "" && !strings.Contains(tempLine, ":") {
 					break
@@ -152,7 +151,7 @@ func getConnectors(content []string) []connectors.Connector {
 	}
 
 	if len(r) == 0 {
-		shared.ErrorHandler(shared.GetFunction(),"'Connectors' not well formed.")
+		shared.ErrorHandler(shared.GetFunction(), "'Connectors' not well formed.")
 	}
 
 	return r
@@ -190,7 +189,7 @@ func getAttachments(content []string) []Attachment {
 	}
 
 	if len(r) == 0 {
-		shared.ErrorHandler(shared.GetFunction(),"'Attachments' not well formed.")
+		shared.ErrorHandler(shared.GetFunction(), "'Attachments' not well formed.")
 	}
 
 	return r
@@ -217,7 +216,7 @@ func getAdaptability(content []string) []string {
 	}
 
 	if !foundAdaptability || len(r) == 0 {
-		shared.ErrorHandler(shared.GetFunction(),"'Adaptability' NOT well defined!")
+		shared.ErrorHandler(shared.GetFunction(), "'Adaptability' NOT well defined!")
 	}
 
 	return r
@@ -226,7 +225,7 @@ func getAdaptability(content []string) []string {
 // Check whether the adaptation type is one supported by gMidArch
 func isAdaptationType(t string) bool {
 
-	_,r := shared.AdaptationTypes[strings.ToUpper(strings.TrimSpace(t))]
+	_, r := shared.AdaptationTypes[strings.ToUpper(strings.TrimSpace(t))]
 
 	return r
 }

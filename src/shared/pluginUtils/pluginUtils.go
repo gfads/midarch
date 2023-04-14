@@ -2,10 +2,10 @@ package pluginUtils
 
 import (
 	"fmt"
+	"github.com/gfads/midarch/src/shared"
 	"io/ioutil"
 	"os"
 	"plugin"
-	"shared"
 	"time"
 )
 
@@ -15,7 +15,7 @@ func LoadPlugins() map[string]time.Time {
 	pluginsDir := shared.DIR_PLUGINS
 	OSDir, err := ioutil.ReadDir(pluginsDir)
 	if err != nil {
-		fmt.Printf("Shared:: Folder '%v' is unreadeable\n", pluginsDir)
+		fmt.Printf("github.com/gfads/midarch/src/shared:: Folder '%v' is unreadeable\n", pluginsDir)
 		os.Exit(0)
 	}
 	for i := range OSDir {
@@ -23,7 +23,7 @@ func LoadPlugins() map[string]time.Time {
 		pluginFile := pluginsDir + "/" + fileName
 		info, err := os.Stat(pluginFile)
 		if err != nil {
-			fmt.Printf("Shared:: Plugin '%v' not readeable\n", pluginFile)
+			fmt.Printf("github.com/gfads/midarch/src/shared:: Plugin '%v' not readeable\n", pluginFile)
 			os.Exit(0)
 		}
 		listOfPlugins[fileName] = info.ModTime()
@@ -31,8 +31,8 @@ func LoadPlugins() map[string]time.Time {
 	return listOfPlugins
 }
 
-func CheckForNewPlugins(listOfOldPlugins map[string]time.Time, listOfNewPlugins map[string]time.Time) [] string {
-	var newPlugins [] string
+func CheckForNewPlugins(listOfOldPlugins map[string]time.Time, listOfNewPlugins map[string]time.Time) []string {
+	var newPlugins []string
 
 	// check for new plugins
 	for key := range listOfNewPlugins {
@@ -49,7 +49,7 @@ func CheckForNewPlugins(listOfOldPlugins map[string]time.Time, listOfNewPlugins 
 	return newPlugins
 }
 
-func LoadPlugin(pluginName string) (plugin.Plugin) {
+func LoadPlugin(pluginName string) plugin.Plugin {
 
 	var plg *plugin.Plugin
 	var err error
@@ -64,7 +64,7 @@ func LoadPlugin(pluginName string) (plugin.Plugin) {
 		if err != nil {
 			fmt.Println("pluginUtils.LoadPlugin::error while opening plugin:", err)
 			if attempts >= shared.ATTEMPTS_TO_OPEN_A_PLUGIN { // TODO
-				fmt.Printf("Shared:: Error on trying open plugin '%v' \n", pluginFile)
+				fmt.Printf("github.com/gfads/midarch/src/shared:: Error on trying open plugin '%v' \n", pluginFile)
 				os.Exit(0)
 			} else {
 				attempts++
@@ -78,7 +78,7 @@ func LoadPlugin(pluginName string) (plugin.Plugin) {
 	// look for a exportable function/variable within the plugin
 	//fx, err := lib.Lookup(symbolName)
 	//if err != nil {
-	//	fmt.Printf( "Shared:: Function '%v' not found in plugin '%v'\n",symbolName,pluginName)
+	//	fmt.Printf( "github.com/gfads/midarch/src/shared:: Function '%v' not found in plugin '%v'\n",symbolName,pluginName)
 	//	os.Exit(0)
 	//}
 	//return fx

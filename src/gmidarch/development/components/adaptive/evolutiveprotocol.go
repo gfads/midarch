@@ -1,17 +1,18 @@
 package adaptive
 
 import (
-	"gmidarch/development/messages"
-	"shared"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/shared"
 	"time"
 )
 
 var isFirstTimeEvolutiveProtocol = true
+
 //var listOfOldPluginsEvolutiveProtocol map[string]time.Time
 
-//@Type: EvolutiveProtocol
-//@Behaviour: Behaviour = I_Hasnewprotocol -> InvR.e1 -> Behaviour
-type EvolutiveProtocol struct {} //[] I_Nonewplugins -> Behaviour
+// @Type: EvolutiveProtocol
+// @Behaviour: Behaviour = I_Hasnewprotocol -> InvR.e1 -> Behaviour
+type EvolutiveProtocol struct{} //[] I_Nonewplugins -> Behaviour
 
 //func (EvolutiveProtocol) I_Nonewplugins(id string, msg *messages.SAMessage, info *interface{}, reset *bool) { //, r *bool
 //	listOfNewPlugins := pluginUtils.LoadPlugins()

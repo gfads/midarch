@@ -1,12 +1,12 @@
 package engine
 
 import (
-	"gmidarch/development/artefacts/graphs/dot"
-	"gmidarch/development/components/component"
-	"gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/artefacts/graphs/dot"
+	"github.com/gfads/midarch/src/gmidarch/development/components/component"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/shared"
 	"math/rand"
 	"reflect"
-	"shared"
 )
 
 type Engine interface {
@@ -35,18 +35,17 @@ func (EngineImpl) Execute(comp *component.Component, executeForever *bool) {
 	comp.Executing = &executing
 	//fmt.Println("EngineImpl.Execute::Component.Id:", comp.Id)
 	//if comp.TypeName == "Unit" {
-		//fmt.Println("EngineImpl.Execute::comp.Info.([]*interface{})[0]).(component.Component).Info:", (*comp.Info.([]*interface{})[0]).(*component.Component).Info)
-		//info := (*comp.Info.([]*interface{})[0]).(component.Component).Info
-		//info := (*comp.Info.([]*interface{})[0]).(*component.Component)
-		//fmt.Println("EngineImpl.Execute::info is", reflect.TypeOf(info.Type))
-		//unit := *comp.Type.(*adaptive.Unit)
-		//reflect.ValueOf(comp.Type).MethodByName("PrintData").Call([]reflect.Value{})
-		//fmt.Println("EngineImpl.Execute::Unit.ElemOfUnit:", unit.ElemOfUnit)
-		//fmt.Println("EngineImpl.Execute::Unit.GraphOfElem:", unit.GraphOfElem)
-		//fmt.Println("EngineImpl.Execute::Unit.ElemOfUnitInfo:", unit.ElemOfUnitInfo)
+	//fmt.Println("EngineImpl.Execute::comp.Info.([]*interface{})[0]).(component.Component).Info:", (*comp.Info.([]*interface{})[0]).(*component.Component).Info)
+	//info := (*comp.Info.([]*interface{})[0]).(component.Component).Info
+	//info := (*comp.Info.([]*interface{})[0]).(*component.Component)
+	//fmt.Println("EngineImpl.Execute::info is", reflect.TypeOf(info.Type))
+	//unit := *comp.Type.(*adaptive.Unit)
+	//reflect.ValueOf(comp.Type).MethodByName("PrintData").Call([]reflect.Value{})
+	//fmt.Println("EngineImpl.Execute::Unit.ElemOfUnit:", unit.ElemOfUnit)
+	//fmt.Println("EngineImpl.Execute::Unit.GraphOfElem:", unit.GraphOfElem)
+	//fmt.Println("EngineImpl.Execute::Unit.ElemOfUnitInfo:", unit.ElemOfUnitInfo)
 	//}
 	//fmt.Println("EngineImpl.Execute::info is", reflect.TypeOf(comp.Type))
-
 
 	// Execute graph
 	for {

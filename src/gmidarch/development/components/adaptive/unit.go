@@ -2,35 +2,35 @@ package adaptive
 
 import (
 	"fmt"
-	"gmidarch/development/artefacts/graphs/dot"
-	"gmidarch/development/artefacts/graphs/exec"
-	"gmidarch/development/components/component"
-	"gmidarch/development/components/middleware"
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
-	"gmidarch/execution/core"
-	"shared/lib"
+	"github.com/gfads/midarch/src/gmidarch/development/artefacts/graphs/dot"
+	"github.com/gfads/midarch/src/gmidarch/development/artefacts/graphs/exec"
+	"github.com/gfads/midarch/src/gmidarch/development/components/component"
+	"github.com/gfads/midarch/src/gmidarch/development/components/middleware"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/gmidarch/execution/core"
+	"github.com/gfads/midarch/src/shared/lib"
 	"strings"
 	"time"
 
-	//	"gmidarch/execution/core/engine"
+	//	"github.com/gfads/midarch/src/gmidarch/execution/core/engine"
+	"github.com/gfads/midarch/src/shared"
 	"os"
 	"reflect"
-	"shared"
 	"sync"
 )
 
 var allUnitsType sync.Map
 var allUnitsGraph sync.Map
 
-//@Type: Unit
-//@Behaviour: Behaviour = RUNTIME
+// @Type: Unit
+// @Behaviour: Behaviour = RUNTIME
 type Unit struct {
-	UnitId         	string
-	Graph          	dot.DOTGraph
-	ElemOfUnitInfo 	interface{} //[] *
-	ElemOfUnit     	interface{}
-	GraphOfElem    	dot.DOTGraph
+	UnitId         string
+	Graph          dot.DOTGraph
+	ElemOfUnitInfo interface{} //[] *
+	ElemOfUnit     interface{}
+	GraphOfElem    dot.DOTGraph
 }
 
 func NewUnit() Unit {
@@ -63,15 +63,15 @@ func (u Unit) PrintData() {
 //	}
 //}
 
-//msg *messages.SAMessage, info [] *interface{}, r *bool
+// msg *messages.SAMessage, info [] *interface{}, r *bool
 func (u Unit) I_Initialiseunit(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	allUnitsType.Store(u.UnitId, u.ElemOfUnit)
 	allUnitsGraph.Store(u.UnitId, u.GraphOfElem)
 }
 
-//msg *messages.SAMessage, info [] *interface{}, r *bool
+// msg *messages.SAMessage, info [] *interface{}, r *bool
 func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	lib.PrintlnDebug("-----------------------------------------> Unit.I_Execute::", u.UnitId, "::TypeName:",(*(*info).([]*interface{})[0]).(*component.Component).TypeName,"::msg.Payload", msg.Payload, "::info:", info)
+	lib.PrintlnDebug("-----------------------------------------> Unit.I_Execute::", u.UnitId, "::TypeName:", (*(*info).([]*interface{})[0]).(*component.Component).TypeName, "::msg.Payload", msg.Payload, "::info:", info)
 	var ok bool
 
 	u.ElemOfUnit, ok = allUnitsType.Load(u.UnitId)
@@ -118,7 +118,7 @@ func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, r
 	return
 }
 
-//msg *messages.SAMessage, info [] *interface{}, r *bool
+// msg *messages.SAMessage, info [] *interface{}, r *bool
 func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	//fmt.Println("-----------------------------------------> Unit.I_Adaptunit::", u.UnitId, "::TypeName:",(*(*info).([]*interface{})[0]).(*component.Component).TypeName,"::msg.Payload", msg.Payload, "::info:", info)
 	cmd := shared.UnitCommand{}
@@ -127,7 +127,6 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 	} else {
 		//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::msg.Payload->nil")
 	}
-
 
 	//fmt.Printf("Unit:: I_Adapt:: %v [%v] %v\n", reflect.TypeOf(u.ElemOfUnit).Name(), cmd.Cmd, u.UnitId)
 
@@ -175,7 +174,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 						if client.Ip != "" {
 							//fmt.Println("Vai adaptar: IP:", client.Ip)
 							if (strings.Contains(unitElemType, "UDP") && client.UDPConnection == nil) ||
-							   (strings.Contains(unitElemType, "TCP") && client.Connection == nil) {
+								(strings.Contains(unitElemType, "TCP") && client.Connection == nil) {
 								//fmt.Println("Vai adaptar: pulou sem conexão")
 								continue
 							}

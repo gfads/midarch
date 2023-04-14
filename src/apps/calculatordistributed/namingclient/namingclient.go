@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
-	"gmidarch/execution/frontend"
-	"shared"
+	"github.com/gfads/midarch/src/gmidarch/execution/frontend"
+	"github.com/gfads/midarch/src/shared"
 )
 
 func main() {
 	fe := frontend.NewFrontend()
 
-	fe.Deploy("namingclientmid.madl","localhost",shared.NAMING_PORT) // serverhost, serverport
+	fe.Deploy("namingclientmid.madl", "localhost", shared.NAMING_PORT) // serverhost, serverport
 
 	fmt.Scanln()
 }

@@ -5,26 +5,26 @@ import (
 	"crypto/x509"
 	"encoding/binary"
 	"fmt"
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
-	evolutive "injector"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	evolutive "github.com/gfads/midarch/src/injector"
+	"github.com/gfads/midarch/src/shared"
+	"github.com/gfads/midarch/src/shared/lib"
 	"io/ioutil"
 	"log"
 	"net"
 	"reflect"
-	"shared"
-	"shared/lib"
 	"time"
 )
 
-//@Type: CRHTLS
-//@Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.eNot -> Behaviour
-type CRHTLS struct {}
+// @Type: CRHTLS
+// @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.eNot -> Behaviour
+type CRHTLS struct{}
 
-func (c CRHTLS) getLocalTcpAddr() (*net.TCPAddr) {
+func (c CRHTLS) getLocalTcpAddr() *net.TCPAddr {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTLS Version Not adapted")
-	//fmt.Println("shared.LocalAddr:", shared.LocalAddr)
-	lib.PrintlnDebug("shared.LocalAddr:", shared.LocalAddr)
+	//fmt.Println("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
+	lib.PrintlnDebug("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
 	var err error = nil
 	var localTCPAddr *net.TCPAddr = nil
 	//shared.LocalAddr = "127.0.0.1:37521"
@@ -51,7 +51,7 @@ func (c CRHTLS) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	host := ""
 	port := ""
 
-	if (h == "" || p == "") {
+	if h == "" || p == "" {
 		host = crhInfo.EndPoint.Host
 		port = crhInfo.EndPoint.Port
 	} else {
@@ -70,7 +70,7 @@ func (c CRHTLS) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		lib.PrintlnDebug("Entrou", crhInfo.Conns[addr])
 		tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(),err.Error())
+			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
 		//log.Println("Resolveu", crhInfo.Conns[addr])
 		//localTcpAddr := c.getLocalTcpAddr()
@@ -82,7 +82,7 @@ func (c CRHTLS) I_Process(id string, msg *messages.SAMessage, info *interface{},
 				lib.PrintlnError("Erro na discagem", crhInfo.Conns[addr], err)
 				time.Sleep(200 * time.Millisecond)
 				//shared.ErrorHandler(shared.GetFunction(), err.Error())
-			}else{
+			} else {
 				break
 			}
 		}
@@ -159,7 +159,7 @@ func (c CRHTLS) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) er
 	return nil
 }
 
-func (c CRHTLS) read(conn net.Conn, size []byte) ([]byte, error){
+func (c CRHTLS) read(conn net.Conn, size []byte) ([]byte, error) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTLS Version Not adapted")
 	// receive reply's size
 	_, err := conn.Read(size)
@@ -192,7 +192,7 @@ func getClientTLSConfig() *tls.Config {
 	}
 	trustCert, err := ioutil.ReadFile(shared.CA_PATH)
 	if err != nil {
-		fmt.Println("Error loading trust certificate. ",err)
+		fmt.Println("Error loading trust certificate. ", err)
 	}
 	certs := x509.NewCertPool()
 	if !certs.AppendCertsFromPEM(trustCert) {
@@ -202,8 +202,8 @@ func getClientTLSConfig() *tls.Config {
 	// connect to server
 	tlsConfig := &tls.Config{
 		InsecureSkipVerify: true,
-		RootCAs: certs,
-		NextProtos: []string{"h2"},
+		RootCAs:            certs,
+		NextProtos:         []string{"h2"},
 	}
 	return tlsConfig
 }

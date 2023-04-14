@@ -3,7 +3,7 @@ package shared
 import (
 	"bufio"
 	"fmt"
-	"gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
 	"log"
 	"os"
 	"plugin"
@@ -70,7 +70,7 @@ const TERR = "TerR"
 // Network setups
 const NAMING_PORT = "1313"
 const NAMING_HOST = "namingserver" //"localhost" //
-const CALCULATOR_HOST = "server" //"localhost" //
+const CALCULATOR_HOST = "server"   //"localhost" //
 const CALCULATOR_PORT = "1314"
 const FIBONACCI_PORT = "1315"
 const QUEUEING_PORT = "1316"
@@ -94,9 +94,9 @@ var SetOfPorts = map[string]string{
 	"QUEUEING_PORT":   QUEUEING_PORT}
 
 var AdaptationTypes = map[string]string{
-	"EVOLUTIVE": "EVOLUTIVE",
+	"EVOLUTIVE":          "EVOLUTIVE",
 	"EVOLUTIVE_PROTOCOL": "EVOLUTIVE_PROTOCOL",
-	"NONE":      "NONE"}
+	"NONE":               "NONE"}
 
 type MonitoredEvolutiveData []string // used in channel Monitor -> Analyser (Evolutive)
 
@@ -193,7 +193,7 @@ func LocalizegGo() string {
 	}
 
 	if !found {
-		fmt.Println("Shared:: Error:: OS Environment variable 'GOROOT' not configured\n")
+		fmt.Println("github.com/gfads/midarch/src/shared:: Error:: OS Environment variable 'GOROOT' not configured\n")
 		os.Exit(1)
 	}
 	return r
@@ -230,7 +230,7 @@ func LocalizegFDR() string {
 	}
 
 	if !found {
-		fmt.Println("Shared:: Error:: OS Environment variable 'FDR4' not configured\n")
+		fmt.Println("github.com/gfads/midarch/src/shared:: Error:: OS Environment variable 'FDR4' not configured\n")
 		os.Exit(1)
 	}
 	return r
@@ -438,8 +438,8 @@ func GetTypeAndBehaviour(file string) (string, string) {
 
 func CompatibleComponents(componentTypeName1, componentTypeName2 string) bool {
 	return (strings.Contains(componentTypeName1, "SRH") && strings.Contains(componentTypeName2, "SRH")) ||
-		   (strings.Contains(componentTypeName1, "CRH") && strings.Contains(componentTypeName2, "CRH")) ||
-		   (componentTypeName1 == componentTypeName2)
+		(strings.Contains(componentTypeName1, "CRH") && strings.Contains(componentTypeName2, "CRH")) ||
+		(componentTypeName1 == componentTypeName2)
 }
 
 func GetComponentTypeByNameFromRAM(componentName string) interface{} {

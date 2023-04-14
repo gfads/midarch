@@ -2,18 +2,18 @@ package crhudp
 
 import (
 	"encoding/binary"
-	"gmidarch/development/components/middleware"
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
-	evolutive "injector"
+	"github.com/gfads/midarch/src/gmidarch/development/components/middleware"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	evolutive "github.com/gfads/midarch/src/injector"
+	"github.com/gfads/midarch/src/shared"
 	"log"
 	"net"
-	"shared"
 )
 
-//@Type: CRHUDP
-//@Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
-type CRHUDP struct {}
+// @Type: CRHUDP
+// @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
+type CRHUDP struct{}
 
 func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
@@ -29,7 +29,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	host := ""
 	port := ""
 
-	if (h == "" || p == "") {
+	if h == "" || p == "" {
 		host = crhInfo.EndPoint.Host
 		port = crhInfo.EndPoint.Port
 	} else {
@@ -44,12 +44,12 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	if _, ok := crhInfo.Conns[key]; !ok { // no connection open yet
 		udpAddr, err := net.ResolveUDPAddr("udp", key)
 		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(),err.Error())
+			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
 
 		crhInfo.Conns[key], err = net.DialUDP("udp", nil, udpAddr)
 		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(),err.Error())
+			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
 	}
 
@@ -59,13 +59,13 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	binary.LittleEndian.PutUint32(size, uint32(len(msgToServer)))
 	_, err = conn.Write(size)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(),err.Error())
+		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
 
 	// send message
 	_, err = conn.Write(msgToServer)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(),err.Error())
+		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
 
 	msgFromServer := c.read(err, conn, size)

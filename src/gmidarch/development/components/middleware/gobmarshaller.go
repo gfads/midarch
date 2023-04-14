@@ -3,9 +3,9 @@ package middleware
 import (
 	"bytes"
 	"encoding/gob"
-	"gmidarch/development/messages"
-	"gmidarch/development/messages/miop"
-	"shared"
+	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/src/shared"
 )
 
 //@Type: Gobmarshaller
@@ -15,7 +15,7 @@ type Gobmarshaller struct{}
 
 func (g Gobmarshaller) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	gob.Register(messages.FunctionalRequest{})
-	gob.Register(messages.AOR{})               // TODO - perhaps put in init()
+	gob.Register(messages.AOR{}) // TODO - perhaps put in init()
 
 	req := msg.Payload.(messages.FunctionalRequest)
 	op := req.Op
@@ -56,5 +56,3 @@ func (Gobmarshaller) Unmarshall(m []byte) interface{} {
 
 	return *r
 }
-
-
