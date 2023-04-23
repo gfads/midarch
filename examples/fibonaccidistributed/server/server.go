@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/fibonacciProxy"
+	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciProxy"
 	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/namingproxy"
 	"github.com/gfads/midarch/src/gmidarch/development/generic"
 	"github.com/gfads/midarch/src/gmidarch/development/messages"

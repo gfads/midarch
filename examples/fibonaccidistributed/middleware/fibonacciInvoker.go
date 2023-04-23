@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/gfads/midarch/src/apps/businesses/fibonacciImpl"
+	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciImpl"
 	"github.com/gfads/midarch/src/gmidarch/development/messages"
 	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
 	"github.com/gfads/midarch/src/shared"

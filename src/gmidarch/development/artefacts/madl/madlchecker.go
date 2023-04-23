@@ -7,7 +7,7 @@ import (
 
 type MADLChecker interface {
 	SyntaxCheck(MADL)
-	SemanticCheck(MADL, architectural.ArchitecturalRepository)
+	SemanticCheck(MADL, architectural.ArchitecturalRepositoryManager)
 }
 
 type MADLCheckerImpl struct{}
@@ -50,9 +50,8 @@ func (MADLCheckerImpl) SyntaxCheck(m MADL) {
 	}
 }
 
-func (c MADLCheckerImpl) SemanticCheck(m MADL, archRepo architectural.ArchitecturalRepository) {
-
-	arm := architectural.NewArchitecturalRepositoryManager()
+func (c MADLCheckerImpl) SemanticCheck(m MADL, archRepoManager architectural.ArchitecturalRepositoryManager) {
+	arm := archRepoManager //architectural.NewArchitecturalRepositoryManager()
 
 	// Check if all component/connectors types used in the madl exist in architectural repositories
 	for c := range m.Components {

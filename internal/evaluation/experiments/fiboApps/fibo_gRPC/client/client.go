@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	fibonacci "github.com/gfads/midarch/evaluation/experiments/fiboApps/fibo_gRPC/proto"
+	"github.com/gfads/midarch/internal/evaluation/experiments/fiboApps/fibo_gRPC/proto"
 	"github.com/gfads/midarch/src/shared"
 	"golang.org/x/net/context"
 	"google.golang.org/grpc"
@@ -14,7 +14,7 @@ import (
 	"time"
 )
 
-func clientX(client fibonacci.FibonacciServiceClient) {
+func clientX(client fibonacci.fibonacci) {
 	var n, SAMPLE_SIZE, AVERAGE_WAITING_TIME int
 	if len(os.Args) >= 2 {
 		n, _ = strconv.Atoi(os.Args[1])
@@ -34,7 +34,7 @@ func clientX(client fibonacci.FibonacciServiceClient) {
 	for i := 0; i < SAMPLE_SIZE; i++ {
 
 		t1 := time.Now()
-		_, err := client.Fibo(context.Background(), &fibonacci.Request{Place: int32(n)})
+		_, err := client.Fibo(context.Background(), &fibonacci.fibonacci{Place: int32(n)})
 		if err != nil {
 			log.Fatal("Fibo error:", err)
 		}

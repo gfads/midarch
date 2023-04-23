@@ -2,8 +2,8 @@ package main
 
 import (
 	"context"
-	fibonacci "github.com/gfads/midarch/evaluation/experiments/fiboApps/fibo_gRPC/proto"
-	"github.com/gfads/midarch/src/apps/businesses/fibonacciImpl"
+	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciImpl"
+	"github.com/gfads/midarch/internal/evaluation/experiments/fiboApps/fibo_gRPC/proto"
 	"github.com/gfads/midarch/src/shared"
 	"google.golang.org/grpc"
 	"log"

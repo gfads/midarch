@@ -1,8 +1,8 @@
 package namingproxy
 
 import (
+	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciProxy"
 	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/calculatorproxy"
-	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/fibonacciProxy"
 	"github.com/gfads/midarch/src/gmidarch/development/generic"
 	"github.com/gfads/midarch/src/gmidarch/development/messages"
 	"github.com/gfads/midarch/src/shared"

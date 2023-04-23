@@ -26,7 +26,7 @@ const NUM_MAX_NODES int = 50
 const EXECUTE_FOREVER = true
 
 // Directories
-var DIR_GO = LocalizegGo() + "/bin"
+var DIR_GO = ""
 var DIR_BASE = LocalizegMidArch()
 var DIR_MADL = DIR_BASE + "/src/apps/artefacts/madls"
 var DIR_DOT = DIR_BASE + "/src/gmidarch/development/repositories/dot"
@@ -34,6 +34,7 @@ var DIR_ADAPTIVE_COMPONENTS = DIR_BASE + "/src/gmidarch/development/components/a
 var DIR_APP_COMPONENTS = DIR_BASE + "/src/gmidarch/development/components/apps"
 var DIR_MIDDLEWARE_COMPONENTS = DIR_BASE + "/src/gmidarch/development/components/middleware"
 var DIR_PROXIES_COMPONENTS = DIR_BASE + "/src/gmidarch/development/components/proxies"
+var DIR_BUSINESS_COMPONENTS = EnvironmentVariableValueWithDefault("MIDARCH_BUSINESS_COMPONENTS_PATH", DIR_BASE+"/examples/fibonaccidistributed/middleware,"+DIR_BASE+"/examples/fibonaccidistributed/fibonacciProxy")
 var DIR_PLUGINS = DIR_BASE + "/src/gmidarch/execution/repositories/plugins"
 var DIR_PLUGINS_SOURCE = DIR_BASE + "/src/gmidarch/development/repositories/plugins"
 var DIR_PLUGINS_IMPORT = "gmidarch/development/repositories/plugins"
@@ -69,8 +70,8 @@ const TERR = "TerR"
 
 // Network setups
 const NAMING_PORT = "1313"
-const NAMING_HOST = "namingserver" //"localhost" //
-const CALCULATOR_HOST = "server"   //"localhost" //
+const NAMING_HOST = "localhost"     // "namingserver" //
+const CALCULATOR_HOST = "localhost" //"server"   //
 const CALCULATOR_PORT = "1314"
 const FIBONACCI_PORT = "1315"
 const QUEUEING_PORT = "1316"
@@ -128,13 +129,13 @@ const RUNTIME_BEHAVIOUR = "RUNTIME"
 const CSP_EXTENSION = "csp"
 const CORINGA = "XXX"
 const DEADLOCK_PROPERTY = "assert " + CORINGA + " :[deadlock free]"
-const BEHAVIOUR_TAG = "//@Behaviour:"
-const TYPE_TAG = "//@Type:"
+const BEHAVIOUR_TAG = "// @Behaviour:"
+const TYPE_TAG = "// @Type:"
 const ACTION_PREFIX = "->"
 const CHOICE = "[]"
 const BEHAVIOUR_ID = "Behaviour"
 
-var DIR_FDR = LocalizegFDR()
+var DIR_FDR = LocalizeFDR()
 var DIR_CSP = DIR_BASE + "/src/apps/artefacts/csp"
 
 const FDR_COMMAND = "refines"
@@ -180,7 +181,7 @@ func GetFunction() string {
 	return caller.Name()
 }
 
-func LocalizegGo() string {
+func LocalizeGo() string {
 	r := ""
 	found := false
 
@@ -215,9 +216,17 @@ func LocalizegMidArch() string {
 		ErrorHandler(GetFunction(), "OS Environment variable 'GMIDARCH' not configured")
 	}
 	return r
+
+	//// Current working directory
+	//dir, err := os.Getwd()
+	//if err != nil {
+	//	ErrorHandler(GetFunction(), "OS Environment variable 'GMIDARCH' not configured")
+	//}
+	//fmt.Println("CWD:", dir)
+	//return dir
 }
 
-func LocalizegFDR() string {
+func LocalizeFDR() string {
 	r := ""
 	found := false
 
@@ -230,8 +239,9 @@ func LocalizegFDR() string {
 	}
 
 	if !found {
-		fmt.Println("github.com/gfads/midarch/src/shared:: Error:: OS Environment variable 'FDR4' not configured\n")
-		os.Exit(1)
+		//fmt.Println("github.com/gfads/midarch/src/shared:: OS Environment variable 'FDR4' not configured\n")
+		return ""
+		//os.Exit(1)
 	}
 	return r
 }

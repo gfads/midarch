@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/fibonacciProxy"
+	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciProxy"
 	"github.com/gfads/midarch/src/gmidarch/development/components/proxies/namingproxy"
 	"github.com/gfads/midarch/src/gmidarch/development/messages"
 	"github.com/gfads/midarch/src/gmidarch/execution/frontend"
@@ -25,9 +25,9 @@ func main() {
 		SAMPLE_SIZE, _ = strconv.Atoi(os.Args[2])
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(os.Args[3])
 	} else {
-		n, _ = strconv.Atoi(shared.EnvironmentVariableValue("FIBONACCI_PLACE"))
-		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValue("SAMPLE_SIZE"))
-		AVERAGE_WAITING_TIME, _ = strconv.Atoi(shared.EnvironmentVariableValue("AVERAGE_WAITING_TIME"))
+		n, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("FIBONACCI_PLACE", "11"))
+		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("SAMPLE_SIZE", "100"))
+		AVERAGE_WAITING_TIME, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("AVERAGE_WAITING_TIME", "60"))
 	}
 	fmt.Println("FIBONACCI_PLACE / SAMPLE_SIZE / AVERAGE_WAITING_TIME:", n, "/", SAMPLE_SIZE, "/", AVERAGE_WAITING_TIME)
 

@@ -8,9 +8,8 @@ import (
 	"github.com/gfads/midarch/src/shared"
 )
 
-//@Type: Gobmarshaller
-//@Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
-
+// @Type: Gobmarshaller
+// @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
 type Gobmarshaller struct{}
 
 func (g Gobmarshaller) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {

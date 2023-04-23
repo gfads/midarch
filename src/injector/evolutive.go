@@ -129,7 +129,7 @@ func generatePlugin(source, plugin string) {
 
 	//fmt.Println("injector::evolutive.generatePlugin::will build plugin:", source)
 	//fmt.Println("command:", shared.DIR_GO+"/go", "build", "-buildmode=plugin", "-o", pOut, pIn)
-	_, err := exec.Command(shared.DIR_GO+"/go", "build", "-buildmode=plugin", "-o", pOut, pIn).CombinedOutput() //"-gcflags", "all=-N -l",
+	_, err := exec.Command("go", "build", "-buildmode=plugin", "-o", pOut, pIn).CombinedOutput() //"-gcflags", "all=-N -l",
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), "Something wrong in generating plugin '"+pIn+"' in \n '"+pOut+"': "+err.Error()+"\n")
 	}

@@ -31,7 +31,7 @@ func (m MADLLoaderImpl) Load(fileName string) MADL {
 
 	// Configure File & Path
 	r.FileName = fileName
-	r.Path = shared.DIR_MADL
+	r.Path = shared.DIR_MADL // TODO dcruzb : remove shared.DIR_MADL, should be passed the entire path to the file (this is user's responsibility)
 	fullPathAdlFileName := r.Path + "/" + r.FileName
 
 	// Read file

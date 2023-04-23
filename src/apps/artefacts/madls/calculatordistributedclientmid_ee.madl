@@ -2,7 +2,7 @@ Configuration calculatordistributedclientmid_ee.madl :=
 
    Components 
       core : Core 
-      monevolutive : Monevolutive 
+      evolutiveprotocol : EvolutiveProtocol 
       monitor : Monitor 
       analyser : Analyser 
       planner : Planner 
@@ -22,7 +22,7 @@ Configuration calculatordistributedclientmid_ee.madl :=
       t6 : Oneway 
 
     Attachments 
-      monevolutive,t2,monitor 
+      evolutiveprotocol,t2,monitor 
       monitor,t3,analyser 
       analyser,t4,planner 
       planner,t5,executor 

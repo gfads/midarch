@@ -47,7 +47,7 @@ func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint)
 
 	// Step 4: Semantic check of madl
 	//fmt.Print("Semantic checking of MADL...")
-	madlChecker.SemanticCheck(madlApp, archRepo)
+	madlChecker.SemanticCheck(madlApp, arm)
 	//fmt.Println("ok")
 
 	// Step 5: Configure madl
