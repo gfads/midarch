@@ -1,4 +1,4 @@
-# midarch [![Godoc](https://godoc.org/github.com/gfads/midarch?status.svg)](https://godoc.org/github.com/gfads/midarch)
+# midarch [![Godoc](https://godoc.org/github.com/gfads/midarch?status.svg)](https://godoc.org/github.com/gfads/midarch) [![Go Report Card](https://goreportcard.com/badge/github.com/gfads/midarch)](https://goreportcard.com/report/github.com/gfads/midarch)
 
 ## Installing & Configuring
 
