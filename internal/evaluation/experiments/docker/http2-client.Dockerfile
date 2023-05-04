@@ -28,8 +28,8 @@ RUN go get github.com/lucas-clemente/quic-go
 #RUN go get -u github.com/golang/protobuf/protoc-gen-go
 #RUN go get -u github.com/streadway/amqp
 
-COPY ./src ./src
-COPY ./src/ssl/myCA.pem /usr/local/share/ca-certificates/server.crt
+COPY ./pkg ./pkg
+COPY ./pkg/ssl/myCA.pem /usr/local/share/ca-certificates/server.crt
 RUN update-ca-certificates
 
 RUN go build $GMIDARCHDIR/src/apps/http2server/client/client.go

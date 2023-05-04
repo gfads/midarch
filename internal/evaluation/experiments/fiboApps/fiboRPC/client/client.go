@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/gfads/midarch/src/shared"
+	"github.com/gfads/midarch/pkg/shared"
 	"log"
 	"math"
 	"math/rand"

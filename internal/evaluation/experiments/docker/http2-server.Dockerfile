@@ -28,7 +28,7 @@ RUN go get github.com/lucas-clemente/quic-go
 #RUN go get -u github.com/golang/protobuf/protoc-gen-go
 #RUN go get -u github.com/streadway/amqp
 
-COPY ./src ./src
+COPY ./pkg ./pkg
 
 RUN go build $GMIDARCHDIR/src/apps/http2server/server/server.go
 

@@ -2,9 +2,9 @@ package middleware
 
 import (
 	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciImpl"
-	"github.com/gfads/midarch/src/gmidarch/development/messages"
-	"github.com/gfads/midarch/src/gmidarch/development/messages/miop"
-	"github.com/gfads/midarch/src/shared"
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/pkg/shared"
 )
 
 // @Type: FibonacciInvoker

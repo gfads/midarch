@@ -7,7 +7,7 @@ import (
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
-	"github.com/gfads/midarch/src/shared/lib"
+	"github.com/gfads/midarch/pkg/shared/lib"
 	"io"
 	"os"
 	"path/filepath"

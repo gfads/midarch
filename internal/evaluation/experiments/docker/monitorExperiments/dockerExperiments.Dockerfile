@@ -7,8 +7,8 @@ ENV GOROOT /usr/local/go
 
 #RUN go get github.com/moby/moby
 
-COPY ./evaluation/experiments/docker/monitorExperiments ./src
-COPY ./src/github.com ./src/github.com
+COPY ./evaluation/experiments/docker/monitorExperiments ./pkg
+COPY ./pkg/github.com ./pkg/github.com
 
 RUN go build $GOPATH/src/dockerExperiments.go
 

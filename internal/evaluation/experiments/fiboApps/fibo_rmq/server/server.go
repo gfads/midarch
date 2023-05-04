@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/gfads/midarch/src/apps/fibomiddleware/impl"
+	"github.com/gfads/midarch/pkg/apps/fibomiddleware/impl"
 	"github.com/streadway/amqp"
 	"log"
 	"strconv"

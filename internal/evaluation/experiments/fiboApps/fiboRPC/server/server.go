@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/gfads/midarch/src/apps/fibomiddleware/impl"
-	"github.com/gfads/midarch/src/shared"
+	"github.com/gfads/midarch/pkg/apps/fibomiddleware/impl"
+	"github.com/gfads/midarch/pkg/shared"
 	"log"
 	"net"
 	"net/rpc"

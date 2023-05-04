@@ -30,7 +30,7 @@ RUN go env -w GO111MODULE=off
 #RUN go get -u github.com/golang/protobuf/protoc-gen-go
 #RUN go get -u github.com/streadway/amqp
 
-COPY ./src ./src
+COPY ./pkg ./pkg
 
 RUN go build $GMIDARCHDIR/src/apps/fibonaccidistributed/server/server.go
 

@@ -6,7 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/docker/docker/client"
-	"github.com/gfads/midarch/src/shared/lib"
+	"github.com/gfads/midarch/pkg/shared/lib"
 	"io"
 	"log"
 	"os"

@@ -10,7 +10,7 @@ ENV FDR4 /usr/local/fdr4/bin
 
 #RUN go get google.golang.org/grpc
 
-COPY ./src ./src
+COPY ./pkg ./pkg
 COPY ./evaluation/experiments ./evaluation/experiments
 
 RUN go build $GMIDARCHDIR/src/adaptive/loadPlugin/loadPlugin.go

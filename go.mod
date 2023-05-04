@@ -31,3 +31,5 @@ require (
 	google.golang.org/genproto v0.0.0-20230110181048-76db0878b65f // indirect
 	gotest.tools/v3 v3.4.0 // indirect
 )
+
+//replace github.com/gfads/midarch => ./  // uncomment for midarch development

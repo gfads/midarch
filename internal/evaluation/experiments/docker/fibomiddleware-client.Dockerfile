@@ -28,9 +28,9 @@ RUN go get github.com/lucas-clemente/quic-go
 #RUN go get -u github.com/golang/protobuf/protoc-gen-go
 #RUN go get -u github.com/streadway/amqp
 
-COPY ./src ./src
+COPY ./pkg ./pkg
 
-RUN go build $GMIDARCHDIR/src/apps/fibomiddleware/client/client.go
+RUN go build $GMIDARCHDIR/pkg/apps/fibomiddleware/client/client.go
 
 # add app
 #COPY docker-entrypoint.sh /usr/local/bin

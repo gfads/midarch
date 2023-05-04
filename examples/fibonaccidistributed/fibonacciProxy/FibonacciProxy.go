@@ -1,8 +1,8 @@
 package fibonacciProxy
 
 import (
-	"github.com/gfads/midarch/src/gmidarch/development/generic"
-	"github.com/gfads/midarch/src/gmidarch/development/messages"
+	"github.com/gfads/midarch/pkg/gmidarch/development/generic"
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 )
 
 // @Type: FibonacciProxy

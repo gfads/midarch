@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciImpl"
 	"github.com/gfads/midarch/internal/evaluation/experiments/fiboApps/fibo_gRPC/proto"
-	"github.com/gfads/midarch/src/shared"
+	"github.com/gfads/midarch/pkg/shared"
 	"google.golang.org/grpc"
 	"log"
 	"net"

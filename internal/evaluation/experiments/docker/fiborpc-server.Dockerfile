@@ -7,7 +7,7 @@ ENV GOROOT /usr/local/go
 ENV GMIDARCHDIR /go
 ENV FDR4 /usr/local/fdr4/bin
 
-COPY ./src ./src
+COPY ./pkg ./pkg
 COPY ./evaluation/experiments ./evaluation/experiments
 
 RUN go build $GMIDARCHDIR/evaluation/experiments/fiboApps/fiboRPC/server/server.go

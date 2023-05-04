@@ -1,0 +1,23 @@
+datatype PROCNAMES = unit2 | unit4 | unit5 | evolutiveprotocol | monitor | analyser | executor | unit1 | core | planner | unit3 | t2 | t3 | t4 | t5 | t6 | t1
+channel InvP,InvR : PROCNAMES
+channel I_Hasnewprotocol,I_Process
+
+
+EVOLUTIVEPROTOCOL = I_Hasnewprotocol -> InvR.t2 -> EVOLUTIVEPROTOCOL
+MONITOR = InvP.t2 -> I_Process -> InvR.t3 -> MONITOR
+ANALYSER = InvP.t3 -> I_Process -> InvR.t4 -> ANALYSER
+EXECUTOR = InvP.t5 -> I_Process -> InvR.t6 -> EXECUTOR
+
+PLANNER = InvP.t4 -> I_Process -> InvR.t5 -> PLANNER
+
+
+
+T6 = InvP.executor -> InvR.core -> T6
+T1 = InvP.core -> InvR.unit1 ->InvP.core -> InvR.unit2 ->InvP.core -> InvR.unit3 ->InvP.core -> InvR.unit4 ->InvP.core -> InvR.unit5 -> T1
+T2 = InvP.evolutiveprotocol -> InvR.monitor -> T2
+T3 = InvP.monitor -> InvR.analyser -> T3
+T4 = InvP.analyser -> InvR.planner -> T4
+T5 = InvP.planner -> InvR.executor -> T5
+
+calculatordistributedclientmid_ee.madl = (UNIT2 ||| UNIT5 ||| EVOLUTIVEPROTOCOL ||| MONITOR ||| ANALYSER ||| EXECUTOR ||| UNIT3 ||| PLANNER ||| UNIT4 ||| UNIT1 ||| CORE)[|{|InvP,InvR|}|](T4[[InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4]] ||| T5[[InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4,InvP.planner <- InvR.t5,InvR.executor <- InvP.t5]] ||| T6[[InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4,InvP.planner <- InvR.t5,InvR.executor <- InvP.t5,InvP.executor <- InvR.t6,InvR.core <- InvP.t6]] ||| T1[[InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4,InvP.planner <- InvR.t5,InvR.executor <- InvP.t5,InvP.executor <- InvR.t6,InvR.core <- InvP.t6,InvP.core <- InvR.t1,InvR.unit1 <- InvP.t1,InvP.core <- InvR.t1,InvR.unit2 <- InvP.t1,InvP.core <- InvR.t1,InvR.unit3 <- InvP.t1,InvP.core <- InvR.t1,InvR.unit4 <- InvP.t1,InvP.core <- InvR.t1,InvR.unit5 <- InvP.t1]] ||| T2[[InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4,InvP.planner <- InvR.t5,InvR.executor <- InvP.t5,InvP.executor <- InvR.t6,InvR.core <- InvP.t6,InvP.core <- InvR.t1,InvR.unit1 <- InvP.t1,InvP.core <- InvR.t1,InvR.unit2 <- InvP.t1,InvP.core <- InvR.t1,InvR.unit3 <- InvP.t1,InvP.core <- InvR.t1,InvR.unit4 <- InvP.t1,InvP.core <- InvR.t1,InvR.unit5 <- InvP.t1,InvP.evolutiveprotocol <- InvR.t2,InvR.monitor <- InvP.t2]] ||| T3[[InvP.analyser <- InvR.t4,InvR.planner <- InvP.t4,InvP.planner <- InvR.t5,InvR.executor <- InvP.t5,InvP.executor <- InvR.t6,InvR.core <- InvP.t6,InvP.core <- InvR.t1,InvR.unit1 <- InvP.t1,InvP.core <- InvR.t1,InvR.unit2 <- InvP.t1,InvP.core <- InvR.t1,InvR.unit3 <- InvP.t1,InvP.core <- InvR.t1,InvR.unit4 <- InvP.t1,InvP.core <- InvR.t1,InvR.unit5 <- InvP.t1,InvP.evolutiveprotocol <- InvR.t2,InvR.monitor <- InvP.t2,InvP.monitor <- InvR.t3,InvR.analyser <- InvP.t3]])
+assert calculatordistributedclientmid_ee.madl :[deadlock free]
