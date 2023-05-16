@@ -14,12 +14,12 @@ type ArchitecturalRepositoryManagerImpl struct {
 	Repository ArchitecturalRepository
 }
 
-func NewArchitecturalRepositoryManager() ArchitecturalRepositoryManager {
+func NewArchitecturalRepositoryManager(businessComponents map[string]interface{}) ArchitecturalRepositoryManager {
 	var arm ArchitecturalRepositoryManager
 
 	// Create a repositories to be managed
 	armImpl := ArchitecturalRepositoryManagerImpl{}
-	armImpl.Repository = LoadArchitecturalRepository()
+	armImpl.Repository = LoadArchitecturalRepository(businessComponents)
 
 	arm = armImpl
 

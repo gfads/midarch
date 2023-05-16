@@ -12,7 +12,7 @@ import (
 )
 
 type Frontend interface {
-	Deploy(string, map[string]messages.EndPoint)
+	Deploy(string, map[string]messages.EndPoint, map[string]interface{})
 }
 
 type FrontendImpl struct{}
@@ -26,10 +26,10 @@ func NewFrontend() Frontend {
 	return fe
 }
 
-func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint) {
+func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint, components map[string]interface{}) {
 
 	// Step 1 - Load architectural repositories
-	arm := architectural.NewArchitecturalRepositoryManager()
+	arm := architectural.NewArchitecturalRepositoryManager(components)
 	archRepo := arm.GetRepository()
 
 	// Step 2: Load madl

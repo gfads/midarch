@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/gfads/midarch/pkg/apps/fibomiddleware/impl"
+	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciImpl"
 	"github.com/gfads/midarch/pkg/shared"
 	"log"
 	"net"
@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	fibonacci := new(impl.Fibonacci)
+	fibonacci := new(fibonacciImpl.Fibonacci)
 
 	rpc.Register(fibonacci)
 

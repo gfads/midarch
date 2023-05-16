@@ -5,6 +5,7 @@ go 1.20
 require (
 	github.com/docker/docker v23.0.3+incompatible
 	github.com/streadway/amqp v1.0.0
+	golang.org/x/exp v0.0.0-20230515195305-f3d0a9c9a5cc
 	golang.org/x/net v0.9.0
 	google.golang.org/grpc v1.54.0
 	google.golang.org/protobuf v1.30.0

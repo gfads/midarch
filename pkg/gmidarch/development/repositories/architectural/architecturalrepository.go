@@ -1,9 +1,6 @@
 package architectural
 
 import (
-	"fmt"
-	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciProxy"
-	middleware2 "github.com/gfads/midarch/examples/fibonaccidistributed/middleware"
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/adaptive"
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/apps"
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/component"
@@ -13,6 +10,7 @@ import (
 	"github.com/gfads/midarch/pkg/gmidarch/development/connectors"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/shared"
+	"golang.org/x/exp/maps"
 	"io/ioutil"
 	"strconv"
 	"strings"
@@ -46,13 +44,11 @@ var SetOfComponentTypesRAM = map[string]interface{}{
 	"CRHTLS":            &middleware.CRHTLS{},
 	"SRHTLS":            &middleware.SRHTLS{},
 	"Calculatorinvoker": &middleware.Calculatorinvoker{},
-	"FibonacciInvoker":  &middleware2.FibonacciInvoker{}, // TODO dcruzb : Update SetOfComponentTypesRAM from deploy for components outside midarch (FibonacciInvoker)
 	"Requestor":         &middleware.Requestor{},
 	"Naminginvoker":     &middleware.Naminginvoker{},
 	"Namingserver":      &middleware.Namingserver{},
 	"Namingproxy":       &namingproxy.Namingproxy{},
-	"Calculatorproxy":   &calculatorproxy.Calculatorproxy{},
-	"FibonacciProxy":    &fibonacciProxy.FibonacciProxy{}} // TODO dcruzb : Update SetOfComponentTypesRAM from deploy for components outside midarch (FibonacciProxy)
+	"Calculatorproxy":   &calculatorproxy.Calculatorproxy{}}
 
 // Set of existing Connectors
 var SetOfConnectorTypesRAM = map[string]connectors.Connector{
@@ -65,8 +61,9 @@ var SetOfConnectorTypesRAM = map[string]connectors.Connector{
 	shared.NTOONEREQREP: {TypeName: shared.NTOONEREQREP, Behaviour: shared.RUNTIME_BEHAVIOUR, DefaultLeftArity: shared.MAX_LEFT_ARITY, DefaultRightArity: 1},
 	shared.ONETONREQREP: {TypeName: shared.ONETONREQREP, Behaviour: shared.RUNTIME_BEHAVIOUR, DefaultLeftArity: 1, DefaultRightArity: shared.MAX_RIGHT_ARITY}}
 
-func LoadArchitecturalRepository() ArchitecturalRepository {
+func LoadArchitecturalRepository(businessComponents map[string]interface{}) ArchitecturalRepository {
 	r := ArchitecturalRepository{}
+	maps.Copy(SetOfComponentTypesRAM, businessComponents)
 	shared.ArchitecturalComponentTypes = SetOfComponentTypesRAM
 
 	// Initialize repositories
@@ -161,18 +158,23 @@ func ReadComponentTypesFromDisk() map[string]string {
 	}
 
 	// Identify business components
-	businessFolders := strings.Split(strings.ReplaceAll(shared.DIR_BUSINESS_COMPONENTS, " ", ""), ",")
-	for _, businessFolder := range businessFolders {
-		fmt.Println(businessFolder)
-		businessFiles, err1 := ioutil.ReadDir(businessFolder)
-		if err1 != nil {
-			shared.ErrorHandler(shared.GetFunction(), err1.Error())
-		}
+	businessComponentsDir := strings.ReplaceAll(shared.DIR_BUSINESS_COMPONENTS, " ", "")
+	if businessComponentsDir == "" {
+		businessComponentsDir = shared.EnvironmentVariableValue("MIDARCH_BUSINESS_COMPONENTS_PATH")
+	}
+	if businessComponentsDir != "" {
+		businessFolders := strings.Split(businessComponentsDir, ",")
+		for _, businessFolder := range businessFolders {
+			businessFiles, err1 := ioutil.ReadDir(businessFolder)
+			if err1 != nil {
+				shared.ErrorHandler(shared.GetFunction(), err1.Error())
+			}
 
-		for file := range businessFiles {
-			fullPathName := businessFolder + "/" + businessFiles[file].Name()
-			typeName, behaviour := shared.GetTypeAndBehaviour(fullPathName)
-			compLibrary[typeName] = behaviour
+			for file := range businessFiles {
+				fullPathName := businessFolder + "/" + businessFiles[file].Name()
+				typeName, behaviour := shared.GetTypeAndBehaviour(fullPathName)
+				compLibrary[typeName] = behaviour
+			}
 		}
 	}
 

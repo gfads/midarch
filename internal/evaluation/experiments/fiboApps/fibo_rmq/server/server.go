@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/gfads/midarch/pkg/apps/fibomiddleware/impl"
+	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciImpl"
 	"github.com/streadway/amqp"
 	"log"
 	"strconv"
@@ -72,7 +72,7 @@ func main() {
 			failOnError(err, "Failed to convert body to integer")
 
 			//log.Printf(" [.] fib(%d)", n)
-			response := impl.Fibonacci{}.F(n)
+			response := fibonacciImpl.Fibonacci{}.F(n)
 
 			err = ch.Publish(
 				"",        // exchange
