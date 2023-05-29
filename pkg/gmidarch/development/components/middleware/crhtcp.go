@@ -12,7 +12,7 @@ import (
 )
 
 // @Type: CRHTCP
-// @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.eNot -> Behaviour
+// @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
 type CRHTCP struct{}
 
 func (c CRHTCP) getLocalTcpAddr() *net.TCPAddr {

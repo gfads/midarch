@@ -5,20 +5,21 @@ import (
 	"crypto/x509"
 	"encoding/binary"
 	"fmt"
-	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
-	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
-	evolutive "github.com/gfads/midarch/pkg/injector"
-	"github.com/gfads/midarch/pkg/shared"
-	"github.com/gfads/midarch/pkg/shared/lib"
 	"io/ioutil"
 	"log"
 	"net"
 	"reflect"
 	"time"
+
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
+	evolutive "github.com/gfads/midarch/pkg/injector"
+	"github.com/gfads/midarch/pkg/shared"
+	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
 // @Type: CRHTLS
-// @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.eNot -> Behaviour
+// @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
 type CRHTLS struct{}
 
 func (c CRHTLS) getLocalTcpAddr() *net.TCPAddr {
