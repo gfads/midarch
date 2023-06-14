@@ -2,15 +2,16 @@ package main
 
 import (
 	"fmt"
-	"github.com/gfads/midarch/pkg/gmidarch/development/components/proxies/calculatorproxy"
+	"sync"
+	"time"
+
+	"github.com/gfads/midarch/examples/calculatordistributed/externalcomponents"
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/proxies/namingproxy"
 	"github.com/gfads/midarch/pkg/gmidarch/development/generic"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/execution/frontend"
 	evolutive "github.com/gfads/midarch/pkg/injector"
 	"github.com/gfads/midarch/pkg/shared"
-	"sync"
-	"time"
 )
 
 func main() {
@@ -24,14 +25,14 @@ func main() {
 	args["srh"] = messages.EndPoint{Host: "localhost", Port: shared.CALCULATOR_PORT}
 
 	// Deploy configuration
-	fe.Deploy("calculatordistributedservermid.madl", args)
+	fe.Deploy(frontend.DeployOptions{FileName: "calculatordistributedservermid.madl", Args: args})
 
 	// proxy to naming service
 	endPoint := messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
 	namingProxy := namingproxy.NewNamingproxy(endPoint)
 
 	// Create proxy to calculatorimpl
-	calcProxy := calculatorproxy.NewCalculatorProxy(generic.ProxyConfig{
+	calcProxy := externalcomponents.NewCalculatorProxy(generic.ProxyConfig{
 		Host: shared.CALCULATOR_HOST,
 		Port: shared.CALCULATOR_PORT,
 	})

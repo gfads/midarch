@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"reflect"
+
 	"github.com/gfads/midarch/pkg/gmidarch/development/repositories/architectural"
 	evolutive "github.com/gfads/midarch/pkg/injector"
 	"github.com/gfads/midarch/pkg/shared"
 	"github.com/gfads/midarch/pkg/shared/pluginUtils"
-	"log"
-	"reflect"
 )
 
 func main() {
@@ -15,7 +16,7 @@ func main() {
 }
 
 func client() {
-	architectural.LoadArchitecturalRepository()
+	architectural.LoadArchitecturalRepository(map[string]interface{}{})
 	componentName := "CRHTCP"
 	cmdType := shared.GetComponentTypeByNameFromRAM(componentName)
 	typeof := reflect.ValueOf(cmdType).Elem().Type()

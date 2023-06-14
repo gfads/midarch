@@ -2,6 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strconv"
+	"sync"
+	"time"
+
 	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciProxy"
 	"github.com/gfads/midarch/examples/fibonaccidistributed/middleware"
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/proxies/namingproxy"
@@ -10,19 +15,15 @@ import (
 	"github.com/gfads/midarch/pkg/gmidarch/execution/frontend"
 	evolutive "github.com/gfads/midarch/pkg/injector"
 	"github.com/gfads/midarch/pkg/shared"
-	"os"
-	"strconv"
-	"sync"
-	"time"
 )
 
 func main() {
 	// Wait for namingserver to get up
 	time.Sleep(8 * time.Second)
-	
+
 	// Example setting environment variable MIDARCH_BUSINESS_COMPONENTS_PATH on code, may be set on system environment variables too
 	os.Setenv("MIDARCH_BUSINESS_COMPONENTS_PATH",
-		shared.DIR_BASE+"/examples/fibonaccidistributed/middleware,"+shared.DIR_BASE+"/examples/fibonaccidistributed/fibonacciProxy")
+		shared.DIR_BASE+"/examples/fibonaccidistributed/middleware")
 
 	fe := frontend.NewFrontend()
 
@@ -34,10 +35,9 @@ func main() {
 	args["srh"] = messages.EndPoint{Host: "0.0.0.0", Port: shared.CALCULATOR_PORT}
 
 	// Deploy configuration
-	fe.Deploy("FibonacciDistributedServerMid.madl", args, map[string]interface{}{
+	fe.Deploy(frontend.DeployOptions{FileName: "FibonacciDistributedServerMid.madl", Args: args, Components: map[string]interface{}{
 		"FibonacciInvoker": &middleware.FibonacciInvoker{},
-		"FibonacciProxy":   &fibonacciProxy.FibonacciProxy{},
-	})
+	}})
 
 	// proxy to naming service
 	endPoint := messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}

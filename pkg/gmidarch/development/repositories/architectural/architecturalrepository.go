@@ -1,19 +1,19 @@
 package architectural
 
 import (
+	"io/ioutil"
+	"strconv"
+	"strings"
+
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/adaptive"
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/apps"
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/component"
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/middleware"
-	"github.com/gfads/midarch/pkg/gmidarch/development/components/proxies/calculatorproxy"
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/proxies/namingproxy"
 	"github.com/gfads/midarch/pkg/gmidarch/development/connectors"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/shared"
 	"golang.org/x/exp/maps"
-	"io/ioutil"
-	"strconv"
-	"strings"
 )
 
 type ArchitecturalRepository struct {
@@ -43,12 +43,10 @@ var SetOfComponentTypesRAM = map[string]interface{}{
 	"SRHUDP":            &middleware.SRHUDP{},
 	"CRHTLS":            &middleware.CRHTLS{},
 	"SRHTLS":            &middleware.SRHTLS{},
-	"Calculatorinvoker": &middleware.Calculatorinvoker{},
 	"Requestor":         &middleware.Requestor{},
 	"Naminginvoker":     &middleware.Naminginvoker{},
 	"Namingserver":      &middleware.Namingserver{},
-	"Namingproxy":       &namingproxy.Namingproxy{},
-	"Calculatorproxy":   &calculatorproxy.Calculatorproxy{}}
+	"Namingproxy":       &namingproxy.Namingproxy{}}
 
 // Set of existing Connectors
 var SetOfConnectorTypesRAM = map[string]connectors.Connector{

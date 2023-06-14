@@ -1,20 +1,21 @@
 package namingproxy
 
 import (
+	"reflect"
+
+	"github.com/gfads/midarch/examples/calculatordistributed/externalcomponents"
 	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciProxy"
-	"github.com/gfads/midarch/pkg/gmidarch/development/components/proxies/calculatorproxy"
 	"github.com/gfads/midarch/pkg/gmidarch/development/generic"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/shared"
-	"reflect"
 )
 
 // @Type: Namingproxy
 // @Behaviour: Behaviour = I_In -> InvR.e1 -> TerR.e1 -> I_Out -> Behaviour
 var ProxiesRepo = map[string]generic.Proxy{ // Update for each new proxy
-	reflect.TypeOf(Namingproxy{}).Name():                     &Namingproxy{},
-	reflect.TypeOf(calculatorproxy.Calculatorproxy{}).Name(): &calculatorproxy.Calculatorproxy{},
-	reflect.TypeOf(fibonacciProxy.FibonacciProxy{}).Name():   &fibonacciProxy.FibonacciProxy{}}
+	reflect.TypeOf(Namingproxy{}).Name():                        &Namingproxy{},
+	reflect.TypeOf(externalcomponents.Calculatorproxy{}).Name(): &externalcomponents.Calculatorproxy{},
+	reflect.TypeOf(fibonacciProxy.FibonacciProxy{}).Name():      &fibonacciProxy.FibonacciProxy{}}
 
 // Internal channels
 var ChOut, ChIn chan messages.SAMessage
@@ -90,7 +91,7 @@ func (p Namingproxy) Lookup(_p1 string) (generic.Proxy, bool) {
 	aor := response.Payload.(messages.FunctionalReply).Rep.(map[string]interface{})
 	host := aor["host"].(string)
 	port := aor["port"].(string)
-	proxy := ProxiesRepo[aor["proxy"].(string)]
+	proxy := ProxiesRepo[aor["proxy"].(string)] // TODO dcruzb: Remove ProxiesRepo and ask for the Proxy in params,
 	if proxy == nil {
 		shared.ErrorHandler(shared.GetFunction(), "Proxy("+aor["proxy"].(string)+") not found!!")
 	}

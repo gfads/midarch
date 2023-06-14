@@ -11,8 +11,14 @@ import (
 	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
+type DeployOptions struct {
+	FileName string
+	Args map[string]messages.EndPoint
+	Components map[string]interface{}
+}
+
 type Frontend interface {
-	Deploy(string, map[string]messages.EndPoint, map[string]interface{})
+	Deploy(options DeployOptions)
 }
 
 type FrontendImpl struct{}
@@ -26,16 +32,16 @@ func NewFrontend() Frontend {
 	return fe
 }
 
-func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint, components map[string]interface{}) {
+func (f FrontendImpl) Deploy(options DeployOptions) {
 
 	// Step 1 - Load architectural repositories
-	arm := architectural.NewArchitecturalRepositoryManager(components)
+	arm := architectural.NewArchitecturalRepositoryManager(options.Components)
 	archRepo := arm.GetRepository()
 
 	// Step 2: Load madl
 	//fmt.Print("Loading MADL[", fileName, "]...")
 	madlLoader := madl.NewMADLLoader()
-	madlApp := madlLoader.Load(fileName)
+	madlApp := madlLoader.Load(options.FileName)
 	shared.Adaptability = madlApp.Adaptability
 	//fmt.Println("ok")
 
@@ -53,7 +59,7 @@ func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint,
 	// Step 5: Configure madl
 	//fmt.Print("Configuring MADL...")
 	madlConfigurator := madl.NewMADLConfigurator()
-	madlConfigurator.Configure(&madlApp, archRepo, args)
+	madlConfigurator.Configure(&madlApp, archRepo, options.Args)
 	//fmt.Println("ok")
 
 	if shared.Contains(madlApp.Adaptability, shared.EVOLUTIVE_ADAPTATION) ||
@@ -74,7 +80,7 @@ func (f FrontendImpl) Deploy(fileName string, args map[string]messages.EndPoint,
 		// Step 5: Configure madl
 		//fmt.Print("Configuring MADL...")
 		madlConfigurator := madl.NewMADLConfigurator()
-		madlConfigurator.ConfigureEE(&mee, archRepo, args, madlApp)
+		madlConfigurator.ConfigureEE(&mee, archRepo, options.Args, madlApp)
 		//fmt.Println("ok")
 
 		// Step 6: Generate & save CSP

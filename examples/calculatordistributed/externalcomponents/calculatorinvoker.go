@@ -1,4 +1,4 @@
-package middleware
+package externalcomponents
 
 import (
 	"github.com/gfads/midarch/pkg/apps/businesses/calculatorimpl"

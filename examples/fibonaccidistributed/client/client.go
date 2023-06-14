@@ -2,18 +2,18 @@ package main
 
 import (
 	"fmt"
-	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciProxy"
-	"github.com/gfads/midarch/examples/fibonaccidistributed/middleware"
-	"github.com/gfads/midarch/pkg/gmidarch/development/components/proxies/namingproxy"
-	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
-	"github.com/gfads/midarch/pkg/gmidarch/execution/frontend"
-	"github.com/gfads/midarch/pkg/shared"
-	"github.com/gfads/midarch/pkg/shared/lib"
 	"math"
 	"math/rand"
 	"os"
 	"strconv"
 	"time"
+
+	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciProxy"
+	"github.com/gfads/midarch/pkg/gmidarch/development/components/proxies/namingproxy"
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
+	"github.com/gfads/midarch/pkg/gmidarch/execution/frontend"
+	"github.com/gfads/midarch/pkg/shared"
+	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
 func main() {
@@ -22,7 +22,7 @@ func main() {
 
 	// Example setting environment variable MIDARCH_BUSINESS_COMPONENTS_PATH on code, may be set on system environment variables too
 	os.Setenv("MIDARCH_BUSINESS_COMPONENTS_PATH",
-		shared.DIR_BASE+"/examples/fibonaccidistributed/middleware,"+shared.DIR_BASE+"/examples/fibonaccidistributed/fibonacciProxy")
+		shared.DIR_BASE+"/examples/fibonaccidistributed/fibonacciProxy")
 
 	var n, SAMPLE_SIZE, AVERAGE_WAITING_TIME int
 	if len(os.Args) >= 2 {
@@ -45,10 +45,12 @@ func main() {
 	args["crh"] = messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
 
 	// Deploy configuration
-	fe.Deploy("FibonacciDistributedClientMid.madl", args, map[string]interface{}{
-		"FibonacciInvoker": &middleware.FibonacciInvoker{},
-		"FibonacciProxy":   &fibonacciProxy.FibonacciProxy{},
-	})
+	fe.Deploy(frontend.DeployOptions{
+		FileName: "FibonacciDistributedClientMid.madl",
+		Args:     args,
+		Components: map[string]interface{}{
+			"FibonacciProxy": &fibonacciProxy.FibonacciProxy{},
+		}})
 
 	// proxy to naming service
 	endPoint := messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}

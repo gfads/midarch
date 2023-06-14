@@ -2,15 +2,12 @@ package factories
 
 import (
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/proxies/namingproxy"
-	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
+	"github.com/gfads/midarch/pkg/gmidarch/development/generic"
 	"github.com/gfads/midarch/pkg/shared"
 )
 
 func LocateNaming() namingproxy.Namingproxy {
-	chin := make(chan messages.SAMessage)
-	chout := make(chan messages.SAMessage)
-
-	p := namingproxy.Namingproxy{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT, ChIn: chin, ChOut: chout}
+	p := namingproxy.Namingproxy{Config: generic.ProxyConfig{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}}
 
 	return p
 }

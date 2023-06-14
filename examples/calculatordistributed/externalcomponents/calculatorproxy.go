@@ -1,4 +1,4 @@
-package calculatorproxy
+package externalcomponents
 
 import (
 	"github.com/gfads/midarch/pkg/gmidarch/development/generic"

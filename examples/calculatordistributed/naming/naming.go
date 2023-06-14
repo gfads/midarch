@@ -1,10 +1,11 @@
 package main
 
 import (
+	"sync"
+
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/execution/frontend"
 	"github.com/gfads/midarch/pkg/shared"
-	"sync"
 )
 
 func main() {
@@ -17,7 +18,7 @@ func main() {
 	args["srh"] = messages.EndPoint{Host: "localhost", Port: shared.NAMING_PORT}
 
 	// Deploy configuration
-	fe.Deploy("naming.madl", args)
+	fe.Deploy(frontend.DeployOptions{FileName: "naming.madl", Args: args})
 
 	//evolutive.EvolutiveInjector{}.Start("srhtcp", 40*time.Second)
 

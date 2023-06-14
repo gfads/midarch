@@ -1,11 +1,12 @@
 package main
 
 import (
+	"sync"
+	"time"
+
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/execution/frontend"
 	evolutive "github.com/gfads/midarch/pkg/injector"
-	"sync"
-	"time"
 )
 
 func main() {
@@ -13,9 +14,9 @@ func main() {
 
 	args := make(map[string]messages.EndPoint)
 
-	fe.Deploy("senderreceiver.madl", args)
+	fe.Deploy(frontend.DeployOptions{FileName: "senderreceiver.madl", Args: args})
 
-	evolutive.EvolutiveInjector{}.Start("sender", 20*time.Second)
+	evolutive.EvolutiveInjector{}.Start("sender", "sender", 20*time.Second)
 
 	//fmt.Scanln()
 	var wg sync.WaitGroup
