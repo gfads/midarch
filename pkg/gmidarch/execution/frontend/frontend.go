@@ -12,8 +12,8 @@ import (
 )
 
 type DeployOptions struct {
-	FileName string
-	Args map[string]messages.EndPoint
+	FileName   string
+	Args       map[string]messages.EndPoint
 	Components map[string]interface{}
 }
 

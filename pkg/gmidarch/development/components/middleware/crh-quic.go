@@ -8,34 +8,25 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
 	"os"
 
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
 	"github.com/gfads/midarch/pkg/shared"
+	"github.com/gfads/midarch/pkg/shared/lib"
 	"github.com/quic-go/quic-go"
 )
 
 // @Type: CRHQuic
 // @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
 type CRHQuic struct {
-	Conns map[string]quic.Session
+	Conns map[string]quic.Connection
 }
 
 var Stream quic.Stream
 
-func NewCRHQuic() CRHQuic {
-	r := new(CRHQuic)
-	r.Behaviour = "B = InvP.e1 -> I_Process -> TerP.e1 -> B"
-	r.Conns = make(map[string]quic.Session, shared.NUM_MAX_CONNECTIONS)
-
-	return *r
-}
-
-func (CRHQuic) Selector(elem interface{}, elemInfo []*interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
-	elem.(CRHQuic).I_Process(msg, info)
-}
-
-func (c CRHQuic) I_Process(msg *messages.SAMessage, info []*interface{}) {
+func (c CRHQuic) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	// check message
 	payload := msg.Payload.([]interface{})
 	host := payload[0].(string) // host
@@ -106,9 +97,54 @@ func (c CRHQuic) I_Process(msg *messages.SAMessage, info []*interface{}) {
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
 
+func (c CRHQuic) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHQuic Version Not adapted")
+	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
+	_, err := conn.Write(sizeOfMsgSize)
+	if err != nil {
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return err
+	}
+
+	// send message
+	_, err = conn.Write(msgToServer)
+	if err != nil {
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return err
+	}
+	return nil
+}
+
+func (c CRHQuic) read(conn net.Conn, size []byte) ([]byte, error) {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHQuic Version Not adapted")
+	// receive reply's size
+	_, err := conn.Read(size)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return nil, err
+	}
+
+	// receive reply
+	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
+	_, err = conn.Read(msgFromServer)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return nil, err
+	}
+	return msgFromServer, nil
+}
+
+func (c CRHQuic) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHQuic Version Not adapted")
+	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
+}
+
 func getClientTLSQuicConfig() *tls.Config {
 	if shared.CA_PATH == "" {
-		log.Fatal("CRHSsl:: Error:: Environment variable 'CA_PATH' not configured\n")
+		log.Fatal("CRHQuic:: Error:: Environment variable 'CA_PATH' not configured\n")
 	}
 
 	trustCert, err := ioutil.ReadFile(shared.CA_PATH)
