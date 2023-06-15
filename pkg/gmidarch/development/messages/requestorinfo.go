@@ -1,6 +1,6 @@
 package messages
 
 type RequestorInfo struct {
-	Inv Invocation
+	Inv               Invocation
 	MarshalledMessage []byte
 }

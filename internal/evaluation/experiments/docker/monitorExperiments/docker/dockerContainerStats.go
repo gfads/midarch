@@ -8,12 +8,11 @@ import "time"
 // Memory usage % = (used_memory / available_memory) * 100.0
 // cpu_delta = cpu_stats.cpu_usage.total_usage - precpu_stats.cpu_usage.total_usage
 // system_cpu_delta = cpu_stats.system_cpu_usage - precpu_stats.system_cpu_usage
-// number_cpus = lenght(cpu_stats.cpu_usage.percpu_usage) or cpu_stats.online_cpus
+// number_cpus = length(cpu_stats.cpu_usage.percpu_usage) or cpu_stats.online_cpus
 // CPU usage % = (cpu_delta / system_cpu_delta) * number_cpus * 100.0
 
-
 type ContainerStats struct {
-	Read      time.Time `json:"read"`
+	Read time.Time `json:"read"`
 	//Preread   time.Time `json:"preread"`
 	//PidsStats struct {
 	//	Current int `json:"current"`
@@ -33,8 +32,8 @@ type ContainerStats struct {
 	//} `json:"storage_stats"`
 	CPUStats struct {
 		CPUUsage struct {
-			TotalUsage        int64 `json:"total_usage"`
-			PercpuUsage       []int `json:"percpu_usage"`
+			TotalUsage  int64 `json:"total_usage"`
+			PercpuUsage []int `json:"percpu_usage"`
 			//UsageInKernelmode int64 `json:"usage_in_kernelmode"`
 			//UsageInUsermode   int   `json:"usage_in_usermode"`
 		} `json:"cpu_usage"`
@@ -48,7 +47,7 @@ type ContainerStats struct {
 	} `json:"cpu_stats"`
 	PrecpuStats struct {
 		CPUUsage struct {
-			TotalUsage        int64 `json:"total_usage"`
+			TotalUsage int64 `json:"total_usage"`
 			//PercpuUsage       []int `json:"percpu_usage"`
 			//UsageInKernelmode int64 `json:"usage_in_kernelmode"`
 			//UsageInUsermode   int   `json:"usage_in_usermode"`
@@ -62,12 +61,12 @@ type ContainerStats struct {
 		//} `json:"throttling_data"`
 	} `json:"precpu_stats"`
 	MemoryStats struct {
-		Usage    int `json:"usage"`
+		Usage int `json:"usage"`
 		//MaxUsage int `json:"max_usage"`
-		Stats    struct {
+		Stats struct {
 			//ActiveAnon              int   `json:"active_anon"`
 			//ActiveFile              int   `json:"active_file"`
-			Cache                   int   `json:"cache"`
+			Cache int `json:"cache"`
 			//Dirty                   int   `json:"dirty"`
 			//HierarchicalMemoryLimit int   `json:"hierarchical_memory_limit"`
 			//HierarchicalMemswLimit  int64 `json:"hierarchical_memsw_limit"`
@@ -100,8 +99,8 @@ type ContainerStats struct {
 		} `json:"stats"`
 		Limit int `json:"limit"`
 	} `json:"memory_stats"`
-	Name     string `json:"name"`
-	ID       string `json:"id"`
+	Name string `json:"name"`
+	ID   string `json:"id"`
 	//Networks struct {
 	//	Eth0 struct {
 	//		RxBytes   int `json:"rx_bytes"`

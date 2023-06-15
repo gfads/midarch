@@ -1,13 +1,14 @@
 package csp
 
 import (
+	"reflect"
+	"strconv"
+	"strings"
+
 	"github.com/gfads/midarch/pkg/gmidarch/development/artefacts/madl"
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/adaptive"
 	"github.com/gfads/midarch/pkg/gmidarch/development/connectors"
 	"github.com/gfads/midarch/pkg/shared"
-	"reflect"
-	"strconv"
-	"strings"
 )
 
 type CompositionProcess struct {
@@ -75,13 +76,13 @@ func (c *CSP) createCompositeProcess() {
 	}
 
 	//Identify sync ports
-	cannonicalNames := map[string]string{}
+	canonicalNames := map[string]string{}
 	for i := range c.EChannels {
-		cannonicalName := c.toCanonicalName(c.EChannels[i])
-		cannonicalNames[cannonicalName] = cannonicalName
+		canonicalName := c.toCanonicalName(c.EChannels[i])
+		canonicalNames[canonicalName] = canonicalName
 	}
-	for i := range cannonicalNames {
-		compositionTemp.SyncPorts = append(compositionTemp.SyncPorts, cannonicalNames[i])
+	for i := range canonicalNames {
+		compositionTemp.SyncPorts = append(compositionTemp.SyncPorts, canonicalNames[i])
 	}
 
 	// Renaming port
@@ -163,8 +164,8 @@ func (c *CSP) identifyExternalChannels() {
 		for j := range tokens {
 			if shared.IsExternal(tokens[j]) {
 				iAction := strings.TrimSpace(tokens[j])
-				iCannonicalAction := c.toCanonicalName(iAction)
-				r1Temp[iCannonicalAction] = iCannonicalAction
+				iCanonicalAction := c.toCanonicalName(iAction)
+				r1Temp[iCanonicalAction] = iCanonicalAction
 			}
 		}
 	}
@@ -175,8 +176,8 @@ func (c *CSP) identifyExternalChannels() {
 		for j := range tokens {
 			if shared.IsExternal(tokens[j]) {
 				iAction := strings.TrimSpace(tokens[j])
-				iCannonicalAction := c.toCanonicalName(iAction)
-				r1Temp[iCannonicalAction] = iCannonicalAction
+				iCanonicalAction := c.toCanonicalName(iAction)
+				r1Temp[iCanonicalAction] = iCanonicalAction
 			}
 		}
 	}
@@ -215,7 +216,7 @@ func (CSP) toCanonicalName(name string) string {
 	}
 
 	if r1 == "" {
-		shared.ErrorHandler(shared.GetFunction(), "Channel '"+name+"' has NOT a cannonical name.")
+		shared.ErrorHandler(shared.GetFunction(), "Channel '"+name+"' has NOT a canonical name.")
 	}
 
 	return r1

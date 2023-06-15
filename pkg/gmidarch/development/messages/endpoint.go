@@ -1,6 +1,6 @@
 package messages
 
-type EndPoint struct{
+type EndPoint struct {
 	Host string
 	Port string
 }

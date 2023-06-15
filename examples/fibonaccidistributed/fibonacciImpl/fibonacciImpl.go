@@ -1,6 +1,6 @@
 package fibonacciImpl
 
-type Fibonacci struct {}
+type Fibonacci struct{}
 
 func (Fibonacci) F(n int) int {
 	if n == 0 {
