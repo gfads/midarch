@@ -3,12 +3,16 @@ package messages
 import (
 	"log"
 	"net"
+
+	"github.com/quic-go/quic-go"
 )
 
 type SRHInfo struct {
 	EndPoint       EndPoint              // host, port
 	Ln             net.Listener          // Listener
+	QUICLn         quic.Listener         // Listener
 	Conns          []net.Conn            // Set of connections
+	QUICConns      []quic.Connection     // Set of connections
 	CurrentConn    net.Conn              // Current connection
 	UDPConnection  *net.UDPConn          // UDP Connection
 	RcvedMessages  chan ReceivedMessages // Buffer of messages received by the server
@@ -18,15 +22,18 @@ type SRHInfo struct {
 }
 
 type ReceivedMessages struct {
-	ToAddress string
-	Chn       net.Conn
-	Msg       []byte
+	ToAddress  string
+	Conn       net.Conn
+	QUICStream quic.Stream
+	Msg        []byte
 }
 
 type Client struct {
 	Ip            string
 	Connection    net.Conn
 	UDPConnection *net.UDPConn
+	QUICConnetion quic.Connection
+	QUICStream    quic.Stream
 	AdaptId       int
 }
 

@@ -3,15 +3,16 @@ package middleware
 import (
 	"crypto/tls"
 	"encoding/binary"
-	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
-	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
-	"github.com/gfads/midarch/pkg/shared"
-	"github.com/gfads/midarch/pkg/shared/lib"
 	"io"
 	"log"
 	"net"
 	"strings"
 	"time"
+
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/pkg/shared"
+	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
 // @Type: SRHTLS
@@ -66,7 +67,7 @@ func (s SRHTLS) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip s
 }
 
 func (s SRHTLS) I_Accept(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	//lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHTLS Version 2 adapted")
+	//lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHTLS Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	srhInfo.Counter++
@@ -89,7 +90,7 @@ func (s SRHTLS) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	connectionAvailable, availableConenctionIndex := s.availableConnectionFromPool(&srhInfo.Clients, "")
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
 	if !connectionAvailable {
-		//lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHTLS Version 2 adapted - No connection available")
+		//lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHTLS Version Not adapted - No connection available")
 		time.Sleep(1 * time.Millisecond)
 		return
 	}
@@ -106,12 +107,12 @@ func (s SRHTLS) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		srhInfo.Conns = append(srhInfo.Conns, conn)
 		//srhInfo.CurrentConn = conn
 
-		lib.PrintlnDebug("SRHTLS Version 2 adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Buscou nova conexão, ip:", conn.RemoteAddr().String())
+		lib.PrintlnDebug("SRHTLS Version Not adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Buscou nova conexão, ip:", conn.RemoteAddr().String())
 		//connectionAvailable, availableConenctionIndex := s.availableConnectionFromPool(&srhInfo.Clients, conn.RemoteAddr().String())
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(
 		//srhInfo.Clients))
 		//if !connectionAvailable {
-		//	lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHTLS Version 2 adapted - No connection available")
+		//	lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHTLS Version Not adapted - No connection available")
 		//	return
 		//}
 		if len(srhInfo.Clients) <= availableConenctionIndex {
@@ -149,13 +150,13 @@ func (s SRHTLS) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
-			lib.PrintlnDebug("SRHTLS Version 2 adapted: tempMsgReceived", tempMsgReceived)
-			lib.PrintlnDebug("SRHTLS Version 2 adapted: tempMsgReceived.Chn", tempMsgReceived.Chn)
-			if tempMsgReceived.Chn == nil {
+			lib.PrintlnDebug("SRHTLS Version Not adapted: tempMsgReceived", tempMsgReceived)
+			lib.PrintlnDebug("SRHTLS Version Not adapted: tempMsgReceived.Chn", tempMsgReceived.Chn)
+			if tempMsgReceived.Conn == nil {
 				*reset = true
 				return
 			}
-			if isNewConnection, miopPacket := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
+			if isNewConnection, miopPacket := s.isNewConnection(tempMsgReceived.Msg); isNewConnection {
 				lib.PrintlnDebug("SRHTLS Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
 				*reset = true
 				return
@@ -184,22 +185,22 @@ func (s SRHTLS) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 		*reset = true
 		return
 	}
-	lib.PrintlnDebug("SRHTLS Version 2 adapted   >>>>> TCP => msg.ToAddr:", msg.ToAddr, "TCP conn:", conn, "AdaptId:", client.AdaptId)
-	msgTemp := msg.Payload.([]byte)
+	lib.PrintlnDebug("SRHTLS Version Not adapted   >>>>> TCP => msg.ToAddr:", msg.ToAddr, "TCP conn:", conn, "AdaptId:", client.AdaptId)
+	msgPayload := msg.Payload.([]byte)
 
 	// send message's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	binary.LittleEndian.PutUint32(size, uint32(len(msgTemp)))
+	binary.LittleEndian.PutUint32(size, uint32(len(msgPayload)))
 	_, err := conn.Write(size)
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
 
 	//json := Jsonmarshaller{}
-	//unmarshalledMsg := json.Unmarshall(msgTemp)
+	//unmarshalledMsg := json.Unmarshall(msgPayload)
 	//log.Println("<<<<<<<<<<<<  <<<<<<<<<<  <<<<<<<<<  SRHTLS Version Not adapted => Msg: ", unmarshalledMsg.Bd.RepBody.OperationResult)
 	// send message
-	_, err = conn.Write(msgTemp)
+	_, err = conn.Write(msgPayload)
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
@@ -229,10 +230,10 @@ func (s SRHTLS) handler(info *interface{}, connectionIndex int) {
 		if err != nil {
 			if err == io.EOF || strings.Contains(err.Error(), "use of closed network connection") {
 				srhInfo.Clients[connectionIndex] = nil
-				lib.PrintlnError("Não Vai matar o app EOF")
+				lib.PrintlnError("EOF error - Will not kill the app")
 				break
 			} else if err != nil && err != io.EOF {
-				lib.PrintlnError("Vai matar o app, erro mas não EOF")
+				lib.PrintlnError("Not EOF error - Will kill the app")
 				shared.ErrorHandler(shared.GetFunction(), err.Error())
 			}
 		}
@@ -243,10 +244,10 @@ func (s SRHTLS) handler(info *interface{}, connectionIndex int) {
 		if err != nil {
 			if err == io.EOF || strings.Contains(err.Error(), "use of closed network connection") {
 				srhInfo.Clients[connectionIndex] = nil
-				lib.PrintlnError("Não Vai matar o app EOF")
+				lib.PrintlnError("EOF error - Will not kill the app")
 				break
 			} else if err != nil && err != io.EOF {
-				lib.PrintlnError("Vai matar o app, erro mas não EOF")
+				lib.PrintlnError("Not EOF error - Will kill the app")
 				shared.ErrorHandler(shared.GetFunction(), err.Error())
 			}
 		}
@@ -259,13 +260,13 @@ func (s SRHTLS) handler(info *interface{}, connectionIndex int) {
 		}
 		if isNewConnection, _ := s.isNewConnection(msgTemp); isNewConnection { // TODO dcruzb: move to I_Receive
 			//newConnection = true
-			lib.PrintlnDebug("TCP Is New Connection")
+			lib.PrintlnDebug("TLS Is New Connection")
 			//miopPacket := miop.CreateReqPacket("Connect", []interface{}{miopPacket.Bd.ReqBody.Body[0], "Ok"}, miopPacket.Bd.ReqBody.Body[0].(int)) // idx is the Connection ID
 			//msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
 
-			lib.PrintlnDebug("TCP Before send")
+			lib.PrintlnDebug("TLS Before send")
 			//s.send(conn, addr, msgPayload)
-			lib.PrintlnDebug("TCP After send")
+			lib.PrintlnDebug("TLS After send")
 			//if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
 			//	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHUDP Version Not adapted")
 			//	break
@@ -273,8 +274,8 @@ func (s SRHTLS) handler(info *interface{}, connectionIndex int) {
 			continue
 		}
 
-		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Chn: conn, ToAddress: srhInfo.Clients[connectionIndex].Ip}
-		lib.PrintlnDebug("SRHTLS Version 2 adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Conn: conn, ToAddress: srhInfo.Clients[connectionIndex].Ip}
+		lib.PrintlnDebug("SRHTLS Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		if !*executeForever {
 			break
 		}
