@@ -80,7 +80,7 @@ func (c CRHTLS) I_Process(id string, msg *messages.SAMessage, info *interface{},
 			crhInfo.Conns[addr], err = tls.Dial("tcp4", tcpAddr.String(), getClientTLSConfig())
 			//log.Println("Discou", crhInfo.Conns[addr])
 			if err != nil {
-				lib.PrintlnError("Erro na discagem", crhInfo.Conns[addr], err)
+				lib.PrintlnError("Dial error", crhInfo.Conns[addr], err)
 				time.Sleep(200 * time.Millisecond)
 				//shared.ErrorHandler(shared.GetFunction(), err.Error())
 			} else {

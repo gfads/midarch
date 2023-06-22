@@ -28,7 +28,7 @@ func (FibonacciInvoker) I_Beforeserver(id string, msg *messages.SAMessage, info 
 		params := []interface{}{req.Params[0].(int)}
 
 		// Functional request
-		req2 := messages.FunctionalRequest{Op: req.Op, Params: params}
+		req2 := messages.FunctionalRequest{Op: req.Op, Params: params} // TODO dcruzb : use req.Params directly instead params
 		msg.Payload = &req2
 
 		reply := fibonacciImpl.Fibonacci{}.F(req.Params[0].(int))

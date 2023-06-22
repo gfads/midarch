@@ -3,7 +3,6 @@ package shared
 import (
 	"bufio"
 	"fmt"
-	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"log"
 	"os"
 	"plugin"
@@ -11,6 +10,8 @@ import (
 	"runtime"
 	"strings"
 	"time"
+
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 )
 
 var ExecuteForever = true
@@ -194,7 +195,7 @@ func LocalizeGo() string {
 	}
 
 	if !found {
-		fmt.Println("github.com/gfads/midarch/pkg/shared:: Error:: OS Environment variable 'GOROOT' not configured\n")
+		fmt.Println("github.com/gfads/midarch/pkg/shared:: Error:: OS Environment variable 'GOROOT' not configured")
 		os.Exit(1)
 	}
 	return r

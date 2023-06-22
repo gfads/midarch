@@ -8,11 +8,11 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
-	"net"
 	"os"
 
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
+	evolutive "github.com/gfads/midarch/pkg/injector"
 	"github.com/gfads/midarch/pkg/shared"
 	"github.com/gfads/midarch/pkg/shared/lib"
 	"github.com/quic-go/quic-go"
@@ -21,12 +21,16 @@ import (
 // @Type: CRHQuic
 // @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
 type CRHQuic struct {
-	Conns map[string]quic.Connection
+	//Conns map[string]quic.Connection
 }
 
-var Stream quic.Stream
+// var Stream quic.Stream
 
 func (c CRHQuic) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	infoTemp := *info
+	crhInfo := infoTemp.(messages.CRHInfo)
+
 	// check message
 	payload := msg.Payload.([]interface{})
 	host := payload[0].(string) // host
@@ -35,19 +39,19 @@ func (c CRHQuic) I_Process(id string, msg *messages.SAMessage, info *interface{}
 
 	addr := host + ":" + port
 	var err error
-	if _, ok := c.Conns[addr]; !ok { // no connection open yet
+	if _, ok := crhInfo.QuicConns[addr]; !ok { // no connection open yet
 		//tcpAddr, err := net.ResolveTCPAddr("tcp", key)
 		//if err != nil {
 		//	log.Fatalf("CRHQuic:: %s", err)
 		//}
 
-		c.Conns[addr], err = quic.DialAddr(addr, getClientTLSQuicConfig(), nil)
+		crhInfo.QuicConns[addr], err = quic.DialAddr(addr, getClientTLSQuicConfig(), nil)
 		if err != nil {
 			fmt.Printf("CRHQuic:: %v\n", err)
 			os.Exit(1)
 		}
 
-		Stream, err = c.Conns[addr].OpenStreamSync(context.Background())
+		crhInfo.QuicStreams[addr], err = crhInfo.QuicConns[addr].OpenStreamSync(context.Background())
 		if err != nil {
 			fmt.Printf("CRHQuic:: %v\n", err)
 			os.Exit(1)
@@ -55,70 +59,89 @@ func (c CRHQuic) I_Process(id string, msg *messages.SAMessage, info *interface{}
 	}
 
 	// connect to server
-	//conn := c.Conns[addr]
+	//conn := c.QuicConns[addr]
 
 	// send message's size
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	binary.LittleEndian.PutUint32(size, uint32(len(msgToServer)))
-	_, err = Stream.Write(size)
+	stream := crhInfo.QuicStreams[addr]
+	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	c.send(sizeOfMsgSize, msgToServer, stream)
 	if err != nil {
-		fmt.Printf("CRHQuic:: %v\n", err)
-		os.Exit(1)
+		lib.PrintlnError("Error trying to send message:", err.Error())
+		*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
+		crhInfo.QuicStreams[addr].Close()
+		crhInfo.QuicConns[addr] = nil
+		crhInfo.QuicStreams[addr] = nil
+		delete(crhInfo.QuicConns, addr)
+		delete(crhInfo.QuicStreams, addr)
+		return
 	}
-	// TODO continue from here
-
-	//fmt.Printf("CRHQuic:: %v \n\n",size)
-	// send message
-	//fmt.Printf("CRHQuic:: Message to server:: %v %v >> %v << \n\n",msgToServer, len(msgToServer), binary.LittleEndian.Uint32(size))
-	_, err = Stream.Write(msgToServer)
-	if err != nil {
-		fmt.Printf("CRHQuic:: %v\n", err)
-		os.Exit(1)
-	}
-
 	//fmt.Printf("CRHQuic:: Message sent to Server [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
-	// receive reply's size
-	_, err = Stream.Read(size)
+	msgFromServer, err := c.read(stream, sizeOfMsgSize)
 	if err != nil {
-		fmt.Printf("CRHQuic:: %v\n", err)
-		os.Exit(1)
-	}
-
-	// receive reply
-	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
-	_, err = Stream.Read(msgFromServer)
-	if err != nil {
-		fmt.Printf("CRHQuic:: %v\n", err)
-		os.Exit(1)
+		lib.PrintlnError("Error trying to read message:", err.Error())
+		*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
+		crhInfo.QuicStreams[addr].Close()
+		crhInfo.QuicConns[addr] = nil
+		crhInfo.QuicStreams[addr] = nil
+		delete(crhInfo.QuicConns, addr)
+		delete(crhInfo.QuicStreams, addr)
+		return
 	}
 	//fmt.Printf("CRHQuic:: Message received from Server:: [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
+
+	if changeProtocol, miopPacket := c.isAdapt(msgFromServer); changeProtocol {
+		lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
+
+		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
+
+		miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{miopPacket.Bd.ReqBody.Body[0], shared.AdaptId, "Ok"}, shared.AdaptId) // idx is the Connection ID
+		msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+		c.send(sizeOfMsgSize, msgPayload, stream)
+
+		if miopPacket.Bd.ReqBody.Body[0] == "udp" {
+			lib.PrintlnInfo("Adapting => UDP")
+			evolutive.GeneratePlugin("crhudp_v1", "crhudp", "crhudp_v1")
+		} else if miopPacket.Bd.ReqBody.Body[0] == "tcp" {
+			lib.PrintlnInfo("Adapting => TCP")
+			evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
+		} else if miopPacket.Bd.ReqBody.Body[0] == "quic" {
+			lib.PrintlnInfo("Adapting => QUIC")
+			evolutive.GeneratePlugin("crhquic_v1", "crhquic", "crhquic_v1")
+		} else {
+			msgFromServer, _ = c.read(stream, sizeOfMsgSize)
+			//fmt.Println("=================> ############### ============> ########### TCP: Leu o read")
+		}
+	}
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
 
-func (c CRHQuic) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error {
+func (c CRHQuic) send(sizeOfMsgSize []byte, msgToServer []byte, stream quic.Stream) error {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHQuic Version Not adapted")
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
-	_, err := conn.Write(sizeOfMsgSize)
+	_, err := stream.Write(sizeOfMsgSize)
 	if err != nil {
-		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		// fmt.Printf("CRHQuic:: %v\n", err)
 		return err
 	}
 
+	//fmt.Printf("CRHQuic:: %v \n\n",size)
 	// send message
-	_, err = conn.Write(msgToServer)
+	//fmt.Printf("CRHQuic:: Message to server:: %v %v >> %v << \n\n",msgToServer, len(msgToServer), binary.LittleEndian.Uint32(size))
+	_, err = stream.Write(msgToServer)
 	if err != nil {
-		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		// fmt.Printf("CRHQuic:: %v\n", err)
 		return err
 	}
+
 	return nil
 }
 
-func (c CRHQuic) read(conn net.Conn, size []byte) ([]byte, error) {
+func (c CRHQuic) read(stream quic.Stream, size []byte) ([]byte, error) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHQuic Version Not adapted")
 	// receive reply's size
-	_, err := conn.Read(size)
+	_, err := stream.Read(size)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err)
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
@@ -127,7 +150,7 @@ func (c CRHQuic) read(conn net.Conn, size []byte) ([]byte, error) {
 
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
-	_, err = conn.Read(msgFromServer)
+	_, err = stream.Read(msgFromServer)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err)
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
