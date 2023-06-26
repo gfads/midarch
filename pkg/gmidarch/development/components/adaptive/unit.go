@@ -2,22 +2,24 @@ package adaptive
 
 import (
 	"fmt"
+	"strings"
+	"time"
+
 	"github.com/gfads/midarch/pkg/gmidarch/development/artefacts/graphs/dot"
 	"github.com/gfads/midarch/pkg/gmidarch/development/artefacts/graphs/exec"
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/component"
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/middleware"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
-	"github.com/gfads/midarch/pkg/gmidarch/execution/core"
+	engine "github.com/gfads/midarch/pkg/gmidarch/execution/core"
 	"github.com/gfads/midarch/pkg/shared/lib"
-	"strings"
-	"time"
 
 	//	"github.com/gfads/midarch/src/gmidarch/execution/core/engine"
-	"github.com/gfads/midarch/pkg/shared"
 	"os"
 	"reflect"
 	"sync"
+
+	"github.com/gfads/midarch/pkg/shared"
 )
 
 var allUnitsType sync.Map
@@ -136,7 +138,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 		cmdElemType := reflect.ValueOf(cmd.Type).Elem().Type().Name()
 		//log.Println("")
 		//log.Println("")
-		lib.PrintlnDebug("--------------Unit.I_Adaptunit::", u.UnitId, ":: Adapt to ---->", cmdElemType)
+		lib.PrintlnInfo("--------------Unit.I_Adaptunit::", u.UnitId, ":: Adapt to ---->", cmdElemType)
 		//log.Println("")
 		//log.Println("")
 
@@ -152,7 +154,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				//allUnitsType.LoadOrStore(u.UnitId, cmd.Type)
 				//g := u.changeSelector(cmd.Selector)
 				//allUnitsGraph.LoadOrStore(u.UnitId, g)
-				lib.PrintlnDebug("--------------Unit.I_Adaptunit::unitElemType(from)", unitElemType, ":: cmdElemType(to)", cmdElemType)
+				lib.PrintlnInfo("--------------Unit.I_Adaptunit::unitElemType(from)", unitElemType, ":: cmdElemType(to)", cmdElemType)
 				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type", cmd.Type)
 				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type is", reflect.TypeOf(cmd.Type))
 
@@ -162,8 +164,13 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 					adaptTo = "tcp"
 				} else if strings.Contains(cmdElemType, "SRHUDP") {
 					adaptTo = "udp"
+				} else if strings.Contains(cmdElemType, "SRHTLS") {
+					adaptTo = "tls"
+				} else if strings.Contains(cmdElemType, "SRHQUIC") {
+					adaptTo = "quic"
 				}
-				if adaptTo == "tcp" || adaptTo == "udp" {
+
+				if adaptTo == "tcp" || adaptTo == "udp" || adaptTo == "tls" || adaptTo == "quic" {
 					reset := false
 
 					infoTemp := elementComponent.Info
@@ -174,8 +181,9 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 						if client.Ip != "" {
 							//fmt.Println("Vai adaptar: IP:", client.Ip)
 							if (strings.Contains(unitElemType, "UDP") && client.UDPConnection == nil) ||
-								(strings.Contains(unitElemType, "TCP") && client.Connection == nil) {
-								//fmt.Println("Vai adaptar: pulou sem conexão")
+								(strings.Contains(unitElemType, "TCP") && client.Connection == nil) ||
+								(strings.Contains(unitElemType, "QUIC") && client.QUICStream == nil) {
+								//fmt.Println("Vai adaptar: pulou sem conexão")0
 								continue
 							}
 							//fmt.Println("Vai adaptar: entrou AdaptId:", client.AdaptId)
@@ -200,7 +208,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 
 				*elementComponent.ExecuteForever = false
 				for *elementComponent.Executing == true {
-					lib.PrintlnDebug("Awaiting to stop executing")
+					lib.PrintlnInfo("Awaiting to stop executing")
 					time.Sleep(200 * time.Millisecond)
 				}
 				//time.Sleep(6 * time.Second)
@@ -210,23 +218,29 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				if strings.Contains(unitElemType, "CRH") {
 					//time.Sleep(2000 * time.Millisecond)
 					//fmt.Println("Unit.I_Adaptunit:: 2 seconds passed", u.UnitId) //, "::info:", elementComponent)
-					lib.PrintlnDebug("Will close CRH connections")
+					lib.PrintlnInfo("Will close CRH connections")
 					infoTemp := elementComponent.Info
 					crhInfo := infoTemp.(messages.CRHInfo)
 					for _, conn := range crhInfo.Conns {
 						conn.Close()
 					}
-					lib.PrintlnDebug("CRH connections closed")
+					for _, conn := range crhInfo.QuicConns {
+						conn.CloseWithError(0, "Close to adapt to "+adaptTo)
+					}
+					for _, conn := range crhInfo.QuicStreams {
+						conn.Close()
+					}
+					lib.PrintlnInfo("CRH connections closed")
 					//shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Process", msg, &elementComponent.Info, reset)
-				} else if adaptTo == "tcp" || adaptTo == "udp" {
+				} else if adaptTo == "tcp" || adaptTo == "udp" || adaptTo == "tls" || adaptTo == "quic" {
 					infoTemp := elementComponent.Info
 					srhInfo := infoTemp.(*messages.SRHInfo)
 					for len(srhInfo.Clients) > 0 {
-						lib.PrintlnDebug("Will initialize")
+						lib.PrintlnInfo("Will initialize:", srhInfo.Clients[len(srhInfo.Clients)-1].Ip)
 						tmpClient := srhInfo.Clients[len(srhInfo.Clients)-1]
 						srhInfo.Clients = messages.Remove(srhInfo.Clients, len(srhInfo.Clients)-1)
 						tmpClient.Initialize()
-						lib.PrintlnDebug("Initialized")
+						lib.PrintlnInfo("Initialized")
 					}
 				}
 

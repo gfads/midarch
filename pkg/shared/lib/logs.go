@@ -1,12 +1,13 @@
 package lib
 
 import (
-	"github.com/gfads/midarch/pkg/shared"
 	"log"
 	"os"
 	"runtime"
 	"strconv"
 	"strings"
+
+	"github.com/gfads/midarch/pkg/shared"
 )
 
 var SHOW_MESSAGES = []DebugLevel{} //ERROR, INFO, MESSAGE} //, DEBUG}

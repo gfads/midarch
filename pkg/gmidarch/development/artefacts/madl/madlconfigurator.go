@@ -1,16 +1,18 @@
 package madl
 
 import (
+	"net"
+	"reflect"
+	"strconv"
+	"strings"
+
 	"github.com/gfads/midarch/pkg/gmidarch/development/artefacts/graphs/dot"
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/component"
 	"github.com/gfads/midarch/pkg/gmidarch/development/connectors"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/development/repositories/architectural"
 	"github.com/gfads/midarch/pkg/shared"
-	"net"
-	"reflect"
-	"strconv"
-	"strings"
+	"github.com/quic-go/quic-go"
 )
 
 type MADLConfigurator interface {
@@ -339,9 +341,13 @@ func (confImpl MADLConfiguratorImpl) configureInfo(m *MADL, archRepo architectur
 				srhInfo := messages.SRHInfo{EndPoint: endPoint, Conns: conns, RcvedMessages: rcvedMsgChan, Clients: clients}
 				m.Components[i].Info = &srhInfo
 			} else if strings.Contains(m.Components[i].TypeName, "CRH") {
-				conns := make(map[string]net.Conn, shared.MAX_NUMBER_OF_CONNECTIONS) // TODO dcruzb: MAX_NUMBER_OF_CONNECTIONS should be in server, not client
+				conns := make(map[string]net.Conn, shared.MAX_NUMBER_OF_CONNECTIONS)            // TODO dcruzb: MAX_NUMBER_OF_CONNECTIONS should be in server, not client
+				quicConns := make(map[string]quic.Connection, shared.MAX_NUMBER_OF_CONNECTIONS) // TODO dcruzb: MAX_NUMBER_OF_CONNECTIONS should be in server, not client
+				quicStreams := make(map[string]quic.Stream, shared.MAX_NUMBER_OF_CONNECTIONS)   // TODO dcruzb: MAX_NUMBER_OF_CONNECTIONS should be in server, not client
+
 				endPoint := messages.EndPoint{Host: v.Host, Port: v.Port}
-				m.Components[i].Info = messages.CRHInfo{EndPoint: endPoint, Conns: conns}
+
+				m.Components[i].Info = messages.CRHInfo{EndPoint: endPoint, Conns: conns, QuicConns: quicConns, QuicStreams: quicStreams}
 			}
 		} else { // no info
 			m.Components[i].Info = new(interface{})

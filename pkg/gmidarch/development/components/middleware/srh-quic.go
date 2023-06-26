@@ -51,7 +51,7 @@ func (s SRHQuic) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip 
 	}
 
 	//lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total clients", len(clients))
-	if len(clients) < 1 { //shared.MAX_NUMBER_OF_CONNECTIONS { TODO dcruzb: go back the env var
+	if len(clients) < 2 { //shared.MAX_NUMBER_OF_CONNECTIONS { TODO dcruzb: go back the env var
 		client := messages.Client{
 			Ip:             "",
 			Connection:     nil,
@@ -137,8 +137,7 @@ func (s SRHQuic) I_Accept(id string, msg *messages.SAMessage, info *interface{},
 
 		lib.PrintlnDebug("SRHQuic Version Not adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Buscou nova conexão, ip:", conn.RemoteAddr().String())
 		//connectionAvailable, availableConenctionIndex := s.availableConnectionFromPool(&srhInfo.Clients, conn.RemoteAddr().String())
-		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(
-		//srhInfo.Clients))
+		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
 		//if !connectionAvailable {
 		//	lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHQuic Version Not adapted - No connection available")
 		//	return
@@ -354,7 +353,9 @@ func (s SRHQuic) handler(info *interface{}, connectionIndex int) {
 		_, err := stream.Read(size)
 		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Read finished", "SRHQuic Version Not adapted")
 		if err != nil {
-			if err == io.EOF || strings.Contains(err.Error(), "use of closed network connection") {
+			if err == io.EOF ||
+				strings.Contains(err.Error(), "use of closed network connection") ||
+				strings.Contains(err.Error(), "timeout: no recent network activity") {
 				srhInfo.Clients[connectionIndex] = nil
 				lib.PrintlnError("EOF error - Will not kill the app")
 				break

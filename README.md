@@ -35,9 +35,9 @@ openssl req -x509 -new -nodes -key myCA.key -sha256 -days 3650 -out myCA.pem
 openssl req -x509 -new -nodes -key myCA.key -sha256 -days 3650 -out myCA.pem -subj '/CN=MidArchCA/C=BR/ST=Pernambuco/L=Recife/O=MidArch'
 
 # Generate Server Certificate
-openssl req -new -nodes -out server.csr -newkey -sha256 -keyout server.key -subj '/CN=localhost/C=BR/ST=Pernambuco/L=Recife/O=MidArch'
+openssl req -new -nodes -newkey rsa:1024 -out server.csr -keyout server.key -subj '/CN=localhost/C=BR/ST=Pernambuco/L=Recife/O=MidArch'
 # Sign the Server Certificate
-openssl x509 -req -in server.csr -CA myCA.pem -CAkey myCA.key -CAcreateserial -sha256 -days 3650 -out server.pem
+openssl x509 -req -in server.csr -CA myCA.pem -CAkey myCA.key -CAcreateserial -sha256 -days 3650 -out server.pem -extfile <(printf "subjectAltName=DNS:localhost")
 ```
 
 Where:
@@ -48,6 +48,16 @@ Where:
 - L = <Locality Name (eg, city)>
 - O = <Organization Name (eg, company)>
 - OU = <Organizational Unit Name (eg, section)>
+
+#### 2.3 QUIC
+
+To use QUIC on linux it is necessary to increase the maximum buffer size.
+
+```bash
+sysctl -w net.core.rmem_max=2500000
+```
+
+More on https://github.com/quic-go/quic-go/wiki/UDP-Receive-Buffer-Size
 
 ### 3. Install FDR4
 

@@ -2,14 +2,16 @@ package crhtcp
 
 import (
 	"encoding/binary"
-	"fmt"
+	"log"
+	"net"
+	"reflect"
+	"time"
+
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/middleware"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
-	evolutive "github.com/gfads/midarch/pkg/injector"
 	"github.com/gfads/midarch/pkg/shared"
-	"log"
-	"net"
+	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
 // @Type: CRHTCP
@@ -18,10 +20,11 @@ type CRHTCP struct{}
 
 func (c CRHTCP) getLocalTcpAddr() *net.TCPAddr {
 	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version 1 adapted")
-	fmt.Println("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
+	//fmt.Println("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
 	log.Println("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
 	var err error = nil
 	var localTCPAddr *net.TCPAddr = nil
+	//shared.LocalAddr = "127.0.0.1:37521"
 	if shared.LocalAddr != "" {
 		localTCPAddr, err = net.ResolveTCPAddr("tcp", shared.LocalAddr)
 		if err != nil {
@@ -32,7 +35,7 @@ func (c CRHTCP) getLocalTcpAddr() *net.TCPAddr {
 }
 
 func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version 1 adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version 1 adapted")
 	infoTemp := *info
 	crhInfo := infoTemp.(messages.CRHInfo)
 
@@ -57,75 +60,127 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 	addr := host + ":" + port
 	var err error
-	fmt.Println("Vai conectar", crhInfo.Conns[addr])
-	log.Println("Vai conectar", crhInfo.Conns[addr])
-	if _, ok := crhInfo.Conns[addr]; !ok { // no connection open yet
-		fmt.Println("Entrou", crhInfo.Conns[addr])
-		log.Println("Entrou", crhInfo.Conns[addr])
+	//fmt.Println("Vai conectar", crhInfo.Conns[addr])
+	lib.PrintlnDebug("Vai conectar", crhInfo.Conns[addr])
+	if _, ok := crhInfo.Conns[addr]; !ok || reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name() != "TCPConn" { // no connection open yet
+		//fmt.Println("Entrou", crhInfo.Conns[addr])
+		lib.PrintlnDebug("Entrou", crhInfo.Conns[addr])
 		tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
+		//log.Println("Resolveu", crhInfo.Conns[addr])
+		//localTcpAddr := c.getLocalTcpAddr()
 
-		localTcpAddr := c.getLocalTcpAddr()
-		crhInfo.Conns[addr], err = net.DialTCP("tcp", localTcpAddr, tcpAddr)
-		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(), err.Error())
+		for {
+			crhInfo.Conns[addr], err = net.DialTCP("tcp", nil, tcpAddr)
+			//log.Println("Discou", crhInfo.Conns[addr])
+			if err != nil {
+				lib.PrintlnError("Erro na discagem", crhInfo.Conns[addr], err)
+				time.Sleep(200 * time.Millisecond)
+				//shared.ErrorHandler(shared.GetFunction(), err.Error())
+			} else {
+				break
+			}
 		}
 		if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
-			fmt.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr())
-			log.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
+			//fmt.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr())
+			//log.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 			shared.LocalAddr = crhInfo.Conns[addr].LocalAddr().String()
 		}
 	}
-	fmt.Println("Terminou", crhInfo.Conns[addr])
-	log.Println("Terminou", crhInfo.Conns[addr])
+	//fmt.Println("Terminou", crhInfo.Conns[addr])
+	lib.PrintlnDebug("Terminou", crhInfo.Conns[addr])
 
 	// send message's size
 	conn := crhInfo.Conns[addr]
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	binary.LittleEndian.PutUint32(size, uint32(len(msgToServer)))
-	_, err = conn.Write(size)
+	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	err = c.send(sizeOfMsgSize, msgToServer, conn)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
+		lib.PrintlnError("Error trying to send message:", err.Error())
+		*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
+		crhInfo.Conns[addr].Close()
+		crhInfo.Conns[addr] = nil
+		delete(crhInfo.Conns, addr)
+		return
 	}
 
-	// send message
-	_, err = conn.Write(msgToServer)
+	msgFromServer, err := c.read(conn, sizeOfMsgSize)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
+		lib.PrintlnError("Error trying to read message:", err.Error())
+		*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
+		crhInfo.Conns[addr].Close()
+		crhInfo.Conns[addr] = nil
+		delete(crhInfo.Conns, addr)
+		return
 	}
+	if changeProtocol, miopPacket := c.isAdapt(msgFromServer); changeProtocol {
+		lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
 
-	msgFromServer := c.read(err, conn, size)
-	if changeProtocol, miop := c.isAdapt(msgFromServer); changeProtocol {
-		log.Println("Adapting, miop.Bd.ReqBody.Body:", miop.Bd.ReqBody.Body)
+		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
 
-		evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
-		//msgFromServer = c.read(err, conn, size)
+		miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{miopPacket.Bd.ReqBody.Body[0], shared.AdaptId, "Ok"}, shared.AdaptId) // idx is the Connection ID
+		msgPayload := middleware.Jsonmarshaller{}.Marshall(miopPacket)
+		c.send(sizeOfMsgSize, msgPayload, conn)
+
+		if miopPacket.Bd.ReqBody.Body[0] == "udp" {
+			lib.PrintlnInfo("Adapting => UDP")
+			//evolutive.GeneratePlugin("crhudp_v1", "crhudp", "crhudp_v1")
+			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhudp")
+		} else if miopPacket.Bd.ReqBody.Body[0] == "tcp" {
+			lib.PrintlnInfo("Adapting => TCP")
+			//evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
+			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhtcp")
+		} else {
+			msgFromServer, _ = c.read(conn, sizeOfMsgSize)
+			//fmt.Println("=================> ############### ============> ########### TCP: Leu o read")
+		}
 	}
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
 
-func (c CRHTCP) read(err error, conn net.Conn, size []byte) []byte {
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version 1 adapted")
-	// receive reply's size
-	_, err = conn.Read(size)
+func (c CRHTCP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version 1 adapted")
+	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
+	_, err := conn.Write(sizeOfMsgSize)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return err
+	}
+
+	// send message
+	_, err = conn.Write(msgToServer)
+	if err != nil {
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return err
+	}
+	return nil
+}
+
+func (c CRHTCP) read(conn net.Conn, size []byte) ([]byte, error) {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version 1 adapted")
+	// receive reply's size
+	_, err := conn.Read(size)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return nil, err
 	}
 
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
 	_, err = conn.Read(msgFromServer)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
+		lib.PrintlnError(shared.GetFunction(), err)
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return nil, err
 	}
-	return msgFromServer
+	return msgFromServer, nil
 }
 
 func (c CRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
-	log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version 1 adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version 1 adapted")
 	miop := middleware.Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }

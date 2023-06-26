@@ -50,8 +50,12 @@ func (c Client) Initialize() {
 	if c.QUICStream != nil {
 		c.QUICStream.Close()
 	}
-	c.QUICConnection = nil
 	c.QUICStream = nil
+	if c.QUICConnection != nil {
+		c.QUICConnection.CloseWithError(0, "Initialized SRH")
+	}
+	c.QUICConnection = nil
+
 	c.AdaptId = 0
 }
 

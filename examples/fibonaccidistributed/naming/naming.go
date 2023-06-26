@@ -30,9 +30,7 @@ func main() {
 	}})
 
 	fmt.Printf("Naming server is running at Port: %v \n", shared.NAMING_PORT)
-	//evolutive.EvolutiveInjector{}.Start("srhtcp", 40*time.Second)
 
-	//fmt.Scanln()
 	var wg sync.WaitGroup
 	wg.Add(1)
 	wg.Wait()

@@ -32,10 +32,21 @@ func (c CRHQuic) I_Process(id string, msg *messages.SAMessage, info *interface{}
 	crhInfo := infoTemp.(messages.CRHInfo)
 
 	// check message
-	payload := msg.Payload.([]interface{})
-	host := payload[0].(string) // host
-	port := payload[1].(string) // port
-	msgToServer := payload[2].([]byte)
+	payload := msg.Payload.(messages.RequestorInfo).MarshalledMessage
+	h := msg.Payload.(messages.RequestorInfo).Inv.Endpoint.Host
+	p := msg.Payload.(messages.RequestorInfo).Inv.Endpoint.Port
+	msgToServer := payload
+
+	host := ""
+	port := ""
+
+	if h == "" || p == "" {
+		host = crhInfo.EndPoint.Host
+		port = crhInfo.EndPoint.Port
+	} else {
+		host = h
+		port = p
+	}
 
 	addr := host + ":" + port
 	var err error
@@ -105,6 +116,9 @@ func (c CRHQuic) I_Process(id string, msg *messages.SAMessage, info *interface{}
 		} else if miopPacket.Bd.ReqBody.Body[0] == "tcp" {
 			lib.PrintlnInfo("Adapting => TCP")
 			evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
+		} else if miopPacket.Bd.ReqBody.Body[0] == "tls" {
+			lib.PrintlnInfo("Adapting => TLS")
+			evolutive.GeneratePlugin("crhtls_v1", "crhtls", "crhtls_v1")
 		} else if miopPacket.Bd.ReqBody.Body[0] == "quic" {
 			lib.PrintlnInfo("Adapting => QUIC")
 			evolutive.GeneratePlugin("crhquic_v1", "crhquic", "crhquic_v1")
