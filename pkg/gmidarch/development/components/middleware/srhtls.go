@@ -145,13 +145,13 @@ func (s SRHTLS) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 	case tempMsgReceived := <-srhInfo.RcvedMessages:
 		{
 			// Receive message from handlers
-			//srhInfo.CurrentConn = tempMsgReceived.Chn
+			//srhInfo.CurrentConn = tempMsgReceived.Conn
 
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
 			lib.PrintlnDebug("SRHTLS Version Not adapted: tempMsgReceived", tempMsgReceived)
-			lib.PrintlnDebug("SRHTLS Version Not adapted: tempMsgReceived.Chn", tempMsgReceived.Chn)
+			lib.PrintlnDebug("SRHTLS Version Not adapted: tempMsgReceived.Conn", tempMsgReceived.Conn)
 			if tempMsgReceived.Conn == nil {
 				*reset = true
 				return

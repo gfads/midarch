@@ -3,12 +3,13 @@ package srhtcp
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/gfads/midarch/pkg/gmidarch/development/components/middleware"
-	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
-	"github.com/gfads/midarch/pkg/shared"
 	"io"
 	"log"
 	"net"
+
+	"github.com/gfads/midarch/pkg/gmidarch/development/components/middleware"
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
+	"github.com/gfads/midarch/pkg/shared"
 )
 
 // @Type: SRHTCP
@@ -107,16 +108,16 @@ func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 	case tempMsgReceived := <-srhInfo.RcvedMessages:
 		{
 			// Receive message from handlers
-			//srhInfo.CurrentConn = tempMsgReceived.Chn
+			//srhInfo.CurrentConn = tempMsgReceived.Conn
 
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
-			if tempMsgReceived.Chn == nil {
+			if tempMsgReceived.Conn == nil {
 				*reset = true
 				return
 			}
-			msg.ToAddr = tempMsgReceived.ToAddress //Chn.RemoteAddr().String()
+			msg.ToAddr = tempMsgReceived.ToAddress //Conn.RemoteAddr().String()
 		}
 	default:
 		{
@@ -198,7 +199,7 @@ func handler(info *interface{}, connectionIndex int) {
 			fmt.Println("Vai matar o app, erro mas não EOF")
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
-		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Chn: conn, ToAddress: srhInfo.Clients[connectionIndex].Ip}
+		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Conn: conn, ToAddress: srhInfo.Clients[connectionIndex].Ip}
 		fmt.Println("SRHTCP Version 1 adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		srhInfo.RcvedMessages <- rcvMessage
 		fmt.Println("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHTCP Version 1 adapted")

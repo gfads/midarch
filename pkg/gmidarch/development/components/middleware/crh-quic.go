@@ -18,7 +18,7 @@ import (
 	"github.com/quic-go/quic-go"
 )
 
-// @Type: CRHQuic
+// @Type: CRHQUIC
 // @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
 type CRHQuic struct {
 	//Conns map[string]quic.Connection

@@ -2,14 +2,15 @@ package middleware
 
 import (
 	"encoding/binary"
-	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
-	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
-	"github.com/gfads/midarch/pkg/shared"
-	"github.com/gfads/midarch/pkg/shared/lib"
 	"io"
 	"net"
 	"strings"
 	"time"
+
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/pkg/shared"
+	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
 // @Type: SRHTCP
@@ -142,14 +143,14 @@ func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 	case tempMsgReceived := <-srhInfo.RcvedMessages:
 		{
 			// Receive message from handlers
-			//srhInfo.CurrentConn = tempMsgReceived.Chn
+			//srhInfo.CurrentConn = tempMsgReceived.Conn
 
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
 			lib.PrintlnDebug("SRHTCP Version 2 adapted: tempMsgReceived", tempMsgReceived)
-			lib.PrintlnDebug("SRHTCP Version 2 adapted: tempMsgReceived.Chn", tempMsgReceived.Chn)
-			if tempMsgReceived.Chn == nil {
+			lib.PrintlnDebug("SRHTCP Version 2 adapted: tempMsgReceived.Conn", tempMsgReceived.Conn)
+			if tempMsgReceived.Conn == nil {
 				*reset = true
 				return
 			}
@@ -271,7 +272,7 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 			continue
 		}
 
-		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Chn: conn, ToAddress: srhInfo.Clients[connectionIndex].Ip}
+		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Conn: conn, ToAddress: srhInfo.Clients[connectionIndex].Ip}
 		lib.PrintlnDebug("SRHTCP Version 2 adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		if !*executeForever {
 			break

@@ -29,12 +29,12 @@ type ReceivedMessages struct {
 }
 
 type Client struct {
-	Ip            string
-	Connection    net.Conn
-	UDPConnection *net.UDPConn
-	QUICConnetion quic.Connection
-	QUICStream    quic.Stream
-	AdaptId       int
+	Ip             string
+	Connection     net.Conn
+	UDPConnection  *net.UDPConn
+	QUICConnection quic.Connection
+	QUICStream     quic.Stream
+	AdaptId        int
 }
 
 func (c Client) Initialize() {
@@ -47,6 +47,11 @@ func (c Client) Initialize() {
 		c.UDPConnection.Close()
 	}
 	c.UDPConnection = nil
+	if c.QUICStream != nil {
+		c.QUICStream.Close()
+	}
+	c.QUICConnection = nil
+	c.QUICStream = nil
 	c.AdaptId = 0
 }
 

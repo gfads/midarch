@@ -3,15 +3,16 @@ package middleware
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
-	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
-	"github.com/gfads/midarch/pkg/shared"
-	"github.com/gfads/midarch/pkg/shared/lib"
 	"io"
 	"net"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
+	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/pkg/shared"
+	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
 // @Type: SRHUDP
@@ -156,7 +157,7 @@ func (s SRHUDP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 	case tempMsgReceived := <-srhInfo.RcvedMessages:
 		{
 			// Receive message from handlers
-			//srhInfo.CurrentConn = tempMsgReceived.Chn
+			//srhInfo.CurrentConn = tempMsgReceived.Conn
 
 			// Update info
 			*info = srhInfo
@@ -303,7 +304,7 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 			continue
 		}
 		lib.PrintlnDebug("SRHUDP Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
-		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Chn: nil, ToAddress: addr.String()}
+		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Conn: nil, ToAddress: addr.String()}
 		if !*executeForever {
 			break
 		}

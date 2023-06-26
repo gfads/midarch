@@ -2,12 +2,13 @@ package srhtcp
 
 import (
 	"encoding/binary"
+	"io"
+	"net"
+
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/middleware"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
 	"github.com/gfads/midarch/pkg/shared"
-	"io"
-	"net"
 )
 
 // @Type: SRHTCP
@@ -135,18 +136,18 @@ func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 	case tempMsgReceived := <-srhInfo.RcvedMessages:
 		{
 			// Receive message from handlers
-			//srhInfo.CurrentConn = tempMsgReceived.Chn
+			//srhInfo.CurrentConn = tempMsgReceived.Conn
 
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
 			//fmt.Println("SRHTCP Version 2 adapted: tempMsgReceived", tempMsgReceived)
-			//fmt.Println("SRHTCP Version 2 adapted: tempMsgReceived.Chn", tempMsgReceived.Chn)
-			if tempMsgReceived.Chn == nil {
+			//fmt.Println("SRHTCP Version 2 adapted: tempMsgReceived.Conn", tempMsgReceived.Conn)
+			if tempMsgReceived.Conn == nil {
 				*reset = true
 				return
 			}
-			msg.ToAddr = tempMsgReceived.ToAddress //Chn.RemoteAddr().String()
+			msg.ToAddr = tempMsgReceived.ToAddress //Conn.RemoteAddr().String()
 		}
 	default:
 		{
@@ -240,7 +241,7 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 			}
 		}
 
-		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Chn: conn, ToAddress: srhInfo.Clients[connectionIndex].Ip}
+		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Conn: conn, ToAddress: srhInfo.Clients[connectionIndex].Ip}
 		//fmt.Println("SRHTCP Version 2 adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		if !*executeForever {
 			break

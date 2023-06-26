@@ -18,7 +18,7 @@ import (
 	"github.com/quic-go/quic-go"
 )
 
-// @Type: SRHQuic
+// @Type: SRHQUIC
 // @Behaviour: Behaviour = I_Accept -> I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> Behaviour
 type SRHQuic struct {
 	// Graph exec.ExecGraph
@@ -42,8 +42,9 @@ func (s SRHQuic) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip 
 			if client.Ip == ip {
 				return true, idx
 			}
-			if client.UDPConnection != nil { // TODO dcruzb: verify others
+			if client.UDPConnection != nil || client.Connection != nil {
 				client.UDPConnection = nil
+				client.Connection = nil // TODO dcruzb: verify memory leak (didn't close the connection)
 				return true, idx
 			}
 		}
@@ -52,11 +53,11 @@ func (s SRHQuic) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip 
 	//lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total clients", len(clients))
 	if len(clients) < 1 { //shared.MAX_NUMBER_OF_CONNECTIONS { TODO dcruzb: go back the env var
 		client := messages.Client{
-			Ip:            "",
-			Connection:    nil,
-			UDPConnection: nil,
-			QUICConnetion: nil,
-			QUICStream:    nil,
+			Ip:             "",
+			Connection:     nil,
+			UDPConnection:  nil,
+			QUICConnection: nil,
+			QUICStream:     nil,
 		}
 		*clientsPtr = append(clients, &client)
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients", len(*clientsPtr))
@@ -66,18 +67,24 @@ func (s SRHQuic) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip 
 	for idx, client := range clients {
 		if client == nil {
 			client := messages.Client{
-				Ip:            "",
-				Connection:    nil,
-				UDPConnection: nil,
-				QUICConnetion: nil,
-				QUICStream:    nil,
+				Ip:             "",
+				Connection:     nil,
+				UDPConnection:  nil,
+				QUICConnection: nil,
+				QUICStream:     nil,
 			}
 			clients[idx] = &client
 			return true, idx
 		}
-		if client.UDPConnection != nil { // TODO dcruzb: verify others
+		if client.UDPConnection != nil {
 			client.UDPConnection.Close()
 			client.UDPConnection = nil
+			return true, idx
+		}
+		if client.Connection != nil {
+			client.Ip = ""
+			client.Connection.Close()
+			client.Connection = nil
 			return true, idx
 		}
 	}
@@ -86,7 +93,7 @@ func (s SRHQuic) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip 
 }
 
 func (s SRHQuic) I_Accept(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	//lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHQuic Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHQuic Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	srhInfo.Counter++
@@ -143,8 +150,8 @@ func (s SRHQuic) I_Accept(id string, msg *messages.SAMessage, info *interface{},
 		}
 		client := srhInfo.Clients[availableConenctionIndex]
 		client.Ip = conn.RemoteAddr().String()
-		client.QUICConnetion = conn
-		client.QUICStream, err = client.QUICConnetion.AcceptStream(context.Background())
+		client.QUICConnection = conn
+		client.QUICStream, err = client.QUICConnection.AcceptStream(context.Background())
 		//stream, err := tempConn.OpenStreamSync(context.Background())
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
