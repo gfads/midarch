@@ -2,13 +2,14 @@ package middleware
 
 import (
 	"encoding/binary"
+	"net"
+	"reflect"
+	"time"
+
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
 	"github.com/gfads/midarch/pkg/shared"
 	"github.com/gfads/midarch/pkg/shared/lib"
-	"net"
-	"reflect"
-	"time"
 )
 
 // @Type: CRHTCP
@@ -128,6 +129,14 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 			lib.PrintlnInfo("Adapting => TCP")
 			//evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
 			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhtcp")
+		} else if miopPacket.Bd.ReqBody.Body[0] == "tls" {
+			lib.PrintlnInfo("Adapting => TLS")
+			//evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
+			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhtls")
+		} else if miopPacket.Bd.ReqBody.Body[0] == "quic" {
+			lib.PrintlnInfo("Adapting => QUIC")
+			//evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
+			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhquic")
 		} else {
 			msgFromServer, _ = c.read(conn, sizeOfMsgSize)
 			//fmt.Println("=================> ############### ============> ########### TCP: Leu o read")

@@ -211,6 +211,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 					lib.PrintlnInfo("Awaiting to stop executing")
 					time.Sleep(200 * time.Millisecond)
 				}
+				lib.PrintlnInfo("Execution stopped")
 				//time.Sleep(6 * time.Second)
 				elementComponent.Type = cmd.Type
 				elementComponent.TypeName = cmdElemType
