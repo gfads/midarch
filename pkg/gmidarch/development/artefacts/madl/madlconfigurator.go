@@ -335,10 +335,11 @@ func (confImpl MADLConfiguratorImpl) configureInfo(m *MADL, archRepo architectur
 		if v, ok := args[m.Components[i].Id]; ok {
 			if strings.Contains(m.Components[i].TypeName, "SRH") { // TODO dcruzb: what happens if TypeName == Unit?
 				endPoint := messages.EndPoint{Host: v.Host, Port: v.Port}
-				conns := []net.Conn{} // TODO dcruzb: MAX_NUMBER_OF_CONNECTIONS should be in server, not client
+				conns := []net.Conn{}            // TODO dcruzb: MAX_NUMBER_OF_CONNECTIONS should be in server, not client
+				quicConns := []quic.Connection{} // TODO dcruzb: MAX_NUMBER_OF_CONNECTIONS should be in server, not client
 				rcvedMsgChan := make(chan messages.ReceivedMessages, shared.MAX_NUMBER_OF_RECEIVED_MESSAGES)
 				var clients []*messages.Client // TODO dcruzb: change to make to allocate and initialize the array with MAX_NUMBER_OF_CONNECTIONS size
-				srhInfo := messages.SRHInfo{EndPoint: endPoint, Conns: conns, RcvedMessages: rcvedMsgChan, Clients: clients}
+				srhInfo := messages.SRHInfo{EndPoint: endPoint, Conns: conns, QUICConns: quicConns, RcvedMessages: rcvedMsgChan, Clients: clients}
 				m.Components[i].Info = &srhInfo
 			} else if strings.Contains(m.Components[i].TypeName, "CRH") {
 				conns := make(map[string]net.Conn, shared.MAX_NUMBER_OF_CONNECTIONS)            // TODO dcruzb: MAX_NUMBER_OF_CONNECTIONS should be in server, not client
