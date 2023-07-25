@@ -130,10 +130,11 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 		//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::msg.Payload->nil")
 	}
 
-	//fmt.Printf("Unit:: I_Adapt:: %v [%v] %v\n", reflect.TypeOf(u.ElemOfUnit).Name(), cmd.Cmd, u.UnitId)
+	// fmt.Printf("Unit:: I_Adapt:: %v [%v] %v\n", reflect.TypeOf(u.ElemOfUnit).Name(), cmd.Cmd, u.UnitId)
 
 	if cmd.Cmd != "" && cmd.Cmd != "Nothing" {
 		elementComponent := (*(*info).([]*interface{})[0]).(*component.Component)
+		lib.PrintlnInfo("--------------Unit.I_Adaptunit::", u.UnitId, ":: Adapt ---->", elementComponent.TypeName)
 		unitElemType := elementComponent.TypeName //reflect.TypeOf(u.ElemOfUnit).Name()
 		cmdElemType := reflect.ValueOf(cmd.Type).Elem().Type().Name()
 		//log.Println("")
@@ -160,17 +161,33 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 
 				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::info:", elementComponent)
 				var adaptTo string
-				if strings.Contains(cmdElemType, "SRHTCP") {
+				if strings.Contains(cmdElemType, "TCP") {
 					adaptTo = "tcp"
-				} else if strings.Contains(cmdElemType, "SRHUDP") {
+				} else if strings.Contains(cmdElemType, "UDP") {
 					adaptTo = "udp"
-				} else if strings.Contains(cmdElemType, "SRHTLS") {
+				} else if strings.Contains(cmdElemType, "TLS") {
 					adaptTo = "tls"
-				} else if strings.Contains(cmdElemType, "SRHQUIC") {
+				} else if strings.Contains(cmdElemType, "QUIC") {
 					adaptTo = "quic"
+					lib.PrintlnInfo("****** Adapt to QUIC")
 				}
 
-				if adaptTo == "tcp" || adaptTo == "udp" || adaptTo == "tls" || adaptTo == "quic" {
+				var adaptFrom string
+				if strings.Contains(unitElemType, "TCP") {
+					adaptFrom = "tcp"
+				} else if strings.Contains(unitElemType, "UDP") {
+					adaptFrom = "udp"
+				} else if strings.Contains(unitElemType, "TLS") {
+					adaptFrom = "tls"
+				} else if strings.Contains(unitElemType, "QUIC") {
+					adaptFrom = "quic"
+					lib.PrintlnInfo("****** Adapt to QUIC")
+				}
+
+				isSRH := strings.Contains(cmdElemType, "SRH")
+				isCRH := strings.Contains(cmdElemType, "CRH")
+
+				if isSRH {
 					reset := false
 
 					infoTemp := elementComponent.Info
@@ -180,10 +197,10 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 						// if Client from Connection Pool have a client connected
 						if client.Ip != "" {
 							//fmt.Println("Vai adaptar: IP:", client.Ip)
-							if (strings.Contains(unitElemType, "UDP") && client.UDPConnection == nil) ||
-								(strings.Contains(unitElemType, "TCP") && client.Connection == nil) ||
-								(strings.Contains(unitElemType, "QUIC") && client.QUICStream == nil) {
-								//fmt.Println("Vai adaptar: pulou sem conexão")0
+							if (adaptFrom == "udp" && client.UDPConnection == nil) ||
+								(adaptFrom == "tcp" && client.Connection == nil) ||
+								(adaptFrom == "quic" && client.QUICStream == nil) {
+								//fmt.Println("Vai adaptar: pulou sem conexão")
 								continue
 							}
 							//fmt.Println("Vai adaptar: entrou AdaptId:", client.AdaptId)
@@ -198,13 +215,13 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 						}
 					}
 					time.Sleep(200 * time.Millisecond)
-				} else if strings.Contains(unitElemType, "CRH") {
-					//time.Sleep(10 * time.Second)
-					//fmt.Println("Unit.I_Adaptunit:: 10 seconds passed", u.UnitId, "::info:", elementComponent)
-					//cmd.Type = shared.GetComponentTypeByNameFromRAM(unitElemType)
-					//fmt.Println("unitElemType", unitElemType, "cmd.Type", cmd.Type)
-					//shared.ErrorHandler(shared.GetFunction(), "Teste")
-				}
+				} // else if isCRH {
+				//time.Sleep(10 * time.Second)
+				//fmt.Println("Unit.I_Adaptunit:: 10 seconds passed", u.UnitId, "::info:", elementComponent)
+				//cmd.Type = shared.GetComponentTypeByNameFromRAM(unitElemType)
+				//fmt.Println("unitElemType", unitElemType, "cmd.Type", cmd.Type)
+				//shared.ErrorHandler(shared.GetFunction(), "Teste")
+				//}
 
 				*elementComponent.ExecuteForever = false
 				for *elementComponent.Executing == true {
@@ -212,11 +229,14 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 					time.Sleep(200 * time.Millisecond)
 				}
 				lib.PrintlnInfo("Execution stopped")
+				lib.PrintlnInfo("****** elementComponent.TypeName:", elementComponent.TypeName)
+				lib.PrintlnInfo("****** cmdElemType:", cmdElemType)
+				lib.PrintlnInfo("****** adaptTo:", adaptTo)
 				//time.Sleep(6 * time.Second)
 				elementComponent.Type = cmd.Type
 				elementComponent.TypeName = cmdElemType
 
-				if strings.Contains(unitElemType, "CRH") {
+				if isCRH {
 					//time.Sleep(2000 * time.Millisecond)
 					//fmt.Println("Unit.I_Adaptunit:: 2 seconds passed", u.UnitId) //, "::info:", elementComponent)
 					lib.PrintlnInfo("Will close CRH connections")
@@ -225,15 +245,17 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 					for _, conn := range crhInfo.Conns {
 						conn.Close()
 					}
+					// if adaptTo != "quic" {
 					for _, conn := range crhInfo.QuicConns {
 						conn.CloseWithError(0, "Close to adapt to "+adaptTo)
 					}
-					for _, conn := range crhInfo.QuicStreams {
-						conn.Close()
+					for _, stream := range crhInfo.QuicStreams {
+						stream.Close()
 					}
+					// }
 					lib.PrintlnInfo("CRH connections closed")
 					//shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Process", msg, &elementComponent.Info, reset)
-				} else if adaptTo == "tcp" || adaptTo == "udp" || adaptTo == "tls" || adaptTo == "quic" {
+				} else if isSRH {
 					infoTemp := elementComponent.Info
 					srhInfo := infoTemp.(*messages.SRHInfo)
 					for len(srhInfo.Clients) > 0 {
