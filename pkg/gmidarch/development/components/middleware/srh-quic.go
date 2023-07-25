@@ -20,13 +20,13 @@ import (
 
 // @Type: SRHQUIC
 // @Behaviour: Behaviour = I_Accept -> I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> Behaviour
-type SRHQuic struct {
+type SRHQUIC struct {
 	// Graph exec.ExecGraph
 }
 
-// var ConnsSRHQuic []quic.Connection
-// var StreamsSRHQuic []quic.Stream
-// var LnSRHQuic quic.Listener
+// var ConnsSRHQUIC []quic.Connection
+// var StreamsSRHQUIC []quic.Stream
+// var LnSRHQUIC quic.Listener
 
 // var c1Quic = make(chan []byte)
 // var c2Quic = make(chan []byte)
@@ -34,7 +34,7 @@ type SRHQuic struct {
 // var currentConnectionQuic = -1
 // var stateQuic = 0
 
-func (s SRHQuic) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip string) (bool, int) {
+func (s SRHQUIC) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip string) (bool, int) {
 	clients := *clientsPtr
 
 	if ip != "" {
@@ -92,8 +92,8 @@ func (s SRHQuic) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip 
 	return false, -1
 }
 
-func (s SRHQuic) I_Accept(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHQuic Version Not adapted")
+func (s SRHQUIC) I_Accept(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHQUIC Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	srhInfo.Counter++
@@ -109,7 +109,7 @@ func (s SRHQuic) I_Accept(id string, msg *messages.SAMessage, info *interface{},
 		quicConfig := quic.Config{KeepAlivePeriod: 60 * time.Second}
 		ln, err := quic.ListenAddr(srhInfo.EndPoint.Host+":"+srhInfo.EndPoint.Port, getServerTLSQuicConfig(), &quicConfig)
 		if err != nil {
-			log.Fatalf("SRHQuic:: %v\n", err)
+			log.Fatalf("SRHQUIC:: %v\n", err)
 		}
 		srhInfo.QUICLn = ln
 	}
@@ -118,7 +118,7 @@ func (s SRHQuic) I_Accept(id string, msg *messages.SAMessage, info *interface{},
 	connectionAvailable, availableConenctionIndex := s.availableConnectionFromPool(&srhInfo.Clients, "")
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
 	if !connectionAvailable {
-		//lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHQuic Version Not adapted - No connection available")
+		//lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHQUIC Version Not adapted - No connection available")
 		time.Sleep(1 * time.Millisecond)
 		return
 	}
@@ -135,15 +135,15 @@ func (s SRHQuic) I_Accept(id string, msg *messages.SAMessage, info *interface{},
 		srhInfo.QUICConns = append(srhInfo.QUICConns, conn)
 		//srhInfo.CurrentConn = conn
 
-		lib.PrintlnDebug("SRHQuic Version Not adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Buscou nova conexão, ip:", conn.RemoteAddr().String())
+		lib.PrintlnDebug("SRHQUIC Version Not adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Buscou nova conexão, ip:", conn.RemoteAddr().String())
 		//connectionAvailable, availableConenctionIndex := s.availableConnectionFromPool(&srhInfo.Clients, conn.RemoteAddr().String())
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
 		//if !connectionAvailable {
-		//	lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHQuic Version Not adapted - No connection available")
+		//	lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHQUIC Version Not adapted - No connection available")
 		//	return
 		//}
 		if len(srhInfo.Clients) <= availableConenctionIndex {
-			lib.PrintlnDebug("SRHQuic Got len(srhInfo.Clients) <= availableConenctionIndex")
+			lib.PrintlnDebug("SRHQUIC Got len(srhInfo.Clients) <= availableConenctionIndex")
 			*reset = true
 			return
 		}
@@ -163,16 +163,16 @@ func (s SRHQuic) I_Accept(id string, msg *messages.SAMessage, info *interface{},
 		// Start goroutine
 		go s.handler(info, availableConenctionIndex)
 	}()
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHQuic Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHQUIC Version Not adapted")
 	return
 }
 
-func (s SRHQuic) I_Receive(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+func (s SRHQUIC) I_Receive(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	// tempPort := *elemInfo[0]
 	// port := tempPort.(string)
 	// host := "0.0.0.0" //"127.0.0.1" // TODO
 
-	// if LnSRHQuic == nil { // listener was not created yet
+	// if LnSRHQUIC == nil { // listener was not created yet
 	// 	//servAddr, err := net.ResolveTCPAddr("tcp", host+":"+port)
 	// 	//if err != nil {
 	// 	//	log.Fatalf("SRH:: %v\n", err)
@@ -180,9 +180,9 @@ func (s SRHQuic) I_Receive(id string, msg *messages.SAMessage, info *interface{}
 	// 	quicConfig := quic.Config{KeepAlivePeriod: 60 * time.Second}
 	// 	ln, err := quic.ListenAddr(host+":"+port, getServerTLSQuicConfig(), &quicConfig)
 	// 	if err != nil {
-	// 		log.Fatalf("SRHQuic:: %v\n", err)
+	// 		log.Fatalf("SRHQUIC:: %v\n", err)
 	// 	}
-	// 	LnSRHQuic = ln
+	// 	LnSRHQUIC = ln
 	// }
 
 	// switch stateQuic {
@@ -208,14 +208,14 @@ func (s SRHQuic) I_Receive(id string, msg *messages.SAMessage, info *interface{}
 		// Update info
 		*info = srhInfo
 		msg.Payload = tempMsgReceived.Msg
-		lib.PrintlnDebug("SRHQuic Version Not adapted: tempMsgReceived", tempMsgReceived)
-		lib.PrintlnDebug("SRHQuic Version Not adapted: tempMsgReceived.QUICStream", tempMsgReceived.QUICStream)
+		lib.PrintlnDebug("SRHQUIC Version Not adapted: tempMsgReceived", tempMsgReceived)
+		lib.PrintlnDebug("SRHQUIC Version Not adapted: tempMsgReceived.QUICStream", tempMsgReceived.QUICStream)
 		if tempMsgReceived.QUICStream == nil {
 			*reset = true
 			return
 		}
 		if isNewConnection, miopPacket := s.isNewConnection(tempMsgReceived.Msg); isNewConnection {
-			lib.PrintlnDebug("SRHQuic Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
+			lib.PrintlnDebug("SRHQUIC Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
 			*reset = true
 			return
 		}
@@ -227,47 +227,47 @@ func (s SRHQuic) I_Receive(id string, msg *messages.SAMessage, info *interface{}
 		}
 	}
 
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHQuic Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHQUIC Version Not adapted")
 	return
 }
 
 // func acceptAndReadQuic(currentConnectionQuic int, c chan []byte) {
 
 // 	// accept connections
-// 	temp, err := LnSRHQuic.Accept(context.Background())
+// 	temp, err := LnSRHQUIC.Accept(context.Background())
 // 	if err != nil {
-// 		fmt.Printf("SRHQuic:: %v\n", err)
+// 		fmt.Printf("SRHQUIC:: %v\n", err)
 // 		os.Exit(1)
 // 	}
-// 	ConnsSRHQuic = append(ConnsSRHQuic, temp) // Quic Session
+// 	ConnsSRHQUIC = append(ConnsSRHQUIC, temp) // Quic Session
 // 	currentConnectionQuic++
 
 // 	// receive size
 // 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-// 	tempConn := ConnsSRHQuic[currentConnectionQuic]
+// 	tempConn := ConnsSRHQUIC[currentConnectionQuic]
 // 	stream, err := tempConn.AcceptStream(context.Background())
 // 	//stream, err := tempConn.OpenStreamSync(context.Background())
-// 	StreamsSRHQuic = append(StreamsSRHQuic, stream)
+// 	StreamsSRHQUIC = append(StreamsSRHQUIC, stream)
 // 	if err != nil {
-// 		fmt.Printf("SRHQuic:: %v\n", err)
+// 		fmt.Printf("SRHQUIC:: %v\n", err)
 // 		os.Exit(1)
 // 	}
 // 	_, err = stream.Read(size)
 // 	if err == io.EOF {
 // 		{
-// 			fmt.Printf("SRHQuic:: Accept and Read\n")
+// 			fmt.Printf("SRHQUIC:: Accept and Read\n")
 // 			os.Exit(0)
 // 		}
 // 	} else if err != nil && err != io.EOF {
-// 		fmt.Printf("SRHQuic:: %v\n", err)
+// 		fmt.Printf("SRHQUIC:: %v\n", err)
 // 		os.Exit(1)
 // 	}
-// 	stream2 := StreamsSRHQuic[currentConnectionQuic]
+// 	stream2 := StreamsSRHQUIC[currentConnectionQuic]
 // 	// receive message
 // 	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
 // 	_, err = stream2.Read(msgTemp)
 // 	if err != nil {
-// 		fmt.Printf("SRHQuic:: %v\n", err)
+// 		fmt.Printf("SRHQUIC:: %v\n", err)
 // 		os.Exit(1)
 // 	}
 // 	c <- msgTemp
@@ -276,14 +276,14 @@ func (s SRHQuic) I_Receive(id string, msg *messages.SAMessage, info *interface{}
 // func readQuic(currentConnectionQuic int, c chan []byte) {
 // 	// receive size
 // 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-// 	stream := StreamsSRHQuic[currentConnectionQuic]
+// 	stream := StreamsSRHQUIC[currentConnectionQuic]
 
 // 	_, err := stream.Read(size)
 // 	if err == io.EOF {
-// 		fmt.Printf("SRHQuic:: Read\n")
+// 		fmt.Printf("SRHQUIC:: Read\n")
 // 		os.Exit(0)
 // 	} else if err != nil && err != io.EOF {
-// 		fmt.Printf("SRHQuic:: %v\n", err)
+// 		fmt.Printf("SRHQUIC:: %v\n", err)
 // 		os.Exit(1)
 // 	}
 
@@ -291,7 +291,7 @@ func (s SRHQuic) I_Receive(id string, msg *messages.SAMessage, info *interface{}
 // 	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
 // 	_, err = stream.Read(msgTemp)
 // 	if err != nil {
-// 		fmt.Printf("SRHQuic:: %v\n", err)
+// 		fmt.Printf("SRHQUIC:: %v\n", err)
 // 		os.Exit(1)
 // 	}
 
@@ -300,8 +300,8 @@ func (s SRHQuic) I_Receive(id string, msg *messages.SAMessage, info *interface{}
 // 	return
 // }
 
-func (e SRHQuic) I_Send(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHQuic Version Not adapted")
+func (e SRHQUIC) I_Send(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHQUIC Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	lib.PrintlnDebug("msg.ToAddr", msg.ToAddr, "srhInfo.Clients", srhInfo.Clients)
@@ -311,7 +311,7 @@ func (e SRHQuic) I_Send(id string, msg *messages.SAMessage, info *interface{}, r
 		*reset = true
 		return
 	}
-	lib.PrintlnDebug("SRHQuic Version Not adapted   >>>>> QUIC => msg.ToAddr:", msg.ToAddr, "QUIC stream:", stream, "AdaptId:", client.AdaptId)
+	lib.PrintlnDebug("SRHQUIC Version Not adapted   >>>>> QUIC => msg.ToAddr:", msg.ToAddr, "QUIC stream:", stream, "AdaptId:", client.AdaptId)
 	msgPayload := msg.Payload.([]byte)
 
 	// send message's size
@@ -319,25 +319,25 @@ func (e SRHQuic) I_Send(id string, msg *messages.SAMessage, info *interface{}, r
 	binary.LittleEndian.PutUint32(size, uint32(len(msgPayload)))
 	_, err := stream.Write(size)
 	if err != nil {
-		fmt.Printf("SRHQuic:: %v\n", err)
+		fmt.Printf("SRHQUIC:: %v\n", err)
 		os.Exit(1)
 	}
 
 	// send message
 	_, err = stream.Write(msgPayload)
 	if err != nil {
-		fmt.Printf("SRHQuic:: %v\n", err)
+		fmt.Printf("SRHQUIC:: %v\n", err)
 		os.Exit(1)
 	}
 
 	// update info
 	*info = srhInfo
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTLS Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHQUIC Version Not adapted")
 	return
 }
 
-func (s SRHQuic) handler(info *interface{}, connectionIndex int) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHQuic Version Not adapted")
+func (s SRHQUIC) handler(info *interface{}, connectionIndex int) {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHQUIC Version Not adapted")
 
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
@@ -348,10 +348,10 @@ func (s SRHQuic) handler(info *interface{}, connectionIndex int) {
 		if !*executeForever {
 			break
 		}
-		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR", "SRHQuic Version Not adapted")
+		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR", "SRHQUIC Version Not adapted")
 		size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 		_, err := stream.Read(size)
-		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Read finished", "SRHQuic Version Not adapted")
+		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Read finished", "SRHQUIC Version Not adapted")
 		if err != nil {
 			if err == io.EOF ||
 				strings.Contains(err.Error(), "use of closed network connection") ||
@@ -381,7 +381,7 @@ func (s SRHQuic) handler(info *interface{}, connectionIndex int) {
 
 		if changeProtocol, miopPacket := s.isAdapt(msgTemp); changeProtocol {
 			if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
-				lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHQuic Version Not adapted")
+				lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHQUIC Version Not adapted")
 				break
 			}
 		}
@@ -402,23 +402,23 @@ func (s SRHQuic) handler(info *interface{}, connectionIndex int) {
 		}
 
 		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, QUICStream: stream, ToAddress: srhInfo.Clients[connectionIndex].Ip}
-		lib.PrintlnDebug("SRHQuic Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+		lib.PrintlnDebug("SRHQUIC Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		if !*executeForever {
 			break
 		}
 		srhInfo.RcvedMessages <- rcvMessage
-		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHQuic Version Not adapted")
+		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHQUIC Version Not adapted")
 	}
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHQuic Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHQUIC Version Not adapted")
 }
 
-func (s SRHQuic) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
+func (s SRHQUIC) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }
 
-func (s SRHQuic) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
+func (s SRHQUIC) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "Connect", miop
@@ -426,11 +426,11 @@ func (s SRHQuic) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
 
 func getServerTLSQuicConfig() *tls.Config {
 	if shared.CRT_PATH == "" {
-		log.Fatal("SRHQuic:: Error:: Environment variable 'CRT_PATH' not configured\n")
+		log.Fatal("SRHQUIC:: Error:: Environment variable 'CRT_PATH' not configured\n")
 	}
 
 	if shared.KEY_PATH == "" {
-		log.Fatal("SRHQuic:: Error:: Environment variable 'KEY_PATH' not configured\n")
+		log.Fatal("SRHQUIC:: Error:: Environment variable 'KEY_PATH' not configured\n")
 	}
 
 	cert, err := tls.LoadX509KeyPair(shared.CRT_PATH, shared.KEY_PATH)
@@ -445,10 +445,10 @@ func getServerTLSQuicConfig() *tls.Config {
 	return tlsConfig
 }
 
-// func (e SRHQuic) Selector(elem interface{}, elemInfo []*interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
+// func (e SRHQUIC) Selector(elem interface{}, elemInfo []*interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
 // 	if op[2] == 'R' { // I_Receive
-// 		elem.(SRHQuic).I_Receive(msg, info, elemInfo)
+// 		elem.(SRHQUIC).I_Receive(msg, info, elemInfo)
 // 	} else { // "I_Send"
-// 		elem.(SRHQuic).I_Send(msg, info, elemInfo)
+// 		elem.(SRHQUIC).I_Send(msg, info, elemInfo)
 // 	}
 // }

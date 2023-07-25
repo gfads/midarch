@@ -33,7 +33,7 @@ func (s SRHTCP) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip s
 	}
 
 	//lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total clients", len(clients))
-	if len(clients) < 1 { //shared.MAX_NUMBER_OF_CONNECTIONS { TODO: dcruzb go back the env var
+	if len(clients) < 2 { //shared.MAX_NUMBER_OF_CONNECTIONS { TODO: dcruzb go back the env var
 		client := messages.Client{
 			Ip:            "",
 			Connection:    nil,
