@@ -1,12 +1,12 @@
-Configuration calculatordistributedservermid :=
+Configuration FibonacciDistributedServerMid :=
   Components
       naming            : Namingproxy
       requestor         : Requestor
       fibonacciinvoker  : FibonacciInvoker
       marshaller        : Jsonmarshaller
       marshaller2       : Jsonmarshaller
-      crh               : CRHUDP
-      srh               : SRHUDP
+      crh               : CRHQUIC
+      srh               : SRHQUIC
 
    Connectors
       t1 : Requestreply
