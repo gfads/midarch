@@ -53,7 +53,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 		crhInfo.Conns[addr], err = net.DialUDP("udp", localUdpAddr, udpAddr)
 		if err != nil {
-			lib.PrintlnError("Erro na discagem", crhInfo.Conns[addr], err)
+			lib.PrintlnError("Dial error", crhInfo.Conns[addr], err)
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		} //else{
 
@@ -63,7 +63,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 			msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
 			err = c.send(sizeOfMsgSize, msgPayload, crhInfo.Conns[addr])
 			if err != nil {
-				lib.PrintlnError("Erro no send após discagem", crhInfo.Conns[addr], err)
+				lib.PrintlnError("Error on send after dial", crhInfo.Conns[addr], err)
 				continue
 				//shared.ErrorHandler(shared.GetFunction(), err.Error())
 			} //else{
