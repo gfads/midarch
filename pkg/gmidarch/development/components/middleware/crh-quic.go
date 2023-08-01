@@ -11,7 +11,6 @@ import (
 	"os"
 
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
-	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
 	"github.com/gfads/midarch/pkg/shared"
 	"github.com/gfads/midarch/pkg/shared/lib"
 	"github.com/quic-go/quic-go"
@@ -100,36 +99,7 @@ func (c CRHQUIC) I_Process(id string, msg *messages.SAMessage, info *interface{}
 	}
 	//fmt.Printf("CRHQUIC:: Message received from Server:: [%v,%v] \n",conn.LocalAddr(),conn.RemoteAddr())
 
-	if changeProtocol, miopPacket := c.isAdapt(msgFromServer); changeProtocol {
-		lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
-
-		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
-
-		miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{miopPacket.Bd.ReqBody.Body[0], shared.AdaptId, "Ok"}, shared.AdaptId) // idx is the Connection ID
-		msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
-		c.send(sizeOfMsgSize, msgPayload, stream)
-
-		if miopPacket.Bd.ReqBody.Body[0] == "udp" {
-			lib.PrintlnInfo("Adapting => UDP")
-			//evolutive.GeneratePlugin("crhudp_v1", "crhudp", "crhudp_v1")
-			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhudp")
-		} else if miopPacket.Bd.ReqBody.Body[0] == "tcp" {
-			lib.PrintlnInfo("Adapting => TCP")
-			//evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
-			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhtcp")
-		} else if miopPacket.Bd.ReqBody.Body[0] == "tls" {
-			lib.PrintlnInfo("Adapting => TLS")
-			//evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
-			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhtls")
-		} else if miopPacket.Bd.ReqBody.Body[0] == "quic" {
-			lib.PrintlnInfo("Adapting => QUIC")
-			//evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
-			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhquic")
-		} else {
-			msgFromServer, _ = c.read(stream, sizeOfMsgSize)
-			//fmt.Println("=================> ############### ============> ########### TCP: Leu o read")
-		}
-	}
+	VerifyAdaptationQUIC(msgFromServer, sizeOfMsgSize, stream, c.send)
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
@@ -174,12 +144,6 @@ func (c CRHQUIC) read(stream quic.Stream, size []byte) ([]byte, error) {
 		return nil, err
 	}
 	return msgFromServer, nil
-}
-
-func (c CRHQUIC) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHQUIC Version Not adapted")
-	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
-	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }
 
 func getClientTLSQuicConfig() *tls.Config {
