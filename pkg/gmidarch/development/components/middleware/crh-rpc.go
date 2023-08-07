@@ -11,12 +11,12 @@ import (
 	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
-// @Type: CRHTCP
+// @Type: CRHRPC
 // @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
-type CRHTCP struct{}
+type CRHRPC struct{}
 
-func (c CRHTCP) getLocalTcpAddr() *net.TCPAddr {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+func (c CRHRPC) getLocalTcpAddr() *net.TCPAddr {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
 	//fmt.Println("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
 	lib.PrintlnDebug("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
 	var err error = nil
@@ -31,8 +31,8 @@ func (c CRHTCP) getLocalTcpAddr() *net.TCPAddr {
 	return localTCPAddr
 }
 
-func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+func (c CRHRPC) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
 	infoTemp := *info
 	crhInfo := infoTemp.(messages.CRHInfo)
 
@@ -116,8 +116,8 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
 
-func (c CRHTCP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+func (c CRHRPC) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
 	_, err := conn.Write(sizeOfMsgSize)
 	if err != nil {
@@ -134,8 +134,8 @@ func (c CRHTCP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) er
 	return nil
 }
 
-func (c CRHTCP) read(conn net.Conn, size []byte) ([]byte, error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+func (c CRHRPC) read(conn net.Conn, size []byte) ([]byte, error) {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
 	// receive reply's size
 	_, err := conn.Read(size)
 	if err != nil {

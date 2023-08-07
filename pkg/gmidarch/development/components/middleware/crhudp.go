@@ -53,7 +53,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 		crhInfo.Conns[addr], err = net.DialUDP("udp", localUdpAddr, udpAddr)
 		if err != nil {
-			lib.PrintlnError("Erro na discagem", crhInfo.Conns[addr], err)
+			lib.PrintlnError("Dial error", crhInfo.Conns[addr], err)
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		} //else{
 
@@ -63,7 +63,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 			msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
 			err = c.send(sizeOfMsgSize, msgPayload, crhInfo.Conns[addr])
 			if err != nil {
-				lib.PrintlnError("Erro no send após discagem", crhInfo.Conns[addr], err)
+				lib.PrintlnError("Error on send after dial", crhInfo.Conns[addr], err)
 				continue
 				//shared.ErrorHandler(shared.GetFunction(), err.Error())
 			} //else{
@@ -106,39 +106,9 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		delete(crhInfo.Conns, addr)
 		return
 	}
-	if changeProtocol, miopPacket := c.isAdapt(msgFromServer); changeProtocol {
-		lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
-		//lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body[0]:", miopPacket.Bd.ReqBody.Body[0])
-		//lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body[1]:", miopPacket.Bd.ReqBody.Body[1])
-		//lib.PrintlnDebug("Adapting, shared.AdaptId:", shared.AdaptId)
-		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
 
-		miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{miopPacket.Bd.ReqBody.Body[0], shared.AdaptId, "Ok"}, shared.AdaptId) // idx is the Connection ID
-		msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
-		c.send(sizeOfMsgSize, msgPayload, conn)
-
-		if miopPacket.Bd.ReqBody.Body[0] == "udp" {
-			lib.PrintlnInfo("Adapting => UDP")
-			//evolutive.GeneratePlugin("crhudp_v1", "crhudp", "crhudp_v1")
-			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhudp")
-		} else if miopPacket.Bd.ReqBody.Body[0] == "tcp" {
-			lib.PrintlnInfo("Adapting => TCP")
-			//evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
-			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhtcp")
-		} else if miopPacket.Bd.ReqBody.Body[0] == "tls" {
-			lib.PrintlnInfo("Adapting => TLS")
-			//evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
-			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhtls")
-		} else if miopPacket.Bd.ReqBody.Body[0] == "quic" {
-			lib.PrintlnInfo("Adapting => QUIC")
-			//evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
-			shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhquic")
-		} else {
-			msgFromServer, _ = c.read(conn, sizeOfMsgSize)
-			//fmt.Println("=================> ############### ============> ########### TCP: Leu o read")
-		}
-	}
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Leu")
+	VerifyAdaptation(msgFromServer, sizeOfMsgSize, conn, c.send)
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Read")
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }

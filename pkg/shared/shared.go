@@ -2,6 +2,7 @@ package shared
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -403,7 +404,7 @@ func SaveFile(path, name, ext string, content []string) {
 	defer file.Close()
 }
 
-func GetTypeAndBehaviour(file string) (string, string) {
+func GetTypeAndBehaviour(file string) (string, string, error) {
 	typeName := ""
 	behaviour := ""
 	foundType := false
@@ -441,10 +442,10 @@ func GetTypeAndBehaviour(file string) (string, string) {
 
 	// Check wether type/behaviour information is complete or not
 	if !foundType || !foundBehaviour {
-		ErrorHandler(GetFunction(), "Tags '"+BEHAVIOUR_TAG+"' or '"+TYPE_TAG+"' are missing in '"+file+"''")
+		err = errors.New(GetFunction() + ":: Tags '" + BEHAVIOUR_TAG + "' or '" + TYPE_TAG + "' are missing in '" + file + "''")
 	}
 
-	return typeName, behaviour
+	return typeName, behaviour, err
 }
 
 func CompatibleComponents(componentTypeName1, componentTypeName2 string) bool {

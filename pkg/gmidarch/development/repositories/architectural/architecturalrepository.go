@@ -13,6 +13,7 @@ import (
 	"github.com/gfads/midarch/pkg/gmidarch/development/connectors"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/shared"
+	"github.com/gfads/midarch/pkg/shared/lib"
 	"golang.org/x/exp/maps"
 )
 
@@ -45,6 +46,8 @@ var SetOfComponentTypesRAM = map[string]interface{}{
 	"SRHTLS":            &middleware.SRHTLS{},
 	"CRHQUIC":           &middleware.CRHQUIC{},
 	"SRHQUIC":           &middleware.SRHQUIC{},
+	"CRHRPC":            &middleware.CRHRPC{},
+	"SRHRPC":            &middleware.SRHRPC{},
 	"Requestor":         &middleware.Requestor{},
 	"Naminginvoker":     &middleware.Naminginvoker{},
 	"Namingserver":      &middleware.Namingserver{},
@@ -111,7 +114,15 @@ func ReadComponentTypesFromDisk() map[string]string {
 
 	for file := range adaptiveFiles {
 		fullPathName := shared.DIR_ADAPTIVE_COMPONENTS + "/" + adaptiveFiles[file].Name()
-		typeName, behaviour := shared.GetTypeAndBehaviour(fullPathName)
+		typeName, behaviour, err := shared.GetTypeAndBehaviour(fullPathName)
+		if err != nil {
+			if strings.Contains(err.Error(), "Tags '"+shared.BEHAVIOUR_TAG+"' or '"+shared.TYPE_TAG+"' are missing") {
+				lib.PrintlnDebug(err.Error())
+				continue
+			} else {
+				shared.ErrorHandler(shared.GetFunction(), err.Error())
+			}
+		}
 		compLibrary[typeName] = behaviour
 	}
 
@@ -123,7 +134,15 @@ func ReadComponentTypesFromDisk() map[string]string {
 
 	for file := range appFiles {
 		fullPathName := shared.DIR_APP_COMPONENTS + "/" + appFiles[file].Name()
-		typeName, behaviour := shared.GetTypeAndBehaviour(fullPathName)
+		typeName, behaviour, err := shared.GetTypeAndBehaviour(fullPathName)
+		if err != nil {
+			if strings.Contains(err.Error(), "Tags '"+shared.BEHAVIOUR_TAG+"' or '"+shared.TYPE_TAG+"' are missing") {
+				lib.PrintlnDebug(err.Error())
+				continue
+			} else {
+				shared.ErrorHandler(shared.GetFunction(), err.Error())
+			}
+		}
 		compLibrary[typeName] = behaviour
 	}
 
@@ -135,7 +154,15 @@ func ReadComponentTypesFromDisk() map[string]string {
 
 	for file := range midFiles {
 		fullPathName := shared.DIR_MIDDLEWARE_COMPONENTS + "/" + midFiles[file].Name()
-		typeName, behaviour := shared.GetTypeAndBehaviour(fullPathName)
+		typeName, behaviour, err := shared.GetTypeAndBehaviour(fullPathName)
+		if err != nil {
+			if strings.Contains(err.Error(), "Tags '"+shared.BEHAVIOUR_TAG+"' or '"+shared.TYPE_TAG+"' are missing") {
+				lib.PrintlnDebug(err.Error())
+				continue
+			} else {
+				shared.ErrorHandler(shared.GetFunction(), err.Error())
+			}
+		}
 		compLibrary[typeName] = behaviour
 	}
 
@@ -152,7 +179,15 @@ func ReadComponentTypesFromDisk() map[string]string {
 		}
 		for file := range proxyFiles {
 			fullPathName := shared.DIR_PROXIES_COMPONENTS + "/" + proxiesFolders[folder].Name() + "/" + proxyFiles[file].Name()
-			typeName, behaviour := shared.GetTypeAndBehaviour(fullPathName)
+			typeName, behaviour, err := shared.GetTypeAndBehaviour(fullPathName)
+			if err != nil {
+				if strings.Contains(err.Error(), "Tags '"+shared.BEHAVIOUR_TAG+"' or '"+shared.TYPE_TAG+"' are missing") {
+					lib.PrintlnDebug(err.Error())
+					continue
+				} else {
+					shared.ErrorHandler(shared.GetFunction(), err.Error())
+				}
+			}
 			compLibrary[typeName] = behaviour
 		}
 	}
@@ -172,7 +207,15 @@ func ReadComponentTypesFromDisk() map[string]string {
 
 			for file := range businessFiles {
 				fullPathName := businessFolder + "/" + businessFiles[file].Name()
-				typeName, behaviour := shared.GetTypeAndBehaviour(fullPathName)
+				typeName, behaviour, err := shared.GetTypeAndBehaviour(fullPathName)
+				if err != nil {
+					if strings.Contains(err.Error(), "Tags '"+shared.BEHAVIOUR_TAG+"' or '"+shared.TYPE_TAG+"' are missing") {
+						lib.PrintlnDebug(err.Error())
+						continue
+					} else {
+						shared.ErrorHandler(shared.GetFunction(), err.Error())
+					}
+				}
 				compLibrary[typeName] = behaviour
 			}
 		}

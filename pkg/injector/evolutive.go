@@ -9,6 +9,8 @@ import (
 	"os/exec"
 	"strings"
 	"time"
+
+	"github.com/gfads/midarch/pkg/shared"
 )
 
 type EvolutiveInjector struct{}
@@ -105,6 +107,10 @@ func GeneratePlugin(source, pluginName, versionedPluginName string) {
 	}
 
 	pluginType, _ := shared.GetTypeAndBehaviour(shared.DIR_PLUGINS_SOURCE + "/" + versionedPluginName + "/" + pluginName + ".go")
+	pluginType, _, err := shared.GetTypeAndBehaviour(shared.DIR_PLUGINS_SOURCE + "/" + versionedPluginName + "/" + pluginName + ".go")
+	if err != nil {
+		shared.ErrorHandler(shared.GetFunction(), err.Error())
+	}
 	pluginSourcePath := shared.DIR_PLUGINS_IMPORT + "/" + versionedPluginName
 
 	//log.Println("pluginSourcePath:", pluginSourcePath)

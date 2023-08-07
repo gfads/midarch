@@ -1,11 +1,11 @@
-Configuration calculatordistributedclientmid :=
+Configuration FibonacciDistributedClientMid :=
 
    Components
       namingproxy       : Namingproxy
       fibonacciproxy    : FibonacciProxy
       requestor         : Requestor
       marshaller        : Jsonmarshaller
-      crh               : CRHUDP
+      crh               : CRHQUIC
 
    Connectors
       t1 : Ntoonereqrep
