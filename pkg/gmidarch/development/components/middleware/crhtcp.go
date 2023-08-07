@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
+	"github.com/gfads/midarch/pkg/gmidarch/development/protocols"
 	"github.com/gfads/midarch/pkg/shared"
 	"github.com/gfads/midarch/pkg/shared/lib"
 )
@@ -59,9 +60,14 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	var err error
 	//fmt.Println("Vai conectar", crhInfo.Conns[addr])
 	lib.PrintlnDebug("Vai conectar", crhInfo.Conns[addr])
-	if _, ok := crhInfo.Conns[addr]; !ok || reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name() != "TCPConn" { // no connection open yet
+	if _, ok := crhInfo.Protocols[addr]; !ok || reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name() != "TCP" { // no connection open yet
 		//fmt.Println("Entrou", crhInfo.Conns[addr])
 		lib.PrintlnDebug("Entrou", crhInfo.Conns[addr])
+		if reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name() != "TCP" {
+			crhInfo.Protocols[addr].CloseConnection()
+			crhInfo.Protocols[addr] = protocols.TCP{}
+		}
+		crhInfo.Protocols[addr].ConnectToServer(host, port)
 		tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
