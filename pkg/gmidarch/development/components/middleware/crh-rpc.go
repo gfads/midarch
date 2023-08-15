@@ -3,7 +3,7 @@ package middleware
 import (
 	"encoding/binary"
 	"net"
-	"reflect"
+	"net/rpc"
 	"time"
 
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
@@ -59,21 +59,21 @@ func (c CRHRPC) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	var err error
 	//fmt.Println("Vai conectar", crhInfo.Conns[addr])
 	lib.PrintlnDebug("Vai conectar", crhInfo.Conns[addr])
-	if _, ok := crhInfo.Conns[addr]; !ok || reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name() != "TCPConn" { // no connection open yet
+	if _, ok := crhInfo.RpcClient[addr]; !ok { // no connection open yet
 		//fmt.Println("Entrou", crhInfo.Conns[addr])
 		lib.PrintlnDebug("Entrou", crhInfo.Conns[addr])
-		tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
-		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(), err.Error())
-		}
+		// tcpAddr, err := net.ResolveTCPAddr("tcp", addr)
+		// if err != nil {
+		// 	shared.ErrorHandler(shared.GetFunction(), err.Error())
+		// }
 		//log.Println("Resolveu", crhInfo.Conns[addr])
 		//localTcpAddr := c.getLocalTcpAddr()
 
 		for {
-			crhInfo.Conns[addr], err = net.DialTCP("tcp", nil, tcpAddr)
+			crhInfo.RpcClient[addr], err = rpc.Dial("tcp", addr)
 			//log.Println("Dialed", crhInfo.Conns[addr])
 			if err != nil {
-				lib.PrintlnError("Erro na discagem", crhInfo.Conns[addr], err)
+				lib.PrintlnError("Dial error", crhInfo.Conns[addr], err)
 				time.Sleep(200 * time.Millisecond)
 				//shared.ErrorHandler(shared.GetFunction(), err.Error())
 			} else {

@@ -9,6 +9,7 @@ import (
 
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/pkg/gmidarch/development/protocols"
 	"github.com/gfads/midarch/pkg/shared"
 	"github.com/gfads/midarch/pkg/shared/lib"
 )
@@ -68,11 +69,17 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	//lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 2 adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
-	srhInfo.Counter++
+	// srhInfo.Counter++
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Cons", len(srhInfo.Clients))
 	//log.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Counter", srhInfo.Counter)
 
-	// check if a listen has been already created
+	if srhInfo.Protocol == nil {
+		srhInfo.Protocol = &protocols.TCP{}
+	}
+
+	srhInfo.Protocol.WaitForConnection()
+
+	// check if a listener has already been created
 	if srhInfo.Ln == nil { // no listen created
 		servAddr, err := net.ResolveTCPAddr("tcp", srhInfo.EndPoint.Host+":"+srhInfo.EndPoint.Port)
 		if err != nil {
