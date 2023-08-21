@@ -11,12 +11,12 @@ import (
 	"github.com/quic-go/quic-go"
 )
 
-func VerifyProtocolAdaptation(msgFromServer []byte, sizeOfMsgSize []byte, protocol generic.Protocol) (err error) {
+func VerifyProtocolAdaptation(msgFromServer []byte, protocol generic.Protocol) (err error) {
 	if changeProtocol, miopPacket := isAdapt(msgFromServer); changeProtocol {
 		lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
 		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
 		adaptToProtocol := miopPacket.Bd.ReqBody.Body[0].(string)
-		confirmProtocolAdaptation(shared.AdaptId, adaptToProtocol, sizeOfMsgSize, protocol)
+		confirmProtocolAdaptation(shared.AdaptId, adaptToProtocol, protocol)
 		prepareToAdaptTo(adaptToProtocol)
 	}
 
@@ -53,10 +53,10 @@ func isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }
 
-func confirmProtocolAdaptation(adaptId int, adaptToProtocol string, sizeOfMsgSize []byte, protocol generic.Protocol) (err error) {
+func confirmProtocolAdaptation(adaptId int, adaptToProtocol string, protocol generic.Protocol) (err error) {
 	miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{adaptToProtocol, adaptId, "Ok"}, adaptId)
 	msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
-	return protocol.Send(sizeOfMsgSize, msgPayload)
+	return protocol.Send(msgPayload)
 }
 
 func confirmAdaptation(adaptId int, protocol string, sizeOfMsgSize []byte, conn net.Conn, send func(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error) (err error) {
