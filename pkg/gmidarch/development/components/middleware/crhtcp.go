@@ -70,29 +70,29 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	lib.PrintlnDebug("Connected", crhInfo.Protocols[addr])
 
 	// send message's size
-	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	err = crhInfo.Protocols[addr].Send(sizeOfMsgSize, msgToServer)
+
+	err = crhInfo.Protocols[addr].Send(msgToServer)
 	if err != nil {
 		lib.PrintlnError("Error trying to send message:", err.Error())
 		*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
-		crhInfo.Conns[addr].Close()
-		crhInfo.Conns[addr] = nil
-		delete(crhInfo.Conns, addr)
+		crhInfo.Protocols[addr].CloseConnection()
+		crhInfo.Protocols[addr] = nil
+		delete(crhInfo.Protocols, addr)
 		return
 	}
 	lib.PrintlnDebug("Sent message", crhInfo.Protocols[addr])
 
-	msgFromServer, err := crhInfo.Protocols[addr].Receive(sizeOfMsgSize)
+	msgFromServer, err := crhInfo.Protocols[addr].Receive()
 	if err != nil {
 		lib.PrintlnError("Error trying to read message:", err.Error())
 		*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
-		crhInfo.Conns[addr].Close()
-		crhInfo.Conns[addr] = nil
-		delete(crhInfo.Conns, addr)
+		crhInfo.Protocols[addr].CloseConnection()
+		crhInfo.Protocols[addr] = nil
+		delete(crhInfo.Protocols, addr)
 		return
 	}
 	lib.PrintlnDebug("Received message", crhInfo.Protocols[addr])
-	VerifyProtocolAdaptation(msgFromServer, sizeOfMsgSize, crhInfo.Protocols[addr])
+	VerifyProtocolAdaptation(msgFromServer, crhInfo.Protocols[addr])
 	lib.PrintlnDebug("Adaptation Verified", crhInfo.Protocols[addr])
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
