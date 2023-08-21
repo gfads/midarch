@@ -181,7 +181,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 					adaptFrom = "tls"
 				} else if strings.Contains(unitElemType, "QUIC") {
 					adaptFrom = "quic"
-					lib.PrintlnInfo("****** Adapt to QUIC")
+					lib.PrintlnInfo("****** Adapt from QUIC")
 				}
 
 				isSRH := strings.Contains(cmdElemType, "SRH")
