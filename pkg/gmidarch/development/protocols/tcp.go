@@ -18,10 +18,19 @@ import (
 type Client struct {
 	connection net.Conn
 	Ip         string
+	adaptId    int
 }
 
 func (cl *Client) Address() string {
 	return cl.Ip
+}
+
+func (cl *Client) AdaptId() int {
+	return cl.adaptId
+}
+
+func (cl *Client) SetAdaptId(adaptId int) {
+	cl.adaptId = adaptId
 }
 
 func (cl *Client) Connection() interface{} {
@@ -29,9 +38,12 @@ func (cl *Client) Connection() interface{} {
 }
 
 func (cl *Client) CloseConnection() {
-	err := cl.connection.Close()
-	if err != nil {
-		lib.PrintlnError(err)
+	cl.Ip = ""
+	if cl.connection != nil {
+		err := cl.connection.Close()
+		if err != nil {
+			lib.PrintlnError(err)
+		}
 	}
 }
 
@@ -124,12 +136,14 @@ func (cl *Client) Send(msg []byte) error {
 }
 
 type TCP struct {
+	// Server attributes
 	ip                 string
 	port               string
 	listener           net.Listener
-	serverConnection   net.Conn
 	initialConnections int
 	clients            []*generic.Client
+	// Client attributes
+	serverConnection net.Conn
 }
 
 func (st *TCP) StartServer(ip, port string, initialConnections int) {
@@ -203,15 +217,20 @@ func (st *TCP) ConnectToServer(ip, port string) {
 
 func (st *TCP) WaitForConnection(cliIdx int) (cl *generic.Client) { // TODO if cliIdx >= inicitalConnections => need to append to the slice
 	// aceita conexões na porta
+	lib.PrintlnInfo("Before accept")
 	conn, err := st.listener.Accept()
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), "Error while waiting for connection: "+err.Error())
 	}
+	lib.PrintlnInfo("After accept")
+	if len(st.clients) > cliIdx {
+		(*st.clients[cliIdx]).(*Client).connection = conn
+		(*st.clients[cliIdx]).(*Client).Ip = conn.RemoteAddr().String()
 
-	(*st.clients[cliIdx]).(*Client).connection = conn
-	(*st.clients[cliIdx]).(*Client).Ip = conn.RemoteAddr().String()
-
-	return st.clients[cliIdx]
+		return st.clients[cliIdx]
+	} else {
+		return nil
+	}
 }
 
 func (st *TCP) CloseConnection() {
@@ -254,7 +273,7 @@ func (st *TCP) WriteString(message string) {
 }
 
 func (st *TCP) Receive() ([]byte, error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "TCP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// receive reply's size
 	_, err := st.serverConnection.Read(sizeOfMsgSize)
@@ -263,7 +282,7 @@ func (st *TCP) Receive() ([]byte, error) {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
-
+	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "TCP read size")
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(sizeOfMsgSize), shared.NUM_MAX_MESSAGE_BYTES)
 	_, err = st.serverConnection.Read(msgFromServer)
@@ -272,6 +291,7 @@ func (st *TCP) Receive() ([]byte, error) {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
+	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "TCP read message")
 	return msgFromServer, nil
 }
 
@@ -294,16 +314,20 @@ func (st *TCP) Send(msgToServer []byte) error {
 	return nil
 }
 
+func (st *TCP) GetClients() (client []*generic.Client) {
+	return st.clients
+}
+
+func (st *TCP) GetClient(idx int) (client generic.Client) {
+	return *st.clients[idx]
+}
+
 func (st *TCP) AddClient(client generic.Client, idx int) {
 	if idx < 0 {
 		st.clients = append(st.clients, &client)
 	} else if idx < st.initialConnections {
 		st.clients[idx] = &client
 	}
-}
-
-func (st *TCP) GetClient(idx int) (client generic.Client) {
-	return *st.clients[idx]
 }
 
 func (st *TCP) GetClientFromAddr(addr string) (client generic.Client) {
@@ -316,3 +340,32 @@ func (st *TCP) GetClientFromAddr(addr string) (client generic.Client) {
 	log.Println("IP without client from the ip:", addr)
 	return nil
 }
+
+func (st *TCP) InitializeClients() {
+	for _, client := range st.clients {
+		if client != nil {
+			(*client).CloseConnection()
+		}
+	}
+	st.clients = st.clients[:0]
+}
+
+func Remove(slice []*Client, idx int) []*Client {
+	var newSlice []*Client
+
+	if len(slice) == idx+1 {
+		newSlice = append(slice[:idx])
+	} else {
+		newSlice = append(slice[:idx], slice[idx+1:]...)
+	}
+
+	return newSlice
+}
+
+// for len(srhInfo.Protocol.GetClients()) > 0 {
+// 	tmpClient := srhInfo.Protocol.GetClients()[0]
+// 	lib.PrintlnInfo("Will initialize:", tmpClient)
+// 	srhInfo.Clients = messages.Remove(srhInfo.Clients, len(srhInfo.Clients)-1)
+// 	tmpClient.Initialize()
+// 	lib.PrintlnInfo("Initialized")
+// }

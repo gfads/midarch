@@ -13,13 +13,17 @@ type Protocol interface {
 	Receive() ([]byte, error)
 	Send(msgToServer []byte) error
 
-	AddClient(client Client, idx int)
+	GetClients() (clients []*Client)
 	GetClient(idx int) (client Client)
 	GetClientFromAddr(addr string) (client Client)
+	AddClient(client Client, idx int)
+	InitializeClients() // Close connections and remove all clientes from the pool
 }
 
 type Client interface {
 	Address() string
+	AdaptId() int
+	SetAdaptId(adaptId int)
 
 	Connection() (conn interface{})
 	CloseConnection()

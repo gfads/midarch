@@ -54,14 +54,16 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	go func() {
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients Index", availableConenctionIndex)
 
-		srhInfo.Protocol.WaitForConnection(availableConenctionIndex)
+		client := srhInfo.Protocol.WaitForConnection(availableConenctionIndex)
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Connected Client", client)
 
 		// Update info
 		*info = srhInfo
 
 		// Start goroutine
-		go s.handler(info, availableConenctionIndex)
+		if client != nil {
+			go s.handler(info, availableConenctionIndex)
+		}
 	}()
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version Not adapted")
 	return
