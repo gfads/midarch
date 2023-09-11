@@ -214,26 +214,28 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 							shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
 						}
 					}
-					for idx, client := range srhInfo.Protocol.GetClients() {
-						//fmt.Println("Vai adaptar")
-						// if Client from Connection Pool have a client connected
-						if (*client).Address() != "" {
-							//fmt.Println("Vai adaptar: IP:", client.Ip)
-							// if (adaptFrom == "udp" && client.UDPConnection == nil) ||
-							// 	(adaptFrom == "tcp" && client.Connection == nil) ||
-							// 	(adaptFrom == "quic" && client.QUICStream == nil) {
-							// 	//fmt.Println("Vai adaptar: pulou sem conexão")
-							// 	continue
-							// }
-							//fmt.Println("Vai adaptar: entrou AdaptId:", client.AdaptId)
-							(*client).SetAdaptId(idx)
-							miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{adaptTo, (*client).AdaptId()}, (*client).AdaptId()) // idx is the Connection ID
-							msg := &messages.SAMessage{}
-							msg.ToAddr = (*client).Address()
-							//log.Println("msg.ToAddr:", msg.ToAddr)
-							msg.Payload = middleware.Jsonmarshaller{}.Marshall(miopPacket)
-							// Coordinate the protocol change
-							shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
+					if srhInfo.Protocol != nil {
+						for idx, client := range srhInfo.Protocol.GetClients() {
+							//fmt.Println("Vai adaptar")
+							// if Client from Connection Pool have a client connected
+							if (*client).Address() != "" {
+								//fmt.Println("Vai adaptar: IP:", client.Ip)
+								// if (adaptFrom == "udp" && client.UDPConnection == nil) ||
+								// 	(adaptFrom == "tcp" && client.Connection == nil) ||
+								// 	(adaptFrom == "quic" && client.QUICStream == nil) {
+								// 	//fmt.Println("Vai adaptar: pulou sem conexão")
+								// 	continue
+								// }
+								//fmt.Println("Vai adaptar: entrou AdaptId:", client.AdaptId)
+								(*client).SetAdaptId(idx)
+								miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{adaptTo, (*client).AdaptId()}, (*client).AdaptId()) // idx is the Connection ID
+								msg := &messages.SAMessage{}
+								msg.ToAddr = (*client).Address()
+								//log.Println("msg.ToAddr:", msg.ToAddr)
+								msg.Payload = middleware.Jsonmarshaller{}.Marshall(miopPacket)
+								// Coordinate the protocol change
+								shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
+							}
 						}
 					}
 					time.Sleep(200 * time.Millisecond)
@@ -264,9 +266,14 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 					lib.PrintlnInfo("Will close CRH connections")
 					infoTemp := elementComponent.Info
 					crhInfo := infoTemp.(messages.CRHInfo)
-					for _, protocol := range crhInfo.Protocols {
-						protocol.CloseConnection()
+					for idx, protocol := range crhInfo.Protocols {
+						if protocol != nil {
+							protocol.CloseConnection()
+						}
+						crhInfo.Protocols[idx] = nil
+						delete(crhInfo.Protocols, idx)
 					}
+
 					for _, conn := range crhInfo.Conns {
 						conn.Close()
 					}
@@ -290,7 +297,10 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 						tmpClient.Initialize()
 						lib.PrintlnInfo("Initialized")
 					}
-					srhInfo.Protocol.InitializeClients()
+					if srhInfo.Protocol != nil {
+						srhInfo.Protocol.StopServer()
+						srhInfo.Protocol = nil
+					}
 				}
 
 				//infoTemp := make([]*interface{}, 1)

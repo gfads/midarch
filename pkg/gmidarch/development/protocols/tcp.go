@@ -161,8 +161,9 @@ func (st *TCP) StartServer(ip, port string, initialConnections int) {
 }
 
 func (st *TCP) StopServer() {
+	st.ResetClients()
 	err := st.listener.Close()
-	if err != nil {
+	if err != nil && !strings.Contains(err.Error(), "use of closed network connection") {
 		lib.PrintlnError("Error while stoping server. Details:", err)
 	}
 }
@@ -220,9 +221,12 @@ func (st *TCP) WaitForConnection(cliIdx int) (cl *generic.Client) { // TODO if c
 	lib.PrintlnInfo("Before accept")
 	conn, err := st.listener.Accept()
 	if err != nil {
+		if strings.Contains(err.Error(), "use of closed network connection") {
+			return nil
+		}
 		shared.ErrorHandler(shared.GetFunction(), "Error while waiting for connection: "+err.Error())
 	}
-	lib.PrintlnInfo("After accept")
+	lib.PrintlnInfo("After accept (cliIdx", cliIdx, ")")
 	if len(st.clients) > cliIdx {
 		(*st.clients[cliIdx]).(*Client).connection = conn
 		(*st.clients[cliIdx]).(*Client).Ip = conn.RemoteAddr().String()
@@ -341,13 +345,15 @@ func (st *TCP) GetClientFromAddr(addr string) (client generic.Client) {
 	return nil
 }
 
-func (st *TCP) InitializeClients() {
+func (st *TCP) ResetClients() {
+	// log.Println("TCP.ResetClients")
 	for _, client := range st.clients {
 		if client != nil {
 			(*client).CloseConnection()
 		}
 	}
 	st.clients = st.clients[:0]
+	// log.Println("TCP.ResetClients clients length:", len(st.clients))
 }
 
 func Remove(slice []*Client, idx int) []*Client {

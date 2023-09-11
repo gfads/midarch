@@ -17,7 +17,7 @@ type Protocol interface {
 	GetClient(idx int) (client Client)
 	GetClientFromAddr(addr string) (client Client)
 	AddClient(client Client, idx int)
-	InitializeClients() // Close connections and remove all clientes from the pool
+	ResetClients() // Close connections and remove all clientes from the pool
 }
 
 type Client interface {
