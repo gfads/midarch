@@ -15,29 +15,29 @@ import (
 	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
-type Client struct {
+type TCPClient struct {
 	connection net.Conn
 	Ip         string
 	adaptId    int
 }
 
-func (cl *Client) Address() string {
+func (cl *TCPClient) Address() string {
 	return cl.Ip
 }
 
-func (cl *Client) AdaptId() int {
+func (cl *TCPClient) AdaptId() int {
 	return cl.adaptId
 }
 
-func (cl *Client) SetAdaptId(adaptId int) {
+func (cl *TCPClient) SetAdaptId(adaptId int) {
 	cl.adaptId = adaptId
 }
 
-func (cl *Client) Connection() interface{} {
+func (cl *TCPClient) Connection() interface{} {
 	return cl.connection
 }
 
-func (cl *Client) CloseConnection() {
+func (cl *TCPClient) CloseConnection() {
 	cl.Ip = ""
 	if cl.connection != nil {
 		err := cl.connection.Close()
@@ -47,7 +47,7 @@ func (cl *Client) CloseConnection() {
 	}
 }
 
-func (cl *Client) ReadString() (message string) {
+func (cl *TCPClient) ReadString() (message string) {
 	var err error
 	// recebe solicitações do cliente
 	message, err = bufio.NewReader(cl.connection).ReadString('\n')
@@ -58,7 +58,7 @@ func (cl *Client) ReadString() (message string) {
 	return message
 }
 
-func (cl *Client) WriteString(message string) {
+func (cl *TCPClient) WriteString(message string) {
 	// envia resposta
 
 	// Vários tipos diferentes de se escrever utilizando Writer, todos funcionam
@@ -79,7 +79,7 @@ func (cl *Client) WriteString(message string) {
 	}
 }
 
-func (cl *Client) Read(b []byte) (err error) {
+func (cl *TCPClient) Read(b []byte) (err error) {
 	_, err = cl.connection.Read(b)
 	if err != nil {
 		if err == io.EOF || strings.Contains(err.Error(), "use of closed network connection") {
@@ -95,7 +95,7 @@ func (cl *Client) Read(b []byte) (err error) {
 	return nil
 }
 
-func (cl *Client) Receive() (msg []byte, err error) {
+func (cl *TCPClient) Receive() (msg []byte, err error) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	// receive reply's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
@@ -116,7 +116,7 @@ func (cl *Client) Receive() (msg []byte, err error) {
 	return msg, nil
 }
 
-func (cl *Client) Send(msg []byte) error {
+func (cl *TCPClient) Send(msg []byte) error {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msg)))
@@ -171,7 +171,7 @@ func (st *TCP) StopServer() {
 func (st *TCP) AvailableConnectionFromPool() (available bool, idx int) {
 	//lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total clients", len(clients))
 	if len(st.clients) < st.initialConnections {
-		client := &Client{}
+		client := &TCPClient{}
 		// *clientsPtr = append(clients, &client)
 		st.AddClient(client, -1)
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>	>>>>>>>>>>>>>> Total Clients", len(*clientsPtr))
@@ -180,7 +180,7 @@ func (st *TCP) AvailableConnectionFromPool() (available bool, idx int) {
 
 	for idx, client := range st.clients {
 		if client == nil {
-			st.AddClient(&Client{}, idx)
+			st.AddClient(&TCPClient{}, idx)
 			return true, idx
 		}
 	}
@@ -228,8 +228,8 @@ func (st *TCP) WaitForConnection(cliIdx int) (cl *generic.Client) { // TODO if c
 	}
 	lib.PrintlnInfo("After accept (cliIdx", cliIdx, ")")
 	if len(st.clients) > cliIdx {
-		(*st.clients[cliIdx]).(*Client).connection = conn
-		(*st.clients[cliIdx]).(*Client).Ip = conn.RemoteAddr().String()
+		(*st.clients[cliIdx]).(*TCPClient).connection = conn
+		(*st.clients[cliIdx]).(*TCPClient).Ip = conn.RemoteAddr().String()
 
 		return st.clients[cliIdx]
 	} else {
@@ -356,8 +356,8 @@ func (st *TCP) ResetClients() {
 	// log.Println("TCP.ResetClients clients length:", len(st.clients))
 }
 
-func Remove(slice []*Client, idx int) []*Client {
-	var newSlice []*Client
+func Remove(slice []*TCPClient, idx int) []*TCPClient {
+	var newSlice []*TCPClient
 
 	if len(slice) == idx+1 {
 		newSlice = append(slice[:idx])
