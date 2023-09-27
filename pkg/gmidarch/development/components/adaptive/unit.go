@@ -170,6 +170,9 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				} else if strings.Contains(cmdElemType, "QUIC") {
 					adaptTo = "quic"
 					lib.PrintlnInfo("****** Adapt to QUIC")
+				} else if strings.Contains(cmdElemType, "RPC") {
+					adaptTo = "rpc"
+					lib.PrintlnInfo("****** Adapt to RPC")
 				}
 
 				var adaptFrom string
@@ -182,6 +185,9 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				} else if strings.Contains(unitElemType, "QUIC") {
 					adaptFrom = "quic"
 					lib.PrintlnInfo("****** Adapt from QUIC")
+				} else if strings.Contains(unitElemType, "RPC") {
+					adaptFrom = "rpc"
+					lib.PrintlnInfo("****** Adapt from RPC")
 				}
 
 				isSRH := strings.Contains(cmdElemType, "SRH")
@@ -216,10 +222,10 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 					}
 					if srhInfo.Protocol != nil {
 						for idx, client := range srhInfo.Protocol.GetClients() {
-							//fmt.Println("Vai adaptar")
+							fmt.Println("Vai adaptar IP:", (*client).Address())
 							// if Client from Connection Pool have a client connected
-							if (*client).Address() != "" {
-								//fmt.Println("Vai adaptar: IP:", client.Ip)
+							if adaptFrom == "rpc" || (*client).Address() != "" {
+								fmt.Println("Vai adaptar: IP:", (*client).Address())
 								// if (adaptFrom == "udp" && client.UDPConnection == nil) ||
 								// 	(adaptFrom == "tcp" && client.Connection == nil) ||
 								// 	(adaptFrom == "quic" && client.QUICStream == nil) {
@@ -298,7 +304,9 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 						lib.PrintlnInfo("Initialized")
 					}
 					if srhInfo.Protocol != nil {
+						lib.PrintlnInfo("Will stop server")
 						srhInfo.Protocol.StopServer()
+						lib.PrintlnInfo("Server stoped")
 						srhInfo.Protocol = nil
 					}
 				}

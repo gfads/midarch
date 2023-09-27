@@ -1,10 +1,19 @@
 package generic
 
 type Protocol interface {
+	// Server Methods
 	StartServer(ip, port string, initialConnections int)
 	StopServer()
 	AvailableConnectionFromPool() (available bool, idx int)
 	WaitForConnection(cliIdx int) (cl *Client)
+
+	GetClients() (clients []*Client)
+	GetClient(idx int) (client Client)
+	GetClientFromAddr(addr string) (client Client)
+	AddClient(client Client, idx int)
+	ResetClients() // Close connections and remove all clientes from the pool
+
+	// Client Methods
 	ConnectToServer(ip, port string)
 	CloseConnection()
 
@@ -12,12 +21,6 @@ type Protocol interface {
 	WriteString(message string)
 	Receive() ([]byte, error)
 	Send(msgToServer []byte) error
-
-	GetClients() (clients []*Client)
-	GetClient(idx int) (client Client)
-	GetClientFromAddr(addr string) (client Client)
-	AddClient(client Client, idx int)
-	ResetClients() // Close connections and remove all clientes from the pool
 }
 
 type Client interface {

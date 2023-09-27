@@ -199,7 +199,7 @@ func (st *TCP) ConnectToServer(ip, port string) {
 
 	for {
 		st.serverConnection, err = net.DialTCP("tcp", nil, tcpAddr)
-		lib.PrintlnDebug("Dialed", st.serverConnection)
+		lib.PrintlnInfo("Dialed", st.serverConnection)
 		if err != nil {
 			lib.PrintlnError("Dial error", st.serverConnection, err)
 			time.Sleep(200 * time.Millisecond)
@@ -356,17 +356,17 @@ func (st *TCP) ResetClients() {
 	// log.Println("TCP.ResetClients clients length:", len(st.clients))
 }
 
-func Remove(slice []*TCPClient, idx int) []*TCPClient {
-	var newSlice []*TCPClient
+// func Remove(slice []*TCPClient, idx int) []*TCPClient {
+// 	var newSlice []*TCPClient
 
-	if len(slice) == idx+1 {
-		newSlice = append(slice[:idx])
-	} else {
-		newSlice = append(slice[:idx], slice[idx+1:]...)
-	}
+// 	if len(slice) == idx+1 {
+// 		newSlice = append(slice[:idx])
+// 	} else {
+// 		newSlice = append(slice[:idx], slice[idx+1:]...)
+// 	}
 
-	return newSlice
-}
+// 	return newSlice
+// }
 
 // for len(srhInfo.Protocol.GetClients()) > 0 {
 // 	tmpClient := srhInfo.Protocol.GetClients()[0]

@@ -84,8 +84,8 @@ func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
-			lib.PrintlnDebug("SRHTCP Version 2 adapted: tempMsgReceived", tempMsgReceived)
-			lib.PrintlnDebug("SRHTCP Version 2 adapted: tempMsgReceived.Conn", tempMsgReceived.Conn)
+			lib.PrintlnDebug("SRHTCP Version Not adapted: tempMsgReceived", tempMsgReceived)
+			lib.PrintlnDebug("SRHTCP Version Not adapted: tempMsgReceived.Conn", tempMsgReceived.Conn)
 			if tempMsgReceived.Conn == nil { // TODO dcruzb: Change to Protocol.Client
 				*reset = true
 				return
@@ -177,7 +177,7 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 		}
 
 		rcvMessage := messages.ReceivedMessages{Msg: msg, Conn: srhInfo.Protocol.GetClient(connectionIndex).Connection().(net.Conn), ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
-		lib.PrintlnDebug("SRHTCP Version 2 adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+		lib.PrintlnDebug("SRHTCP Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		if !*executeForever {
 			break
 		}
