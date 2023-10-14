@@ -83,6 +83,8 @@ func prepareToAdaptTo(protocol string) (err error) {
 		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhquic")
 	} else if protocol == "rpc" {
 		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhrpc")
+	} else if protocol == "http" {
+		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhhttp")
 	}
 
 	return nil

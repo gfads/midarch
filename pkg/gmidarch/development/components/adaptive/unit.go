@@ -173,6 +173,9 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				} else if strings.Contains(cmdElemType, "RPC") {
 					adaptTo = "rpc"
 					lib.PrintlnInfo("****** Adapt to RPC")
+				} else if strings.Contains(cmdElemType, "HTTP") {
+					adaptTo = "http"
+					lib.PrintlnInfo("****** Adapt to HTTP")
 				}
 
 				var adaptFrom string
@@ -188,6 +191,9 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				} else if strings.Contains(unitElemType, "RPC") {
 					adaptFrom = "rpc"
 					lib.PrintlnInfo("****** Adapt from RPC")
+				} else if strings.Contains(unitElemType, "HTTP") {
+					adaptFrom = "http"
+					lib.PrintlnInfo("****** Adapt from HTTP")
 				}
 
 				isSRH := strings.Contains(cmdElemType, "SRH")
@@ -224,7 +230,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 						for idx, client := range srhInfo.Protocol.GetClients() {
 							fmt.Println("Vai adaptar IP:", (*client).Address())
 							// if Client from Connection Pool have a client connected
-							if adaptFrom == "rpc" || (*client).Address() != "" {
+							if adaptFrom == "rpc" || adaptFrom == "http" || (*client).Address() != "" {
 								fmt.Println("Vai adaptar: IP:", (*client).Address())
 								// if (adaptFrom == "udp" && client.UDPConnection == nil) ||
 								// 	(adaptFrom == "tcp" && client.Connection == nil) ||
