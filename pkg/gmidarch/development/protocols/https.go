@@ -1,8 +1,11 @@
 package protocols
 
 import (
+	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
@@ -15,7 +18,7 @@ import (
 	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
-type HTTPClient struct {
+type HTTPSClient struct {
 	connection net.Conn
 	Ip         string
 	adaptId    int
@@ -23,23 +26,23 @@ type HTTPClient struct {
 	replyChan  chan []byte
 }
 
-func (cl *HTTPClient) Address() string {
+func (cl *HTTPSClient) Address() string {
 	return cl.Ip
 }
 
-func (cl *HTTPClient) AdaptId() int {
+func (cl *HTTPSClient) AdaptId() int {
 	return cl.adaptId
 }
 
-func (cl *HTTPClient) SetAdaptId(adaptId int) {
+func (cl *HTTPSClient) SetAdaptId(adaptId int) {
 	cl.adaptId = adaptId
 }
 
-func (cl *HTTPClient) Connection() interface{} {
+func (cl *HTTPSClient) Connection() interface{} {
 	return cl.connection
 }
 
-func (cl *HTTPClient) CloseConnection() {
+func (cl *HTTPSClient) CloseConnection() {
 	cl.Ip = ""
 	if cl.connection != nil {
 		err := cl.connection.Close()
@@ -49,26 +52,26 @@ func (cl *HTTPClient) CloseConnection() {
 	}
 }
 
-func (cl *HTTPClient) ReadString() (message string) {
+func (cl *HTTPSClient) ReadString() (message string) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (cl *HTTPClient) WriteString(message string) {
+func (cl *HTTPSClient) WriteString(message string) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (cl *HTTPClient) Read(b []byte) (err error) {
+func (cl *HTTPSClient) Read(b []byte) (err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (cl *HTTPClient) Receive() (msg []byte, err error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP Version Not adapted")
+func (cl *HTTPSClient) Receive() (msg []byte, err error) {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTPS Version Not adapted")
 	msg = <-cl.msgChan
-	lib.PrintlnInfo("HTTPClient.Receive: msg", msg)
-	lib.PrintlnInfo("HTTPClient.Receive: msg as string", string(msg))
+	lib.PrintlnInfo("HTTPSClient.Receive: msg", msg)
+	lib.PrintlnInfo("HTTPSClient.Receive: msg as string", string(msg))
 	// receive reply's size
 	// size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// cl.Read(size)
@@ -88,8 +91,8 @@ func (cl *HTTPClient) Receive() (msg []byte, err error) {
 	return msg, nil
 }
 
-func (cl *HTTPClient) Send(msg []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP Version Not adapted")
+func (cl *HTTPSClient) Send(msg []byte) error {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTPS Version Not adapted")
 	go func() {
 		cl.replyChan <- msg
 	}()
@@ -111,79 +114,79 @@ func (cl *HTTPClient) Send(msg []byte) error {
 	return nil
 }
 
-type HTTP struct {
+type HTTPS struct {
 	// Server attributes
 	ip                 string
 	port               string
-	httpServer         *http.Server
+	httpsServer        *http.Server
 	listener           net.Listener
 	initialConnections int
 	clients            []*generic.Client
 	started            bool
 
 	// Client attributes
-	httpClient *http.Client // serverConnection net.Conn
-	msgChan    chan []byte
+	httpsClient *http.Client // serverConnection net.Conn
+	msgChan     chan []byte
 }
 
 // Server methods
 
-func (st *HTTP) StartServer(ip, port string, initialConnections int) {
+func (st *HTTPS) StartServer(ip, port string, initialConnections int) {
 	st.ip = ip
 	st.port = port
 	st.initialConnections = initialConnections
 
-	lib.PrintlnInfo("HTTP clients len", len(st.clients))
-	if len(st.clients) < 1 { //st.initialConnections { TODO dcruzb : verify if there is the need to more than one client on HTTP
-		client := &HTTPClient{}
+	lib.PrintlnInfo("HTTPS clients len", len(st.clients))
+	if len(st.clients) < 1 { //st.initialConnections { TODO dcruzb : verify if there is the need to more than one client on HTTPS
+		client := &HTTPSClient{}
 		client.msgChan = make(chan []byte)
 		client.replyChan = make(chan []byte)
 		// *clientsPtr = append(clients, &client)
 		st.AddClient(client, -1)
-		lib.PrintlnInfo("HTTP client created")
+		lib.PrintlnInfo("HTTPS client created")
 	}
 
-	var client *HTTPClient = (*st.clients[0]).(*HTTPClient)
-	request := new(HTTPRequest)
+	var client *HTTPSClient = (*st.clients[0]).(*HTTPSClient)
+	request := new(HTTPSRequest)
 	request.msgChan = client.msgChan
 	request.replyChan = client.replyChan
 
 	// Publish the receivers methods
 	// handler := http.Handler{ServeHTTP: RequestTest}
-	st.httpServer = &http.Server{Handler: request}
-	// st.httpServer.Handler = request
-	// st.httpServer.Serve()
+	st.httpsServer = &http.Server{Handler: request}
+	// st.httpsServer.Handler = request
+	// st.httpsServer.Serve()
 
-	// err := st.httpServer.Handler(RequestTest)
+	// err := st.httpsServer.Handler(RequestTest)
 	// if err != nil {
 	// 	lib.PrintlnError(shared.GetFunction(), "Error while registering methods. Details:", err.Error())
 	// }
-	// Register a HTTP handler
+	// Register a HTTPS handler
 	// http.HandleHTTP()
 
-	ln, err := net.Listen("tcp", st.ip+":"+st.port)
+	ln, err := tls.Listen("tcp4", st.ip+":"+st.port, lib.GetServerTLSConfig())
 	if err != nil {
-		lib.PrintlnError(shared.GetFunction(), "Error while starting HTTP server. Details: ", err)
+		lib.PrintlnError(shared.GetFunction(), "Error while starting HTTPS server. Details: ", err)
 	}
 
 	st.listener = ln
 }
 
-func (st *HTTP) StopServer() {
+func (st *HTTPS) StopServer() {
 	err := st.listener.Close()
 	if err != nil {
 		lib.PrintlnError("Error while stoping server. Details:", err)
 	}
 }
 
-func (st *HTTP) AvailableConnectionFromPool() (available bool, idx int) {
+func (st *HTTPS) AvailableConnectionFromPool() (available bool, idx int) {
 	return !st.started, 0
 }
 
-func (st *HTTP) WaitForConnection(cliIdx int) (cl *generic.Client) {
+func (st *HTTPS) WaitForConnection(cliIdx int) (cl *generic.Client) {
 	st.started = true
 	go func() {
-		err := st.httpServer.Serve(st.listener)
+		err := st.httpsServer.Serve(st.listener)
 		if err != nil {
 			if strings.Contains(err.Error(), "use of closed network connection") {
 				return
@@ -192,26 +195,26 @@ func (st *HTTP) WaitForConnection(cliIdx int) (cl *generic.Client) {
 		}
 	}()
 
-	lib.PrintlnInfo("HTTP wait -> clients len", len(st.clients))
+	lib.PrintlnInfo("HTTPS wait -> clients len", len(st.clients))
 	if len(st.clients) > cliIdx {
-		// (*st.clients[cliIdx]).(*HTTPClient).connection = conn
-		// (*st.clients[cliIdx]).(*HTTPClient).Ip = conn.RemoteAddr().String()
-		lib.PrintlnInfo("HTTP wait -> client returned")
+		// (*st.clients[cliIdx]).(*HTTPSClient).connection = conn
+		// (*st.clients[cliIdx]).(*HTTPSClient).Ip = conn.RemoteAddr().String()
+		lib.PrintlnInfo("HTTPS wait -> client returned")
 		return st.clients[cliIdx]
 	} else {
 		return nil
 	}
 }
 
-func (st *HTTP) GetClients() (client []*generic.Client) {
+func (st *HTTPS) GetClients() (client []*generic.Client) {
 	return st.clients
 }
 
-func (st *HTTP) GetClient(idx int) (client generic.Client) {
+func (st *HTTPS) GetClient(idx int) (client generic.Client) {
 	return *st.clients[idx]
 }
 
-func (st *HTTP) AddClient(client generic.Client, idx int) {
+func (st *HTTPS) AddClient(client generic.Client, idx int) {
 	if idx < 0 {
 		st.clients = append(st.clients, &client)
 	} else if idx < st.initialConnections {
@@ -219,7 +222,7 @@ func (st *HTTP) AddClient(client generic.Client, idx int) {
 	}
 }
 
-func (st *HTTP) GetClientFromAddr(addr string) (client generic.Client) {
+func (st *HTTPS) GetClientFromAddr(addr string) (client generic.Client) {
 	for _, client := range st.clients {
 		if (*client).Address() == addr {
 			return *client
@@ -230,7 +233,7 @@ func (st *HTTP) GetClientFromAddr(addr string) (client generic.Client) {
 	return nil
 }
 
-func (st *HTTP) ResetClients() {
+func (st *HTTPS) ResetClients() {
 	for _, client := range st.clients {
 		if client != nil {
 			(*client).CloseConnection()
@@ -241,7 +244,7 @@ func (st *HTTP) ResetClients() {
 
 // Client Methods
 
-func (st *HTTP) ConnectToServer(ip, port string) {
+func (st *HTTPS) ConnectToServer(ip, port string) {
 	lib.PrintlnInfo("**********************************************")
 	if st.msgChan == nil {
 		st.msgChan = make(chan []byte)
@@ -259,45 +262,46 @@ func (st *HTTP) ConnectToServer(ip, port string) {
 
 	for {
 		// Create an HTTP client with a timeout
-		st.httpClient = &http.Client{Timeout: 5 * time.Second}
+		st.httpsClient = &http.Client{Timeout: 5 * time.Second}
+		st.httpsClient.Transport = &http.Transport{TLSClientConfig: getClientTLSConfig(), DialTLS: func(network, addr string) (net.Conn, error) { return tls.Dial(network, addr, getClientTLSConfig()) }}
 		// st.serverConnection, err = net.DialTCP("tcp", nil, tcpAddr)
-		lib.PrintlnDebug("Dialed", st.httpClient)
+		lib.PrintlnDebug("Dialed", st.httpsClient)
 		// if err != nil {
-		// 	lib.PrintlnError("Dial error", st.httpClient, err)
+		// 	lib.PrintlnError("Dial error", st.httpsClient, err)
 		// 	time.Sleep(200 * time.Millisecond)
 		// 	//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		// } else {
 		break // TODO dcruzb: remove for since there is no possibility of error
 		// }
 	}
-	lib.PrintlnDebug("Connected", st.httpClient)
+	lib.PrintlnDebug("Connected", st.httpsClient)
 	// if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 	// 	//lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
-	// 	shared.LocalAddr = st.httpClient.LocalAddr().String()
-	// 	lib.PrintlnDebug("Got local addr", st.httpClient)
+	// 	shared.LocalAddr = st.httpsClient.LocalAddr().String()
+	// 	lib.PrintlnDebug("Got local addr", st.httpsClient)
 	// }
 }
 
-func (st *HTTP) CloseConnection() {
-	st.httpClient.CloseIdleConnections()
-	// err := st.httpClient.Close()
+func (st *HTTPS) CloseConnection() {
+	st.httpsClient.CloseIdleConnections()
+	// err := st.httpsClient.Close()
 	// if err != nil {
 	// 	lib.PrintlnError(err)
 	// }
 }
 
-func (st *HTTP) ReadString() (message string) {
+func (st *HTTPS) ReadString() (message string) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (st *HTTP) WriteString(message string) {
+func (st *HTTPS) WriteString(message string) {
 	//TODO implement me
 	panic("implement me")
 }
 
-func (st *HTTP) Receive() ([]byte, error) {
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "HTTP.Receive")
+func (st *HTTPS) Receive() ([]byte, error) {
+	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "HTTPS.Receive")
 	msgFromServer := <-st.msgChan
 	// sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// // receive reply's size
@@ -307,7 +311,7 @@ func (st *HTTP) Receive() ([]byte, error) {
 	// 	//shared.ErrorHandler(shared.GetFunction(), err.Error())
 	// 	return nil, err
 	// }
-	// lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "HTTP read size")
+	// lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "HTTPS read size")
 	// // receive reply
 	// msgFromServer := make([]byte, binary.LittleEndian.Uint32(sizeOfMsgSize), shared.NUM_MAX_MESSAGE_BYTES)
 	// _, err = st.serverConnection.Read(msgFromServer)
@@ -316,30 +320,30 @@ func (st *HTTP) Receive() ([]byte, error) {
 	// 	//shared.ErrorHandler(shared.GetFunction(), err.Error())
 	// 	return nil, err
 	// }
-	// lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "HTTP read message")
+	// lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "HTTPS read message")
 	return msgFromServer, nil
 }
 
-// func (st *HTTP) Call(serviceMethod string, args any, reply any) (err error) {
+// func (st *HTTPS) Call(serviceMethod string, args any, reply any) (err error) {
 // 	c := make(chan error, 1)
-// 	go func() { c <- st.httpClient.Call(serviceMethod, args, reply) }()
+// 	go func() { c <- st.httpsClient.Call(serviceMethod, args, reply) }()
 // 	select {
 // 	case err = <-c:
 // 		return err
 // 	case <-time.After(2 * time.Second):
-// 		return errors.New("HTTP Call timeout")
+// 		return errors.New("HTTPS Call timeout")
 // 	}
 // }
 
-func (st *HTTP) Send(msgToServer []byte) error {
-	lib.PrintlnInfo("CRHHTTP Version Not adapted")
+func (st *HTTPS) Send(msgToServer []byte) error {
+	lib.PrintlnInfo("CRHHTTPS Version Not adapted")
 	//sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 
 	addr := st.ip + ":" + st.port
 
 	// The message received from the server
 	var msgFromServer []byte // := make([]byte, binary.LittleEndian.Uint32(sizeOfMsgSize), shared.NUM_MAX_MESSAGE_BYTES)
-	response, err := st.httpClient.Get("http://" + addr + "?param=" + url.PathEscape(string(msgToServer)))
+	response, err := st.httpsClient.Get("https://" + addr + "?param=" + url.PathEscape(string(msgToServer)))
 	if err != nil {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return err
@@ -381,13 +385,13 @@ func (st *HTTP) Send(msgToServer []byte) error {
 	// return nil
 }
 
-type HTTPRequest struct {
+type HTTPSRequest struct {
 	msgChan   chan []byte
 	replyChan chan []byte
 	//ServeHTTP func(w http.ResponseWriter, r *http.Request)
 }
 
-func (rq HTTPRequest) Request(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
+func (rq HTTPSRequest) Request(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
 	lib.PrintlnInfo("Received message")
 	uriParameters := lib.GetURIParameters(r.RequestURI)
 	go func() {
@@ -402,7 +406,7 @@ func (rq HTTPRequest) Request(w http.ResponseWriter, r *http.Request) { //reques
 	//return nil
 }
 
-func (rq HTTPRequest) ServeHTTP(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
+func (rq HTTPSRequest) ServeHTTP(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
 	lib.PrintlnInfo("Received message. URI:", r.RequestURI)
 	uriParameters := lib.GetURIParameters(r.RequestURI)
 	lib.PrintlnInfo("Received message:", uriParameters["param"].(string))
@@ -416,4 +420,26 @@ func (rq HTTPRequest) ServeHTTP(w http.ResponseWriter, r *http.Request) { //requ
 	w.Write(replyMsg)
 
 	//return nil
+}
+
+func getClientTLSConfig() *tls.Config {
+	if shared.CA_PATH == "" {
+		log.Fatal("CRHSsl:: Error:: Environment variable 'CA_PATH' not configured\n")
+	}
+	trustCert, err := ioutil.ReadFile(shared.CA_PATH)
+	if err != nil {
+		fmt.Println("Error loading trust certificate. ", err)
+	}
+	certs := x509.NewCertPool()
+	if !certs.AppendCertsFromPEM(trustCert) {
+		fmt.Println("Error installing trust certificate.")
+	}
+
+	// connect to server
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: true,
+		RootCAs:            certs,
+		NextProtos:         []string{"h2"},
+	}
+	return tlsConfig
 }
