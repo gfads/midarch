@@ -79,7 +79,7 @@ func (s SRHTLS) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
-		srhInfo.Ln, err = tls.Listen("tcp4", servAddr.String(), lib.GetServerTLSConfig()) //net.ListenTCP("tcp", servAddr)
+		srhInfo.Ln, err = tls.Listen("tcp4", servAddr.String(), lib.GetServerTLSConfig("h2")) //net.ListenTCP("tcp", servAddr)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}

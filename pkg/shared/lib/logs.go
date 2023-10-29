@@ -2,6 +2,9 @@ package lib
 
 import (
 	"crypto/tls"
+	"crypto/x509"
+	"fmt"
+	"io/ioutil"
 	"log"
 	"net/url"
 	"os"
@@ -145,7 +148,7 @@ func GetURIParameters(uri string) (parameters map[string]interface{}) {
 	// return parameters
 }
 
-func GetServerTLSConfig() *tls.Config {
+func GetServerTLSConfig(proto string) *tls.Config {
 	if shared.CRT_PATH == "" {
 		log.Fatal("SRHSsl:: Error:: Environment variable 'CRT_PATH' not configured\n")
 	}
@@ -161,7 +164,29 @@ func GetServerTLSConfig() *tls.Config {
 
 	tlsConfig := &tls.Config{
 		Certificates: []tls.Certificate{cert},
-		NextProtos:   []string{"h2"},
+		NextProtos:   []string{proto},
+	}
+	return tlsConfig
+}
+
+func GetClientTLSConfig(proto string) *tls.Config {
+	if shared.CA_PATH == "" {
+		log.Fatal("CRHSsl:: Error:: Environment variable 'CA_PATH' not configured\n")
+	}
+	trustCert, err := ioutil.ReadFile(shared.CA_PATH)
+	if err != nil {
+		fmt.Println("Error loading trust certificate. ", err)
+	}
+	certs := x509.NewCertPool()
+	if !certs.AppendCertsFromPEM(trustCert) {
+		fmt.Println("Error installing trust certificate.")
+	}
+
+	// connect to server
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: true,
+		RootCAs:            certs,
+		NextProtos:         []string{proto},
 	}
 	return tlsConfig
 }

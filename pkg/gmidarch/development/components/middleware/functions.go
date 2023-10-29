@@ -73,7 +73,7 @@ func confirmAdaptationQUIC(adaptId int, protocol string, sizeOfMsgSize []byte, s
 
 func prepareToAdaptTo(protocol string) (err error) {
 	lib.PrintlnInfo("Adapting =>", strings.ToUpper(protocol))
-	if protocol == "udp" {
+	if protocol == "udp" { // TODO dcruzb : change to switch
 		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhudp")
 	} else if protocol == "tcp" {
 		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhtcp")
@@ -83,6 +83,8 @@ func prepareToAdaptTo(protocol string) (err error) {
 		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhquic")
 	} else if protocol == "rpc" {
 		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhrpc")
+	} else if protocol == "http2" {
+		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhhttp2")
 	} else if protocol == "https" {
 		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhhttps")
 	} else if protocol == "http" {
