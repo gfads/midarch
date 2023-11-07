@@ -68,8 +68,8 @@ func (cl *HTTPSClient) Read(b []byte) (err error) {
 func (cl *HTTPSClient) Receive() (msg []byte, err error) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTPS Version Not adapted")
 	msg = <-cl.msgChan
-	lib.PrintlnInfo("HTTPSClient.Receive: msg", msg)
-	lib.PrintlnInfo("HTTPSClient.Receive: msg as string", string(msg))
+	// lib.PrintlnInfo("HTTPSClient.Receive: msg", msg)
+	// lib.PrintlnInfo("HTTPSClient.Receive: msg as string", string(msg))
 	// receive reply's size
 	// size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// cl.Read(size)
@@ -346,7 +346,7 @@ func (st *HTTPS) Send(msgToServer []byte) error {
 	lib.PrintlnInfo("************************************************************************ 2")
 	response, err := st.httpsClient.Get("https://" + addr + "?param=" + url.PathEscape(string(msgToServer)))
 	lib.PrintlnInfo("************************************************************************ 3")
-	lib.PrintlnInfo("response:", response)
+	//lib.PrintlnInfo("response:", response)
 	if err != nil {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return err
@@ -365,7 +365,7 @@ func (st *HTTPS) Send(msgToServer []byte) error {
 
 	msgFromServer = bodyBytes
 
-	lib.PrintlnInfo("Got message from server" + string(msgFromServer))
+	// lib.PrintlnInfo("Got message from server" + string(msgFromServer))
 	go func() {
 		st.msgChan <- msgFromServer
 	}()
@@ -410,9 +410,9 @@ func (rq HTTPSRequest) Request(w http.ResponseWriter, r *http.Request) { //reque
 }
 
 func (rq HTTPSRequest) ServeHTTP(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
-	lib.PrintlnInfo("Received message. URI:", r.RequestURI)
+	lib.PrintlnInfo("Received request. URI:", r.RequestURI)
 	uriParameters := lib.GetURIParameters(r.RequestURI)
-	lib.PrintlnInfo("Received message:", uriParameters["param"].(string))
+	lib.PrintlnInfo("Received request params:", uriParameters["param"].(string))
 	go func() {
 		rq.msgChan <- []byte(uriParameters["param"].(string))
 	}()

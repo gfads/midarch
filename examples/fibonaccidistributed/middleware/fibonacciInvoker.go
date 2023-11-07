@@ -34,6 +34,15 @@ func (FibonacciInvoker) I_Beforeserver(id string, msg *messages.SAMessage, info 
 		reply := fibonacciImpl.Fibonacci{}.F(req.Params[0].(int))
 		msg.Payload = messages.FunctionalReply{Rep: reply}
 
+	case "I":
+		params := []interface{}{req.Params[0].(int)}
+
+		// Functional request
+		req2 := messages.FunctionalRequest{Op: req.Op, Params: params} // TODO dcruzb : use req.Params directly instead params
+		msg.Payload = &req2
+
+		reply := "data:image/png;base64,BASE64_HERE"
+		msg.Payload = messages.FunctionalReply{Rep: reply}
 	default:
 		shared.ErrorHandler(shared.GetFunction(), "Operation '"+req.Op+"' not present in Invoker")
 	}

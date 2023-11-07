@@ -31,7 +31,7 @@ func main() {
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(os.Args[3])
 	} else {
 		n, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("FIBONACCI_PLACE", "11"))
-		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("SAMPLE_SIZE", "100"))
+		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("SAMPLE_SIZE", "10000"))
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("AVERAGE_WAITING_TIME", "60"))
 	}
 	fmt.Println("FIBONACCI_PLACE / SAMPLE_SIZE / AVERAGE_WAITING_TIME:", n, "/", SAMPLE_SIZE, "/", AVERAGE_WAITING_TIME)
@@ -75,7 +75,7 @@ func main() {
 			t2 := time.Now()
 
 			duration := t2.Sub(t1)
-			if r != 0 {
+			if r != "0" {
 				ok = true
 				lib.PrintlnMessage(x+1, float64(duration.Nanoseconds())/1000000)
 			}

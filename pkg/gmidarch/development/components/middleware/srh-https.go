@@ -87,7 +87,7 @@ func (s SRHHTTPS) I_Receive(id string, msg *messages.SAMessage, info *interface{
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
-			lib.PrintlnInfo("SRHHTTPS Version Not adapted: tempMsgReceived", tempMsgReceived)
+			// lib.PrintlnInfo("SRHHTTPS Version Not adapted: tempMsgReceived", tempMsgReceived)
 			if isNewConnection, miopPacket := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
 				lib.PrintlnInfo("SRHHTTPS Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
 				*reset = true
