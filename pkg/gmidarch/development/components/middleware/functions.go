@@ -4,11 +4,24 @@ import (
 	"net"
 	"strings"
 
+	"github.com/gfads/midarch/pkg/gmidarch/development/generic"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
 	"github.com/gfads/midarch/pkg/shared"
 	"github.com/gfads/midarch/pkg/shared/lib"
 	"github.com/quic-go/quic-go"
 )
+
+func VerifyProtocolAdaptation(msgFromServer []byte, protocol generic.Protocol) (err error) {
+	if changeProtocol, miopPacket := isAdapt(msgFromServer); changeProtocol {
+		lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
+		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
+		adaptToProtocol := miopPacket.Bd.ReqBody.Body[0].(string)
+		confirmProtocolAdaptation(shared.AdaptId, adaptToProtocol, protocol)
+		prepareToAdaptTo(adaptToProtocol)
+	}
+
+	return nil
+}
 
 func VerifyAdaptation(msgFromServer []byte, sizeOfMsgSize []byte, conn net.Conn, send func(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error) (err error) {
 	if changeProtocol, miopPacket := isAdapt(msgFromServer); changeProtocol {
@@ -40,6 +53,12 @@ func isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }
 
+func confirmProtocolAdaptation(adaptId int, adaptToProtocol string, protocol generic.Protocol) (err error) {
+	miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{adaptToProtocol, adaptId, "Ok"}, adaptId)
+	msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+	return protocol.Send(msgPayload)
+}
+
 func confirmAdaptation(adaptId int, protocol string, sizeOfMsgSize []byte, conn net.Conn, send func(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error) (err error) {
 	miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{protocol, adaptId, "Ok"}, adaptId)
 	msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
@@ -54,7 +73,7 @@ func confirmAdaptationQUIC(adaptId int, protocol string, sizeOfMsgSize []byte, s
 
 func prepareToAdaptTo(protocol string) (err error) {
 	lib.PrintlnInfo("Adapting =>", strings.ToUpper(protocol))
-	if protocol == "udp" {
+	if protocol == "udp" { // TODO dcruzb : change to switch
 		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhudp")
 	} else if protocol == "tcp" {
 		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhtcp")
@@ -64,6 +83,12 @@ func prepareToAdaptTo(protocol string) (err error) {
 		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhquic")
 	} else if protocol == "rpc" {
 		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhrpc")
+	} else if protocol == "http2" {
+		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhhttp2")
+	} else if protocol == "https" {
+		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhhttps")
+	} else if protocol == "http" {
+		shared.ListOfComponentsToAdaptTo = append(shared.ListOfComponentsToAdaptTo, "crhhttp")
 	}
 
 	return nil

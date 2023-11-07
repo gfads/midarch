@@ -2,11 +2,7 @@ package middleware
 
 import (
 	"crypto/tls"
-	"crypto/x509"
 	"encoding/binary"
-	"fmt"
-	"io/ioutil"
-	"log"
 	"net"
 	"reflect"
 	"time"
@@ -75,7 +71,7 @@ func (c CRHTLS) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		//localTcpAddr := c.getLocalTcpAddr()
 
 		for {
-			crhInfo.Conns[addr], err = tls.Dial("tcp4", tcpAddr.String(), getClientTLSConfig())
+			crhInfo.Conns[addr], err = tls.Dial("tcp4", tcpAddr.String(), lib.GetClientTLSConfig("h2"))
 			//log.Println("Discou", crhInfo.Conns[addr])
 			if err != nil {
 				lib.PrintlnError("Dial error", crhInfo.Conns[addr], err)
@@ -159,26 +155,4 @@ func (c CRHTLS) read(conn net.Conn, size []byte) ([]byte, error) {
 		return nil, err
 	}
 	return msgFromServer, nil
-}
-
-func getClientTLSConfig() *tls.Config {
-	if shared.CA_PATH == "" {
-		log.Fatal("CRHSsl:: Error:: Environment variable 'CA_PATH' not configured\n")
-	}
-	trustCert, err := ioutil.ReadFile(shared.CA_PATH)
-	if err != nil {
-		fmt.Println("Error loading trust certificate. ", err)
-	}
-	certs := x509.NewCertPool()
-	if !certs.AppendCertsFromPEM(trustCert) {
-		fmt.Println("Error installing trust certificate.")
-	}
-
-	// connect to server
-	tlsConfig := &tls.Config{
-		InsecureSkipVerify: true,
-		RootCAs:            certs,
-		NextProtos:         []string{"h2"},
-	}
-	return tlsConfig
 }

@@ -9,12 +9,12 @@ import (
 	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
-// @Type: CRHRPC
+// @Type: CRHHTTPS
 // @Behaviour: Behaviour = InvP.e1 -> I_Process -> TerP.e1 -> Behaviour
-type CRHRPC struct{}
+type CRHHTTPS struct{}
 
-// func (c CRHRPC) getLocalTcpAddr() *net.TCPAddr {
-// 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
+// func (c CRHHTTPS) getLocalTcpAddr() *net.TCPAddr {
+// 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTPS Version Not adapted")
 // 	//fmt.Println("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
 // 	lib.PrintlnDebug("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
 // 	var err error = nil
@@ -29,8 +29,8 @@ type CRHRPC struct{}
 // 	return localTCPAddr
 // }
 
-func (c CRHRPC) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
+func (c CRHHTTPS) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTPS Version Not adapted")
 	infoTemp := *info
 	crhInfo := infoTemp.(messages.CRHInfo)
 
@@ -57,17 +57,18 @@ func (c CRHRPC) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	var err error
 	//fmt.Println("Vai conectar", crhInfo.Conns[addr])
 	lib.PrintlnDebug("Vai conectar", crhInfo.Conns[addr])
-	if _, ok := crhInfo.Protocols[addr]; !ok || reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name() != "RPC" { // no connection open yet
+	if _, ok := crhInfo.Protocols[addr]; !ok || reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name() != "HTTPS" { // no connection open yet
 		lib.PrintlnInfo("Try to connect", crhInfo.Protocols[addr])
 		if ok {
 			lib.PrintlnInfo("ElemName", reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name())
 			crhInfo.Protocols[addr].CloseConnection()
 		}
-		crhInfo.Protocols[addr] = &protocols.RPC{}
+		crhInfo.Protocols[addr] = &protocols.HTTPS{}
 		crhInfo.Protocols[addr].ConnectToServer(host, port)
 	}
 	lib.PrintlnInfo("Connected", crhInfo.Protocols[addr])
 
+	lib.PrintlnInfo("Will send:", string(msgToServer))
 	err = crhInfo.Protocols[addr].Send(msgToServer)
 	if err != nil {
 		lib.PrintlnError("Error trying to send message:", err.Error())
@@ -94,8 +95,8 @@ func (c CRHRPC) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
 
-// func (c CRHRPC) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error {
-// 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
+// func (c CRHHTTPS) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error {
+// 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTPS Version Not adapted")
 // 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
 // 	_, err := conn.Write(sizeOfMsgSize)
 // 	if err != nil {
@@ -112,8 +113,8 @@ func (c CRHRPC) I_Process(id string, msg *messages.SAMessage, info *interface{},
 // 	return nil
 // }
 
-// func (c CRHRPC) read(conn net.Conn, size []byte) ([]byte, error) {
-// 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
+// func (c CRHHTTPS) read(conn net.Conn, size []byte) ([]byte, error) {
+// 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTPS Version Not adapted")
 // 	// receive reply's size
 // 	_, err := conn.Read(size)
 // 	if err != nil {

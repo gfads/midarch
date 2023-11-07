@@ -7,9 +7,9 @@ import (
 	"log"
 	"net"
 
-	"github.com/gfads/midarch/pkg/gmidarch/development/components/middleware"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/shared"
+	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
 // @Type: SRHTCP
@@ -47,7 +47,7 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	//fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 1 adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
-	srhInfo.Counter++
+	// srhInfo.Counter++
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Cons", len(srhInfo.Clients))
 	//log.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Counter", srhInfo.Counter)
 
@@ -134,29 +134,16 @@ func (s SRHTCP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 	fmt.Println("----------------------------------------->", shared.GetFunction(), "SRHTCP Version 1 adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
-	log.Println("msg.ToAddr", msg.ToAddr, "srhInfo.Clients", srhInfo.Clients)
-	client := srhInfo.GetClientFromAddr(msg.ToAddr, srhInfo.Clients)
-	conn := client.Connection //srhInfo.CurrentConn
-	if conn == nil {
+	lib.PrintlnDebug("msg.ToAddr", msg.ToAddr)
+	client := srhInfo.Protocol.GetClientFromAddr(msg.ToAddr)
+	if client == nil {
 		*reset = true
 		return
 	}
-	fmt.Println("SRHTCP Version 1 adapted   >>>>> TCP => msg.ToAddr:", msg.ToAddr, "TCP conn:", conn, "AdaptId:", client.AdaptId)
+	fmt.Println("SRHTCP Version 1 adapted   >>>>> TCP => msg.ToAddr:", msg.ToAddr, "TCP Client:", client) //, "AdaptId:", client.AdaptId)
 	msgTemp := msg.Payload.([]byte)
 
-	// send message's size
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	binary.LittleEndian.PutUint32(size, uint32(len(msgTemp)))
-	_, err := conn.Write(size)
-	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
-	}
-
-	json := middleware.Jsonmarshaller{}
-	unmarshalledMsg := json.Unmarshall(msgTemp)
-	log.Println("<<<<<<<<<<<<  <<<<<<<<<<  <<<<<<<<<  SRHTCP Version 1 adapted => Msg: ", unmarshalledMsg.Bd.RepBody.OperationResult)
-	// send message
-	_, err = conn.Write(msgTemp)
+	err := client.Send(msgTemp)
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}

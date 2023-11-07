@@ -170,6 +170,18 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				} else if strings.Contains(cmdElemType, "QUIC") {
 					adaptTo = "quic"
 					lib.PrintlnInfo("****** Adapt to QUIC")
+				} else if strings.Contains(cmdElemType, "RPC") {
+					adaptTo = "rpc"
+					lib.PrintlnInfo("****** Adapt to RPC")
+				} else if strings.Contains(cmdElemType, "HTTP2") {
+					adaptTo = "http2"
+					lib.PrintlnInfo("****** Adapt to HTTP2")
+				} else if strings.Contains(cmdElemType, "HTTPS") {
+					adaptTo = "https"
+					lib.PrintlnInfo("****** Adapt to HTTPS")
+				} else if strings.Contains(cmdElemType, "HTTP") {
+					adaptTo = "http"
+					lib.PrintlnInfo("****** Adapt to HTTP")
 				}
 
 				var adaptFrom string
@@ -181,7 +193,19 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 					adaptFrom = "tls"
 				} else if strings.Contains(unitElemType, "QUIC") {
 					adaptFrom = "quic"
-					lib.PrintlnInfo("****** Adapt to QUIC")
+					lib.PrintlnInfo("****** Adapt from QUIC")
+				} else if strings.Contains(unitElemType, "RPC") {
+					adaptFrom = "rpc"
+					lib.PrintlnInfo("****** Adapt from RPC")
+				} else if strings.Contains(unitElemType, "HTTP2") {
+					adaptFrom = "http2"
+					lib.PrintlnInfo("****** Adapt from HTTP2")
+				} else if strings.Contains(unitElemType, "HTTPS") {
+					adaptFrom = "https"
+					lib.PrintlnInfo("****** Adapt from HTTPS")
+				} else if strings.Contains(unitElemType, "HTTP") {
+					adaptFrom = "http"
+					lib.PrintlnInfo("****** Adapt from HTTP")
 				}
 
 				isSRH := strings.Contains(cmdElemType, "SRH")
@@ -214,6 +238,30 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 							shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
 						}
 					}
+					if srhInfo.Protocol != nil {
+						for idx, client := range srhInfo.Protocol.GetClients() {
+							fmt.Println("Vai adaptar IP:", (*client).Address())
+							// if Client from Connection Pool have a client connected
+							if adaptFrom == "rpc" || adaptFrom == "http" || adaptFrom == "https" || adaptFrom == "http2" || (*client).Address() != "" {
+								fmt.Println("Vai adaptar: IP:", (*client).Address())
+								// if (adaptFrom == "udp" && client.UDPConnection == nil) ||
+								// 	(adaptFrom == "tcp" && client.Connection == nil) ||
+								// 	(adaptFrom == "quic" && client.QUICStream == nil) {
+								// 	//fmt.Println("Vai adaptar: pulou sem conexão")
+								// 	continue
+								// }
+								//fmt.Println("Vai adaptar: entrou AdaptId:", client.AdaptId)
+								(*client).SetAdaptId(idx)
+								miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{adaptTo, (*client).AdaptId()}, (*client).AdaptId()) // idx is the Connection ID
+								msg := &messages.SAMessage{}
+								msg.ToAddr = (*client).Address()
+								//log.Println("msg.ToAddr:", msg.ToAddr)
+								msg.Payload = middleware.Jsonmarshaller{}.Marshall(miopPacket)
+								// Coordinate the protocol change
+								shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
+							}
+						}
+					}
 					time.Sleep(200 * time.Millisecond)
 				} // else if isCRH {
 				//time.Sleep(10 * time.Second)
@@ -242,6 +290,14 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 					lib.PrintlnInfo("Will close CRH connections")
 					infoTemp := elementComponent.Info
 					crhInfo := infoTemp.(messages.CRHInfo)
+					for idx, protocol := range crhInfo.Protocols {
+						if protocol != nil {
+							protocol.CloseConnection()
+						}
+						crhInfo.Protocols[idx] = nil
+						delete(crhInfo.Protocols, idx)
+					}
+
 					for _, conn := range crhInfo.Conns {
 						conn.Close()
 					}
@@ -264,6 +320,12 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 						srhInfo.Clients = messages.Remove(srhInfo.Clients, len(srhInfo.Clients)-1)
 						tmpClient.Initialize()
 						lib.PrintlnInfo("Initialized")
+					}
+					if srhInfo.Protocol != nil {
+						lib.PrintlnInfo("Will stop server")
+						srhInfo.Protocol.StopServer()
+						lib.PrintlnInfo("Server stoped")
+						srhInfo.Protocol = nil
 					}
 				}
 

@@ -4,7 +4,6 @@ import (
 	"crypto/tls"
 	"encoding/binary"
 	"io"
-	"log"
 	"net"
 	"strings"
 	"time"
@@ -70,7 +69,7 @@ func (s SRHTLS) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	//lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHTLS Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
-	srhInfo.Counter++
+	// srhInfo.Counter++
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Cons", len(srhInfo.Clients))
 	//log.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Counter", srhInfo.Counter)
 
@@ -80,7 +79,7 @@ func (s SRHTLS) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
-		srhInfo.Ln, err = tls.Listen("tcp4", servAddr.String(), getServerTLSConfig()) //net.ListenTCP("tcp", servAddr)
+		srhInfo.Ln, err = tls.Listen("tcp4", servAddr.String(), lib.GetServerTLSConfig("h2")) //net.ListenTCP("tcp", servAddr)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 		}
@@ -295,25 +294,4 @@ func (s SRHTLS) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTLS Version Not adapted")
 	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "Connect", miop
-}
-
-func getServerTLSConfig() *tls.Config {
-	if shared.CRT_PATH == "" {
-		log.Fatal("SRHSsl:: Error:: Environment variable 'CRT_PATH' not configured\n")
-	}
-
-	if shared.KEY_PATH == "" {
-		log.Fatal("SRHSsl:: Error:: Environment variable 'KEY_PATH' not configured\n")
-	}
-
-	cert, err := tls.LoadX509KeyPair(shared.CRT_PATH, shared.KEY_PATH)
-	if err != nil {
-		log.Fatal("Error loading certificate. ", err)
-	}
-
-	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		NextProtos:   []string{"h2"},
-	}
-	return tlsConfig
 }

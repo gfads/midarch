@@ -4,20 +4,22 @@ import (
 	"log"
 	"net"
 
+	"github.com/gfads/midarch/pkg/gmidarch/development/generic"
 	"github.com/quic-go/quic-go"
 )
 
 type SRHInfo struct {
-	EndPoint       EndPoint              // host, port
-	Ln             net.Listener          // Listener
-	QUICLn         quic.Listener         // Listener
-	Conns          []net.Conn            // Set of connections
-	QUICConns      []quic.Connection     // Set of connections
-	CurrentConn    net.Conn              // Current connection
-	UDPConnection  *net.UDPConn          // UDP Connection
-	RcvedMessages  chan ReceivedMessages // Buffer of messages received by the server
-	Clients        []*Client             // Connection Pool, possible connected
-	Counter        int
+	EndPoint      EndPoint              // host, port
+	Protocol      generic.Protocol      // generic.Protocol (TCP, UDP, QUIC)
+	Ln            net.Listener          // Listener
+	QUICLn        quic.Listener         // Listener
+	Conns         []net.Conn            // Set of connections
+	QUICConns     []quic.Connection     // Set of connections
+	CurrentConn   net.Conn              // Current connection
+	UDPConnection *net.UDPConn          // UDP Connection
+	RcvedMessages chan ReceivedMessages // Buffer of messages received by the server
+	Clients       []*Client             // Connection Pool, possible connected
+	// Counter        int
 	ExecuteForever *bool
 }
 

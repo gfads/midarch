@@ -1,7 +1,12 @@
 package lib
 
 import (
+	"crypto/tls"
+	"crypto/x509"
+	"fmt"
+	"io/ioutil"
 	"log"
+	"net/url"
 	"os"
 	"runtime"
 	"strconv"
@@ -118,4 +123,70 @@ func inArrayDL(a DebugLevel, list []DebugLevel) bool {
 		}
 	}
 	return false
+}
+
+func GetURIParameters(uri string) (parameters map[string]interface{}) {
+	decodedPathParam, err := url.PathUnescape(uri[8:])
+	if err != nil {
+		PrintlnInfo("Error decoding path parameter:", err)
+		return
+	}
+	return map[string]interface{}{"param": decodedPathParam}
+
+	// parameters = make(map[string]interface{})
+	// paramRegex, err := regexp.Compile("([?][\\w|=|%|(|)|+|-|.|:]+)|([&][\\w|=|%|(|)|+|-|.|:]+)")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// 	return
+	// }
+	// params := paramRegex.FindAllString(uri, -1)
+	// for _, param := range params {
+	// 	param := param[1:]
+	// 	keyValue := strings.Split(param, "=")
+	// 	parameters[keyValue[0]] = keyValue[1]
+	// }
+	// return parameters
+}
+
+func GetServerTLSConfig(proto string) *tls.Config {
+	if shared.CRT_PATH == "" {
+		log.Fatal("SRHSsl:: Error:: Environment variable 'CRT_PATH' not configured\n")
+	}
+
+	if shared.KEY_PATH == "" {
+		log.Fatal("SRHSsl:: Error:: Environment variable 'KEY_PATH' not configured\n")
+	}
+
+	cert, err := tls.LoadX509KeyPair(shared.CRT_PATH, shared.KEY_PATH)
+	if err != nil {
+		log.Fatal("Error loading certificate. ", err)
+	}
+
+	tlsConfig := &tls.Config{
+		Certificates: []tls.Certificate{cert},
+		NextProtos:   []string{proto},
+	}
+	return tlsConfig
+}
+
+func GetClientTLSConfig(proto string) *tls.Config {
+	if shared.CA_PATH == "" {
+		log.Fatal("CRHSsl:: Error:: Environment variable 'CA_PATH' not configured\n")
+	}
+	trustCert, err := ioutil.ReadFile(shared.CA_PATH)
+	if err != nil {
+		fmt.Println("Error loading trust certificate. ", err)
+	}
+	certs := x509.NewCertPool()
+	if !certs.AppendCertsFromPEM(trustCert) {
+		fmt.Println("Error installing trust certificate.")
+	}
+
+	// connect to server
+	tlsConfig := &tls.Config{
+		InsecureSkipVerify: true,
+		RootCAs:            certs,
+		NextProtos:         []string{proto},
+	}
+	return tlsConfig
 }

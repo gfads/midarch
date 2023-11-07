@@ -12,14 +12,14 @@ import (
 	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
-// @Type: SRHRPC
+// @Type: SRHHTTPS
 // @Behaviour: Behaviour = I_Accept -> I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> Behaviour
-type SRHRPC struct {
+type SRHHTTPS struct {
 	// Graph exec.ExecGraph
 }
 
-func (s SRHRPC) I_Accept(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	//lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHRPC Version 2 adapted")
+func (s SRHHTTPS) I_Accept(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+	//lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHHTTPS Version 2 adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	// srhInfo.Counter++
@@ -27,9 +27,9 @@ func (s SRHRPC) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	//log.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Counter", srhInfo.Counter)
 
 	if srhInfo.Protocol == nil {
-		srhInfo.Protocol = &protocols.RPC{}
+		srhInfo.Protocol = &protocols.HTTPS{}
 		srhInfo.Protocol.StartServer(srhInfo.EndPoint.Host, srhInfo.EndPoint.Port, 2) //shared.MAX_NUMBER_OF_CONNECTIONS)
-		lib.PrintlnInfo("SRHRPC Server Started")
+		lib.PrintlnInfo("SRHHTTPS Server Started")
 	}
 
 	// // check if a listener has already been created
@@ -48,17 +48,17 @@ func (s SRHRPC) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	connectionAvailable, availableConenctionIndex := srhInfo.Protocol.AvailableConnectionFromPool()
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
 	if !connectionAvailable {
-		//lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHRPC Version 2 adapted - No connection available")
+		//lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHHTTPS Version 2 adapted - No connection available")
 		time.Sleep(1 * time.Millisecond)
 		return
 	}
 
 	// RPC is already executed concurrently, dont need go func
 	// go func() {
-	lib.PrintlnInfo("SRHRPC Clients Index", availableConenctionIndex)
+	lib.PrintlnInfo("SRHHTTPS Clients Index", availableConenctionIndex)
 
 	client := srhInfo.Protocol.WaitForConnection(availableConenctionIndex)
-	lib.PrintlnInfo("SRHRPC Client", client)
+	lib.PrintlnInfo("SRHHTTPS Client", client)
 
 	// Update info
 	*info = srhInfo
@@ -68,12 +68,12 @@ func (s SRHRPC) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		go s.handler(info, availableConenctionIndex)
 	}
 	// }()
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHRPC Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHHTTPS Version Not adapted")
 	return
 }
 
-func (s SRHRPC) I_Receive(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	// lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "SRHRPC Version Not adapted")
+func (s SRHHTTPS) I_Receive(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+	// lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "SRHHTTPS Version Not adapted")
 	//lib.PrintlnDebug(shared.GetFunction(), "HERE")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
@@ -87,13 +87,13 @@ func (s SRHRPC) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
-			lib.PrintlnInfo("SRHRPC Version Not adapted: tempMsgReceived", tempMsgReceived)
+			lib.PrintlnInfo("SRHHTTPS Version Not adapted: tempMsgReceived", tempMsgReceived)
 			if isNewConnection, miopPacket := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
-				lib.PrintlnInfo("SRHRPC Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
+				lib.PrintlnInfo("SRHHTTPS Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
 				*reset = true
 				return
 			}
-			lib.PrintlnInfo("SRHRPC tempMsgReceived.ToAddress", tempMsgReceived.ToAddress)
+			lib.PrintlnInfo("SRHHTTPS tempMsgReceived.ToAddress", tempMsgReceived.ToAddress)
 			msg.ToAddr = tempMsgReceived.ToAddress //Chn.RemoteAddr().String()
 		}
 	default:
@@ -103,12 +103,12 @@ func (s SRHRPC) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 		}
 	}
 
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "end", "SRHRPC Version Not adapted")
+	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "end", "SRHHTTPS Version Not adapted")
 	return
 }
 
-func (s SRHRPC) I_Send(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHRPC Version Not adapted")
+func (s SRHHTTPS) I_Send(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHHTTPS Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	lib.PrintlnInfo("msg.ToAddr", msg.ToAddr)
@@ -117,7 +117,7 @@ func (s SRHRPC) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 		*reset = true
 		return
 	}
-	lib.PrintlnInfo("SRHRPC Version Not adapted   >>>>> RPC => msg.ToAddr:", msg.ToAddr, "RPC Client:", client) //, "AdaptId:", client.AdaptId) // TODO dcruzb: verify impact of removing AdaptId
+	lib.PrintlnInfo("SRHHTTPS Version Not adapted   >>>>> RPC => msg.ToAddr:", msg.ToAddr, "RPC Client:", client) //, "AdaptId:", client.AdaptId) // TODO dcruzb: verify impact of removing AdaptId
 	msgTemp := msg.Payload.([]byte)
 
 	err := client.Send(msgTemp)
@@ -127,12 +127,12 @@ func (s SRHRPC) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 
 	// update info
 	*info = srhInfo
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "end", "SRHRPC Version Not adapted")
+	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "end", "SRHHTTPS Version Not adapted")
 	return
 }
 
-func (s SRHRPC) handler(info *interface{}, connectionIndex int) {
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "SRHRPC Version Not adapted")
+func (s SRHHTTPS) handler(info *interface{}, connectionIndex int) {
+	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "SRHHTTPS Version Not adapted")
 
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
@@ -144,7 +144,7 @@ func (s SRHRPC) handler(info *interface{}, connectionIndex int) {
 		if !*executeForever {
 			break
 		}
-		lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "FOR", "SRHRPC Version Not adapted")
+		lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "FOR", "SRHHTTPS Version Not adapted")
 
 		msg, err := client.Receive()
 		if err != nil {
@@ -152,10 +152,10 @@ func (s SRHRPC) handler(info *interface{}, connectionIndex int) {
 				break
 			}
 		}
-		lib.PrintlnInfo("SRHRPC got message")
+		lib.PrintlnInfo("SRHHTTPS got message")
 		if changeProtocol, miopPacket := s.isAdapt(msg); changeProtocol {
 			if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
-				lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHRPC Version Not adapted")
+				lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHHTTPS Version Not adapted")
 				break
 			}
 		}
@@ -176,23 +176,23 @@ func (s SRHRPC) handler(info *interface{}, connectionIndex int) {
 		}
 
 		rcvMessage := messages.ReceivedMessages{Msg: msg, Conn: nil, ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
-		lib.PrintlnInfo("SRHRPC Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+		lib.PrintlnInfo("SRHHTTPS Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		if !*executeForever {
 			break
 		}
 		srhInfo.RcvedMessages <- rcvMessage
-		lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHRPC Version Not adapted")
+		lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHHTTPS Version Not adapted")
 	}
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "end", "SRHRPC Version Not adapted")
+	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "end", "SRHHTTPS Version Not adapted")
 }
 
-func (s SRHRPC) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
+func (s SRHHTTPS) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }
 
-func (s SRHRPC) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
+func (s SRHHTTPS) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "Connect", miop
