@@ -5,6 +5,7 @@ import (
 
 	"github.com/gfads/midarch/examples/calculatordistributed/externalcomponents"
 	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciProxy"
+	sendFileProxy "github.com/gfads/midarch/examples/sendfiledistributed/sendfileProxy"
 	"github.com/gfads/midarch/pkg/gmidarch/development/generic"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/shared"
@@ -15,7 +16,9 @@ import (
 var ProxiesRepo = map[string]generic.Proxy{ // Update for each new proxy
 	reflect.TypeOf(Namingproxy{}).Name():                        &Namingproxy{},
 	reflect.TypeOf(externalcomponents.Calculatorproxy{}).Name(): &externalcomponents.Calculatorproxy{},
-	reflect.TypeOf(fibonacciProxy.FibonacciProxy{}).Name():      &fibonacciProxy.FibonacciProxy{}}
+	reflect.TypeOf(fibonacciProxy.FibonacciProxy{}).Name():      &fibonacciProxy.FibonacciProxy{},
+	reflect.TypeOf(sendFileProxy.SendFileProxy{}).Name():        &fibonacciProxy.FibonacciProxy{},
+}
 
 // Internal channels
 var ChOut, ChIn chan messages.SAMessage
