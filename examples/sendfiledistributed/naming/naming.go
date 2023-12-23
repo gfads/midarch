@@ -5,7 +5,7 @@ import (
 	"os"
 	"sync"
 
-	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciProxy"
+	sendFileProxy "github.com/gfads/midarch/examples/sendfiledistributed/sendfileProxy"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/execution/frontend"
 	"github.com/gfads/midarch/pkg/shared"
@@ -26,7 +26,7 @@ func main() {
 
 	// Deploy configuration
 	fe.Deploy(frontend.DeployOptions{FileName: "naming.madl", Args: args, Components: map[string]interface{}{
-		"FibonacciProxy": &fibonacciProxy.FibonacciProxy{},
+		"SendFileProxy": &sendFileProxy.SendFileProxy{},
 	}})
 
 	fmt.Printf("Naming server is running at Port: %v \n", shared.NAMING_PORT)

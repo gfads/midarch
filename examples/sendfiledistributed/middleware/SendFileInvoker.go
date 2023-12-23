@@ -1,7 +1,7 @@
 package middleware
 
 import (
-	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciImpl"
+	sendFileImpl "github.com/gfads/midarch/examples/sendfiledistributed/sendfileImpl"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
 	"github.com/gfads/midarch/pkg/shared"
@@ -22,26 +22,8 @@ func (SendFileInvoker) I_Beforeserver(id string, msg *messages.SAMessage, info *
 	req := messages.FunctionalRequest{Op: miopPacket.Bd.ReqHeader.Operation, Params: miopPacket.Bd.ReqBody.Body}
 
 	switch req.Op {
-	case "F":
-
-		// Parameters
-		params := []interface{}{req.Params[0].(int)}
-
-		// Functional request
-		req2 := messages.FunctionalRequest{Op: req.Op, Params: params} // TODO dcruzb : use req.Params directly instead params
-		msg.Payload = &req2
-
-		reply := fibonacciImpl.Fibonacci{}.F(req.Params[0].(int))
-		msg.Payload = messages.FunctionalReply{Rep: reply}
-
-	case "I":
-		params := []interface{}{req.Params[0].(int)}
-
-		// Functional request
-		req2 := messages.FunctionalRequest{Op: req.Op, Params: params} // TODO dcruzb : use req.Params directly instead params
-		msg.Payload = &req2
-
-		reply := "data:image/png;base64,BASE64_HERE"
+	case "U":
+		reply := sendFileImpl.SendFile{}.Save(req.Params[0].(string))
 		msg.Payload = messages.FunctionalReply{Rep: reply}
 	default:
 		shared.ErrorHandler(shared.GetFunction(), "Operation '"+req.Op+"' not present in Invoker")

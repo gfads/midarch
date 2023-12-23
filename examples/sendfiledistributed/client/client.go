@@ -8,7 +8,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciProxy"
 	sendFileProxy "github.com/gfads/midarch/examples/sendfiledistributed/sendfileProxy"
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/proxies/namingproxy"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
@@ -32,7 +31,7 @@ func main() {
 		SAMPLE_SIZE, _ = strconv.Atoi(os.Args[2])
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(os.Args[3])
 	} else {
-		FILE_SIZE = shared.EnvironmentVariableValueWithDefault("FILE_SIZE", "sm")
+		FILE_SIZE = shared.EnvironmentVariableValueWithDefault("FILE_SIZE", "md")
 		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("SAMPLE_SIZE", "10000"))
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("AVERAGE_WAITING_TIME", "60"))
 	}
@@ -48,10 +47,10 @@ func main() {
 
 	// Deploy configuration
 	fe.Deploy(frontend.DeployOptions{
-		FileName: "FibonacciDistributedClientMid.madl",
+		FileName: "SendFileDistributedClientMid.madl",
 		Args:     args,
 		Components: map[string]interface{}{
-			"FibonacciProxy": &fibonacciProxy.FibonacciProxy{},
+			"SendFileProxy": &sendFileProxy.SendFileProxy{},
 		}})
 
 	// proxy to naming service
@@ -60,27 +59,28 @@ func main() {
 
 	aux, ok := namingProxy.Lookup("SendFile")
 	if !ok {
-		shared.ErrorHandler(shared.GetFunction(), "Service 'Fibonacci' not found in Naming Service")
+		shared.ErrorHandler(shared.GetFunction(), "Service 'SendFile' not found in Naming Service")
 	}
 
 	sendFile := aux.(*sendFileProxy.SendFileProxy)
 
+	fileBytes := getFile(FILE_SIZE)
 	rand.Seed(time.Now().UnixNano())
 	for x := 0; x < SAMPLE_SIZE; x++ {
 		ok := false
-		file := getFile(FILE_SIZE)
+
 		for !ok {
 			// TODO dcruzb: getImage based on FILE_SIZE
 
 			t1 := time.Now()
 			//fmt.Println("Result:", fibonacci.F(n))
-			r := sendFile.SendFile(file)
+			r := sendFile.SendFile(fileBytes)
 			//time.Sleep(200 * time.Millisecond)
 
 			t2 := time.Now()
 
 			duration := t2.Sub(t1)
-			if r != "0" {
+			if r {
 				ok = true
 				lib.PrintlnMessage(x+1, float64(duration.Nanoseconds())/1000000)
 			}
@@ -99,20 +99,21 @@ func main() {
 	//wg.Wait()
 }
 
-func getFile(size string) *os.File {
+func getFile(size string) []byte {
 	var fileName string
 	switch size {
 	case "sm":
-		fileName = shared.DIR_BASE + "/examples/sendfiledistributed/client/36x36.txt"
+		fileName = shared.DIR_BASE + "/examples/sendfiledistributed/client/36x36.png"
 	case "md":
-		fileName = shared.DIR_BASE + "/examples/sendfiledistributed/client/720x1080.txt"
+		fileName = shared.DIR_BASE + "/examples/sendfiledistributed/client/720x1080.png"
 	case "lg":
-		fileName = shared.DIR_BASE + "/examples/sendfiledistributed/client/4k.txt"
+		fileName = shared.DIR_BASE + "/examples/sendfiledistributed/client/4k.jpg" // Foto de <a href="https://unsplash.com/pt-br/@francesco_ungaro?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Francesco Ungaro</a> na <a href="https://unsplash.com/pt-br/fotografias/cardume-de-peixes-no-corpo-de-agua-MJ1Q7hHeGlA?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
 	}
 
-	file, err := os.Open(fileName)
+	fileBytes, err := os.ReadFile(fileName)
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), "Error opening file: "+fileName)
 	}
-	return file
+
+	return fileBytes
 }
