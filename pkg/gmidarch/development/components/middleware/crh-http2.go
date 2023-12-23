@@ -58,17 +58,17 @@ func (c CRHHTTP2) I_Process(id string, msg *messages.SAMessage, info *interface{
 	//fmt.Println("Vai conectar", crhInfo.Conns[addr])
 	lib.PrintlnDebug("Vai conectar", crhInfo.Conns[addr])
 	if _, ok := crhInfo.Protocols[addr]; !ok || reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name() != "HTTP2" { // no connection open yet
-		lib.PrintlnInfo("Try to connect", crhInfo.Protocols[addr])
+		lib.PrintlnDebug("Try to connect", crhInfo.Protocols[addr])
 		if ok {
-			lib.PrintlnInfo("ElemName", reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name())
+			lib.PrintlnDebug("ElemName", reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name())
 			crhInfo.Protocols[addr].CloseConnection()
 		}
 		crhInfo.Protocols[addr] = &protocols.HTTP2{}
 		crhInfo.Protocols[addr].ConnectToServer(host, port)
 	}
-	lib.PrintlnInfo("Connected", crhInfo.Protocols[addr])
+	lib.PrintlnDebug("Connected", crhInfo.Protocols[addr])
 
-	lib.PrintlnInfo("Will send:", string(msgToServer))
+	lib.PrintlnDebug("Will send:", string(msgToServer))
 	err = crhInfo.Protocols[addr].Send(msgToServer)
 	if err != nil {
 		lib.PrintlnError("Error trying to send message:", err.Error())
@@ -78,7 +78,7 @@ func (c CRHHTTP2) I_Process(id string, msg *messages.SAMessage, info *interface{
 		delete(crhInfo.Protocols, addr)
 		return
 	}
-	lib.PrintlnInfo("Sent message", crhInfo.Protocols[addr])
+	lib.PrintlnDebug("Sent message", crhInfo.Protocols[addr])
 
 	msgFromServer, err := crhInfo.Protocols[addr].Receive()
 	if err != nil {
@@ -89,9 +89,9 @@ func (c CRHHTTP2) I_Process(id string, msg *messages.SAMessage, info *interface{
 		delete(crhInfo.Protocols, addr)
 		return
 	}
-	lib.PrintlnInfo("Received message", crhInfo.Protocols[addr])
+	lib.PrintlnDebug("Received message", crhInfo.Protocols[addr])
 	VerifyProtocolAdaptation(msgFromServer, crhInfo.Protocols[addr])
-	lib.PrintlnInfo("Adaptation Verified", crhInfo.Protocols[addr])
+	lib.PrintlnDebug("Adaptation Verified", crhInfo.Protocols[addr])
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
 

@@ -395,14 +395,14 @@ type HTTPSRequest struct {
 }
 
 func (rq HTTPSRequest) Request(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
-	lib.PrintlnInfo("Received message")
+	lib.PrintlnDebug("Received message")
 	uriParameters := lib.GetURIParameters(r.RequestURI)
 	go func() {
 		rq.msgChan <- []byte(uriParameters["param"].(string))
 	}()
-	lib.PrintlnInfo("Forwarded message")
+	lib.PrintlnDebug("Forwarded message")
 	replyMsg := <-rq.replyChan
-	lib.PrintlnInfo("Received reply")
+	lib.PrintlnDebug("Received reply")
 	//*reply = w
 	w.Write(replyMsg)
 
@@ -410,15 +410,15 @@ func (rq HTTPSRequest) Request(w http.ResponseWriter, r *http.Request) { //reque
 }
 
 func (rq HTTPSRequest) ServeHTTP(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
-	lib.PrintlnInfo("Received request. URI:", r.RequestURI)
+	lib.PrintlnDebug("Received request. URI:", r.RequestURI)
 	uriParameters := lib.GetURIParameters(r.RequestURI)
-	lib.PrintlnInfo("Received request params:", uriParameters["param"].(string))
+	lib.PrintlnDebug("Received request params:", uriParameters["param"].(string))
 	go func() {
 		rq.msgChan <- []byte(uriParameters["param"].(string))
 	}()
-	lib.PrintlnInfo("Forwarded message")
+	lib.PrintlnDebug("Forwarded message")
 	replyMsg := <-rq.replyChan
-	lib.PrintlnInfo("Received reply")
+	lib.PrintlnDebug("Received reply")
 	//*reply = w
 	w.Write(replyMsg)
 

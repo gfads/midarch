@@ -14,6 +14,7 @@ import (
 	"github.com/gfads/midarch/pkg/gmidarch/development/generic"
 	"github.com/gfads/midarch/pkg/shared"
 	"github.com/gfads/midarch/pkg/shared/lib"
+	"golang.org/x/net/http2"
 )
 
 type HTTP2Client struct {
@@ -243,7 +244,7 @@ func (st *HTTP2) ResetClients() {
 // Client Methods
 
 func (st *HTTP2) ConnectToServer(ip, port string) {
-	lib.PrintlnInfo("**********************************************")
+	lib.PrintlnInfo("********************************************** HTTP2.ConnectToServer")
 	if st.msgChan == nil {
 		st.msgChan = make(chan []byte)
 	}
@@ -258,23 +259,9 @@ func (st *HTTP2) ConnectToServer(ip, port string) {
 	// lib.PrintlnDebug("Resolved addr", tcpAddr)
 	//localTcpAddr := c.getLocalTcpAddr()
 
-	for {
-		// Create an HTTP client with a timeout
-		st.http2Client = &http.Client{Timeout: 5 * time.Second}
-		st.http2Client.Transport = &http.Transport{TLSClientConfig: lib.GetClientTLSConfig("h2")}
-		// , DialTLS: func(network, addr string) (net.Conn, error) {
-		// 	return tls.Dial(network, addr, lib.GetClientTLSConfig("h2"))
-		// }}
-		// st.serverConnection, err = net.DialTCP("tcp", nil, tcpAddr)
-		lib.PrintlnDebug("Dialed", st.http2Client)
-		// if err != nil {
-		// 	lib.PrintlnError("Dial error", st.http2Client, err)
-		// 	time.Sleep(200 * time.Millisecond)
-		// 	//shared.ErrorHandler(shared.GetFunction(), err.Error())
-		// } else {
-		break // TODO dcruzb: remove for since there is no possibility of error
-		// }
-	}
+	// Create an HTTP client with a timeout
+	http2Transport := &http2.Transport{TLSClientConfig: lib.GetClientTLSConfig("h2")}
+	st.http2Client = &http.Client{Timeout: 5 * time.Second, Transport: http2Transport}
 	lib.PrintlnDebug("Connected", st.http2Client)
 	// if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 	// 	//lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())

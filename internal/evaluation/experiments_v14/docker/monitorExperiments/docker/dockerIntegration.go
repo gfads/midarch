@@ -4,16 +4,17 @@ import (
 	"context"
 	"encoding/binary"
 	"errors"
-	"github.com/docker/docker/api/types"
-	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/docker/client"
-	"github.com/gfads/midarch/pkg/shared/lib"
 	"io"
 	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/docker/docker/api/types"
+	"github.com/docker/docker/api/types/filters"
+	"github.com/docker/docker/client"
+	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
 func getClientContainer(ctx context.Context, cli *client.Client) map[string]types.Container {
@@ -65,7 +66,7 @@ func getContainerStatus(ctx context.Context, cli *client.Client, containerID str
 	return "no container"
 }
 
-func saveContainerLogsToFile(ctx context.Context, cli *client.Client, containerID string, containerType string, kind Kind, fiboPlace int, sampleSize int) error {
+func saveContainerLogsToFile(ctx context.Context, cli *client.Client, containerID string, containerType string, kind TransportProtocolFactor, fiboPlace int, sampleSize int) error {
 	options := types.ContainerLogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,

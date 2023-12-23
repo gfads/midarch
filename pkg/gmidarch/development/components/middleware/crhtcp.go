@@ -60,7 +60,7 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	if _, ok := crhInfo.Protocols[addr]; !ok || reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name() != "TCP" { // no connection open yet
 		lib.PrintlnDebug("Try to connect", crhInfo.Protocols[addr])
 		if ok {
-			lib.PrintlnInfo("ElemName", reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name())
+			lib.PrintlnDebug("ElemName", reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name())
 			crhInfo.Protocols[addr].CloseConnection()
 		}
 		crhInfo.Protocols[addr] = &protocols.TCP{}

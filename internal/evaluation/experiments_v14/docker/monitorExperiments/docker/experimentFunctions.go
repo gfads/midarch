@@ -1,12 +1,11 @@
 package docker
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/docker/docker/client"
-	"github.com/gfads/midarch/pkg/shared/lib"
 	"io"
 	"log"
 	"os"
@@ -16,13 +15,17 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/docker/docker/client"
+	"github.com/gfads/midarch/pkg/shared"
+	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
-func createStack(kind Kind) error {
+func createStack(kind TransportProtocolFactor) error {
 	return executeCommand(kind.createStackCommand())
 }
 
-func removeStack(kind Kind) error {
+func removeStack(kind TransportProtocolFactor) error {
 	return executeCommand(kind.removeStackCommand())
 }
 
@@ -39,11 +42,68 @@ func executeCommand(command string) error {
 	return err
 }
 
-func RunExperiment(kind Kind, fiboPlace int, sampleSize int) {
+func buildExperiment(transportProtocol TransportProtocolFactor, remoteOperation RemoteOperationFactor, fiboPlace int, imageSize string, sampleSize int) {
+	dcModel := shared.DOCKER_COMPOSE_PATH
+	log.Println("Vai ler:", dcModel)
+	input, err := os.ReadFile(dcModel)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	specificEnvClient := ""
+	switch remoteOperation {
+	case Fibonacci:
+		specificEnvClient = "FIBONACCI_PLACE: \"" + strconv.Itoa(fiboPlace) + "\""
+	case SendFile:
+		specificEnvClient = "IMAGE_SIZE: \"" + imageSize + "\""
+	}
+
+	sampleSizeStr := strconv.Itoa(sampleSize)
+	avarageWaitingTime := "200"
+	experimentVersion := "1.14.0"
+	baseImageName := "midarch/<remote.operation>:<version>-<app>-<tranport.protocol>"
+	imageName := strings.Replace(baseImageName, "<remote.operation>", remoteOperation.toString(), 1)
+	imageName = strings.Replace(imageName, "<version>", experimentVersion, 1)
+	imageName = strings.Replace(imageName, "<tranport.protocol>", transportProtocol.toString(), 1)
+	imageNameNamingServer := strings.Replace(imageName, "<app>", "namingserver", 1)
+	imageNameServer := strings.Replace(imageName, "<app>", "server", 1)
+	imageNameClient := strings.Replace(imageName, "<app>", "client", 1)
+
+	output := bytes.Replace(input, []byte("<image.namingserver>"), []byte(imageNameNamingServer), -1)
+	output = bytes.Replace(output, []byte("<image.server>"), []byte(imageNameServer), -1)
+	output = bytes.Replace(output, []byte("<image.client>"), []byte(imageNameClient), -1)
+	output = bytes.Replace(output, []byte("<specific.env.client>"), []byte(specificEnvClient), -1)
+	output = bytes.Replace(output, []byte("<sample.size>"), []byte(sampleSizeStr), -1)
+	output = bytes.Replace(output, []byte("<average.waiting.time>"), []byte(avarageWaitingTime), -1)
+
+	outputPath := shared.DIR_EXPERIMENTS_RESULTS + "/" + remoteOperation.toString() + "-" + experimentVersion + "-" + transportProtocol.toString() + "-" + strconv.Itoa(fiboPlace) + "-" + imageSize + "-" + sampleSizeStr
+	log.Println("Save to:", outputPath)
+	os.Mkdir(outputPath, os.ModePerm)
+	if err = os.WriteFile(outputPath+"/dc-experiment.yml", output, 0666); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func RunFibonacciExperiment(transportProtocol TransportProtocolFactor, fiboPlace int, sampleSize int) {
+	RunExperiment(transportProtocol, Fibonacci, fiboPlace, "", sampleSize)
+}
+
+func RunSendFileExperiment(transportProtocol TransportProtocolFactor, imageSize string, sampleSize int) {
+	RunExperiment(transportProtocol, SendFile, 0, imageSize, sampleSize)
+}
+
+func RunExperiment(transportProtocol TransportProtocolFactor, remoteOperation RemoteOperationFactor, fiboPlace int, imageSize string, sampleSize int) {
+	log.Println("Preparing experiment", transportProtocol.toString(), "(fiboPlace:", fiboPlace, "sampleSize:", sampleSize, ") experiment fiboPlace!")
+	log.Println("Building experiment")
+	log.Println()
+	buildExperiment(transportProtocol, remoteOperation, fiboPlace, imageSize, sampleSize)
+	return
+
 	for {
-		log.Println("Preparing to run", kind.toString(), "(fiboPlace:", fiboPlace, "sampleSize:", sampleSize, ") experiment fiboPlace!")
+		log.Println("Preparing to run", transportProtocol.toString(), "(fiboPlace:", fiboPlace, "sampleSize:", sampleSize, ") experiment fiboPlace!")
 		log.Println()
-		err := processExperiment(kind, fiboPlace, sampleSize)
+		err := processExperiment(transportProtocol, fiboPlace, sampleSize)
 		if err != nil {
 			log.Println()
 			log.Println("Error while processing experiment. Will try again in 10 seconds. Error:", err)
@@ -53,7 +113,7 @@ func RunExperiment(kind Kind, fiboPlace int, sampleSize int) {
 		} else {
 			log.Println()
 			log.Println()
-			log.Println("Finished running", kind.toString(), "(fiboPlace:", fiboPlace, "sampleSize:", sampleSize, ") experiment fiboPlace!")
+			log.Println("Finished running", transportProtocol.toString(), "(fiboPlace:", fiboPlace, "sampleSize:", sampleSize, ") experiment fiboPlace!")
 			log.Println("Waiting 10 seconds to exit")
 			time.Sleep(10 * time.Second)
 			return
@@ -61,7 +121,7 @@ func RunExperiment(kind Kind, fiboPlace int, sampleSize int) {
 	}
 }
 
-func processExperiment(kind Kind, fiboPlace int, sampleSize int) []error {
+func processExperiment(kind TransportProtocolFactor, fiboPlace int, sampleSize int) []error {
 	var experimentErrors []error
 	stackRemoved := false
 
@@ -125,7 +185,7 @@ func processExperiment(kind Kind, fiboPlace int, sampleSize int) []error {
 	return experimentErrors
 }
 
-func monitorExperiment(kind Kind, fiboPlace int, sampleSize int, cli *client.Client, ctx context.Context, cancel context.CancelFunc, containerId string, containerType string) error {
+func monitorExperiment(kind TransportProtocolFactor, fiboPlace int, sampleSize int, cli *client.Client, ctx context.Context, cancel context.CancelFunc, containerId string, containerType string) error {
 	stats, err := cli.ContainerStats(ctx, containerId, true)
 	if err != nil {
 		//_ = fmt.Errorf("%s", err.Error())

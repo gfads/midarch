@@ -1,0 +1,47 @@
+version: "3.3"
+services:
+  namingserver:
+    image: <image.namingserver>
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          cpus: "1"
+          memory: 128M
+        reservations:
+          cpus: "1"
+          memory: 128M
+
+  server:
+    image: <image.server>
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          cpus: "1"
+          memory: 128M
+        reservations:
+          cpus: "1"
+          memory: 128M
+
+  client:
+    image: <image.client>
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          cpus: "1"
+          memory: 128M
+        reservations:
+          cpus: "1"
+          memory: 128M
+    environment:
+      <specific.env.client>
+      SAMPLE_SIZE: <sample.size>
+      AVERAGE_WAITING_TIME: <average.waiting.time>

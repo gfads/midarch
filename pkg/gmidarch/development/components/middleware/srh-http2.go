@@ -29,7 +29,7 @@ func (s SRHHTTP2) I_Accept(id string, msg *messages.SAMessage, info *interface{}
 	if srhInfo.Protocol == nil {
 		srhInfo.Protocol = &protocols.HTTP2{}
 		srhInfo.Protocol.StartServer(srhInfo.EndPoint.Host, srhInfo.EndPoint.Port, 2) //shared.MAX_NUMBER_OF_CONNECTIONS)
-		lib.PrintlnInfo("SRHHTTP2 Server Started")
+		lib.PrintlnDebug("SRHHTTP2 Server Started")
 	}
 
 	// // check if a listener has already been created
@@ -53,12 +53,12 @@ func (s SRHHTTP2) I_Accept(id string, msg *messages.SAMessage, info *interface{}
 		return
 	}
 
-	// RPC is already executed concurrently, dont need go func
+	// HTTP2 is already executed concurrently, dont need go func
 	// go func() {
-	lib.PrintlnInfo("SRHHTTP2 Clients Index", availableConenctionIndex)
+	lib.PrintlnDebug("SRHHTTP2 Clients Index", availableConenctionIndex)
 
 	client := srhInfo.Protocol.WaitForConnection(availableConenctionIndex)
-	lib.PrintlnInfo("SRHHTTP2 Client", client)
+	lib.PrintlnDebug("SRHHTTP2 Client", client)
 
 	// Update info
 	*info = srhInfo
@@ -73,7 +73,7 @@ func (s SRHHTTP2) I_Accept(id string, msg *messages.SAMessage, info *interface{}
 }
 
 func (s SRHHTTP2) I_Receive(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	// lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "SRHHTTP2 Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHHTTP2 Version Not adapted")
 	//lib.PrintlnDebug(shared.GetFunction(), "HERE")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
@@ -87,13 +87,13 @@ func (s SRHHTTP2) I_Receive(id string, msg *messages.SAMessage, info *interface{
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
-			lib.PrintlnInfo("SRHHTTP2 Version Not adapted: tempMsgReceived", tempMsgReceived)
+			lib.PrintlnDebug("SRHHTTP2 Version Not adapted: tempMsgReceived", tempMsgReceived)
 			if isNewConnection, miopPacket := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
-				lib.PrintlnInfo("SRHHTTP2 Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
+				lib.PrintlnDebug("SRHHTTP2 Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
 				*reset = true
 				return
 			}
-			lib.PrintlnInfo("SRHHTTP2 tempMsgReceived.ToAddress", tempMsgReceived.ToAddress)
+			lib.PrintlnDebug("SRHHTTP2 tempMsgReceived.ToAddress", tempMsgReceived.ToAddress)
 			msg.ToAddr = tempMsgReceived.ToAddress //Chn.RemoteAddr().String()
 		}
 	default:
@@ -103,7 +103,7 @@ func (s SRHHTTP2) I_Receive(id string, msg *messages.SAMessage, info *interface{
 		}
 	}
 
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "end", "SRHHTTP2 Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHHTTP2 Version Not adapted")
 	return
 }
 
@@ -111,13 +111,13 @@ func (s SRHHTTP2) I_Send(id string, msg *messages.SAMessage, info *interface{}, 
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHHTTP2 Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
-	lib.PrintlnInfo("msg.ToAddr", msg.ToAddr)
+	lib.PrintlnDebug("msg.ToAddr", msg.ToAddr)
 	client := srhInfo.Protocol.GetClientFromAddr(msg.ToAddr)
 	if client == nil {
 		*reset = true
 		return
 	}
-	lib.PrintlnInfo("SRHHTTP2 Version Not adapted   >>>>> RPC => msg.ToAddr:", msg.ToAddr, "RPC Client:", client) //, "AdaptId:", client.AdaptId) // TODO dcruzb: verify impact of removing AdaptId
+	lib.PrintlnDebug("SRHHTTP2 Version Not adapted   >>>>> HTTP2 => msg.ToAddr:", msg.ToAddr, "HTTP2 Client:", client) //, "AdaptId:", client.AdaptId) // TODO dcruzb: verify impact of removing AdaptId
 	msgTemp := msg.Payload.([]byte)
 
 	err := client.Send(msgTemp)
@@ -127,12 +127,12 @@ func (s SRHHTTP2) I_Send(id string, msg *messages.SAMessage, info *interface{}, 
 
 	// update info
 	*info = srhInfo
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "end", "SRHHTTP2 Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHHTTP2 Version Not adapted")
 	return
 }
 
 func (s SRHHTTP2) handler(info *interface{}, connectionIndex int) {
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "SRHHTTP2 Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHHTTP2 Version Not adapted")
 
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
@@ -144,7 +144,7 @@ func (s SRHHTTP2) handler(info *interface{}, connectionIndex int) {
 		if !*executeForever {
 			break
 		}
-		lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "FOR", "SRHHTTP2 Version Not adapted")
+		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR", "SRHHTTP2 Version Not adapted")
 
 		msg, err := client.Receive()
 		if err != nil {
@@ -152,22 +152,22 @@ func (s SRHHTTP2) handler(info *interface{}, connectionIndex int) {
 				break
 			}
 		}
-		lib.PrintlnInfo("SRHHTTP2 got message")
+		lib.PrintlnDebug("SRHHTTP2 got message")
 		if changeProtocol, miopPacket := s.isAdapt(msg); changeProtocol {
 			if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
-				lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHHTTP2 Version Not adapted")
+				lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHHTTP2 Version Not adapted")
 				break
 			}
 		}
 		if isNewConnection, _ := s.isNewConnection(msg); isNewConnection { // TODO dcruzb: move to I_Receive
 			//newConnection = true
-			lib.PrintlnInfo("RPC Is New Connection")
+			lib.PrintlnDebug("HTTP2 Is New Connection")
 			//miopPacket := miop.CreateReqPacket("Connect", []interface{}{miopPacket.Bd.ReqBody.Body[0], "Ok"}, miopPacket.Bd.ReqBody.Body[0].(int)) // idx is the Connection ID
 			//msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
 
-			lib.PrintlnInfo("RPC Before send")
+			lib.PrintlnDebug("HTTP2 Before send")
 			//s.send(conn, addr, msgPayload)
-			lib.PrintlnInfo("RPC After send")
+			lib.PrintlnDebug("HTTP2 After send")
 			//if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
 			//	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHUDP Version Not adapted")
 			//	break
@@ -176,14 +176,14 @@ func (s SRHHTTP2) handler(info *interface{}, connectionIndex int) {
 		}
 
 		rcvMessage := messages.ReceivedMessages{Msg: msg, Conn: nil, ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
-		lib.PrintlnInfo("SRHHTTP2 Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+		lib.PrintlnDebug("SRHHTTP2 Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		if !*executeForever {
 			break
 		}
 		srhInfo.RcvedMessages <- rcvMessage
-		lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHHTTP2 Version Not adapted")
+		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHHTTP2 Version Not adapted")
 	}
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "end", "SRHHTTP2 Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHHTTP2 Version Not adapted")
 }
 
 func (s SRHHTTP2) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {

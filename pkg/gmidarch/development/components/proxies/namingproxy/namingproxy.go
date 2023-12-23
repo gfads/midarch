@@ -17,7 +17,7 @@ var ProxiesRepo = map[string]generic.Proxy{ // Update for each new proxy
 	reflect.TypeOf(Namingproxy{}).Name():                        &Namingproxy{},
 	reflect.TypeOf(externalcomponents.Calculatorproxy{}).Name(): &externalcomponents.Calculatorproxy{},
 	reflect.TypeOf(fibonacciProxy.FibonacciProxy{}).Name():      &fibonacciProxy.FibonacciProxy{},
-	reflect.TypeOf(sendFileProxy.SendFileProxy{}).Name():        &fibonacciProxy.FibonacciProxy{},
+	reflect.TypeOf(sendFileProxy.SendFileProxy{}).Name():        &sendFileProxy.SendFileProxy{},
 }
 
 // Internal channels

@@ -7,7 +7,7 @@ ENV GOROOT /usr/local/go
 ENV GMIDARCHDIR /go
 ENV GMIDARCH /go
 ENV FDR4 /usr/local/fdr4/bin
-RUN go env -w GO111MODULE=off
+# RUN go env -w GO111MODULE=off
 
 # COPY ./fdr4 /usr/local/fdr4
 # #RUN sh -c 'echo "deb http://www.cs.ox.ac.uk/projects/fdr/downloads/debian/ fdr release\n" > /etc/apt/sources.list.d/fdr.list'
