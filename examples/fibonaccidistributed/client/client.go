@@ -75,7 +75,7 @@ func main() {
 			t2 := time.Now()
 
 			duration := t2.Sub(t1)
-			if r != "0" {
+			if r != 0 {
 				ok = true
 				lib.PrintlnMessage(x+1, float64(duration.Nanoseconds())/1000000)
 			}

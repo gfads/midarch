@@ -43,7 +43,7 @@ var DIR_PLUGINS_IMPORT = "github.com/gfads/midarch/pkg/gmidarch/development/repo
 var CA_PATH = EnvironmentVariableValue("CA_PATH")
 var CRT_PATH = EnvironmentVariableValue("CRT_PATH")
 var KEY_PATH = EnvironmentVariableValue("KEY_PATH")
-var DOCKER_COMPOSE_PATH = DIR_BASE + "/internal/evaluation/experiments_v14/docker/monitorExperiments/dc-experiment.model.yml"
+var DIR_EXPERIMENTS_MODELS = DIR_BASE + "/internal/evaluation/experiments_v14/docker/models"
 var DIR_EXPERIMENTS_RESULTS = DIR_BASE + "/internal/evaluation/experiments_v14/results"
 var AdaptId = -1
 var LocalAddr = ""
@@ -74,8 +74,8 @@ const TERR = "TerR"
 
 // Network setups
 const NAMING_PORT = "1313"
-const NAMING_HOST = "localhost"     // "namingserver" //
-const CALCULATOR_HOST = "localhost" //"server"   //
+const NAMING_HOST = "localhost"     //"naming"     //
+const CALCULATOR_HOST = "localhost" //"server" //
 const CALCULATOR_PORT = "1314"
 const FIBONACCI_PORT = "1315"
 const QUEUEING_PORT = "1316"
@@ -83,6 +83,7 @@ const MAX_NUMBER_OF_CONNECTIONS = 10
 const SIZE_OF_MESSAGE_SIZE = 4
 const NUM_MAX_MESSAGE_BYTES int = 10240000  // 10MB
 const MAX_NUMBER_OF_RECEIVED_MESSAGES = 300 // messages received and not processed by srh
+const MAX_UDP_PACKET_SIZE = 65507           // Maximum UDP packet size
 
 const ATTEMPTS_TO_OPEN_A_PLUGIN = 1000
 

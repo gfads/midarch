@@ -248,6 +248,7 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 			lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Handler without client")
 			break
 		}
+		// lib.PrintlnInfo("Received:", size)
 		srhInfo.Clients[connectionIndex].Ip = addr.String()
 		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Read efetuado", "SRHUDP Version Not adapted")
 		if err != nil {
@@ -264,12 +265,14 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 		}
 
 		// receive message
-		msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
+		// msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
 		//err = conn.SetReadDeadline(time.Now().Add(10*time.Second))
 		//if err != nil {
 		//	lib.PrintlnError(shared.GetFunction(), err.Error())
 		//}
-		_, err = conn.Read(msgTemp)
+		// _, err = conn.Read(msgTemp)
+		// lib.PrintlnInfo("Received:", msgTemp)
+		msgTemp, err := s.read(binary.LittleEndian.Uint32(size), conn)
 		if err != nil {
 			if err == io.EOF ||
 				strings.Contains(err.Error(), "use of closed network connection") ||
@@ -312,6 +315,44 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHUDP Version Not adapted")
 	}
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
+}
+
+func (s SRHUDP) read(size uint32, conn *net.UDPConn) (fullMessage []byte, err error) {
+	// msgTemp := make([]byte, size)
+	//err = conn.SetReadDeadline(time.Now().Add(10*time.Second))
+	//if err != nil {
+	//	lib.PrintlnError(shared.GetFunction(), err.Error())
+	//}
+	// _, err = conn.Read(msgTemp)
+	// fullMessage = make([]byte, size)
+	// lib.PrintlnInfo("Received(read):size", size)
+	const maxBufferSize = shared.MAX_UDP_PACKET_SIZE
+	for {
+		bufferSize := int(size) - len(fullMessage)
+		if bufferSize > maxBufferSize {
+			bufferSize = maxBufferSize
+		}
+		buffer := make([]byte, bufferSize, bufferSize)
+		// lib.PrintlnInfo("Received(read-ini):size", size, "len(fullMessage)", len(fullMessage), "bufferSize", bufferSize, "remaining", int(size)-len(fullMessage))
+
+		// lib.PrintlnInfo("Received(read):for1")
+		n, _, err := conn.ReadFromUDP(buffer)
+		// lib.PrintlnInfo("Received(read):", buffer)
+
+		if err != nil {
+			lib.PrintlnError("Error while reading message. Error:", err)
+			return nil, err
+		}
+
+		fullMessage = append(fullMessage, buffer[:n]...)
+		// lib.PrintlnInfo("Received(read):for2")
+		// lib.PrintlnInfo("Received(read-end):size", size, "len(fullMessage)", len(fullMessage), "bufferSize", bufferSize)
+		// Check if the message is complete (you need a way to determine this based on your protocol)
+		if len(fullMessage) >= int(size) {
+			return fullMessage, nil
+		}
+		// lib.PrintlnInfo("Received(read):for3")
+	}
 }
 
 func (s SRHUDP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {

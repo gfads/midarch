@@ -31,7 +31,7 @@ func main() {
 		SAMPLE_SIZE, _ = strconv.Atoi(os.Args[2])
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(os.Args[3])
 	} else {
-		FILE_SIZE = shared.EnvironmentVariableValueWithDefault("FILE_SIZE", "md")
+		FILE_SIZE = shared.EnvironmentVariableValueWithDefault("FILE_SIZE", "lg")
 		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("SAMPLE_SIZE", "10000"))
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("AVERAGE_WAITING_TIME", "60"))
 	}
@@ -73,7 +73,7 @@ func main() {
 			// TODO dcruzb: getImage based on FILE_SIZE
 
 			t1 := time.Now()
-			//fmt.Println("Result:", fibonacci.F(n))
+
 			r := sendFile.SendFile(fileBytes)
 			//time.Sleep(200 * time.Millisecond)
 
@@ -105,9 +105,9 @@ func getFile(size string) []byte {
 	case "sm":
 		fileName = shared.DIR_BASE + "/examples/sendfiledistributed/client/36x36.png"
 	case "md":
-		fileName = shared.DIR_BASE + "/examples/sendfiledistributed/client/720x1080.png"
+		fileName = shared.DIR_BASE + "/examples/sendfiledistributed/client/2k.png"
 	case "lg":
-		fileName = shared.DIR_BASE + "/examples/sendfiledistributed/client/4k.jpg" // Foto de <a href="https://unsplash.com/pt-br/@francesco_ungaro?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Francesco Ungaro</a> na <a href="https://unsplash.com/pt-br/fotografias/cardume-de-peixes-no-corpo-de-agua-MJ1Q7hHeGlA?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+		fileName = shared.DIR_BASE + "/examples/sendfiledistributed/client/4k.png" // Foto de <a href="https://unsplash.com/pt-br/@francesco_ungaro?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Francesco Ungaro</a> na <a href="https://unsplash.com/pt-br/fotografias/cardume-de-peixes-no-corpo-de-agua-MJ1Q7hHeGlA?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
 	}
 
 	fileBytes, err := os.ReadFile(fileName)

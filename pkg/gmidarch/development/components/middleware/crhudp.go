@@ -95,7 +95,15 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 	// send message's size
 	conn := crhInfo.Conns[addr]
-	c.send(sizeOfMsgSize, msgToServer, conn)
+	err := c.send(sizeOfMsgSize, msgToServer, conn)
+	if err != nil {
+		lib.PrintlnError("Error trying to send message:", err.Error())
+		*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
+		crhInfo.Conns[addr].Close()
+		crhInfo.Conns[addr] = nil
+		delete(crhInfo.Conns, addr)
+		return
+	}
 
 	msgFromServer, err := c.read(conn, sizeOfMsgSize)
 	if err != nil {
@@ -115,6 +123,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 func (c CRHUDP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error {
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
+	// lib.PrintlnInfo("Send: sizeOfMsgSize:", sizeOfMsgSize)
 	_, err := conn.Write(sizeOfMsgSize)
 	if err != nil {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
@@ -123,13 +132,31 @@ func (c CRHUDP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) er
 	}
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu sizeOfMsgSize")
 
+	const maxPacketSize = shared.MAX_UDP_PACKET_SIZE
 	// send message
-	_, err = conn.Write(msgToServer)
-	if err != nil {
-		//fmt.Println("Erro no envio do sizeOfMsgSize(", sizeOfMsgSize, ") Connection:", reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name())
-		//shared.ErrorHandler(shared.GetFunction(), err.Error())
-		lib.PrintlnError("Erro no send 2, retornou o erro", err)
-		return err
+	fragmentedMessage := msgToServer
+	for {
+		fragmentSize := len(fragmentedMessage)
+		if fragmentSize > maxPacketSize {
+			fragmentSize = maxPacketSize
+		}
+		fragment := fragmentedMessage[:fragmentSize]
+		// lib.PrintlnInfo("Send: fragment:", fragment)
+		// lib.PrintlnInfo("Send(read-ini):size", len(msgToServer), "len(fragmentedMessage)-remaining:", len(fragmentedMessage), "maxPacketSize", maxPacketSize)
+		_, err = conn.Write(fragment)
+		if err != nil {
+			//fmt.Println("Erro no envio do sizeOfMsgSize(", sizeOfMsgSize, ") Connection:", reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name())
+			//shared.ErrorHandler(shared.GetFunction(), err.Error())
+			lib.PrintlnError("Erro no send 2, retornou o erro", err)
+			return err
+		}
+
+		fragmentedMessage = fragmentedMessage[fragmentSize:]
+		if len(fragmentedMessage) > 0 {
+			time.Sleep(5 * time.Millisecond)
+		} else {
+			break
+		}
 	}
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu msg")
 	return nil
@@ -154,7 +181,7 @@ func (c CRHUDP) getLocalUdpAddr() *net.UDPAddr {
 
 func (c CRHUDP) read(conn net.Conn, size []byte) ([]byte, error) {
 	// receive reply's size
-	err := conn.SetReadDeadline(time.Now().Add(500 * time.Millisecond))
+	err := conn.SetReadDeadline(time.Time{}) //time.Now().Add(15000 * time.Millisecond))
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err.Error())
 	}
