@@ -1,13 +1,13 @@
 package protocols
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
@@ -69,8 +69,8 @@ func (cl *HTTP2Client) Read(b []byte) (err error) {
 func (cl *HTTP2Client) Receive() (msg []byte, err error) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP2 Version Not adapted")
 	msg = <-cl.msgChan
-	lib.PrintlnInfo("HTTP2Client.Receive: msg", msg)
-	lib.PrintlnInfo("HTTP2Client.Receive: msg as string", string(msg))
+	// lib.PrintlnInfo("HTTP2Client.Receive: msg", msg)
+	// lib.PrintlnInfo("HTTP2Client.Receive: msg as string", string(msg))
 	// receive reply's size
 	// size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// cl.Read(size)
@@ -332,7 +332,9 @@ func (st *HTTP2) Send(msgToServer []byte) error {
 	// The message received from the server
 	var msgFromServer []byte // := make([]byte, binary.LittleEndian.Uint32(sizeOfMsgSize), shared.NUM_MAX_MESSAGE_BYTES)
 	lib.PrintlnInfo("************************************************************************ 2")
-	response, err := st.http2Client.Get("https://" + addr + "?param=" + url.PathEscape(string(msgToServer)))
+	req, err := http.NewRequest("GET", "https://"+addr, bytes.NewReader(msgToServer))
+	// req.Header.Set("Accept-Encoding", "gzip")
+	response, err := st.http2Client.Do(req)
 	lib.PrintlnInfo("************************************************************************ 3")
 	lib.PrintlnInfo("response:", response)
 	if err != nil {
@@ -398,11 +400,16 @@ func (rq HTTP2Request) Request(w http.ResponseWriter, r *http.Request) { //reque
 }
 
 func (rq HTTP2Request) ServeHTTP(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
-	lib.PrintlnInfo("Received message. URI:", r.RequestURI)
-	uriParameters := lib.GetURIParameters(r.RequestURI)
-	lib.PrintlnInfo("Received message:", uriParameters["param"].(string))
+	// lib.PrintlnInfo("Received message. URI:", r.RequestURI)
+	// uriParameters := lib.GetURIParameters(r.RequestURI)
+	// lib.PrintlnInfo("Received message:", uriParameters["param"].(string))
+	// go func() {
+	// 	rq.msgChan <- []byte(uriParameters["param"].(string))
+	// }()
+	msg, _ := io.ReadAll(r.Body)
+	r.Body.Close()
 	go func() {
-		rq.msgChan <- []byte(uriParameters["param"].(string))
+		rq.msgChan <- msg //[]byte(uriParameters["param"].(string))
 	}()
 	lib.PrintlnInfo("Forwarded message")
 	replyMsg := <-rq.replyChan
