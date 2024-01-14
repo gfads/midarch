@@ -1,12 +1,12 @@
 package protocols
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
@@ -67,8 +67,8 @@ func (cl *HTTPClient) Read(b []byte) (err error) {
 func (cl *HTTPClient) Receive() (msg []byte, err error) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP Version Not adapted")
 	msg = <-cl.msgChan
-	lib.PrintlnInfo("HTTPClient.Receive: msg", msg)
-	lib.PrintlnInfo("HTTPClient.Receive: msg as string", string(msg))
+	//lib.PrintlnInfo("HTTPClient.Receive: msg", msg)
+	//lib.PrintlnInfo("HTTPClient.Receive: msg as string", string(msg))
 	// receive reply's size
 	// size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// cl.Read(size)
@@ -297,7 +297,7 @@ func (st *HTTP) WriteString(message string) {
 }
 
 func (st *HTTP) Receive() ([]byte, error) {
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "HTTP.Receive")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "HTTP.Receive")
 	msgFromServer := <-st.msgChan
 	// sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// // receive reply's size
@@ -332,14 +332,17 @@ func (st *HTTP) Receive() ([]byte, error) {
 // }
 
 func (st *HTTP) Send(msgToServer []byte) error {
-	lib.PrintlnInfo("CRHHTTP Version Not adapted")
+	//lib.PrintlnInfo("CRHHTTP Version Not adapted")
 	//sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 
 	addr := st.ip + ":" + st.port
 
 	// The message received from the server
 	var msgFromServer []byte // := make([]byte, binary.LittleEndian.Uint32(sizeOfMsgSize), shared.NUM_MAX_MESSAGE_BYTES)
-	response, err := st.httpClient.Get("http://" + addr + "?param=" + url.PathEscape(string(msgToServer)))
+	//response, err := st.httpClient.Get("http://" + addr + "?param=" + url.PathEscape(string(msgToServer)))
+	req, err := http.NewRequest("GET", "http://"+addr, bytes.NewReader(msgToServer))
+	// req.Header.Set("Accept-Encoding", "gzip")
+	response, err := st.httpClient.Do(req)
 	if err != nil {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return err
@@ -358,11 +361,11 @@ func (st *HTTP) Send(msgToServer []byte) error {
 
 	msgFromServer = bodyBytes
 
-	lib.PrintlnInfo("Got message from server" + string(msgFromServer))
+	//lib.PrintlnInfo("Got message from server" + string(msgFromServer))
 	go func() {
 		st.msgChan <- msgFromServer
 	}()
-	lib.PrintlnInfo("Put message in msgChan")
+	//lib.PrintlnInfo("Put message in msgChan")
 	return nil
 
 	// binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
@@ -403,15 +406,20 @@ func (rq HTTPRequest) Request(w http.ResponseWriter, r *http.Request) { //reques
 }
 
 func (rq HTTPRequest) ServeHTTP(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
-	lib.PrintlnInfo("Received message. URI:", r.RequestURI)
-	uriParameters := lib.GetURIParameters(r.RequestURI)
-	lib.PrintlnInfo("Received message:", uriParameters["param"].(string))
+	//lib.PrintlnInfo("Received message. URI:", r.RequestURI)
+	//uriParameters := lib.GetURIParameters(r.RequestURI)
+	//lib.PrintlnInfo("Received message:", uriParameters["param"].(string))
+	//go func() {
+	//	rq.msgChan <- []byte(uriParameters["param"].(string))
+	//}()
+	msg, _ := io.ReadAll(r.Body)
+	r.Body.Close()
 	go func() {
-		rq.msgChan <- []byte(uriParameters["param"].(string))
+		rq.msgChan <- msg //[]byte(uriParameters["param"].(string))
 	}()
-	lib.PrintlnInfo("Forwarded message")
+	//lib.PrintlnInfo("Forwarded message")
 	replyMsg := <-rq.replyChan
-	lib.PrintlnInfo("Received reply")
+	//lib.PrintlnInfo("Received reply")
 	//*reply = w
 	w.Write(replyMsg)
 

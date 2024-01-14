@@ -324,19 +324,14 @@ func (st *HTTP2) Receive() ([]byte, error) {
 // }
 
 func (st *HTTP2) Send(msgToServer []byte) error {
-	lib.PrintlnInfo("CRHHTTP2 Version Not adapted")
 	//sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
-	lib.PrintlnInfo("************************************************************************ 1")
 	addr := st.ip + ":" + st.port
 
 	// The message received from the server
 	var msgFromServer []byte // := make([]byte, binary.LittleEndian.Uint32(sizeOfMsgSize), shared.NUM_MAX_MESSAGE_BYTES)
-	lib.PrintlnInfo("************************************************************************ 2")
 	req, err := http.NewRequest("GET", "https://"+addr, bytes.NewReader(msgToServer))
 	// req.Header.Set("Accept-Encoding", "gzip")
 	response, err := st.http2Client.Do(req)
-	lib.PrintlnInfo("************************************************************************ 3")
-	lib.PrintlnInfo("response:", response)
 	if err != nil {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return err
@@ -355,11 +350,9 @@ func (st *HTTP2) Send(msgToServer []byte) error {
 
 	msgFromServer = bodyBytes
 
-	lib.PrintlnInfo("Got message from server" + string(msgFromServer))
 	go func() {
 		st.msgChan <- msgFromServer
 	}()
-	lib.PrintlnInfo("Put message in msgChan")
 	return nil
 
 	// binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
@@ -411,9 +404,7 @@ func (rq HTTP2Request) ServeHTTP(w http.ResponseWriter, r *http.Request) { //req
 	go func() {
 		rq.msgChan <- msg //[]byte(uriParameters["param"].(string))
 	}()
-	lib.PrintlnInfo("Forwarded message")
 	replyMsg := <-rq.replyChan
-	lib.PrintlnInfo("Received reply")
 	//*reply = w
 	w.Write(replyMsg)
 

@@ -1,13 +1,13 @@
 package protocols
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
@@ -301,7 +301,7 @@ func (st *HTTPS) WriteString(message string) {
 }
 
 func (st *HTTPS) Receive() ([]byte, error) {
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "HTTPS.Receive")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "HTTPS.Receive")
 	msgFromServer := <-st.msgChan
 	// sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// // receive reply's size
@@ -336,16 +336,17 @@ func (st *HTTPS) Receive() ([]byte, error) {
 // }
 
 func (st *HTTPS) Send(msgToServer []byte) error {
-	lib.PrintlnInfo("CRHHTTPS Version Not adapted")
+	//lib.PrintlnInfo("CRHHTTPS Version Not adapted")
 	//sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
-	lib.PrintlnInfo("************************************************************************ 1")
+	//lib.PrintlnInfo("************************************************************************ 1")
 	addr := st.ip + ":" + st.port
 
 	// The message received from the server
 	var msgFromServer []byte // := make([]byte, binary.LittleEndian.Uint32(sizeOfMsgSize), shared.NUM_MAX_MESSAGE_BYTES)
-	lib.PrintlnInfo("************************************************************************ 2")
-	response, err := st.httpsClient.Get("https://" + addr + "?param=" + url.PathEscape(string(msgToServer)))
-	lib.PrintlnInfo("************************************************************************ 3")
+	//response, err := st.httpsClient.Get("https://" + addr + "?param=" + url.PathEscape(string(msgToServer)))
+	req, err := http.NewRequest("GET", "https://"+addr, bytes.NewReader(msgToServer))
+	// req.Header.Set("Accept-Encoding", "gzip")
+	response, err := st.httpsClient.Do(req)
 	//lib.PrintlnInfo("response:", response)
 	if err != nil {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
@@ -369,7 +370,7 @@ func (st *HTTPS) Send(msgToServer []byte) error {
 	go func() {
 		st.msgChan <- msgFromServer
 	}()
-	lib.PrintlnInfo("Put message in msgChan")
+	//lib.PrintlnInfo("Put message in msgChan")
 	return nil
 
 	// binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
@@ -410,15 +411,20 @@ func (rq HTTPSRequest) Request(w http.ResponseWriter, r *http.Request) { //reque
 }
 
 func (rq HTTPSRequest) ServeHTTP(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
-	lib.PrintlnDebug("Received request. URI:", r.RequestURI)
-	uriParameters := lib.GetURIParameters(r.RequestURI)
-	lib.PrintlnDebug("Received request params:", uriParameters["param"].(string))
+	//lib.PrintlnDebug("Received request. URI:", r.RequestURI)
+	//uriParameters := lib.GetURIParameters(r.RequestURI)
+	//lib.PrintlnDebug("Received request params:", uriParameters["param"].(string))
+	//go func() {
+	//	rq.msgChan <- []byte(uriParameters["param"].(string))
+	//}()
+	msg, _ := io.ReadAll(r.Body)
+	r.Body.Close()
 	go func() {
-		rq.msgChan <- []byte(uriParameters["param"].(string))
+		rq.msgChan <- msg //[]byte(uriParameters["param"].(string))
 	}()
-	lib.PrintlnDebug("Forwarded message")
+	//lib.PrintlnDebug("Forwarded message")
 	replyMsg := <-rq.replyChan
-	lib.PrintlnDebug("Received reply")
+	//lib.PrintlnDebug("Received reply")
 	//*reply = w
 	w.Write(replyMsg)
 
