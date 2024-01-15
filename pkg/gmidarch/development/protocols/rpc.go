@@ -66,7 +66,7 @@ func (cl *RPCClient) Read(b []byte) (err error) {
 func (cl *RPCClient) Receive() (msg []byte, err error) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
 	msg = <-cl.msgChan
-	lib.PrintlnInfo("RPCClient.Receive: msg", msg)
+	// lib.PrintlnInfo("RPCClient.Receive: msg", msg)
 	// receive reply's size
 	// size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// cl.Read(size)
@@ -131,7 +131,7 @@ func (st *RPC) StartServer(ip, port string, initialConnections int) {
 	st.port = port
 	st.initialConnections = initialConnections
 
-	lib.PrintlnInfo("RPC clients len", len(st.clients))
+	// lib.PrintlnInfo("RPC clients len", len(st.clients))
 	if len(st.clients) < 1 { //st.initialConnections { TODO dcruzb : verify if there is the need to more than one client on RPC
 		client := &RPCClient{}
 		client.msgChan = make(chan []byte)
@@ -187,11 +187,11 @@ func (st *RPC) WaitForConnection(cliIdx int) (cl *generic.Client) {
 		}
 	}()
 
-	lib.PrintlnInfo("RPC wait -> clients len", len(st.clients))
+	// lib.PrintlnInfo("RPC wait -> clients len", len(st.clients))
 	if len(st.clients) > cliIdx {
 		// (*st.clients[cliIdx]).(*RPCClient).connection = conn
 		// (*st.clients[cliIdx]).(*RPCClient).Ip = conn.RemoteAddr().String()
-		lib.PrintlnInfo("RPC wait -> client returned")
+		// lib.PrintlnInfo("RPC wait -> client returned")
 		return st.clients[cliIdx]
 	} else {
 		return nil
@@ -237,7 +237,7 @@ func (st *RPC) ResetClients() {
 // Client Methods
 
 func (st *RPC) ConnectToServer(ip, port string) {
-	lib.PrintlnInfo("**********************************************")
+	// lib.PrintlnInfo("**********************************************")
 	if st.msgChan == nil {
 		st.msgChan = make(chan []byte)
 	}
@@ -291,7 +291,7 @@ func (st *RPC) WriteString(message string) {
 }
 
 func (st *RPC) Receive() ([]byte, error) {
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "RPC.Receive")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "RPC.Receive")
 	msgFromServer := <-st.msgChan
 	// sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// // receive reply's size
@@ -326,7 +326,7 @@ func (st *RPC) Call(serviceMethod string, args any, reply any) (err error) {
 }
 
 func (st *RPC) Send(msgToServer []byte) error {
-	lib.PrintlnInfo("CRHRPC Version Not adapted")
+	// lib.PrintlnInfo("CRHRPC Version Not adapted")
 	//sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 
 	// The message received from the server
@@ -337,11 +337,11 @@ func (st *RPC) Send(msgToServer []byte) error {
 		return err
 	}
 
-	lib.PrintlnInfo("Got message from server")
+	// lib.PrintlnInfo("Got message from server")
 	go func() {
 		st.msgChan <- msgFromServer
 	}()
-	lib.PrintlnInfo("Put message in msgChan")
+	// lib.PrintlnInfo("Put message in msgChan")
 	return nil
 
 	// binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
@@ -366,13 +366,13 @@ type RPCRequest struct {
 }
 
 func (rq RPCRequest) Request(request []byte, reply *[]byte) error {
-	lib.PrintlnInfo("Received message")
+	// lib.PrintlnInfo("Received message")
 	go func() {
 		rq.msgChan <- request
 	}()
-	lib.PrintlnInfo("Forwarded message")
+	// lib.PrintlnInfo("Forwarded message")
 	replyMsg := <-rq.replyChan
-	lib.PrintlnInfo("Received reply")
+	// lib.PrintlnInfo("Received reply")
 	*reply = replyMsg
 	return nil
 }
