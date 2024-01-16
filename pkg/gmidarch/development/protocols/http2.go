@@ -61,7 +61,7 @@ func (cl *HTTP2Client) WriteString(message string) {
 	panic("implement me")
 }
 
-func (cl *HTTP2Client) Read(b []byte) (err error) {
+func (cl *HTTP2Client) Read(b []byte) (n int, err error) {
 	//TODO implement me
 	panic("implement me")
 }

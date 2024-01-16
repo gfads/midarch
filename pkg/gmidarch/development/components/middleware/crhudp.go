@@ -132,7 +132,7 @@ func (c CRHUDP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) er
 	}
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu sizeOfMsgSize")
 
-	const maxPacketSize = shared.MAX_UDP_PACKET_SIZE
+	const maxPacketSize = shared.MAX_PACKET_SIZE
 	// send message
 	fragmentedMessage := msgToServer
 	for {

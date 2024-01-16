@@ -59,7 +59,7 @@ func (cl *HTTPClient) WriteString(message string) {
 	panic("implement me")
 }
 
-func (cl *HTTPClient) Read(b []byte) (err error) {
+func (cl *HTTPClient) Read(b []byte) (n int, err error) {
 	//TODO implement me
 	panic("implement me")
 }

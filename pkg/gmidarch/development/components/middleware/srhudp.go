@@ -326,7 +326,7 @@ func (s SRHUDP) read(size uint32, conn *net.UDPConn) (fullMessage []byte, err er
 	// _, err = conn.Read(msgTemp)
 	// fullMessage = make([]byte, size)
 	// lib.PrintlnInfo("Received(read):size", size)
-	const maxBufferSize = shared.MAX_UDP_PACKET_SIZE
+	const maxBufferSize = shared.MAX_PACKET_SIZE
 	for {
 		bufferSize := int(size) - len(fullMessage)
 		if bufferSize > maxBufferSize {

@@ -58,7 +58,7 @@ func (cl *RPCClient) WriteString(message string) {
 	panic("implement me")
 }
 
-func (cl *RPCClient) Read(b []byte) (err error) {
+func (cl *RPCClient) Read(b []byte) (n int, err error) {
 	//TODO implement me
 	panic("implement me")
 }

@@ -31,7 +31,7 @@ type Client interface {
 	Connection() (conn interface{})
 	CloseConnection()
 
-	Read(b []byte) (err error)
+	Read(b []byte) (n int, err error)
 	ReadString() (message string)
 	WriteString(message string)
 	Receive() ([]byte, error)

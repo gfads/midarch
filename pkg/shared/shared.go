@@ -81,9 +81,9 @@ const FIBONACCI_PORT = "1315"
 const QUEUEING_PORT = "1316"
 const MAX_NUMBER_OF_CONNECTIONS = 10
 const SIZE_OF_MESSAGE_SIZE = 4
-const NUM_MAX_MESSAGE_BYTES int = 10240000  // 10MB
+const NUM_MAX_MESSAGE_BYTES int = 16777216  // 16MB
 const MAX_NUMBER_OF_RECEIVED_MESSAGES = 300 // messages received and not processed by srh
-const MAX_UDP_PACKET_SIZE = 65507           // Maximum UDP packet size
+const MAX_PACKET_SIZE = 65507               // Maximum packet size - 65535 Maximum Transmission Unit (MTU) is the maximum size of the data transfer limit set by hardware in a network. The packet size should never exceed MTU
 
 const ATTEMPTS_TO_OPEN_A_PLUGIN = 1000
 
