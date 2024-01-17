@@ -105,7 +105,7 @@ func (cl *TCPClient) Receive() (fullMessage []byte, err error) {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
-	// TODO dcruzb: check if size is bigger than shared.NUM_MAX_MESSAGE_BYTES
+	// TODO dcruzb: validate if size is smaller than shared.NUM_MAX_MESSAGE_BYTES
 	// receive reply
 	//msg = make([]byte, binary.LittleEndian.Uint32(size), binary.LittleEndian.Uint32(size))
 	//err = cl.Read(msg)
@@ -360,7 +360,7 @@ func (st *TCP) Send(msgToServer []byte) error {
 
 		fragmentedMessage = fragmentedMessage[fragmentSize:]
 		if len(fragmentedMessage) > 0 {
-			time.Sleep(5 * time.Millisecond)
+			// time.Sleep(1 * time.Millisecond) // uncomment when using with debug enabled to avoid message loss
 		} else {
 			break
 		}

@@ -17,7 +17,7 @@ import (
 type CRHUDP struct{}
 
 func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
 	infoTemp := *info
 	crhInfo := infoTemp.(messages.CRHInfo)
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
@@ -71,7 +71,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 			//}
 			msgFromServer, err := c.read(crhInfo.Conns[addr], sizeOfMsgSize)
 			if err != nil {
-				lib.PrintlnDebug("Error while reading Connect msg. Error:", err)
+				// lib.PrintlnDebug("Error while reading Connect msg. Error:", err)
 				*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
 				crhInfo.Conns[addr].Close()
 				crhInfo.Conns[addr] = nil
@@ -88,7 +88,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 		if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 			//fmt.Println("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr())
-			lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
+			// lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 			shared.LocalAddr = crhInfo.Conns[addr].LocalAddr().String()
 		}
 	}
@@ -116,7 +116,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	}
 
 	VerifyAdaptation(msgFromServer, sizeOfMsgSize, conn, c.send)
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Read")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Read")
 
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
@@ -130,7 +130,7 @@ func (c CRHUDP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) er
 		lib.PrintlnError("Erro no send 1, retornou o erro", err)
 		return err
 	}
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu sizeOfMsgSize")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu sizeOfMsgSize")
 
 	const maxPacketSize = shared.MAX_PACKET_SIZE
 	// send message
@@ -153,12 +153,12 @@ func (c CRHUDP) send(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) er
 
 		fragmentedMessage = fragmentedMessage[fragmentSize:]
 		if len(fragmentedMessage) > 0 {
-			time.Sleep(5 * time.Millisecond)
+			time.Sleep(4 * time.Millisecond) // uncomment when using with debug enabled to avoid message loss
 		} else {
 			break
 		}
 	}
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu msg")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted ###### Escreveu msg")
 	return nil
 }
 
@@ -168,7 +168,7 @@ func (c CRHUDP) getLocalUdpAddr() *net.UDPAddr {
 	//shared.LocalAddr = "127.0.0.1:37522"
 	if shared.LocalAddr != "" {
 		//fmt.Println("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
-		lib.PrintlnDebug("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
+		// lib.PrintlnDebug("github.com/gfads/midarch/src/shared.LocalAddr:", shared.LocalAddr)
 		localUdpAddr, err = net.ResolveUDPAddr("udp", shared.LocalAddr)
 		if err != nil {
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
@@ -192,8 +192,9 @@ func (c CRHUDP) read(conn net.Conn, size []byte) ([]byte, error) {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
 
+	// TODO dcruzb: validate if size is smaller than shared.MAX_PACKET_SIZE
 	// receive reply
-	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
+	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), binary.LittleEndian.Uint32(size))
 	err = conn.SetReadDeadline(time.Now().Add(500 * time.Millisecond))
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err.Error())
