@@ -1,18 +1,13 @@
 package middleware
 
 import (
-	"context"
-	"crypto/tls"
-	"encoding/binary"
-	"fmt"
 	"io"
-	"log"
-	"os"
 	"strings"
 	"time"
 
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
+	"github.com/gfads/midarch/pkg/gmidarch/development/protocols"
 	"github.com/gfads/midarch/pkg/shared"
 	"github.com/gfads/midarch/pkg/shared/lib"
 	"github.com/quic-go/quic-go"
@@ -20,105 +15,38 @@ import (
 
 // @Type: SRHQUIC
 // @Behaviour: Behaviour = I_Accept -> I_Receive -> InvR.e1 -> TerR.e1 -> I_Send -> Behaviour
-type SRHQUIC struct {
-	// Graph exec.ExecGraph
-}
-
-// var ConnsSRHQUIC []quic.Connection
-// var StreamsSRHQUIC []quic.Stream
-// var LnSRHQUIC quic.Listener
-
-// var c1Quic = make(chan []byte)
-// var c2Quic = make(chan []byte)
-
-// var currentConnectionQuic = -1
-// var stateQuic = 0
-
-func (s SRHQUIC) availableConnectionFromPool(clientsPtr *[]*messages.Client, ip string) (bool, int) {
-	clients := *clientsPtr
-
-	if ip != "" {
-		for idx, client := range clients {
-			if client.Ip == ip {
-				return true, idx
-			}
-			if client.UDPConnection != nil || client.Connection != nil {
-				client.UDPConnection = nil
-				client.Connection = nil // TODO dcruzb: verify memory leak (didn't close the connection)
-				return true, idx
-			}
-		}
-	}
-
-	//lib.PrintlnDebug(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total clients", len(clients))
-	if len(clients) < 2 { //shared.MAX_NUMBER_OF_CONNECTIONS { TODO dcruzb: go back the env var
-		client := messages.Client{
-			Ip:             "",
-			Connection:     nil,
-			UDPConnection:  nil,
-			QUICConnection: nil,
-			QUICStream:     nil,
-		}
-		*clientsPtr = append(clients, &client)
-		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients", len(*clientsPtr))
-		return true, len(*clientsPtr) - 1
-	}
-
-	for idx, client := range clients {
-		if client == nil {
-			client := messages.Client{
-				Ip:             "",
-				Connection:     nil,
-				UDPConnection:  nil,
-				QUICConnection: nil,
-				QUICStream:     nil,
-			}
-			clients[idx] = &client
-			return true, idx
-		}
-		if client.UDPConnection != nil {
-			client.UDPConnection.Close()
-			client.UDPConnection = nil
-			return true, idx
-		}
-		if client.Connection != nil {
-			client.Ip = ""
-			client.Connection.Close()
-			client.Connection = nil
-			return true, idx
-		}
-	}
-
-	return false, -1
-}
+type SRHQUIC struct{}
 
 func (s SRHQUIC) I_Accept(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHQUIC Version Not adapted")
+	//lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHQUIC Version 2 adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 	// srhInfo.Counter++
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Cons", len(srhInfo.Clients))
 	//log.Println("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<< Counter", srhInfo.Counter)
 
-	// check if a listener has been already created
-	if srhInfo.QUICLn == nil { // no listener created
-		//servAddr, err := net.ResolveTCPAddr("tcp", host+":"+port)
-		//if err != nil {
-		//	log.Fatalf("SRH:: %v\n", err)
-		//}
-		quicConfig := quic.Config{KeepAlivePeriod: 60 * time.Second}
-		ln, err := quic.ListenAddr(srhInfo.EndPoint.Host+":"+srhInfo.EndPoint.Port, getServerTLSQuicConfig(), &quicConfig)
-		if err != nil {
-			log.Fatalf("SRHQUIC:: %v\n", err)
-		}
-		srhInfo.QUICLn = ln
+	if srhInfo.Protocol == nil {
+		srhInfo.Protocol = &protocols.QUIC{}
+		srhInfo.Protocol.StartServer(srhInfo.EndPoint.Host, srhInfo.EndPoint.Port, 2) //shared.MAX_NUMBER_OF_CONNECTIONS)
 	}
 
+	// // check if a listener has already been created
+	// if srhInfo.Ln == nil { // no listen created
+	// 	servAddr, err := net.ResolveTCPAddr("tcp", srhInfo.EndPoint.Host+":"+srhInfo.EndPoint.Port)
+	// 	if err != nil {
+	// 		shared.ErrorHandler(shared.GetFunction(), err.Error())
+	// 	}
+	// 	srhInfo.Ln, err = net.ListenTLS("tcp", servAddr)
+	// 	if err != nil {
+	// 		shared.ErrorHandler(shared.GetFunction(), err.Error())
+	// 	}
+	// }
+
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
-	connectionAvailable, availableConenctionIndex := s.availableConnectionFromPool(&srhInfo.Clients, "")
+	connectionAvailable, availableConenctionIndex := srhInfo.Protocol.AvailableConnectionFromPool()
 	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
 	if !connectionAvailable {
-		//lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHQUIC Version Not adapted - No connection available")
+		//lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHQUIC Version 2 adapted - No connection available")
 		time.Sleep(1 * time.Millisecond)
 		return
 	}
@@ -126,100 +54,49 @@ func (s SRHQUIC) I_Accept(id string, msg *messages.SAMessage, info *interface{},
 	go func() {
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients Index", availableConenctionIndex)
 
-		// Accept connections
-		conn, err := srhInfo.QUICLn.Accept(context.Background())
-		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(), err.Error())
-		}
-
-		srhInfo.QUICConns = append(srhInfo.QUICConns, conn)
-		//srhInfo.CurrentConn = conn
-
-		lib.PrintlnDebug("SRHQUIC Version Not adapted >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Buscou nova conexão, ip:", conn.RemoteAddr().String())
-		//connectionAvailable, availableConenctionIndex := s.availableConnectionFromPool(&srhInfo.Clients, conn.RemoteAddr().String())
-		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
-		//if !connectionAvailable {
-		//	lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHQUIC Version Not adapted - No connection available")
-		//	return
-		//}
-		if len(srhInfo.Clients) <= availableConenctionIndex {
-			lib.PrintlnDebug("SRHQUIC Got len(srhInfo.Clients) <= availableConenctionIndex")
-			*reset = true
-			return
-		}
-		client := srhInfo.Clients[availableConenctionIndex]
-		client.Ip = conn.RemoteAddr().String()
-		client.QUICConnection = conn
-		client.QUICStream, err = client.QUICConnection.AcceptStream(context.Background())
-		//stream, err := tempConn.OpenStreamSync(context.Background())
-		if err != nil {
-			shared.ErrorHandler(shared.GetFunction(), err.Error())
-		}
+		client := srhInfo.Protocol.WaitForConnection(availableConenctionIndex)
 		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Connected Client", client)
 
 		// Update info
 		*info = srhInfo
 
 		// Start goroutine
-		go s.handler(info, availableConenctionIndex)
+		if client != nil {
+			go s.handler(info, availableConenctionIndex)
+		}
 	}()
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHQUIC Version Not adapted")
 	return
 }
 
 func (s SRHQUIC) I_Receive(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	// tempPort := *elemInfo[0]
-	// port := tempPort.(string)
-	// host := "0.0.0.0" //"127.0.0.1" // TODO
-
-	// if LnSRHQUIC == nil { // listener was not created yet
-	// 	//servAddr, err := net.ResolveTCPAddr("tcp", host+":"+port)
-	// 	//if err != nil {
-	// 	//	log.Fatalf("SRH:: %v\n", err)
-	// 	//}
-	// 	quicConfig := quic.Config{KeepAlivePeriod: 60 * time.Second}
-	// 	ln, err := quic.ListenAddr(host+":"+port, getServerTLSQuicConfig(), &quicConfig)
-	// 	if err != nil {
-	// 		log.Fatalf("SRHQUIC:: %v\n", err)
-	// 	}
-	// 	LnSRHQUIC = ln
-	// }
-
-	// switch stateQuic {
-	// case 0:
-	// 	go acceptAndReadQuic(currentConnectionQuic, c1Quic)
-	// 	stateQuic = 1
-	// case 1:
-	// 	go readQuic(currentConnectionQuic, c1Quic)
-	// 	stateQuic = 2
-	// case 2:
-	// 	go readQuic(currentConnectionQuic, c1Quic)
-	// }
-
-	//go acceptAndRead(currentConnectionQuic, c1Quic, done)
-	//go read(currentConnectionQuic, c2Quic, done)
-
+	//lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHQUIC Version Not adapted")
+	//lib.PrintlnDebug(shared.GetFunction(), "HERE")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
 
 	select {
 	case tempMsgReceived := <-srhInfo.RcvedMessages:
-		// *msg = messages.SAMessage{Payload: tempMsgReceived}
-		// Update info
-		*info = srhInfo
-		msg.Payload = tempMsgReceived.Msg
-		lib.PrintlnDebug("SRHQUIC Version Not adapted: tempMsgReceived", tempMsgReceived)
-		lib.PrintlnDebug("SRHQUIC Version Not adapted: tempMsgReceived.QUICStream", tempMsgReceived.QUICStream)
-		if tempMsgReceived.QUICStream == nil {
-			*reset = true
-			return
+		{
+			// Receive message from handlers
+			//srhInfo.CurrentConn = tempMsgReceived.Conn
+
+			// Update info
+			*info = srhInfo
+			msg.Payload = tempMsgReceived.Msg
+			//lib.PrintlnDebug("SRHQUIC Version Not adapted: tempMsgReceived", tempMsgReceived)
+			//lib.PrintlnDebug("SRHQUIC Version Not adapted: tempMsgReceived.QUICStream", tempMsgReceived.QUICStream)
+			if tempMsgReceived.QUICStream == nil { // TODO dcruzb: Change to Protocol.Client
+				*reset = true
+				return
+			}
+			if isNewConnection, miopPacket := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
+				lib.PrintlnDebug("SRHQUIC Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
+				*reset = true
+				return
+			}
+			msg.ToAddr = tempMsgReceived.ToAddress //Chn.RemoteAddr().String()
 		}
-		if isNewConnection, miopPacket := s.isNewConnection(tempMsgReceived.Msg); isNewConnection {
-			lib.PrintlnDebug("SRHQUIC Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
-			*reset = true
-			return
-		}
-		msg.ToAddr = tempMsgReceived.ToAddress //Chn.RemoteAddr().String()
 	default:
 		{
 			*reset = true
@@ -231,103 +108,22 @@ func (s SRHQUIC) I_Receive(id string, msg *messages.SAMessage, info *interface{}
 	return
 }
 
-// func acceptAndReadQuic(currentConnectionQuic int, c chan []byte) {
-
-// 	// accept connections
-// 	temp, err := LnSRHQUIC.Accept(context.Background())
-// 	if err != nil {
-// 		fmt.Printf("SRHQUIC:: %v\n", err)
-// 		os.Exit(1)
-// 	}
-// 	ConnsSRHQUIC = append(ConnsSRHQUIC, temp) // Quic Session
-// 	currentConnectionQuic++
-
-// 	// receive size
-// 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-// 	tempConn := ConnsSRHQUIC[currentConnectionQuic]
-// 	stream, err := tempConn.AcceptStream(context.Background())
-// 	//stream, err := tempConn.OpenStreamSync(context.Background())
-// 	StreamsSRHQUIC = append(StreamsSRHQUIC, stream)
-// 	if err != nil {
-// 		fmt.Printf("SRHQUIC:: %v\n", err)
-// 		os.Exit(1)
-// 	}
-// 	_, err = stream.Read(size)
-// 	if err == io.EOF {
-// 		{
-// 			fmt.Printf("SRHQUIC:: Accept and Read\n")
-// 			os.Exit(0)
-// 		}
-// 	} else if err != nil && err != io.EOF {
-// 		fmt.Printf("SRHQUIC:: %v\n", err)
-// 		os.Exit(1)
-// 	}
-// 	stream2 := StreamsSRHQUIC[currentConnectionQuic]
-// 	// receive message
-// 	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-// 	_, err = stream2.Read(msgTemp)
-// 	if err != nil {
-// 		fmt.Printf("SRHQUIC:: %v\n", err)
-// 		os.Exit(1)
-// 	}
-// 	c <- msgTemp
-// }
-
-// func readQuic(currentConnectionQuic int, c chan []byte) {
-// 	// receive size
-// 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-// 	stream := StreamsSRHQUIC[currentConnectionQuic]
-
-// 	_, err := stream.Read(size)
-// 	if err == io.EOF {
-// 		fmt.Printf("SRHQUIC:: Read\n")
-// 		os.Exit(0)
-// 	} else if err != nil && err != io.EOF {
-// 		fmt.Printf("SRHQUIC:: %v\n", err)
-// 		os.Exit(1)
-// 	}
-
-// 	// receive message
-// 	msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-// 	_, err = stream.Read(msgTemp)
-// 	if err != nil {
-// 		fmt.Printf("SRHQUIC:: %v\n", err)
-// 		os.Exit(1)
-// 	}
-
-// 	c <- msgTemp
-
-// 	return
-// }
-
-func (e SRHQUIC) I_Send(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+func (s SRHQUIC) I_Send(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHQUIC Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
-	lib.PrintlnDebug("msg.ToAddr", msg.ToAddr, "srhInfo.Clients", srhInfo.Clients)
-	client := srhInfo.GetClientFromAddr(msg.ToAddr, srhInfo.Clients)
-	stream := client.QUICStream //srhInfo.CurrentConn
-	if stream == nil {
+	lib.PrintlnDebug("msg.ToAddr", msg.ToAddr)
+	client := srhInfo.Protocol.GetClientFromAddr(msg.ToAddr)
+	if client == nil {
 		*reset = true
 		return
 	}
-	lib.PrintlnDebug("SRHQUIC Version Not adapted   >>>>> QUIC => msg.ToAddr:", msg.ToAddr, "QUIC stream:", stream, "AdaptId:", client.AdaptId)
-	msgPayload := msg.Payload.([]byte)
+	lib.PrintlnDebug("SRHQUIC Version Not adapted   >>>>> QUIC => msg.ToAddr:", msg.ToAddr, "QUIC Client:", client) //, "AdaptId:", client.AdaptId) // TODO dcruzb: verify impact of removing AdaptId
+	msgTemp := msg.Payload.([]byte)
 
-	// send message's size
-	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	binary.LittleEndian.PutUint32(size, uint32(len(msgPayload)))
-	_, err := stream.Write(size)
+	err := client.Send(msgTemp)
 	if err != nil {
-		fmt.Printf("SRHQUIC:: %v\n", err)
-		os.Exit(1)
-	}
-
-	// send message
-	_, err = stream.Write(msgPayload)
-	if err != nil {
-		fmt.Printf("SRHQUIC:: %v\n", err)
-		os.Exit(1)
+		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
 
 	// update info
@@ -341,7 +137,8 @@ func (s SRHQUIC) handler(info *interface{}, connectionIndex int) {
 
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
-	stream := srhInfo.Clients[connectionIndex].QUICStream //CurrentConn
+	// conn := srhInfo.Clients[connectionIndex].Connection //CurrentConn
+	client := srhInfo.Protocol.GetClient(connectionIndex)
 	executeForever := srhInfo.ExecuteForever
 
 	for {
@@ -349,43 +146,21 @@ func (s SRHQUIC) handler(info *interface{}, connectionIndex int) {
 			break
 		}
 		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR", "SRHQUIC Version Not adapted")
-		size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-		_, err := stream.Read(size)
-		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Read finished", "SRHQUIC Version Not adapted")
-		if err != nil {
-			if err == io.EOF ||
-				strings.Contains(err.Error(), "use of closed network connection") ||
-				strings.Contains(err.Error(), "timeout: no recent network activity") {
-				srhInfo.Clients[connectionIndex] = nil
-				lib.PrintlnError("EOF error - Will not kill the app")
-				break
-			} else if err != nil && err != io.EOF {
-				lib.PrintlnError("Not EOF error - Will kill the app")
-				shared.ErrorHandler(shared.GetFunction(), err.Error())
-			}
-		}
 
-		// receive message
-		msgTemp := make([]byte, binary.LittleEndian.Uint32(size))
-		_, err = stream.Read(msgTemp)
+		msg, err := client.Receive()
 		if err != nil {
 			if err == io.EOF || strings.Contains(err.Error(), "use of closed network connection") {
-				srhInfo.Clients[connectionIndex] = nil
-				lib.PrintlnError("EOF error - Will not kill the app")
 				break
-			} else if err != nil && err != io.EOF {
-				lib.PrintlnError("Not EOF error - Will kill the app")
-				shared.ErrorHandler(shared.GetFunction(), err.Error())
 			}
 		}
 
-		if changeProtocol, miopPacket := s.isAdapt(msgTemp); changeProtocol {
+		if changeProtocol, miopPacket := s.isAdapt(msg); changeProtocol {
 			if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
 				lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHQUIC Version Not adapted")
 				break
 			}
 		}
-		if isNewConnection, _ := s.isNewConnection(msgTemp); isNewConnection { // TODO dcruzb: move to I_Receive
+		if isNewConnection, _ := s.isNewConnection(msg); isNewConnection { // TODO dcruzb: move to I_Receive
 			//newConnection = true
 			lib.PrintlnDebug("QUIC Is New Connection")
 			//miopPacket := miop.CreateReqPacket("Connect", []interface{}{miopPacket.Bd.ReqBody.Body[0], "Ok"}, miopPacket.Bd.ReqBody.Body[0].(int)) // idx is the Connection ID
@@ -401,7 +176,7 @@ func (s SRHQUIC) handler(info *interface{}, connectionIndex int) {
 			continue
 		}
 
-		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, QUICStream: stream, ToAddress: srhInfo.Clients[connectionIndex].Ip}
+		rcvMessage := messages.ReceivedMessages{Msg: msg, QUICStream: srhInfo.Protocol.GetClient(connectionIndex).Connection().(quic.Stream), ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
 		lib.PrintlnDebug("SRHQUIC Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		if !*executeForever {
 			break
@@ -413,42 +188,13 @@ func (s SRHQUIC) handler(info *interface{}, connectionIndex int) {
 }
 
 func (s SRHQUIC) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
-	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHQUIC Version Not adapted")
 	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }
 
 func (s SRHQUIC) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
-	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHQUIC Version Not adapted")
 	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "Connect", miop
 }
-
-func getServerTLSQuicConfig() *tls.Config {
-	if shared.CRT_PATH == "" {
-		log.Fatal("SRHQUIC:: Error:: Environment variable 'CRT_PATH' not configured\n")
-	}
-
-	if shared.KEY_PATH == "" {
-		log.Fatal("SRHQUIC:: Error:: Environment variable 'KEY_PATH' not configured\n")
-	}
-
-	cert, err := tls.LoadX509KeyPair(shared.CRT_PATH, shared.KEY_PATH)
-	if err != nil {
-		log.Fatal("Error loading certificate. ", err)
-	}
-
-	tlsConfig := &tls.Config{
-		Certificates: []tls.Certificate{cert},
-		NextProtos:   []string{"MidArchQuic"}, // TODO dcruzb: Verify what NextProtos should be
-	}
-	return tlsConfig
-}
-
-// func (e SRHQUIC) Selector(elem interface{}, elemInfo []*interface{}, op string, msg *messages.SAMessage, info []*interface{}, r *bool) {
-// 	if op[2] == 'R' { // I_Receive
-// 		elem.(SRHQUIC).I_Receive(msg, info, elemInfo)
-// 	} else { // "I_Send"
-// 		elem.(SRHQUIC).I_Send(msg, info, elemInfo)
-// 	}
-// }
