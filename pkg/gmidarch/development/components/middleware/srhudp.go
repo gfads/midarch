@@ -306,11 +306,12 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 			//}
 			continue
 		}
-		// lib.PrintlnDebug("SRHUDP Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
-		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Conn: nil, ToAddress: addr.String()}
+
 		if !*executeForever {
 			break
 		}
+		// lib.PrintlnDebug("SRHUDP Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+		rcvMessage := messages.ReceivedMessages{Msg: msgTemp, Conn: nil, ToAddress: addr.String()}
 		srhInfo.RcvedMessages <- rcvMessage
 		// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHUDP Version Not adapted")
 	}

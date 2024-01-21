@@ -176,11 +176,12 @@ func (s SRHQUIC) handler(info *interface{}, connectionIndex int) {
 			continue
 		}
 
-		rcvMessage := messages.ReceivedMessages{Msg: msg, QUICStream: srhInfo.Protocol.GetClient(connectionIndex).Connection().(quic.Stream), ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
-		lib.PrintlnDebug("SRHQUIC Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		if !*executeForever {
 			break
 		}
+		rcvMessage := messages.ReceivedMessages{Msg: msg, QUICStream: srhInfo.Protocol.GetClient(connectionIndex).Connection().(quic.Stream), ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
+		lib.PrintlnDebug("SRHQUIC Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+
 		srhInfo.RcvedMessages <- rcvMessage
 		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHQUIC Version Not adapted")
 	}

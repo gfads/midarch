@@ -165,6 +165,7 @@ func (st *RPC) StartServer(ip, port string, initialConnections int) {
 }
 
 func (st *RPC) StopServer() {
+	st.ResetClients()
 	err := st.listener.Close()
 	if err != nil {
 		lib.PrintlnError("Error while stoping server. Details:", err)
@@ -203,6 +204,9 @@ func (st *RPC) GetClients() (client []*generic.Client) {
 }
 
 func (st *RPC) GetClient(idx int) (client generic.Client) {
+	if len(st.clients) < idx {
+		return nil
+	}
 	return *st.clients[idx]
 }
 

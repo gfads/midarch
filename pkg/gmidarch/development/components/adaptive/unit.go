@@ -163,10 +163,13 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				var adaptTo string
 				if strings.Contains(cmdElemType, "TCP") {
 					adaptTo = "tcp"
+					lib.PrintlnInfo("****** Adapt to TCP")
 				} else if strings.Contains(cmdElemType, "UDP") {
 					adaptTo = "udp"
+					lib.PrintlnInfo("****** Adapt to UDP")
 				} else if strings.Contains(cmdElemType, "TLS") {
 					adaptTo = "tls"
+					lib.PrintlnInfo("****** Adapt to TLS")
 				} else if strings.Contains(cmdElemType, "QUIC") {
 					adaptTo = "quic"
 					lib.PrintlnInfo("****** Adapt to QUIC")
@@ -187,10 +190,13 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				var adaptFrom string
 				if strings.Contains(unitElemType, "TCP") {
 					adaptFrom = "tcp"
+					lib.PrintlnInfo("****** Adapt from TCP")
 				} else if strings.Contains(unitElemType, "UDP") {
 					adaptFrom = "udp"
+					lib.PrintlnInfo("****** Adapt from UDP")
 				} else if strings.Contains(unitElemType, "TLS") {
 					adaptFrom = "tls"
+					lib.PrintlnInfo("****** Adapt from TLS")
 				} else if strings.Contains(unitElemType, "QUIC") {
 					adaptFrom = "quic"
 					lib.PrintlnInfo("****** Adapt from QUIC")
@@ -216,13 +222,14 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 
 					infoTemp := elementComponent.Info
 					srhInfo := infoTemp.(*messages.SRHInfo)
-					for idx, client := range srhInfo.Clients {
+					for idx, client := range srhInfo.Clients { // TODO dcruzb: probably no protocol use srhInfo.Clients anymore. Verify and remove
 						//fmt.Println("Vai adaptar")
 						// if Client from Connection Pool have a client connected
 						if client.Ip != "" {
 							//fmt.Println("Vai adaptar: IP:", client.Ip)
 							if (adaptFrom == "udp" && client.UDPConnection == nil) ||
 								(adaptFrom == "tcp" && client.Connection == nil) ||
+								(adaptFrom == "tls" && client.Connection == nil) ||
 								(adaptFrom == "quic" && client.QUICStream == nil) {
 								//fmt.Println("Vai adaptar: pulou sem conexão")
 								continue
@@ -279,7 +286,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				lib.PrintlnInfo("Execution stopped")
 				lib.PrintlnInfo("****** elementComponent.TypeName:", elementComponent.TypeName)
 				lib.PrintlnInfo("****** cmdElemType:", cmdElemType)
-				lib.PrintlnInfo("****** adaptTo:", adaptTo)
+				lib.PrintlnInfo("****** adapt From:", adaptFrom, "=> To:", adaptTo)
 				//time.Sleep(6 * time.Second)
 				elementComponent.Type = cmd.Type
 				elementComponent.TypeName = cmdElemType

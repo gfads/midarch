@@ -153,6 +153,7 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 				break
 			}
 		}
+		//lib.PrintlnMessage("Message received")
 
 		if changeProtocol, miopPacket := s.isAdapt(msg); changeProtocol {
 			if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
@@ -176,11 +177,12 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 			continue
 		}
 
-		rcvMessage := messages.ReceivedMessages{Msg: msg, Conn: srhInfo.Protocol.GetClient(connectionIndex).Connection().(net.Conn), ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
-		lib.PrintlnDebug("SRHTCP Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		if !*executeForever {
 			break
 		}
+		rcvMessage := messages.ReceivedMessages{Msg: msg, Conn: srhInfo.Protocol.GetClient(connectionIndex).Connection().(net.Conn), ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
+		lib.PrintlnDebug("SRHTCP Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+
 		srhInfo.RcvedMessages <- rcvMessage
 		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHTCP Version Not adapted")
 	}

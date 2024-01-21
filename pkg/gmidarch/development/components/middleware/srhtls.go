@@ -176,11 +176,12 @@ func (s SRHTLS) handler(info *interface{}, connectionIndex int) {
 			continue
 		}
 
-		rcvMessage := messages.ReceivedMessages{Msg: msg, Conn: srhInfo.Protocol.GetClient(connectionIndex).Connection().(net.Conn), ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
-		lib.PrintlnDebug("SRHTLS Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		if !*executeForever {
 			break
 		}
+		rcvMessage := messages.ReceivedMessages{Msg: msg, Conn: srhInfo.Protocol.GetClient(connectionIndex).Connection().(net.Conn), ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
+		lib.PrintlnDebug("SRHTLS Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+
 		srhInfo.RcvedMessages <- rcvMessage
 		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHTLS Version Not adapted")
 	}

@@ -175,11 +175,12 @@ func (s SRHHTTP2) handler(info *interface{}, connectionIndex int) {
 			continue
 		}
 
-		rcvMessage := messages.ReceivedMessages{Msg: msg, Conn: nil, ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
-		lib.PrintlnDebug("SRHHTTP2 Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		if !*executeForever {
 			break
 		}
+		rcvMessage := messages.ReceivedMessages{Msg: msg, Conn: nil, ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
+		lib.PrintlnDebug("SRHHTTP2 Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+
 		srhInfo.RcvedMessages <- rcvMessage
 		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHHTTP2 Version Not adapted")
 	}
