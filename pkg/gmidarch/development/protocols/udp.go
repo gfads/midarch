@@ -48,8 +48,14 @@ func (cl *UDPClient) CloseConnection() {
 }
 
 func (cl *UDPClient) ReadString() (message string) {
-	// TODO implement me
-	panic("implement me")
+	var err error
+	// recebe solicitações do cliente
+	message, err = bufio.NewReader(cl.connection).ReadString('\n')
+	if err != nil {
+		lib.PrintlnError("Error while reading message from socket UDP. Details:", err)
+	}
+
+	return message
 }
 
 func (cl *UDPClient) WriteString(message string) {
@@ -111,6 +117,10 @@ func (cl *UDPClient) Receive() (fullMessage []byte, err error) {
 	//	return nil, err
 	//}
 
+	addr, err := net.ResolveUDPAddr("udp", cl.Ip)
+	if err != nil {
+		return nil, err
+	}
 	msgSize := binary.LittleEndian.Uint32(size)
 	const maxBufferSize = shared.MAX_PACKET_SIZE
 	for {
@@ -124,7 +134,6 @@ func (cl *UDPClient) Receive() (fullMessage []byte, err error) {
 		// lib.PrintlnInfo("Received(read):for1")
 		n, err := cl.Read(buffer)
 		// lib.PrintlnInfo("Received(read):", buffer)
-
 		if err != nil {
 			lib.PrintlnError("Error while reading message. Error:", err)
 			return nil, err
@@ -136,6 +145,11 @@ func (cl *UDPClient) Receive() (fullMessage []byte, err error) {
 		// Check if the message is complete (you need a way to determine this based on your protocol)
 		if len(fullMessage) >= int(msgSize) {
 			return fullMessage, nil
+		} else {
+			_, err = cl.connection.WriteTo([]byte("ack"), addr)
+			if err != nil {
+				return nil, err
+			}
 		}
 		// lib.PrintlnInfo("Received(read):for3")
 	}
@@ -144,17 +158,18 @@ func (cl *UDPClient) Receive() (fullMessage []byte, err error) {
 func (cl *UDPClient) Send(msg []byte) error {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
 	addr, err := net.ResolveUDPAddr("udp", cl.Ip)
+	if err != nil {
+		return err
+	}
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msg)))
-	_, err = cl.connection.WriteToUDP(sizeOfMsgSize, addr)
+	_, err = cl.connection.WriteTo(sizeOfMsgSize, addr)
 	if err != nil {
-		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return err
 	}
 	// send message
-	_, err = cl.connection.WriteToUDP(msg, addr)
+	_, err = cl.connection.WriteTo(msg, addr)
 	if err != nil {
-		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return err
 	}
 	return nil
@@ -314,7 +329,8 @@ func (st *UDP) Receive() ([]byte, error) {
 	}
 	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "UDP read size")
 	// receive reply
-	msgFromServer := make([]byte, binary.LittleEndian.Uint32(sizeOfMsgSize), shared.NUM_MAX_MESSAGE_BYTES)
+	// TODO dcruzb: validate if size is smaller than shared.NUM_MAX_MESSAGE_BYTES
+	msgFromServer := make([]byte, binary.LittleEndian.Uint32(sizeOfMsgSize), binary.LittleEndian.Uint32(sizeOfMsgSize))
 	_, err = st.serverConnection.Read(msgFromServer)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err)
@@ -357,7 +373,12 @@ func (st *UDP) Send(msgToServer []byte) error {
 
 		fragmentedMessage = fragmentedMessage[fragmentSize:]
 		if len(fragmentedMessage) > 0 {
-			time.Sleep(5 * time.Millisecond) // uncomment when using with debug enabled to avoid message loss
+			ackBuffer := make([]byte, 3, 3)
+			_, err := st.serverConnection.Read(ackBuffer)
+			if err != nil || string(ackBuffer) != "ack" {
+				lib.PrintlnError("Error while reading message. Error:", err)
+				return err
+			}
 		} else {
 			break
 		}
