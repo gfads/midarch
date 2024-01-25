@@ -90,8 +90,6 @@ const ATTEMPTS_TO_OPEN_A_PLUGIN = 1000
 // Evolution
 const FIRST_MONITOR_TIME time.Duration = 10 * time.Second
 const MONITOR_TIME time.Duration = 100 * time.Millisecond
-const TIME_TO_START_SERVER = "0" // in seconds // "8" in containerized environment
-const TIME_TO_START_CLIENT = "2" // in seconds // "13" in containerized environment
 
 var INJECTION_TIME time.Duration
 
