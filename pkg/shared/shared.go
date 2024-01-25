@@ -74,8 +74,8 @@ const TERR = "TerR"
 
 // Network setups
 const NAMING_PORT = "1313"
-const NAMING_HOST = "localhost"     //"naming"     //
-const CALCULATOR_HOST = "localhost" //"server" //
+const NAMING_HOST = "naming"     //"localhost"     //
+const CALCULATOR_HOST = "server" //"localhost" //
 const CALCULATOR_PORT = "1314"
 const FIBONACCI_PORT = "1315"
 const QUEUEING_PORT = "1316"

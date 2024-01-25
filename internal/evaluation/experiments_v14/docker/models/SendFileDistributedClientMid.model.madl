@@ -1,0 +1,23 @@
+Configuration FibonacciDistributedClientMid :=
+
+   Components
+      namingproxy       : Namingproxy
+      sendfileproxy     : SendFileProxy
+      requestor         : Requestor
+      marshaller        : Jsonmarshaller
+      crh               : CRH<protocol>
+
+   Connectors
+      t1 : Ntoonereqrep
+      t2 : Requestreply
+      t3 : Requestreply
+
+   Attachments
+      sendfileproxy, t1, requestor
+      namingproxy, t1, requestor
+      requestor, t2, marshaller
+      requestor, t3, crh
+
+   Adaptability
+      Evolutive_Protocol
+EndConf

@@ -1,7 +1,7 @@
 version: "3.3"
 services:
-  namingserver:
-    image: <image.namingserver>
+  naming:
+    image: <image.naming>
     deploy:
       replicas: 1
       restart_policy:
@@ -13,6 +13,9 @@ services:
         reservations:
           cpus: "1"
           memory: 128M
+    environment:
+      CRT_PATH: "/usr/src/app/examples/certs/server.pem"
+      KEY_PATH: "/usr/src/app/examples/certs/server.key"
 
   server:
     image: <image.server>
@@ -27,6 +30,11 @@ services:
         reservations:
           cpus: "1"
           memory: 128M
+    environment:
+      CA_PATH: "/usr/src/app/examples/certs/myCA.pem"
+      CRT_PATH: "/usr/src/app/examples/certs/server.pem"
+      KEY_PATH: "/usr/src/app/examples/certs/server.key"       
+      TIME_TO_START_SERVER: 8   
 
   client:
     image: <image.client>
@@ -42,6 +50,8 @@ services:
           cpus: "1"
           memory: 128M
     environment:
+      CA_PATH: "/usr/src/app/examples/certs/myCA.pem"    
       <specific.env.client>
       SAMPLE_SIZE: <sample.size>
       AVERAGE_WAITING_TIME: <average.waiting.time>
+      TIME_TO_START_CLIENT: 13

@@ -7,7 +7,6 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strconv"
 	"strings"
 	"time"
 
@@ -66,7 +65,7 @@ func getContainerStatus(ctx context.Context, cli *client.Client, containerID str
 	return "no container"
 }
 
-func saveContainerLogsToFile(ctx context.Context, cli *client.Client, containerID string, containerType string, kind TransportProtocolFactor, fiboPlace int, sampleSize int) error {
+func saveContainerLogsToFile(experimentDescription string, outputPath string, ctx context.Context, cli *client.Client, containerID string, containerType string, kind TransportProtocolFactor, fiboPlace int, sampleSize int) error {
 	options := types.ContainerLogsOptions{
 		ShowStdout: true,
 		ShowStderr: true,
@@ -80,13 +79,10 @@ func saveContainerLogsToFile(ctx context.Context, cli *client.Client, containerI
 		return err
 	}
 
-	filename := filepath.Join("evaluation",
-		"results",
-		"docker",
+	filename := filepath.Join(outputPath,
 		"log_"+
-			kind.toString()+"_"+containerType+"_"+
-			strconv.Itoa(fiboPlace)+"_"+
-			strconv.Itoa(sampleSize)+"_"+
+			strings.Replace(experimentDescription, ":", "-", 1)+"-"+
+			containerType+"_"+
 			time.Now().Format("20060102_150405")+".results.txt")
 	file, err := os.Create(filename)
 	if err != nil {

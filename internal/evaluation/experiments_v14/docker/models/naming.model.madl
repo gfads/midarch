@@ -1,0 +1,20 @@
+Configuration naming :=
+    Components
+         server     : Namingserver
+         finvoker   : Naminginvoker
+         marshaller : Jsonmarshaller
+         srh        : SRH<protocol>
+
+      Connectors
+         t1 : Requestreply
+         t2 : Requestreply
+         t3 : Requestreply
+
+      Attachments
+         srh, t1, finvoker
+         finvoker, t2, marshaller
+         finvoker, t3, server
+
+      Adaptability
+         None
+EndConf 

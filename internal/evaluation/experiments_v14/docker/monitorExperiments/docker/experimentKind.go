@@ -1,13 +1,30 @@
 package docker
 
-type Kind int
+type RemoteOperationFactor int
 
 const (
-	Udp Kind = iota
+	Fibonacci RemoteOperationFactor = iota
+	SendFile
+)
+
+func (kind RemoteOperationFactor) toString() string {
+	switch kind {
+	case Fibonacci:
+		return "Fibonacci"
+	case SendFile:
+		return "SendFile"
+	}
+	panic("Kind conversion to string using unlisted kind")
+}
+
+type TransportProtocolFactor int
+
+const (
+	Udp TransportProtocolFactor = iota
 	Tcp
 	Tls
-	Quic
 	Rpc
+	Quic
 	Http
 	Https
 	Http2
@@ -15,9 +32,12 @@ const (
 	E_Grpc
 	E_Rmq
 	UdpTcp
+	TcpTls
+	RpcQuic
+	QuicHttp2
 )
 
-func (kind Kind) toString() string {
+func (kind TransportProtocolFactor) toString() string {
 	switch kind {
 	case Udp:
 		return "UDP"
@@ -43,48 +63,54 @@ func (kind Kind) toString() string {
 		return "E_RMQ"
 	case UdpTcp:
 		return "UdpTcp"
+	case TcpTls:
+		return "TcpTls"
+	case RpcQuic:
+		return "RpcQuic"
+	case QuicHttp2:
+		return "QuicHttp2"
 	}
 	panic("Kind conversion to string using unlisted kind")
 }
 
-func (kind Kind) createStackCommand() string {
+func (kind TransportProtocolFactor) createStackCommand() string {
 	switch kind {
 	case Udp:
-		return "docker stack deploy -c ./evaluation/experiments/docker/dc-newfibomiddleware-udp.yml newfibomiddleware-udp"
+		return "docker stack deploy -c ./evaluation/experiments_v14/docker/dc-fibonaccidistributed-udp.yml fibonaccidistributed-udp"
 	case Tcp:
-		return "docker stack deploy -c ./evaluation/experiments/docker/dc-newfibomiddleware-tcp.yml newfibomiddleware-tcp"
+		return "docker stack deploy -c ./evaluation/experiments_v14/docker/dc-fibonaccidistributed-tcp.yml fibonaccidistributed-tcp"
 	case Tls:
-		return "docker stack deploy -c ./evaluation/experiments/docker/dc-newfibomiddleware-tls.yml newfibomiddleware-tls"
+		return "docker stack deploy -c ./evaluation/experiments_v14/docker/dc-fibonaccidistributed-tls.yml fibonaccidistributed-tls"
 	case Quic:
-		return "docker stack deploy -c ./evaluation/experiments/docker/dc-fibomiddleware-quic.yml fibomiddleware-quic"
+		return "docker stack deploy -c ./evaluation/experiments_v14/docker/dc-fibomiddleware-quic.yml fibomiddleware-quic"
 	case Rpc:
-		return "docker stack deploy -c ./evaluation/experiments/docker/dc-fibomiddleware-rpc.yml fibomiddleware-rpc"
+		return "docker stack deploy -c ./evaluation/experiments_v14/docker/dc-fibomiddleware-rpc.yml fibomiddleware-rpc"
 	case Http:
-		return "docker stack deploy -c ./evaluation/experiments/docker/dc-fibomiddleware-http.yml fibomiddleware-http"
+		return "docker stack deploy -c ./evaluation/experiments_v14/docker/dc-fibomiddleware-http.yml fibomiddleware-http"
 	case Https:
-		return "docker stack deploy -c ./evaluation/experiments/docker/dc-fibomiddleware-https.yml fibomiddleware-https"
+		return "docker stack deploy -c ./evaluation/experiments_v14/docker/dc-fibomiddleware-https.yml fibomiddleware-https"
 	case Http2:
-		return "docker stack deploy -c ./evaluation/experiments/docker/dc-fibomiddleware-http2.yml fibomiddleware-http2"
+		return "docker stack deploy -c ./evaluation/experiments_v14/docker/dc-fibomiddleware-http2.yml fibomiddleware-http2"
 	case E_Rpc:
-		return "docker stack deploy -c ./evaluation/experiments/docker/dc-fiborpc.yml fiborpc"
+		return "docker stack deploy -c ./evaluation/experiments_v14/docker/dc-fiborpc.yml fiborpc"
 	case E_Grpc:
-		return "docker stack deploy -c ./evaluation/experiments/docker/dc-fibogrpc.yml fibogrpc"
+		return "docker stack deploy -c ./evaluation/experiments_v14/docker/dc-fibogrpc.yml fibogrpc"
 	case E_Rmq:
-		return "docker stack deploy -c ./evaluation/experiments/docker/dc-fibormq.yml fibormq"
+		return "docker stack deploy -c ./evaluation/experiments_v14/docker/dc-fibormq.yml fibormq"
 	case UdpTcp:
-		return "docker stack deploy -c ./evaluation/experiments/docker/dc-newfibomiddleware-udptcp.yml newfibomiddleware-udptcp"
+		return "docker stack deploy -c ./evaluation/experiments_v14/docker/dc-fibonaccidistributed-udptcp.yml fibonaccidistributed-udptcp"
 	}
 	panic("Kind create stack command using unlisted kind")
 }
 
-func (kind Kind) removeStackCommand() string {
+func (kind TransportProtocolFactor) removeStackCommand() string {
 	switch kind {
 	case Udp:
-		return "docker stack rm newfibomiddleware-udp"
+		return "docker stack rm fibonaccidistributed-udp"
 	case Tcp:
-		return "docker stack rm newfibomiddleware-tcp"
+		return "docker stack rm fibonaccidistributed-tcp"
 	case Tls:
-		return "docker stack rm newfibomiddleware-tls"
+		return "docker stack rm fibonaccidistributed-tls"
 	case Quic:
 		return "docker stack rm fibomiddleware-quic"
 	case Rpc:
@@ -102,7 +128,7 @@ func (kind Kind) removeStackCommand() string {
 	case E_Rmq:
 		return "docker stack rm fibormq"
 	case UdpTcp:
-		return "docker stack rm newfibomiddleware-udptcp"
+		return "docker stack rm fibonaccidistributed-udptcp"
 	}
 	panic("Kind remove stack command using unlisted kind")
 }

@@ -21,11 +21,20 @@ import (
 	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
-func createStack(kind TransportProtocolFactor) error {
+func createStack(composePath string) error {
+	return executeCommand("docker stack deploy -c " + composePath + " midarch")
+}
+
+// deprecated
+func createStackFromKind(kind TransportProtocolFactor) error {
 	return executeCommand(kind.createStackCommand())
 }
 
-func removeStack(kind TransportProtocolFactor) error {
+func removeStack() error {
+	return executeCommand("docker stack rm midarch")
+}
+
+func removeStackFromKind(kind TransportProtocolFactor) error {
 	return executeCommand(kind.removeStackCommand())
 }
 
@@ -42,43 +51,126 @@ func executeCommand(command string) error {
 	return err
 }
 
-func buildExperiment(transportProtocol TransportProtocolFactor, remoteOperation RemoteOperationFactor, fiboPlace int, imageSize string, sampleSize int) {
-	dcModel := shared.DOCKER_COMPOSE_PATH
+func buildExperiment(experimentDescription string, transportProtocol TransportProtocolFactor, remoteOperation RemoteOperationFactor, sampleSize int, fiboPlace int, imageSize string) (outputPath string) {
+	specificEnvClient := ""
+	baseAppGoFilePath := "$GMIDARCHDIR/examples"
+	switch remoteOperation {
+	case Fibonacci:
+		specificEnvClient = "FIBONACCI_PLACE: \"" + strconv.Itoa(fiboPlace) + "\""
+		baseAppGoFilePath += "/fibonaccidistributed"
+	case SendFile:
+		specificEnvClient = "IMAGE_SIZE: \"" + imageSize + "\""
+		baseAppGoFilePath += "/sendfiledistributed"
+	}
+	sampleSizeStr := strconv.Itoa(sampleSize)
+	avarageWaitingTime := "200"
+	baseImageName := "midarch/" + strings.ToLower(experimentDescription) + "-<app>"
+	imageNameNamingServer := strings.Replace(baseImageName, "<app>", "naming", 1)
+	imageNameServer := strings.Replace(baseImageName, "<app>", "server", 1)
+	imageNameClient := strings.Replace(baseImageName, "<app>", "client", 1)
+
+	outputPath = shared.DIR_EXPERIMENTS_RESULTS + "/" + strings.ReplaceAll(experimentDescription, ":", "-")
+	if remoteOperation == Fibonacci {
+		outputPath += "-" + strconv.Itoa(fiboPlace)
+	} else {
+		outputPath += "-" + imageSize
+	}
+	log.Println("Save to:", outputPath)
+	os.Mkdir(outputPath, os.ModePerm)
+
+	generateDockerfile("naming", "$GMIDARCHDIR/naming", baseAppGoFilePath+"/naming/naming.go", outputPath)
+	generateDockerfile("server", "$GMIDARCHDIR/server", baseAppGoFilePath+"/server/server.go", outputPath)
+	generateDockerfile("client", "$GMIDARCHDIR/client", baseAppGoFilePath+"/client/client.go", outputPath)
+	generateComposeFile(imageNameNamingServer, imageNameServer, imageNameClient, specificEnvClient, sampleSizeStr, avarageWaitingTime, outputPath)
+
+	buildImages(shared.DIR_BASE, outputPath, imageNameNamingServer, imageNameServer, imageNameClient, transportProtocol)
+
+	// publishImages(imageNameNamingServer, imageNameServer, imageNameClient)
+
+	return outputPath
+}
+
+func publishImages(imageNameNamingServer string, imageNameServer string, imageNameClient string) {
+	log.Println("Publishing images")
+	log.Println()
+	err := executeCommand("docker push " + imageNameNamingServer)
+	if err != nil {
+		log.Println("Error while publishing image", imageNameNamingServer, "Error:", err)
+	}
+	err = executeCommand("docker push " + imageNameServer)
+	if err != nil {
+		log.Println("Error while publishing image", imageNameServer, "Error:", err)
+	}
+	err = executeCommand("docker push " + imageNameClient)
+	if err != nil {
+		log.Println("Error while publishing image", imageNameClient, "Error:", err)
+	}
+}
+
+func buildImages(contextPath string, outputPath string, imageNameNamingServer string, imageNameServer string, imageNameClient string, transportProtocolFactor TransportProtocolFactor) {
+	log.Println("Building images")
+	log.Println()
+	protocolFactor := strings.ToUpper(transportProtocolFactor.toString())
+	err := shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/naming.model.madl", shared.DIR_MADL+"/naming.madl", map[string]string{"<protocol>": protocolFactor})
+	if err != nil {
+		log.Println("Error while building image", imageNameNamingServer, "Error:", err)
+	}
+	err = executeCommand("docker build -t " + imageNameNamingServer + " " + contextPath + " -f " + outputPath + "/Dockerfile.naming")
+	if err != nil {
+		log.Println("Error while building image", imageNameNamingServer, "Error:", err)
+	}
+
+	err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/SendFileDistributedServerMid.model.madl", shared.DIR_MADL+"/SendFileDistributedServerMid.madl", map[string]string{"<protocol>": protocolFactor})
+	if err != nil {
+		log.Println("Error while building image", imageNameServer, "Error:", err)
+	}
+	err = executeCommand("docker build -t " + imageNameServer + " " + contextPath + " -f " + outputPath + "/Dockerfile.server")
+	if err != nil {
+		log.Println("Error while building image", imageNameServer, "Error:", err)
+	}
+
+	err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/SendFileDistributedClientMid.model.madl", shared.DIR_MADL+"/SendFileDistributedClientMid.madl", map[string]string{"<protocol>": protocolFactor})
+	if err != nil {
+		log.Println("Error while building image", imageNameClient, "Error:", err)
+	}
+	err = executeCommand("docker build -t " + imageNameClient + " " + contextPath + " -f " + outputPath + "/Dockerfile.client")
+	if err != nil {
+		log.Println("Error while building image", imageNameClient, "Error:", err)
+	}
+}
+
+func generateDockerfile(app string, appFilePath string, goFilePath string, outputPath string) {
+	dockerfileModel := shared.DIR_EXPERIMENTS_MODELS + "/Dockerfile.model"
+	log.Println("Vai ler:", dockerfileModel)
+	input, err := os.ReadFile(dockerfileModel)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	output := bytes.Replace(input, []byte("<gofile.path>"), []byte(goFilePath), -1)
+	// output = bytes.Replace(output, []byte("<app.path>"), []byte(appFilePath), -1)
+
+	if err = os.WriteFile(outputPath+"/Dockerfile."+app, output, 0666); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
+func generateComposeFile(imageNameNamingServer string, imageNameServer string, imageNameClient string, specificEnvClient string, sampleSizeStr string, avarageWaitingTime string, outputPath string) {
+	dcModel := shared.DIR_EXPERIMENTS_MODELS + "/dc-experiment.model.yml"
 	log.Println("Vai ler:", dcModel)
 	input, err := os.ReadFile(dcModel)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	specificEnvClient := ""
-	switch remoteOperation {
-	case Fibonacci:
-		specificEnvClient = "FIBONACCI_PLACE: \"" + strconv.Itoa(fiboPlace) + "\""
-	case SendFile:
-		specificEnvClient = "IMAGE_SIZE: \"" + imageSize + "\""
-	}
-
-	sampleSizeStr := strconv.Itoa(sampleSize)
-	avarageWaitingTime := "200"
-	experimentVersion := "1.14.0"
-	baseImageName := "midarch/<remote.operation>:<version>-<app>-<tranport.protocol>"
-	imageName := strings.Replace(baseImageName, "<remote.operation>", remoteOperation.toString(), 1)
-	imageName = strings.Replace(imageName, "<version>", experimentVersion, 1)
-	imageName = strings.Replace(imageName, "<tranport.protocol>", transportProtocol.toString(), 1)
-	imageNameNamingServer := strings.Replace(imageName, "<app>", "namingserver", 1)
-	imageNameServer := strings.Replace(imageName, "<app>", "server", 1)
-	imageNameClient := strings.Replace(imageName, "<app>", "client", 1)
-
-	output := bytes.Replace(input, []byte("<image.namingserver>"), []byte(imageNameNamingServer), -1)
+	output := bytes.Replace(input, []byte("<image.naming>"), []byte(imageNameNamingServer), -1)
 	output = bytes.Replace(output, []byte("<image.server>"), []byte(imageNameServer), -1)
 	output = bytes.Replace(output, []byte("<image.client>"), []byte(imageNameClient), -1)
 	output = bytes.Replace(output, []byte("<specific.env.client>"), []byte(specificEnvClient), -1)
 	output = bytes.Replace(output, []byte("<sample.size>"), []byte(sampleSizeStr), -1)
 	output = bytes.Replace(output, []byte("<average.waiting.time>"), []byte(avarageWaitingTime), -1)
 
-	outputPath := shared.DIR_EXPERIMENTS_RESULTS + "/" + remoteOperation.toString() + "-" + experimentVersion + "-" + transportProtocol.toString() + "-" + strconv.Itoa(fiboPlace) + "-" + imageSize + "-" + sampleSizeStr
-	log.Println("Save to:", outputPath)
-	os.Mkdir(outputPath, os.ModePerm)
 	if err = os.WriteFile(outputPath+"/dc-experiment.yml", output, 0666); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
@@ -86,24 +178,39 @@ func buildExperiment(transportProtocol TransportProtocolFactor, remoteOperation 
 }
 
 func RunFibonacciExperiment(transportProtocol TransportProtocolFactor, fiboPlace int, sampleSize int) {
-	RunExperiment(transportProtocol, Fibonacci, fiboPlace, "", sampleSize)
+	RunExperiment(transportProtocol, Fibonacci, sampleSize, fiboPlace, "")
 }
 
 func RunSendFileExperiment(transportProtocol TransportProtocolFactor, imageSize string, sampleSize int) {
-	RunExperiment(transportProtocol, SendFile, 0, imageSize, sampleSize)
+	RunExperiment(transportProtocol, SendFile, sampleSize, 0, imageSize)
 }
 
-func RunExperiment(transportProtocol TransportProtocolFactor, remoteOperation RemoteOperationFactor, fiboPlace int, imageSize string, sampleSize int) {
-	log.Println("Preparing experiment", transportProtocol.toString(), "(fiboPlace:", fiboPlace, "sampleSize:", sampleSize, ") experiment fiboPlace!")
+func RunExperiment(transportProtocolFactor TransportProtocolFactor, remoteOperation RemoteOperationFactor, sampleSize int, fiboPlace int, imageSize string) {
+	experimentVersion := "1.14.0"
+	experimentLevel := ""
+	if remoteOperation == Fibonacci {
+		experimentLevel = strconv.Itoa(fiboPlace)
+	} else {
+		experimentLevel = imageSize
+	}
+
+	baseExperimentDescription := "<remote.operation>:<version>-<transport.protocol>-<sample.size>"
+	baseExperimentDescription = strings.Replace(baseExperimentDescription, "<remote.operation>", remoteOperation.toString(), 1)
+	baseExperimentDescription = strings.Replace(baseExperimentDescription, "<version>", experimentVersion, 1)
+	baseExperimentDescription = strings.Replace(baseExperimentDescription, "<transport.protocol>", transportProtocolFactor.toString(), 1)
+	baseExperimentDescription = strings.Replace(baseExperimentDescription, "<sample.size>", strconv.Itoa(sampleSize), 1)
+	experimentDescription := baseExperimentDescription + "-" + experimentLevel
+
+	log.Println("Preparing experiment", experimentDescription)
 	log.Println("Building experiment")
 	log.Println()
-	buildExperiment(transportProtocol, remoteOperation, fiboPlace, imageSize, sampleSize)
-	return
+	ouputPath := buildExperiment(baseExperimentDescription, transportProtocolFactor, remoteOperation, sampleSize, fiboPlace, imageSize)
+	// return
 
 	for {
-		log.Println("Preparing to run", transportProtocol.toString(), "(fiboPlace:", fiboPlace, "sampleSize:", sampleSize, ") experiment fiboPlace!")
+		log.Println("Preparing to run", experimentDescription)
 		log.Println()
-		err := processExperiment(transportProtocol, fiboPlace, sampleSize)
+		err := processExperiment(experimentDescription, ouputPath, transportProtocolFactor, fiboPlace, sampleSize)
 		if err != nil {
 			log.Println()
 			log.Println("Error while processing experiment. Will try again in 10 seconds. Error:", err)
@@ -113,7 +220,7 @@ func RunExperiment(transportProtocol TransportProtocolFactor, remoteOperation Re
 		} else {
 			log.Println()
 			log.Println()
-			log.Println("Finished running", transportProtocol.toString(), "(fiboPlace:", fiboPlace, "sampleSize:", sampleSize, ") experiment fiboPlace!")
+			log.Println("Finished running", experimentDescription)
 			log.Println("Waiting 10 seconds to exit")
 			time.Sleep(10 * time.Second)
 			return
@@ -121,11 +228,11 @@ func RunExperiment(transportProtocol TransportProtocolFactor, remoteOperation Re
 	}
 }
 
-func processExperiment(kind TransportProtocolFactor, fiboPlace int, sampleSize int) []error {
+func processExperiment(experimentDescription string, outputPath string, kind TransportProtocolFactor, fiboPlace int, sampleSize int) []error {
 	var experimentErrors []error
 	stackRemoved := false
 
-	err := createStack(kind)
+	err := createStack(outputPath + "/dc-experiment.yml")
 	if err != nil {
 		experimentErrors = append(experimentErrors, err)
 		return experimentErrors
@@ -133,7 +240,7 @@ func processExperiment(kind TransportProtocolFactor, fiboPlace int, sampleSize i
 	defer func() {
 		if !stackRemoved {
 			stackRemoved = true
-			removeStack(kind)
+			removeStack()
 		}
 	}()
 
@@ -160,32 +267,32 @@ func processExperiment(kind TransportProtocolFactor, fiboPlace int, sampleSize i
 	wg := sync.WaitGroup{}
 	wg.Add(2) // Wait for any of the experiments to finish
 	go func() {
-		err = monitorExperiment(kind, fiboPlace, sampleSize, cli, ctx, cancel, containers["client"].ID, "client")
+		err = monitorExperiment(experimentDescription, outputPath, kind, fiboPlace, sampleSize, cli, ctx, cancel, containers["client"].ID, "client")
 		if err != nil {
 			experimentErrors = append(experimentErrors, err)
 		}
 		wg.Done()
 		if !stackRemoved {
 			stackRemoved = true
-			removeStack(kind)
+			removeStack()
 		}
 	}()
 	go func() {
-		err = monitorExperiment(kind, fiboPlace, sampleSize, cli, ctx, cancel, containers["server"].ID, "server")
+		err = monitorExperiment(experimentDescription, outputPath, kind, fiboPlace, sampleSize, cli, ctx, cancel, containers["server"].ID, "server")
 		if err != nil {
 			experimentErrors = append(experimentErrors, err)
 		}
 		wg.Done()
 		if !stackRemoved {
 			stackRemoved = true
-			removeStack(kind)
+			removeStack()
 		}
 	}()
 	wg.Wait()
 	return experimentErrors
 }
 
-func monitorExperiment(kind TransportProtocolFactor, fiboPlace int, sampleSize int, cli *client.Client, ctx context.Context, cancel context.CancelFunc, containerId string, containerType string) error {
+func monitorExperiment(experimentDescription string, outputPath string, kind TransportProtocolFactor, fiboPlace int, sampleSize int, cli *client.Client, ctx context.Context, cancel context.CancelFunc, containerId string, containerType string) error {
 	stats, err := cli.ContainerStats(ctx, containerId, true)
 	if err != nil {
 		//_ = fmt.Errorf("%s", err.Error())
@@ -195,13 +302,10 @@ func monitorExperiment(kind TransportProtocolFactor, fiboPlace int, sampleSize i
 
 	var containerStats ContainerStats
 
-	filename := filepath.Join("evaluation",
-		"results",
-		"docker",
+	filename := filepath.Join(outputPath,
 		"log_"+
-			kind.toString()+"_"+containerType+"_"+
-			strconv.Itoa(fiboPlace)+"_"+
-			strconv.Itoa(sampleSize)+"_"+
+			strings.Replace(experimentDescription, ":", "-", 1)+"-"+
+			containerType+"_"+
 			time.Now().Format("20060102_150405")+".monitor.csv")
 	file, err := os.Create(filename)
 	if err != nil {
@@ -266,6 +370,6 @@ OuterLoop:
 			}
 		}
 	}
-	err = saveContainerLogsToFile(ctx, cli, containerId, containerType, kind, fiboPlace, sampleSize)
+	err = saveContainerLogsToFile(experimentDescription, outputPath, ctx, cli, containerId, containerType, kind, fiboPlace, sampleSize)
 	return err
 }
