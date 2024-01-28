@@ -135,14 +135,14 @@ func (st *HTTP2) StartServer(ip, port string, initialConnections int) {
 	st.port = port
 	st.initialConnections = initialConnections
 
-	lib.PrintlnInfo("HTTP2 clients len", len(st.clients))
+	//lib.PrintlnInfo("HTTP2 clients len", len(st.clients))
 	if len(st.clients) < 1 { //st.initialConnections { TODO dcruzb : verify if there is the need to more than one client on HTTP2
 		client := &HTTP2Client{}
 		client.msgChan = make(chan []byte)
 		client.replyChan = make(chan []byte)
 		// *clientsPtr = append(clients, &client)
 		st.AddClient(client, -1)
-		lib.PrintlnInfo("HTTP2 client created")
+		//lib.PrintlnInfo("HTTP2 client created")
 	}
 
 	var client *HTTP2Client = (*st.clients[0]).(*HTTP2Client)
@@ -194,11 +194,11 @@ func (st *HTTP2) WaitForConnection(cliIdx int) (cl *generic.Client) {
 		}
 	}()
 
-	lib.PrintlnInfo("HTTP2 wait -> clients len", len(st.clients))
+	//lib.PrintlnInfo("HTTP2 wait -> clients len", len(st.clients))
 	if len(st.clients) > cliIdx {
 		// (*st.clients[cliIdx]).(*HTTP2Client).connection = conn
 		// (*st.clients[cliIdx]).(*HTTP2Client).Ip = conn.RemoteAddr().String()
-		lib.PrintlnInfo("HTTP2 wait -> client returned")
+		//lib.PrintlnInfo("HTTP2 wait -> client returned")
 		return st.clients[cliIdx]
 	} else {
 		return nil
@@ -244,7 +244,7 @@ func (st *HTTP2) ResetClients() {
 // Client Methods
 
 func (st *HTTP2) ConnectToServer(ip, port string) {
-	lib.PrintlnInfo("********************************************** HTTP2.ConnectToServer")
+	//lib.PrintlnInfo("********************************************** HTTP2.ConnectToServer")
 	if st.msgChan == nil {
 		st.msgChan = make(chan []byte)
 	}
@@ -289,7 +289,7 @@ func (st *HTTP2) WriteString(message string) {
 }
 
 func (st *HTTP2) Receive() ([]byte, error) {
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "HTTP2.Receive")
+	//lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "HTTP2.Receive")
 	msgFromServer := <-st.msgChan
 	// sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// // receive reply's size
@@ -378,14 +378,14 @@ type HTTP2Request struct {
 }
 
 func (rq HTTP2Request) Request(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
-	lib.PrintlnInfo("Received message")
+	//lib.PrintlnInfo("Received message")
 	uriParameters := lib.GetURIParameters(r.RequestURI)
 	go func() {
 		rq.msgChan <- []byte(uriParameters["param"].(string))
 	}()
-	lib.PrintlnInfo("Forwarded message")
+	//lib.PrintlnInfo("Forwarded message")
 	replyMsg := <-rq.replyChan
-	lib.PrintlnInfo("Received reply")
+	//lib.PrintlnInfo("Received reply")
 	//*reply = w
 	w.Write(replyMsg)
 

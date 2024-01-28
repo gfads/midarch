@@ -134,14 +134,14 @@ func (st *HTTPS) StartServer(ip, port string, initialConnections int) {
 	st.port = port
 	st.initialConnections = initialConnections
 
-	lib.PrintlnInfo("HTTPS clients len", len(st.clients))
+	//lib.PrintlnInfo("HTTPS clients len", len(st.clients))
 	if len(st.clients) < 1 { //st.initialConnections { TODO dcruzb : verify if there is the need to more than one client on HTTPS
 		client := &HTTPSClient{}
 		client.msgChan = make(chan []byte)
 		client.replyChan = make(chan []byte)
 		// *clientsPtr = append(clients, &client)
 		st.AddClient(client, -1)
-		lib.PrintlnInfo("HTTPS client created")
+		//lib.PrintlnInfo("HTTPS client created")
 	}
 
 	var client *HTTPSClient = (*st.clients[0]).(*HTTPSClient)
@@ -193,11 +193,11 @@ func (st *HTTPS) WaitForConnection(cliIdx int) (cl *generic.Client) {
 		}
 	}()
 
-	lib.PrintlnInfo("HTTPS wait -> clients len", len(st.clients))
+	//lib.PrintlnInfo("HTTPS wait -> clients len", len(st.clients))
 	if len(st.clients) > cliIdx {
 		// (*st.clients[cliIdx]).(*HTTPSClient).connection = conn
 		// (*st.clients[cliIdx]).(*HTTPSClient).Ip = conn.RemoteAddr().String()
-		lib.PrintlnInfo("HTTPS wait -> client returned")
+		//lib.PrintlnInfo("HTTPS wait -> client returned")
 		return st.clients[cliIdx]
 	} else {
 		return nil
@@ -243,7 +243,7 @@ func (st *HTTPS) ResetClients() {
 // Client Methods
 
 func (st *HTTPS) ConnectToServer(ip, port string) {
-	lib.PrintlnInfo("**********************************************")
+	//lib.PrintlnInfo("**********************************************")
 	if st.msgChan == nil {
 		st.msgChan = make(chan []byte)
 	}

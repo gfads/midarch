@@ -59,7 +59,7 @@ func buildExperiment(experimentDescription string, transportProtocol TransportPr
 		specificEnvClient = "FIBONACCI_PLACE: \"" + strconv.Itoa(fiboPlace) + "\""
 		baseAppGoFilePath += "/fibonaccidistributed"
 	case SendFile:
-		specificEnvClient = "IMAGE_SIZE: \"" + imageSize + "\""
+		specificEnvClient = "FILE_SIZE: \"" + imageSize + "\""
 		baseAppGoFilePath += "/sendfiledistributed"
 	}
 	sampleSizeStr := strconv.Itoa(sampleSize)
@@ -83,7 +83,7 @@ func buildExperiment(experimentDescription string, transportProtocol TransportPr
 	generateDockerfile("client", "$GMIDARCHDIR/client", baseAppGoFilePath+"/client/client.go", outputPath)
 	generateComposeFile(imageNameNamingServer, imageNameServer, imageNameClient, specificEnvClient, sampleSizeStr, avarageWaitingTime, outputPath)
 
-	buildImages(shared.DIR_BASE, outputPath, imageNameNamingServer, imageNameServer, imageNameClient, transportProtocol)
+	buildImages(shared.DIR_BASE, outputPath, remoteOperation, imageNameNamingServer, imageNameServer, imageNameClient, transportProtocol)
 
 	// publishImages(imageNameNamingServer, imageNameServer, imageNameClient)
 
@@ -107,7 +107,7 @@ func publishImages(imageNameNamingServer string, imageNameServer string, imageNa
 	}
 }
 
-func buildImages(contextPath string, outputPath string, imageNameNamingServer string, imageNameServer string, imageNameClient string, transportProtocolFactor TransportProtocolFactor) {
+func buildImages(contextPath string, outputPath string, remoteOperation RemoteOperationFactor, imageNameNamingServer string, imageNameServer string, imageNameClient string, transportProtocolFactor TransportProtocolFactor) {
 	log.Println("Building images")
 	log.Println()
 	protocolFactor := strings.ToUpper(transportProtocolFactor.toString())
@@ -120,7 +120,11 @@ func buildImages(contextPath string, outputPath string, imageNameNamingServer st
 		log.Println("Error while building image", imageNameNamingServer, "Error:", err)
 	}
 
-	err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/SendFileDistributedServerMid.model.madl", shared.DIR_MADL+"/SendFileDistributedServerMid.madl", map[string]string{"<protocol>": protocolFactor})
+	if remoteOperation == Fibonacci {
+		err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/FibonacciDistributedServerMid.model.madl", shared.DIR_MADL+"/FibonacciDistributedServerMid.madl", map[string]string{"<protocol>": protocolFactor})
+	} else {
+		err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/SendFileDistributedServerMid.model.madl", shared.DIR_MADL+"/SendFileDistributedServerMid.madl", map[string]string{"<protocol>": protocolFactor})
+	}
 	if err != nil {
 		log.Println("Error while building image", imageNameServer, "Error:", err)
 	}
@@ -129,7 +133,11 @@ func buildImages(contextPath string, outputPath string, imageNameNamingServer st
 		log.Println("Error while building image", imageNameServer, "Error:", err)
 	}
 
-	err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/SendFileDistributedClientMid.model.madl", shared.DIR_MADL+"/SendFileDistributedClientMid.madl", map[string]string{"<protocol>": protocolFactor})
+	if remoteOperation == Fibonacci {
+		err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/FibonacciDistributedClientMid.model.madl", shared.DIR_MADL+"/FibonacciDistributedClientMid.madl", map[string]string{"<protocol>": protocolFactor})
+	} else {
+		err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/SendFileDistributedClientMid.model.madl", shared.DIR_MADL+"/SendFileDistributedClientMid.madl", map[string]string{"<protocol>": protocolFactor})
+	}
 	if err != nil {
 		log.Println("Error while building image", imageNameClient, "Error:", err)
 	}

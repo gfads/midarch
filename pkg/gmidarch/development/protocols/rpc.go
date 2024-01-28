@@ -138,7 +138,7 @@ func (st *RPC) StartServer(ip, port string, initialConnections int) {
 		client.replyChan = make(chan []byte)
 		// *clientsPtr = append(clients, &client)
 		st.AddClient(client, -1)
-		lib.PrintlnInfo("RPC client created")
+		//lib.PrintlnInfo("RPC client created")
 	}
 
 	var client *RPCClient = (*st.clients[0]).(*RPCClient)

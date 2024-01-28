@@ -133,14 +133,14 @@ func (st *HTTP) StartServer(ip, port string, initialConnections int) {
 	st.port = port
 	st.initialConnections = initialConnections
 
-	lib.PrintlnInfo("HTTP clients len", len(st.clients))
+	//lib.PrintlnInfo("HTTP clients len", len(st.clients))
 	if len(st.clients) < 1 { //st.initialConnections { TODO dcruzb : verify if there is the need to more than one client on HTTP
 		client := &HTTPClient{}
 		client.msgChan = make(chan []byte)
 		client.replyChan = make(chan []byte)
 		// *clientsPtr = append(clients, &client)
 		st.AddClient(client, -1)
-		lib.PrintlnInfo("HTTP client created")
+		//lib.PrintlnInfo("HTTP client created")
 	}
 
 	var client *HTTPClient = (*st.clients[0]).(*HTTPClient)
@@ -192,11 +192,11 @@ func (st *HTTP) WaitForConnection(cliIdx int) (cl *generic.Client) {
 		}
 	}()
 
-	lib.PrintlnInfo("HTTP wait -> clients len", len(st.clients))
+	//lib.PrintlnInfo("HTTP wait -> clients len", len(st.clients))
 	if len(st.clients) > cliIdx {
 		// (*st.clients[cliIdx]).(*HTTPClient).connection = conn
 		// (*st.clients[cliIdx]).(*HTTPClient).Ip = conn.RemoteAddr().String()
-		lib.PrintlnInfo("HTTP wait -> client returned")
+		//lib.PrintlnInfo("HTTP wait -> client returned")
 		return st.clients[cliIdx]
 	} else {
 		return nil
@@ -242,7 +242,7 @@ func (st *HTTP) ResetClients() {
 // Client Methods
 
 func (st *HTTP) ConnectToServer(ip, port string) {
-	lib.PrintlnInfo("**********************************************")
+	//lib.PrintlnInfo("**********************************************")
 	if st.msgChan == nil {
 		st.msgChan = make(chan []byte)
 	}
@@ -391,14 +391,14 @@ type HTTPRequest struct {
 }
 
 func (rq HTTPRequest) Request(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
-	lib.PrintlnInfo("Received message")
+	//lib.PrintlnInfo("Received message")
 	uriParameters := lib.GetURIParameters(r.RequestURI)
 	go func() {
 		rq.msgChan <- []byte(uriParameters["param"].(string))
 	}()
-	lib.PrintlnInfo("Forwarded message")
+	//lib.PrintlnInfo("Forwarded message")
 	replyMsg := <-rq.replyChan
-	lib.PrintlnInfo("Received reply")
+	//lib.PrintlnInfo("Received reply")
 	//*reply = w
 	w.Write(replyMsg)
 

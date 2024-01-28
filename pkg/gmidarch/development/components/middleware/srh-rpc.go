@@ -29,7 +29,7 @@ func (s SRHRPC) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	if srhInfo.Protocol == nil {
 		srhInfo.Protocol = &protocols.RPC{}
 		srhInfo.Protocol.StartServer(srhInfo.EndPoint.Host, srhInfo.EndPoint.Port, 2) //shared.MAX_NUMBER_OF_CONNECTIONS)
-		lib.PrintlnInfo("SRHRPC Server Started")
+		//lib.PrintlnInfo("SRHRPC Server Started")
 	}
 
 	// // check if a listener has already been created

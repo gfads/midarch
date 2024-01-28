@@ -19,7 +19,8 @@ import (
 
 func main() {
 	// Wait for namingserver to get up
-	time.Sleep(8 * time.Second)
+	timeToRun, _ := strconv.Atoi(shared.EnvironmentVariableValueWithDefault("TIME_TO_START_SERVER", "0"))
+	time.Sleep(time.Duration(timeToRun) * time.Second)
 
 	// Example setting environment variable MIDARCH_BUSINESS_COMPONENTS_PATH on code, may be set on system environment variables too
 	os.Setenv("MIDARCH_BUSINESS_COMPONENTS_PATH",
@@ -58,8 +59,8 @@ func main() {
 
 	fmt.Printf("Fibonacci server is running at Port: %v \n", shared.CALCULATOR_PORT)
 
-	intervalBetweenInjections, _ := strconv.Atoi(shared.EnvironmentVariableValueWithDefault("INJECTION_INTERVAL", "90"))
-	evolutive.EvolutiveInjector{}.StartEvolutiveProtocolInjection("srhtcp", "srhudp", time.Duration(intervalBetweenInjections)*time.Second)
+	intervalBetweenInjections, _ := strconv.Atoi(shared.EnvironmentVariableValueWithDefault("INJECTION_INTERVAL", "45"))
+	evolutive.EvolutiveInjector{}.StartEvolutiveProtocolInjection("srhtcp", "srhhttp2", time.Duration(intervalBetweenInjections)*time.Second)
 
 	//fmt.Scanln()
 	var wg sync.WaitGroup

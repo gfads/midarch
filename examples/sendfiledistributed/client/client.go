@@ -32,8 +32,8 @@ func main() {
 		SAMPLE_SIZE, _ = strconv.Atoi(os.Args[2])
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(os.Args[3])
 	} else {
-		FILE_SIZE = shared.EnvironmentVariableValueWithDefault("FILE_SIZE", "lg")
-		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("SAMPLE_SIZE", "10000"))
+		FILE_SIZE = shared.EnvironmentVariableValueWithDefault("FILE_SIZE", "sm")
+		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("SAMPLE_SIZE", "1000"))
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("AVERAGE_WAITING_TIME", "60"))
 	}
 	fmt.Println("FILE_SIZE / SAMPLE_SIZE / AVERAGE_WAITING_TIME:", FILE_SIZE, "/", SAMPLE_SIZE, "/", AVERAGE_WAITING_TIME)
