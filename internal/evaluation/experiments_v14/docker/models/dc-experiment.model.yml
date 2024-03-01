@@ -35,6 +35,7 @@ services:
       CRT_PATH: "/usr/src/app/examples/certs/server.pem"
       KEY_PATH: "/usr/src/app/examples/certs/server.key"       
       TIME_TO_START_SERVER: 8   
+      INJECTION_INTERVAL: <injection.interval>
 
   client:
     image: <image.client>

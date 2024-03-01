@@ -108,7 +108,7 @@ func getFile(size string) []byte {
 	case "md":
 		fileName = shared.DIR_BASE + "/examples/sendfiledistributed/client/2k.png"
 	case "lg":
-		fileName = shared.DIR_BASE + "/examples/sendfiledistributed/client/4k.png" // Foto de <a href="https://unsplash.com/pt-br/@francesco_ungaro?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Francesco Ungaro</a> na <a href="https://unsplash.com/pt-br/fotografias/cardume-de-peixes-no-corpo-de-agua-MJ1Q7hHeGlA?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
+		fileName = shared.DIR_BASE + "/examples/sendfiledistributed/client/4k.jpg" // Foto de <a href="https://unsplash.com/pt-br/@francesco_ungaro?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Francesco Ungaro</a> na <a href="https://unsplash.com/pt-br/fotografias/cardume-de-peixes-no-corpo-de-agua-MJ1Q7hHeGlA?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a>
 	}
 
 	fileBytes, err := os.ReadFile(fileName)

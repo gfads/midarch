@@ -51,7 +51,7 @@ func executeCommand(command string) error {
 	return err
 }
 
-func buildExperiment(experimentDescription string, transportProtocol TransportProtocolFactor, remoteOperation RemoteOperationFactor, sampleSize int, fiboPlace int, imageSize string) (outputPath string) {
+func buildExperiment(experimentDescription string, transportProtocol TransportProtocolFactor, adaptationInterval int, remoteOperation RemoteOperationFactor, sampleSize int, fiboPlace int, imageSize string) (outputPath string) {
 	specificEnvClient := ""
 	baseAppGoFilePath := "$GMIDARCHDIR/examples"
 	switch remoteOperation {
@@ -75,17 +75,18 @@ func buildExperiment(experimentDescription string, transportProtocol TransportPr
 	} else {
 		outputPath += "-" + imageSize
 	}
-	log.Println("Save to:", outputPath)
+	log.Println("Building in:", outputPath)
 	os.Mkdir(outputPath, os.ModePerm)
 
+	generateServerFile(transportProtocol, remoteOperation)
 	generateDockerfile("naming", "$GMIDARCHDIR/naming", baseAppGoFilePath+"/naming/naming.go", outputPath)
 	generateDockerfile("server", "$GMIDARCHDIR/server", baseAppGoFilePath+"/server/server.go", outputPath)
 	generateDockerfile("client", "$GMIDARCHDIR/client", baseAppGoFilePath+"/client/client.go", outputPath)
-	generateComposeFile(imageNameNamingServer, imageNameServer, imageNameClient, specificEnvClient, sampleSizeStr, avarageWaitingTime, outputPath)
+	generateComposeFile(imageNameNamingServer, imageNameServer, imageNameClient, adaptationInterval, specificEnvClient, sampleSizeStr, avarageWaitingTime, outputPath)
 
 	buildImages(shared.DIR_BASE, outputPath, remoteOperation, imageNameNamingServer, imageNameServer, imageNameClient, transportProtocol)
 
-	// publishImages(imageNameNamingServer, imageNameServer, imageNameClient)
+	publishImages(imageNameNamingServer, imageNameServer, imageNameClient)
 
 	return outputPath
 }
@@ -110,7 +111,13 @@ func publishImages(imageNameNamingServer string, imageNameServer string, imageNa
 func buildImages(contextPath string, outputPath string, remoteOperation RemoteOperationFactor, imageNameNamingServer string, imageNameServer string, imageNameClient string, transportProtocolFactor TransportProtocolFactor) {
 	log.Println("Building images")
 	log.Println()
-	protocolFactor := strings.ToUpper(transportProtocolFactor.toString())
+	var protocolFactor string
+	if transportProtocolFactor.IsEvolutive() {
+		firstProtocolFactor, _ := transportProtocolFactor.getEvolutiveProtocols()
+		protocolFactor = strings.ToUpper(firstProtocolFactor.toString())
+	} else {
+		protocolFactor = strings.ToUpper(transportProtocolFactor.toString())
+	}
 	err := shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/naming.model.madl", shared.DIR_MADL+"/naming.madl", map[string]string{"<protocol>": protocolFactor})
 	if err != nil {
 		log.Println("Error while building image", imageNameNamingServer, "Error:", err)
@@ -147,6 +154,44 @@ func buildImages(contextPath string, outputPath string, remoteOperation RemoteOp
 	}
 }
 
+func generateServerFile(transportProtocol TransportProtocolFactor, remoteOperation RemoteOperationFactor) {
+	serverFileModel := shared.DIR_EXPERIMENTS_MODELS
+	serverFilePath := shared.DIR_BASE + "/examples"
+	if remoteOperation == Fibonacci {
+		serverFileModel += "/FibonacciServer.model.go"
+		serverFilePath += "/fibonaccidistributed/server/server.go"
+	} else {
+		serverFileModel += "/SendFileServer.model.go"
+		serverFilePath += "/sendfiledistributed/server/server.go"
+	}
+	log.Println("Vai ler:", serverFileModel)
+	input, err := os.ReadFile(serverFileModel)
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	var output []byte
+	if transportProtocol.IsEvolutive() {
+		output = bytes.Replace(input, []byte("<evolutive.import>"), []byte("evolutive \"github.com/gfads/midarch/pkg/injector\""), -1)
+		output = bytes.Replace(output, []byte("<interval.between.injections>"), []byte("intervalBetweenInjections, _ := strconv.Atoi(shared.EnvironmentVariableValueWithDefault(\"INJECTION_INTERVAL\", \"120\"))"), -1)
+		evolutiveInjectionCode := []byte("evolutive.EvolutiveInjector{}.StartEvolutiveProtocolInjection(\"<protocol1>\", \"<protocol2>\", time.Duration(intervalBetweenInjections)*time.Second)")
+		protocol2, protocol1 := transportProtocol.getEvolutiveProtocols()
+		evolutiveInjectionCode = bytes.Replace(evolutiveInjectionCode, []byte("<protocol1>"), []byte(protocol1.getComponentName()), -1)
+		evolutiveInjectionCode = bytes.Replace(evolutiveInjectionCode, []byte("<protocol2>"), []byte(protocol2.getComponentName()), -1)
+		output = bytes.Replace(output, []byte("<evolutive.injection>"), evolutiveInjectionCode, -1)
+	} else {
+		output = bytes.Replace(input, []byte("<evolutive.import>"), []byte(""), -1)
+		output = bytes.Replace(output, []byte("<interval.between.injections>"), []byte(""), -1)
+		output = bytes.Replace(output, []byte("<evolutive.injection>"), []byte(""), -1)
+	}
+
+	log.Println("Vai escrever:", serverFilePath)
+	if err = os.WriteFile(serverFilePath, output, 0666); err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+}
+
 func generateDockerfile(app string, appFilePath string, goFilePath string, outputPath string) {
 	dockerfileModel := shared.DIR_EXPERIMENTS_MODELS + "/Dockerfile.model"
 	log.Println("Vai ler:", dockerfileModel)
@@ -164,7 +209,7 @@ func generateDockerfile(app string, appFilePath string, goFilePath string, outpu
 	}
 }
 
-func generateComposeFile(imageNameNamingServer string, imageNameServer string, imageNameClient string, specificEnvClient string, sampleSizeStr string, avarageWaitingTime string, outputPath string) {
+func generateComposeFile(imageNameNamingServer string, imageNameServer string, imageNameClient string, adaptationInterval int, specificEnvClient string, sampleSizeStr string, avarageWaitingTime string, outputPath string) {
 	dcModel := shared.DIR_EXPERIMENTS_MODELS + "/dc-experiment.model.yml"
 	log.Println("Vai ler:", dcModel)
 	input, err := os.ReadFile(dcModel)
@@ -175,6 +220,7 @@ func generateComposeFile(imageNameNamingServer string, imageNameServer string, i
 	output := bytes.Replace(input, []byte("<image.naming>"), []byte(imageNameNamingServer), -1)
 	output = bytes.Replace(output, []byte("<image.server>"), []byte(imageNameServer), -1)
 	output = bytes.Replace(output, []byte("<image.client>"), []byte(imageNameClient), -1)
+	output = bytes.Replace(output, []byte("<adaptation.interval>"), []byte(strconv.Itoa(adaptationInterval)), -1)
 	output = bytes.Replace(output, []byte("<specific.env.client>"), []byte(specificEnvClient), -1)
 	output = bytes.Replace(output, []byte("<sample.size>"), []byte(sampleSizeStr), -1)
 	output = bytes.Replace(output, []byte("<average.waiting.time>"), []byte(avarageWaitingTime), -1)
@@ -185,15 +231,15 @@ func generateComposeFile(imageNameNamingServer string, imageNameServer string, i
 	}
 }
 
-func RunFibonacciExperiment(transportProtocol TransportProtocolFactor, fiboPlace int, sampleSize int) {
-	RunExperiment(transportProtocol, Fibonacci, sampleSize, fiboPlace, "")
+func RunFibonacciExperiment(transportProtocol TransportProtocolFactor, adaptationInterval int, fiboPlace int, sampleSize int) {
+	RunExperiment(transportProtocol, adaptationInterval, Fibonacci, sampleSize, fiboPlace, "")
 }
 
-func RunSendFileExperiment(transportProtocol TransportProtocolFactor, imageSize string, sampleSize int) {
-	RunExperiment(transportProtocol, SendFile, sampleSize, 0, imageSize)
+func RunSendFileExperiment(transportProtocol TransportProtocolFactor, adaptationInterval int, imageSize string, sampleSize int) {
+	RunExperiment(transportProtocol, adaptationInterval, SendFile, sampleSize, 0, imageSize)
 }
 
-func RunExperiment(transportProtocolFactor TransportProtocolFactor, remoteOperation RemoteOperationFactor, sampleSize int, fiboPlace int, imageSize string) {
+func RunExperiment(transportProtocolFactor TransportProtocolFactor, adaptationInterval int, remoteOperation RemoteOperationFactor, sampleSize int, fiboPlace int, imageSize string) {
 	experimentVersion := "1.14.0"
 	experimentLevel := ""
 	if remoteOperation == Fibonacci {
@@ -201,19 +247,26 @@ func RunExperiment(transportProtocolFactor TransportProtocolFactor, remoteOperat
 	} else {
 		experimentLevel = imageSize
 	}
+	var adaptationIntervalFactor string
+	if transportProtocolFactor.IsEvolutive() {
+		adaptationIntervalFactor = "on" + strconv.Itoa(adaptationInterval) + "s"
+	} else {
+		adaptationIntervalFactor = "off"
+	}
 
-	baseExperimentDescription := "<remote.operation>:<version>-<transport.protocol>-<sample.size>"
+	baseExperimentDescription := "<remote.operation>:<version>-<transport.protocol>-<adaptation.interval>-<sample.size>"
 	baseExperimentDescription = strings.Replace(baseExperimentDescription, "<remote.operation>", remoteOperation.toString(), 1)
 	baseExperimentDescription = strings.Replace(baseExperimentDescription, "<version>", experimentVersion, 1)
 	baseExperimentDescription = strings.Replace(baseExperimentDescription, "<transport.protocol>", transportProtocolFactor.toString(), 1)
+	baseExperimentDescription = strings.Replace(baseExperimentDescription, "<adaptation.interval>", adaptationIntervalFactor, 1)
 	baseExperimentDescription = strings.Replace(baseExperimentDescription, "<sample.size>", strconv.Itoa(sampleSize), 1)
 	experimentDescription := baseExperimentDescription + "-" + experimentLevel
 
 	log.Println("Preparing experiment", experimentDescription)
 	log.Println("Building experiment")
 	log.Println()
-	ouputPath := buildExperiment(baseExperimentDescription, transportProtocolFactor, remoteOperation, sampleSize, fiboPlace, imageSize)
-	// return
+	ouputPath := buildExperiment(baseExperimentDescription, transportProtocolFactor, adaptationInterval, remoteOperation, sampleSize, fiboPlace, imageSize)
+	//return
 
 	for {
 		log.Println("Preparing to run", experimentDescription)
