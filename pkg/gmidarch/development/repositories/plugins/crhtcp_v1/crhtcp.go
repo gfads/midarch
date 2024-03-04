@@ -168,8 +168,9 @@ func (c CRHTCP) read(conn net.Conn, size []byte) ([]byte, error) {
 		return nil, err
 	}
 
+	// TODO dcruzb: validate if size is smaller than shared.MAX_PACKET_SIZE
 	// receive reply
-	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
+	msgFromServer := make([]byte, binary.LittleEndian.Uint32(size), binary.LittleEndian.Uint32(size))
 	_, err = conn.Read(msgFromServer)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err)

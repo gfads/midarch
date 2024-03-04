@@ -19,7 +19,7 @@ import (
 
 func main() {
 	// Wait for namingserver to get up
-	timeToRun, _ := strconv.Atoi(shared.EnvironmentVariableValueWithDefault("TIME_TO_START_SERVER", "0"))
+	timeToRun, _ := strconv.Atoi(shared.EnvironmentVariableValueWithDefault("TIME_TO_START_SERVER", "8"))
 	time.Sleep(time.Duration(timeToRun) * time.Second)
 
 	// Example setting environment variable MIDARCH_BUSINESS_COMPONENTS_PATH on code, may be set on system environment variables too

@@ -35,11 +35,13 @@ const (
 	TcpTls
 	RpcQuic
 	QuicHttp2
+	TcpHttp
+	TlsHttp2
 )
 
 func (kind TransportProtocolFactor) IsEvolutive() bool {
 	switch kind {
-	case UdpTcp, TcpTls, RpcQuic, QuicHttp2:
+	case UdpTcp, TcpTls, RpcQuic, QuicHttp2, TcpHttp, TlsHttp2:
 		return true
 	}
 	return false
@@ -55,6 +57,10 @@ func (kind TransportProtocolFactor) getEvolutiveProtocols() (TransportProtocolFa
 		return Rpc, Quic
 	case QuicHttp2:
 		return Quic, Http2
+	case TcpHttp:
+		return Tcp, Http
+	case TlsHttp2:
+		return Tls, Http2
 	}
 	panic("Kind get protocols using unlisted kind")
 }
@@ -91,6 +97,10 @@ func (kind TransportProtocolFactor) toString() string {
 		return "RpcQuic"
 	case QuicHttp2:
 		return "QuicHttp2"
+	case TcpHttp:
+		return "TcpHttp"
+	case TlsHttp2:
+		return "TlsHttp2"
 	}
 	panic("Kind conversion to string using unlisted kind")
 }
