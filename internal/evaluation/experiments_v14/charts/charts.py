@@ -62,8 +62,27 @@ def read_results_data(file_path):
   """
   header = ["dateTime", "sequential", "response_time"]
   print(file_path)
-  df = pd.read_csv(file_path, header=None, delimiter=" ", skiprows=1, names=header)
+
+  df = pd.read_csv(file_path, header=None, delimiter=" ", skiprows=101, names=header, na_values=["-"]) # 100 Warm-up requests + header
+
+
+  # # Definindo a largura da coluna fixa
+  # width_fixa = 19
+  # # Lendo a coluna fixa com `pd.read_fwf`
+  # df_fixa = pd.read_fwf(file_path, widths=[width_fixa], skiprows=1, header=None)
+  # # Lendo as demais colunas com `pd.read_csv`
+  # df_variavel = pd.read_csv(file_path, skiprows=1, header=None,  delimiter=" ", usecols=range(1, None))
+  # # Combinando as DataFrames
+  # df = pd.concat([df_fixa, df_variavel], axis=1)
+  # # Definindo nomes de colunas (opcional)
+  # df.columns = ["dateTime", "sequential", "response_time", ...]
+  # # Imprimindo o DataFrame
+  # print(df.to_string())
+
+
+
   df = df.dropna(subset=['sequential', 'response_time'])
+  print(df)
   df["dateTime"] = pd.to_datetime(df["dateTime"], format="mixed")
   df['duration'] = (df['dateTime'] - df['dateTime'].iloc[0]).dt.total_seconds()
   return df
@@ -107,7 +126,7 @@ def generate_lineplots_by_metric(df, experiment, app, metric, level):
   fig, ax = plt.subplots()
   metric_column = "memory_usage(%)" if metric == "memory" else "cpu_usage(%)"
   # df[["dateTime", "duration", "protocol", "memory_usage(%)", "cpu_usage(%)"]].to_csv("df.csv")
-  sns.lineplot(x="duration", y=metric_column, data=df, hue="protocol") #df[df["container_status"] == client_or_server]
+  sns.lineplot(x="duration", y=metric_column, data=df, hue="protocol")
   ax.set_xlabel("Duração (s)")
   ax.set_ylabel("% Memória Utilizada" if metric == "memory" else "% CPU Utilizado")
   ax.set_title(f"{experiment.capitalize()} - {app.capitalize()} - {metric.capitalize()} - {level}")
@@ -128,11 +147,12 @@ def generate_lineplots_by_response_time(df, experiment, level):
     Figura do Matplotlib com os lineplots.
   """
   fig, ax = plt.subplots()
-  sns.lineplot(x="duration", y="response_time", data=df, hue="protocol")
+  sns.lineplot(x="duration", y="response_time", data=df, hue="protocol", sort=False)
   ax.set_xlabel("Duração (s)")
   ax.set_ylabel("Tempo de Resposta (ms)")
+  # ax.set_ylim(bottom=0, top=max(df["response_time"]))
   ax.set_title(f"{experiment.capitalize()} - {level}")
-  # plt.show()
+  plt.show()
   return fig
 
 
@@ -149,7 +169,7 @@ def save_plots(fig, output_directory, experiment, app, metric, level, kind):
   """
   if not os.path.exists(output_directory):
     os.makedirs(output_directory)
-  file_name = f"{experiment}_{app}_{metric}_{level}_{kind}.png"
+  file_name = f"{experiment}_{level}_{app}_{metric}_{kind}.png"
   fig.savefig(os.path.join(output_directory, file_name))
 
 def main():
@@ -176,7 +196,7 @@ def main():
             print("experiment/level/app/metric/protocol:", experiment, "/", level, "/", app, "/", metric, "/", protocol)
             for experiment_directory in os.listdir(input_directory):
               # print(experiment_directory, experiment_directory.upper())
-              if experiment in experiment_directory and protocol in experiment_directory.upper() and level in experiment_directory:
+              if experiment in experiment_directory and "-"+protocol+"-" in experiment_directory.upper() and "-"+level in experiment_directory:
                 ############# Read Monitor Data #############
                 file_path = get_last_log_file(os.path.join(input_directory, experiment_directory), app, "monitor")
                 if file_path is None:
@@ -191,16 +211,20 @@ def main():
                   continue
 
                 ############# Read Results Data #############
-                file_path = get_last_log_file(os.path.join(input_directory, experiment_directory), app, "results")
-                if file_path is None:
-                  continue
-                df_experiment = read_results_data(file_path)
-                df_experiment["protocol"] = protocol
-                df_concat = pd.concat([df_results, df_experiment], ignore_index=True)
-                df_results = df_concat
+                # avoid executing this block twice for the same experiment
+                if metric == "memory" and app == "client":
+                  file_path = get_last_log_file(os.path.join(input_directory, experiment_directory), app, "results")
+                  if file_path is None:
+                    continue
+                  df_experiment = read_results_data(file_path)
+                  df_experiment["protocol"] = protocol
+                  df_concat = pd.concat([df_results, df_experiment], ignore_index=True)
+                  df_results = df_concat
 
-                if df_results.empty:
-                  continue
+                  if df_results.empty:
+                    continue
+
+
 
               # df["duration"] = calculate_duration(df)
               # df = df[df["duration"] > 0]
@@ -209,11 +233,13 @@ def main():
           save_plots(fig, output_directory, experiment, app, metric, level, kind="boxplot")
           plt.close()
           fig = generate_lineplots_by_metric(df_monitor, experiment, app, metric, level)
-          save_plots(fig, output_directory, experiment, app, metric, level, kind="lineplot_by_metric")
+          save_plots(fig, output_directory, experiment, app, metric, level, kind="lineplot")
           plt.close()
-          fig = generate_lineplots_by_response_time(df_results, experiment, level)
-          save_plots(fig, output_directory, experiment, app, metric, level, kind="lineplot_by_response_time")
-          plt.close()
+          if metric == "memory" and app == "client":
+            fig = generate_lineplots_by_response_time(df_results, experiment, level)
+            save_plots(fig, output_directory, experiment, app, "responsetime", level, kind="lineplot")
+            plt.close()
+
 
 if __name__ == "__main__":
     main()
