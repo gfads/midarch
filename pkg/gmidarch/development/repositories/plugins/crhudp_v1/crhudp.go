@@ -2,13 +2,14 @@ package crhudp
 
 import (
 	"encoding/binary"
+	"log"
+	"net"
+
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/middleware"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
 	evolutive "github.com/gfads/midarch/pkg/injector"
 	"github.com/gfads/midarch/pkg/shared"
-	"log"
-	"net"
 )
 
 // @Type: CRHUDP
@@ -102,6 +103,6 @@ func (c CRHUDP) read(err error, conn net.Conn, size []byte) []byte {
 }
 
 func (c CRHUDP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
-	miop := middleware.Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, _ := middleware.Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }

@@ -1,5 +1,4 @@
-Configuration FibonacciDistributedClientMid :=
-
+Configuration SendFileDistributedClientMid :=
    Components
       namingproxy       : Namingproxy
       sendfileproxy     : SendFileProxy

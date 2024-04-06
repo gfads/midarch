@@ -1,4 +1,4 @@
-Configuration FibonacciDistributedServerMid :=
+Configuration SendFileDistributedServerMid :=
   Components
       naming            : Namingproxy
       requestor         : Requestor

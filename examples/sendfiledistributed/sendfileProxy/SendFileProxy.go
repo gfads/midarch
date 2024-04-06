@@ -70,7 +70,7 @@ func (p SendFileProxy) SendFile(file []byte) bool {
 	_params := []interface{}{base64String}
 
 	// _functionalRequest := messages.FunctionalRequest{Op: "F", Params: _params}
-	_functionalRequest := messages.FunctionalRequest{Op: "U", Params: _params}              // TODO dcruzb: Test to get base64 image
+	_functionalRequest := messages.FunctionalRequest{Op: "U", Params: _params}
 	_msg := messages.Invocation{Endpoint: _endPoint, Functionalrequest: _functionalRequest} // Naming endpoint defined at architectural level
 
 	_samMsg := messages.SAMessage{Payload: _msg}

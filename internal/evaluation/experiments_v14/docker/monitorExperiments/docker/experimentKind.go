@@ -34,6 +34,7 @@ const (
 	UdpTcp
 	TcpTls
 	RpcQuic
+	RpcHttp
 	QuicHttp2
 	TcpHttp
 	TlsHttp2
@@ -41,7 +42,7 @@ const (
 
 func (kind TransportProtocolFactor) IsEvolutive() bool {
 	switch kind {
-	case UdpTcp, TcpTls, RpcQuic, QuicHttp2, TcpHttp, TlsHttp2:
+	case UdpTcp, TcpTls, RpcQuic, RpcHttp, QuicHttp2, TcpHttp, TlsHttp2:
 		return true
 	}
 	return false
@@ -55,6 +56,8 @@ func (kind TransportProtocolFactor) getEvolutiveProtocols() (TransportProtocolFa
 		return Tcp, Tls
 	case RpcQuic:
 		return Rpc, Quic
+	case RpcHttp:
+		return Rpc, Http
 	case QuicHttp2:
 		return Quic, Http2
 	case TcpHttp:
@@ -95,6 +98,8 @@ func (kind TransportProtocolFactor) toString() string {
 		return "TcpTls"
 	case RpcQuic:
 		return "RpcQuic"
+	case RpcHttp:
+		return "RpcHttp"
 	case QuicHttp2:
 		return "QuicHttp2"
 	case TcpHttp:

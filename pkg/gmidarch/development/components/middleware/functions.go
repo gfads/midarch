@@ -12,7 +12,10 @@ import (
 )
 
 func VerifyProtocolAdaptation(msgFromServer []byte, protocol generic.Protocol) (err error) {
-	if changeProtocol, miopPacket := isAdapt(msgFromServer); changeProtocol {
+	if changeProtocol, miopPacket, err := isAdapt(msgFromServer); changeProtocol {
+		if err != nil {
+			return err
+		}
 		lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
 		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
 		adaptToProtocol := miopPacket.Bd.ReqBody.Body[0].(string)
@@ -24,7 +27,10 @@ func VerifyProtocolAdaptation(msgFromServer []byte, protocol generic.Protocol) (
 }
 
 func VerifyAdaptation(msgFromServer []byte, sizeOfMsgSize []byte, conn net.Conn, send func(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error) (err error) {
-	if changeProtocol, miopPacket := isAdapt(msgFromServer); changeProtocol {
+	if changeProtocol, miopPacket, err := isAdapt(msgFromServer); changeProtocol {
+		if err != nil {
+			return err
+		}
 		lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
 		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
 		protocol := miopPacket.Bd.ReqBody.Body[0].(string)
@@ -36,7 +42,10 @@ func VerifyAdaptation(msgFromServer []byte, sizeOfMsgSize []byte, conn net.Conn,
 }
 
 func VerifyAdaptationQUIC(msgFromServer []byte, sizeOfMsgSize []byte, stream quic.Stream, send func(sizeOfMsgSize []byte, msgToServer []byte, stream quic.Stream) error) (err error) {
-	if changeProtocol, miopPacket := isAdapt(msgFromServer); changeProtocol {
+	if changeProtocol, miopPacket, err := isAdapt(msgFromServer); changeProtocol {
+		if err != nil {
+			return err
+		}
 		lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
 		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
 		protocol := miopPacket.Bd.ReqBody.Body[0].(string)
@@ -47,10 +56,10 @@ func VerifyAdaptationQUIC(msgFromServer []byte, sizeOfMsgSize []byte, stream qui
 	return nil
 }
 
-func isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
+func isAdapt(msgFromServer []byte) (bool, miop.MiopPacket, error) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
-	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
+	miop, err := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop, err
 }
 
 func confirmProtocolAdaptation(adaptId int, adaptToProtocol string, protocol generic.Protocol) (err error) {

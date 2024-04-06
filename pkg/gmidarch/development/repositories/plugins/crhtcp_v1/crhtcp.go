@@ -182,6 +182,10 @@ func (c CRHTCP) read(conn net.Conn, size []byte) ([]byte, error) {
 
 func (c CRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version 1 adapted")
-	miop := middleware.Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, err := middleware.Jsonmarshaller{}.Unmarshall(msgFromServer)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err.Error())
+		return false, miop
+	}
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }

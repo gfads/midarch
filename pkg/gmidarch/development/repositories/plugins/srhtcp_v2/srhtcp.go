@@ -254,6 +254,6 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 
 func (s SRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	miop := middleware.Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, _ := middleware.Jsonmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }

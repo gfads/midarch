@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"os"
@@ -19,6 +20,7 @@ import (
 func main() {
 	// Wait for namingserver and server to get up
 	timeToRun, _ := strconv.Atoi(shared.EnvironmentVariableValueWithDefault("TIME_TO_START_CLIENT", "13"))
+	lib.PrintlnDebug("Waiting", timeToRun, "seconds for naming server and server to get up")
 	time.Sleep(time.Duration(timeToRun) * time.Second)
 
 	// Example setting environment variable MIDARCH_BUSINESS_COMPONENTS_PATH on code, may be set on system environment variables too
@@ -32,11 +34,11 @@ func main() {
 		SAMPLE_SIZE, _ = strconv.Atoi(os.Args[2])
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(os.Args[3])
 	} else {
-		FILE_SIZE = shared.EnvironmentVariableValueWithDefault("FILE_SIZE", "sm")
-		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("SAMPLE_SIZE", "1000"))
+		FILE_SIZE = shared.EnvironmentVariableValueWithDefault("FILE_SIZE", "md")
+		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("SAMPLE_SIZE", "100"))
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("AVERAGE_WAITING_TIME", "60"))
 	}
-	fmt.Println("FILE_SIZE / SAMPLE_SIZE / AVERAGE_WAITING_TIME:", FILE_SIZE, "/", SAMPLE_SIZE, "/", AVERAGE_WAITING_TIME)
+	fmt.Println("dateTime;info;sequential;response_time") //"FILE_SIZE / SAMPLE_SIZE / AVERAGE_WAITING_TIME:", FILE_SIZE, "/", SAMPLE_SIZE, "/", AVERAGE_WAITING_TIME)
 
 	fe := frontend.NewFrontend()
 
@@ -83,7 +85,8 @@ func main() {
 			duration := t2.Sub(t1)
 			if r {
 				ok = true
-				lib.PrintlnMessage(x+1, float64(duration.Nanoseconds())/1000000)
+				// lib.PrintlnMessage(x+1, float64(duration.Nanoseconds())/1000000)
+				log.Printf(";ok;%d;%f\n", x+1, float64(duration.Nanoseconds())/1000000)
 			}
 
 			// Normally distributed waiting time between calls with an average of 60 milliseconds and standard deviation of 20 milliseconds

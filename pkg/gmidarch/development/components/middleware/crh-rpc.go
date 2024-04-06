@@ -55,8 +55,7 @@ func (c CRHRPC) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 	addr := host + ":" + port
 	var err error
-	//fmt.Println("Vai conectar", crhInfo.Conns[addr])
-	lib.PrintlnDebug("Vai conectar", crhInfo.Conns[addr])
+	lib.PrintlnDebug("Will connect", crhInfo.Conns[addr])
 	if _, ok := crhInfo.Protocols[addr]; !ok || reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name() != "RPC" { // no connection open yet
 		lib.PrintlnDebug("Try to connect", crhInfo.Protocols[addr])
 		if ok {
@@ -75,6 +74,7 @@ func (c CRHRPC) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		crhInfo.Protocols[addr].CloseConnection()
 		crhInfo.Protocols[addr] = nil
 		delete(crhInfo.Protocols, addr)
+		// lib.SHOW_MESSAGES = append(lib.SHOW_MESSAGES, lib.DEBUG)
 		return
 	}
 	lib.PrintlnDebug("Sent message", crhInfo.Protocols[addr])

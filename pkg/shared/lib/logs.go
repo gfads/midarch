@@ -66,7 +66,7 @@ func Println(messageLevel DebugLevel, message ...interface{}) {
 			switch messageLevel {
 			case INFO:
 				var logs []interface{}
-				logs = append(logs, "- \"", file+":"+strconv.Itoa(line), "- INFO -")
+				logs = append(logs, ";\"", file+":"+strconv.Itoa(line), "- INFO -")
 				logs = append(logs, message...)
 				logs = append(logs, "\"")
 				log.Println(logs...)
@@ -78,7 +78,7 @@ func Println(messageLevel DebugLevel, message ...interface{}) {
 			case MESSAGE:
 				log.Println(message...)
 			case ERROR:
-				log.Println("- \"", file+":"+strconv.Itoa(line), "***** ERROR *****", message, "\"")
+				log.Println(";\"", file+":"+strconv.Itoa(line), "***** ERROR *****", message, "\"")
 			}
 		}
 	}

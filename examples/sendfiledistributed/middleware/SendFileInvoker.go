@@ -17,6 +17,9 @@ func (SendFileInvoker) I_Beforeunmarshalling(id string, msg *messages.SAMessage,
 }
 
 func (SendFileInvoker) I_Beforeserver(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
+	if msg.Payload.(messages.FunctionalReply).Rep == nil {
+		shared.ErrorHandler(shared.GetFunction(), "Payload is nil")
+	}
 	miopPacket := msg.Payload.(messages.FunctionalReply).Rep.(miop.MiopPacket) // from marshaller
 
 	req := messages.FunctionalRequest{Op: miopPacket.Bd.ReqHeader.Operation, Params: miopPacket.Bd.ReqBody.Body}

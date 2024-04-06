@@ -190,12 +190,20 @@ func (s SRHQUIC) handler(info *interface{}, connectionIndex int) {
 
 func (s SRHQUIC) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHQUIC Version Not adapted")
-	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, err := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err.Error())
+		return false, miop
+	}
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }
 
 func (s SRHQUIC) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHQUIC Version Not adapted")
-	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, err := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err.Error())
+		return false, miop
+	}
 	return miop.Bd.ReqHeader.Operation == "Connect", miop
 }

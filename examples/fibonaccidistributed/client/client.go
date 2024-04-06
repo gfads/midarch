@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"os"
@@ -19,6 +20,7 @@ import (
 func main() {
 	// Wait for namingserver and server to get up
 	timeToRun, _ := strconv.Atoi(shared.EnvironmentVariableValueWithDefault("TIME_TO_START_CLIENT", "13"))
+	lib.PrintlnDebug("Waiting", timeToRun, "seconds for naming server and server to get up")
 	time.Sleep(time.Duration(timeToRun) * time.Second)
 
 	// Example setting environment variable MIDARCH_BUSINESS_COMPONENTS_PATH on code, may be set on system environment variables too
@@ -35,7 +37,7 @@ func main() {
 		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("SAMPLE_SIZE", "10000"))
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("AVERAGE_WAITING_TIME", "60"))
 	}
-	fmt.Println("FIBONACCI_PLACE / SAMPLE_SIZE / AVERAGE_WAITING_TIME:", n, "/", SAMPLE_SIZE, "/", AVERAGE_WAITING_TIME)
+	fmt.Println("dateTime;info;sequential;response_time") //"FIBONACCI_PLACE / SAMPLE_SIZE / AVERAGE_WAITING_TIME:", n, "/", SAMPLE_SIZE, "/", AVERAGE_WAITING_TIME)
 
 	fe := frontend.NewFrontend()
 
@@ -78,7 +80,8 @@ func main() {
 			duration := t2.Sub(t1)
 			if r != 0 {
 				ok = true
-				lib.PrintlnMessage(x+1, float64(duration.Nanoseconds())/1000000)
+				//lib.PrintlnMessage(";" + strconv.Itoa(x+1) + ";" + strconv.FormatFloat(float64(duration.Nanoseconds())/1000000, 'f', -1, 64))
+				log.Printf(";ok;%d;%f\n", x+1, float64(duration.Nanoseconds())/1000000)
 			}
 
 			// Normally distributed waiting time between calls with an average of 60 milliseconds and standard deviation of 20 milliseconds

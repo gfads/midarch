@@ -1,5 +1,4 @@
 Configuration FibonacciDistributedClientMid :=
-
    Components
       namingproxy       : Namingproxy
       fibonacciproxy    : FibonacciProxy

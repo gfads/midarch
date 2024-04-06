@@ -89,17 +89,22 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 				delete(crhInfo.Conns, addr)
 				return
 			}
-			if isNewConnection, miopPacket := c.isNewConnection(msgFromServer); isNewConnection {
+			if isNewConnection, miopPacket, err := c.isNewConnection(msgFromServer); isNewConnection {
 				if miopPacket.Bd.ReqBody.Body[1] == "Ok" {
 					break
+				}
+				if err != nil {
+					*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
+					crhInfo.Conns[addr].Close()
+					crhInfo.Conns[addr] = nil
+					delete(crhInfo.Conns, addr)
+					return
 				}
 			}
 			//}
 		}
 	}
 	lib.PrintlnDebug("Connected", crhInfo.Protocols[addr])
-
-	// send message's size
 
 	err = crhInfo.Protocols[addr].Send(msgToServer)
 	if err != nil {
@@ -122,12 +127,20 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		return
 	}
 	lib.PrintlnDebug("Received message", crhInfo.Protocols[addr])
-	VerifyProtocolAdaptation(msgFromServer, crhInfo.Protocols[addr])
+	err = VerifyProtocolAdaptation(msgFromServer, crhInfo.Protocols[addr])
+	if err != nil {
+		lib.PrintlnError("Error verifying adaptation:", err.Error())
+		*msg = messages.SAMessage{Payload: nil} // TODO dcruzb: adjust message
+		crhInfo.Protocols[addr].CloseConnection()
+		crhInfo.Protocols[addr] = nil
+		delete(crhInfo.Protocols, addr)
+		return
+	}
 	lib.PrintlnDebug("Adaptation Verified", crhInfo.Protocols[addr])
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
 
-func (c CRHUDP) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
-	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
-	return miop.Bd.ReqHeader.Operation == "Connect", miop
+func (c CRHUDP) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket, error) {
+	miop, err := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	return miop.Bd.ReqHeader.Operation == "Connect", miop, err
 }

@@ -187,6 +187,8 @@ type UDP struct {
 }
 
 func (st *UDP) StartServer(ip, port string, initialConnections int) {
+	st.ip = ip
+	st.port = port
 	servAddr, err := net.ResolveUDPAddr("udp4", ip+":"+port)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err.Error())
@@ -373,11 +375,23 @@ func (st *UDP) Send(msgToServer []byte) error {
 
 		fragmentedMessage = fragmentedMessage[fragmentSize:]
 		if len(fragmentedMessage) > 0 {
-			ackBuffer := make([]byte, 3, 3)
+			ackBuffer := make([]byte, 3)
 			_, err := st.serverConnection.Read(ackBuffer)
-			if err != nil || string(ackBuffer) != "ack" {
-				lib.PrintlnError("Error while reading message. Error:", err)
-				return err
+			if err != nil || (strings.TrimSpace(string(ackBuffer)) != "ack" && strings.TrimSpace(string(ackBuffer)) != "ok") {
+				lib.PrintlnError("Error while reading message. ackBuffer: '"+strings.TrimSpace(string(ackBuffer))+"'. Error:", err)
+				if err != nil {
+					return err
+				} else {
+					// if the message is not an error, and not the expected info, then reads again to get one more byte, should be the message size
+					sizeaux := make([]byte, 30)
+					_, err := st.serverConnection.Read(sizeaux)
+					if err != nil {
+						return err
+					}
+					msgSize := ackBuffer
+					msgSize = append(msgSize, sizeaux[0])
+					lib.PrintlnError("msgSize: '" + strings.TrimSpace(string(msgSize)))
+				}
 			}
 		} else {
 			break
