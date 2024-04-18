@@ -136,7 +136,7 @@ def generate_boxplots(df, experiment, app, metric, level):
   fig.set_size_inches(14, 8)
   metric_column = "memory_usage(%)" if metric == "memory" else "cpu_usage(%)"
   # df[["dateTime", "duration", "protocol", "memory_usage(%)", "cpu_usage(%)"]].to_csv("df.csv")
-  sns.boxplot(x="protocol", y=metric_column, data=df, ax=ax)
+  sns.boxplot(x="protocol", y=metric_column, data=df, ax=ax, showfliers=False)
   ax.set_xlabel("Protocolo")
   ax.set_ylabel("% Memória Utilizada" if metric == "memory" else "% CPU Utilizado")
   ax.set_title(f"{experiment.capitalize()} - {app.capitalize()} - {metric.capitalize()} - {level}")
@@ -188,7 +188,7 @@ def generate_lineplots_by_response_time(df, experiment, level):
   fig, ax = plt.subplots()
   fig.set_size_inches(14, 8)
   # sns.lineplot(x="duration", y="response_time", data=df, hue="protocol", sort=False)
-  sns.boxplot(x="protocol", y="response_time", data=df, ax=ax)
+  sns.boxplot(x="protocol", y="response_time", data=df, ax=ax, showfliers=False)
   ax.set_xlabel("Duração (s)")
   ax.set_ylabel("Tempo de Resposta (ms)")
   # ax.set_ylim(bottom=0, top=max(df["response_time"]))
@@ -219,13 +219,13 @@ def main():
   """
   Função principal que gera os boxplots para os experimentos.
   """
-  input_directory = "../results20240403-AllExecutedOk"
+  input_directory = "../results" #20240403-AllExecutedOk"
   output_directory = "./charts"
 
   experiments = ["Fibonacci", "SendFile"]
   fibonacci_levels = ["2", "11", "38"]
   sendfile_levels = ["sm", "md", "lg"]
-  protocols = ["UDP", "TCP", "TLS", "RPC", "QUIC", "HTTP", "HTTPS", "HTTP2", "TCPTLS", "RPCHTTP", "TCPHTTP", "TLSHTTP2"]
+  protocols = ["UDP", "TCP", "TLS", "RPC", "QUIC", "HTTP", "HTTPS", "HTTP2", "TCPTLS", "RPCHTTP", "TCPHTTP", "TLSHTTP2", "E_RPC", "E_GRPC", "E_RMQ"]
   metrics = ["memory", "cpu"]
   apps = ["client", "server"]
   for experiment in experiments:

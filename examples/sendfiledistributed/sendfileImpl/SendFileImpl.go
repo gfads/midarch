@@ -29,7 +29,7 @@ func (SendFile) Save(base64File string) bool {
 }
 
 // Calculate Fibonacci Number based on RPC function signature, where r is the return of the function
-func (f SendFile) FiboRPC(n int, r *int) error {
-	*r = f.F(n)
+func (s SendFile) UploadRPC(base64File string, r *bool) error {
+	*r = s.Save(base64File)
 	return nil
 }

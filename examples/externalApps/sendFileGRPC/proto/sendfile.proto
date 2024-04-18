@@ -1,0 +1,16 @@
+syntax = "proto3";
+option go_package = "github.com/gfads/midarch/examples/externalApps/sendFileGRPC/sendfile";
+
+package sendfile;
+
+message Request {
+    string base64File = 1;
+}
+
+message Response {
+    bool saved = 1;
+}
+
+service SendFileService {
+    rpc Upload(Request) returns (Response) {}
+}
