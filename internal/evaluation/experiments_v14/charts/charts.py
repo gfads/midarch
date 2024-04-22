@@ -140,6 +140,9 @@ def generate_boxplots(df, experiment, app, metric, level):
   ax.set_xlabel("Protocolo")
   ax.set_ylabel("% Memória Utilizada" if metric == "memory" else "% CPU Utilizado")
   ax.set_title(f"{experiment.capitalize()} - {app.capitalize()} - {metric.capitalize()} - {level}")
+  plt.xticks(rotation=45)
+  plt.tight_layout()
+
   # plt.show()
   return fig
 
@@ -167,6 +170,9 @@ def generate_lineplots_by_metric(df, experiment, app, metric, level):
   ax.set_ylabel("% Memória Utilizada" if metric == "memory" else "% CPU Utilizado")
   ax.set_title(f"{experiment.capitalize()} - {app.capitalize()} - {metric.capitalize()} - {level}")
   plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+  plt.xticks(rotation=45)
+  plt.tight_layout()
+
   # plt.show()
   return fig
 
@@ -193,6 +199,12 @@ def generate_lineplots_by_response_time(df, experiment, level):
   ax.set_ylabel("Tempo de Resposta (ms)")
   # ax.set_ylim(bottom=0, top=max(df["response_time"]))
   ax.set_title(f"{experiment.capitalize()} - {level}")
+
+  # Rotate legend
+  plt.legend(loc='upper right', bbox_to_anchor=(1.25, 1), ncol=1)
+  plt.xticks(rotation=45) 
+  plt.tight_layout()
+  
   # plt.show()
   return fig
 
@@ -213,7 +225,7 @@ def save_plots(fig, output_directory, experiment, app, metric, level, kind):
   if not os.path.exists(output_directory):
     os.makedirs(output_directory)
   file_name = f"{experiment}_{level}_{app}_{metric}_{kind}.png"
-  fig.savefig(os.path.join(output_directory, file_name))
+  fig.savefig(os.path.join(output_directory, file_name), bbox_inches='tight', pad_inches=0.1)
 
 def main():
   """
@@ -247,7 +259,7 @@ def main():
                 if not validate_file(file_path, "monitor"):
                   continue
                 df_experiment = read_monitor_data(file_path)
-                df_experiment["protocol"] = protocol
+                df_experiment["protocol"] = protocol if "off" in experiment_directory else protocol + "-120s" if "on120s" in experiment_directory else protocol + "-300s"
                 #   df_monitor = df_monitor.append(df_experiment)
                 df_concat = pd.concat([df_monitor, df_experiment], ignore_index=True)
                 df_monitor = df_concat
@@ -264,7 +276,7 @@ def main():
                   if not validate_file(file_path, "results"):
                     continue
                   df_experiment = read_results_data(file_path)
-                  df_experiment["protocol"] = protocol
+                  df_experiment["protocol"] = protocol if "off" in experiment_directory else protocol + "-120s" if "on120s" in experiment_directory else protocol + "-300s"
                   df_concat = pd.concat([df_results, df_experiment], ignore_index=True)
                   df_results = df_concat
 

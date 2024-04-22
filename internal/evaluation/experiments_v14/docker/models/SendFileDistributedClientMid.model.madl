@@ -18,5 +18,5 @@ Configuration SendFileDistributedClientMid :=
       requestor, t3, crh
 
    Adaptability
-      Evolutive_Protocol
+      None
 EndConf

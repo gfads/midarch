@@ -1,5 +1,5 @@
 Configuration SendFileDistributedServerMid :=
-  Components
+   Components
       naming            : Namingproxy
       requestor         : Requestor
       sendfileinvoker   : SendFileInvoker
@@ -23,6 +23,5 @@ Configuration SendFileDistributedServerMid :=
         sendfileinvoker,t5,marshaller2
 
    Adaptability
-      Evolutive_Protocol
-
+      None
 EndConf

@@ -3,7 +3,7 @@ Configuration naming :=
          server     : Namingserver
          finvoker   : Naminginvoker
          marshaller : Jsonmarshaller
-         srh        : SRHQUIC
+         srh        : SRHUDP
 
       Connectors
          t1 : Requestreply

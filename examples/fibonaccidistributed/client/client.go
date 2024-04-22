@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciProxy"
-	"github.com/gfads/midarch/pkg/gmidarch/development/components/proxies/namingproxy"
+	"github.com/gfads/midarch/pkg/gmidarch/development/generic"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/execution/frontend"
 	"github.com/gfads/midarch/pkg/shared"
@@ -45,7 +45,7 @@ func main() {
 	// The order of Ip/hosts must the same as one in which
 	// these elements appear in the configuration
 	args := make(map[string]messages.EndPoint)
-	args["crh"] = messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
+	args["crh"] = messages.EndPoint{Host: shared.CALCULATOR_HOST, Port: shared.CALCULATOR_PORT}
 
 	// Deploy configuration
 	fe.Deploy(frontend.DeployOptions{
@@ -55,24 +55,30 @@ func main() {
 			"FibonacciProxy": &fibonacciProxy.FibonacciProxy{},
 		}})
 
-	// proxy to naming service
-	endPoint := messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
-	namingProxy := namingproxy.NewNamingproxy(endPoint)
+	// // proxy to naming service
+	// endPoint := messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
+	// namingProxy := namingproxy.NewNamingproxy(endPoint)
 
-	aux, ok := namingProxy.Lookup("Fibonacci")
-	if !ok {
-		shared.ErrorHandler(shared.GetFunction(), "Service 'Fibonacci' not found in Naming Service")
-	}
+	// aux, ok := namingProxy.Lookup("Fibonacci")
+	// if !ok {
+	// 	shared.ErrorHandler(shared.GetFunction(), "Service 'Fibonacci' not found in Naming Service")
+	// }
 
-	fibonacci := aux.(*fibonacciProxy.FibonacciProxy)
+	// fibonacci := aux.(*fibonacciProxy.FibonacciProxy)
+
+	fibonacci := &fibonacciProxy.FibonacciProxy{}
+	proxyConfig := generic.ProxyConfig{Host: shared.CALCULATOR_HOST, Port: shared.CALCULATOR_PORT}
+	fibonacci.Configure(proxyConfig)
+	time.Sleep(2 * time.Second)
 
 	rand.Seed(time.Now().UnixNano())
 	for x := 0; x < SAMPLE_SIZE; x++ {
 		ok := false
 		for !ok {
 			t1 := time.Now()
-			//fmt.Println("Result:", fibonacci.F(n))
+			// fmt.Println("Before call Fibonacci F(n):", n)
 			r := fibonacci.F(n)
+			// fmt.Println("After call Fibonacci F(n):", n, "Result:", r)
 			//time.Sleep(200 * time.Millisecond)
 
 			t2 := time.Now()

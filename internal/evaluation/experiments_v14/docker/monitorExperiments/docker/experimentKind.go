@@ -48,6 +48,10 @@ func (kind TransportProtocolFactor) IsEvolutive() bool {
 	return false
 }
 
+func (kind TransportProtocolFactor) IsMidArch() bool {
+	return !(kind == E_Rpc || kind == E_Grpc || kind == E_Rmq)
+}
+
 func (kind TransportProtocolFactor) getEvolutiveProtocols() (TransportProtocolFactor, TransportProtocolFactor) {
 	switch kind {
 	case UdpTcp:
