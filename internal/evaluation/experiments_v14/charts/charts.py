@@ -76,7 +76,8 @@ def read_monitor_data(file_path):
   Returns:
     DataFrame do Pandas com os dados do experimento.
   """
-  df = pd.read_csv(file_path, delimiter=";")
+  #header = ["dateTime", "container_name", "container_status", "used_memory(MB)", "available_memory(MB)", "memory_usage(%)", "cpu_delta", "system_cpu_delta", "number_cpus", "cpu_usage(%)", "total_cpu_usage", "pre_total_cpu_usage"]
+  df = pd.read_csv(file_path, delimiter=";") #, skiprows=101, header=None, names=header) # 101 = 100 Warm-up requests + header
   df["dateTime"] = pd.to_datetime(df["dateTime"], format="mixed")
   df['duration'] = (df['dateTime'] - df['dateTime'].iloc[0]).dt.total_seconds()
   return df
@@ -94,7 +95,7 @@ def read_results_data(file_path):
   header = ["dateTime", "info", "sequential", "response_time"]
   # print(file_path)
 
-  df = pd.read_csv(file_path, header=None, delimiter=";", skiprows=101, names=header, na_values=["-"]) # 101 = 100 Warm-up requests + header
+  df = pd.read_csv(file_path, delimiter=";", skiprows=101, header=None, names=header, na_values=["-"]) # 101 = 100 Warm-up requests + header
 
 
   # # Definindo a largura da coluna fixa
@@ -139,7 +140,7 @@ def generate_boxplots(df, experiment, app, metric, level):
   sns.boxplot(x="protocol", y=metric_column, data=df, ax=ax, showfliers=False)
   ax.set_xlabel("Protocolo")
   ax.set_ylabel("% Memória Utilizada" if metric == "memory" else "% CPU Utilizado")
-  ax.set_title(f"{experiment.capitalize()} - {app.capitalize()} - {metric.capitalize()} - {level}")
+  ax.set_title(f"{experiment.capitalize()} - {"Cliente" if app == "client" else "Servidor"} - {"Memória" if metric == "memory" else "CPU"} - {level}")
   plt.xticks(rotation=45)
   plt.tight_layout()
 
@@ -168,7 +169,7 @@ def generate_lineplots_by_metric(df, experiment, app, metric, level):
   sns.lineplot(x="duration", y=metric_column, data=df, hue="protocol")
   ax.set_xlabel("Duração (s)")
   ax.set_ylabel("% Memória Utilizada" if metric == "memory" else "% CPU Utilizado")
-  ax.set_title(f"{experiment.capitalize()} - {app.capitalize()} - {metric.capitalize()} - {level}")
+  ax.set_title(f"{experiment.capitalize()} - {"Cliente" if app == "client" else "Servidor"} - {"Memória" if metric == "memory" else "CPU"} - {level}")
   plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
   plt.xticks(rotation=45)
   plt.tight_layout()
@@ -224,8 +225,8 @@ def save_plots(fig, output_directory, experiment, app, metric, level, kind):
     return
   if not os.path.exists(output_directory):
     os.makedirs(output_directory)
-  file_name = f"{experiment}_{level}_{app}_{metric}_{kind}.png"
-  fig.savefig(os.path.join(output_directory, file_name), bbox_inches='tight', pad_inches=0.1)
+  file_name = f"{experiment}_{level}_{app}_{metric}_{kind}.svg"
+  fig.savefig(os.path.join(output_directory, file_name), bbox_inches='tight', pad_inches=0.1, format='svg')
 
 def main():
   """
