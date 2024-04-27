@@ -96,7 +96,7 @@ func (cl *TCPClient) Read(b []byte) (n int, err error) {
 }
 
 func (cl *TCPClient) Receive() (fullMessage []byte, err error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	// receive reply's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	cl.Read(size)
@@ -146,7 +146,7 @@ func (cl *TCPClient) Receive() (fullMessage []byte, err error) {
 }
 
 func (cl *TCPClient) Send(msg []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msg)))
 	_, err := cl.connection.Write(sizeOfMsgSize)
@@ -223,7 +223,7 @@ func (st *TCP) ConnectToServer(ip, port string) {
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
-	lib.PrintlnDebug("Resolved addr", tcpAddr)
+	// lib.PrintlnDebug("Resolved addr", tcpAddr)
 	//localTcpAddr := c.getLocalTcpAddr()
 
 	for {
@@ -237,11 +237,11 @@ func (st *TCP) ConnectToServer(ip, port string) {
 			break
 		}
 	}
-	lib.PrintlnDebug("Connected", st.serverConnection)
+	// lib.PrintlnDebug("Connected", st.serverConnection)
 	if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 		//lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 		shared.LocalAddr = st.serverConnection.LocalAddr().String()
-		lib.PrintlnDebug("Got local addr", st.serverConnection)
+		// lib.PrintlnDebug("Got local addr", st.serverConnection)
 	}
 }
 
@@ -324,12 +324,12 @@ func (st *TCP) Receive() ([]byte, error) {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "TCP read message")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "TCP read message")
 	return msgFromServer, nil
 }
 
 func (st *TCP) Send(msgToServer []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
 	_, err := st.serverConnection.Write(sizeOfMsgSize)

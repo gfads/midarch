@@ -65,7 +65,7 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 			go s.handler(info, availableConenctionIndex)
 		}
 	}()
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version Not adapted")
 	return
 }
 
@@ -84,14 +84,14 @@ func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
-			lib.PrintlnDebug("SRHTCP Version Not adapted: tempMsgReceived", tempMsgReceived)
-			lib.PrintlnDebug("SRHTCP Version Not adapted: tempMsgReceived.Conn", tempMsgReceived.Conn)
+			// lib.PrintlnDebug("SRHTCP Version Not adapted: tempMsgReceived", tempMsgReceived)
+			// lib.PrintlnDebug("SRHTCP Version Not adapted: tempMsgReceived.Conn", tempMsgReceived.Conn)
 			if tempMsgReceived.Conn == nil { // TODO dcruzb: Change to Protocol.Client
 				*reset = true
 				return
 			}
-			if isNewConnection, miopPacket := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
-				lib.PrintlnDebug("SRHTCP Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
+			if isNewConnection, _ := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
+				// lib.PrintlnDebug("SRHTCP Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
 				*reset = true
 				return
 			}
@@ -104,21 +104,21 @@ func (s SRHTCP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 		}
 	}
 
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version Not adapted")
 	return
 }
 
 func (s SRHTCP) I_Send(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHTCP Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
-	lib.PrintlnDebug("msg.ToAddr", msg.ToAddr)
+	// lib.PrintlnDebug("msg.ToAddr", msg.ToAddr)
 	client := srhInfo.Protocol.GetClientFromAddr(msg.ToAddr)
 	if client == nil {
 		*reset = true
 		return
 	}
-	lib.PrintlnDebug("SRHTCP Version Not adapted   >>>>> TCP => msg.ToAddr:", msg.ToAddr, "TCP Client:", client) //, "AdaptId:", client.AdaptId) // TODO dcruzb: verify impact of removing AdaptId
+	// lib.PrintlnDebug("SRHTCP Version Not adapted   >>>>> TCP => msg.ToAddr:", msg.ToAddr, "TCP Client:", client) //, "AdaptId:", client.AdaptId) // TODO dcruzb: verify impact of removing AdaptId
 	msgTemp := msg.Payload.([]byte)
 
 	err := client.Send(msgTemp)
@@ -128,12 +128,12 @@ func (s SRHTCP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 
 	// update info
 	*info = srhInfo
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version Not adapted")
 	return
 }
 
 func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHTCP Version Not adapted")
 
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
@@ -145,7 +145,7 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 		if !*executeForever {
 			break
 		}
-		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR", "SRHTCP Version Not adapted")
+		// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR", "SRHTCP Version Not adapted")
 
 		msg, err := client.Receive()
 		if err != nil {
@@ -157,19 +157,19 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 
 		if changeProtocol, miopPacket := s.isAdapt(msg); changeProtocol {
 			if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
-				lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHTCP Version Not adapted")
+				// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHTCP Version Not adapted")
 				break
 			}
 		}
 		if isNewConnection, _ := s.isNewConnection(msg); isNewConnection { // TODO dcruzb: move to I_Receive
 			//newConnection = true
-			lib.PrintlnDebug("TCP Is New Connection")
+			// lib.PrintlnDebug("TCP Is New Connection")
 			//miopPacket := miop.CreateReqPacket("Connect", []interface{}{miopPacket.Bd.ReqBody.Body[0], "Ok"}, miopPacket.Bd.ReqBody.Body[0].(int)) // idx is the Connection ID
 			//msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
 
-			lib.PrintlnDebug("TCP Before send")
+			// lib.PrintlnDebug("TCP Before send")
 			//s.send(conn, addr, msgPayload)
-			lib.PrintlnDebug("TCP After send")
+			// lib.PrintlnDebug("TCP After send")
 			//if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
 			//	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHUDP Version Not adapted")
 			//	break
@@ -181,12 +181,12 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 			break
 		}
 		rcvMessage := messages.ReceivedMessages{Msg: msg, Conn: srhInfo.Protocol.GetClient(connectionIndex).Connection().(net.Conn), ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
-		lib.PrintlnDebug("SRHTCP Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+		// lib.PrintlnDebug("SRHTCP Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 
 		srhInfo.RcvedMessages <- rcvMessage
-		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHTCP Version Not adapted")
+		// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHTCP Version Not adapted")
 	}
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTCP Version Not adapted")
 }
 
 func (s SRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {

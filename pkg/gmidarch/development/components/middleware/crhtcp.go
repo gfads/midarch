@@ -5,7 +5,6 @@ import (
 
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/development/protocols"
-	"github.com/gfads/midarch/pkg/shared"
 	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
@@ -30,7 +29,7 @@ type CRHTCP struct{}
 // }
 
 func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	infoTemp := *info
 	crhInfo := infoTemp.(messages.CRHInfo)
 
@@ -56,17 +55,17 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 	addr := host + ":" + port
 	var err error
 	//fmt.Println("Will connect", crhInfo.Protocols[addr])
-	lib.PrintlnDebug("Will connect", crhInfo.Protocols[addr])
+	// lib.PrintlnDebug("Will connect", crhInfo.Protocols[addr])
 	if _, ok := crhInfo.Protocols[addr]; !ok || reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name() != "TCP" { // no connection open yet
-		lib.PrintlnDebug("Try to connect", crhInfo.Protocols[addr])
+		// lib.PrintlnDebug("Try to connect", crhInfo.Protocols[addr])
 		if ok {
-			lib.PrintlnDebug("ElemName", reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name())
+			// lib.PrintlnDebug("ElemName", reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name())
 			crhInfo.Protocols[addr].CloseConnection()
 		}
 		crhInfo.Protocols[addr] = &protocols.TCP{}
 		crhInfo.Protocols[addr].ConnectToServer(host, port)
 	}
-	lib.PrintlnDebug("Connected", crhInfo.Protocols[addr])
+	// lib.PrintlnDebug("Connected", crhInfo.Protocols[addr])
 
 	// send message's size
 
@@ -79,7 +78,7 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		delete(crhInfo.Protocols, addr)
 		return
 	}
-	lib.PrintlnDebug("Sent message", crhInfo.Protocols[addr])
+	// lib.PrintlnDebug("Sent message", crhInfo.Protocols[addr])
 
 	msgFromServer, err := crhInfo.Protocols[addr].Receive()
 	if err != nil {
@@ -90,8 +89,8 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		delete(crhInfo.Protocols, addr)
 		return
 	}
-	lib.PrintlnDebug("Received message", crhInfo.Protocols[addr])
+	// lib.PrintlnDebug("Received message", crhInfo.Protocols[addr])
 	VerifyProtocolAdaptation(msgFromServer, crhInfo.Protocols[addr])
-	lib.PrintlnDebug("Adaptation Verified", crhInfo.Protocols[addr])
+	// lib.PrintlnDebug("Adaptation Verified", crhInfo.Protocols[addr])
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }

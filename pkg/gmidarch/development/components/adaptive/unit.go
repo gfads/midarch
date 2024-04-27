@@ -73,7 +73,7 @@ func (u Unit) I_Initialiseunit(id string, msg *messages.SAMessage, info *interfa
 
 // msg *messages.SAMessage, info [] *interface{}, r *bool
 func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	lib.PrintlnDebug("-----------------------------------------> Unit.I_Execute::", u.UnitId, "::TypeName:", (*(*info).([]*interface{})[0]).(*component.Component).TypeName, "::msg.Payload", msg.Payload, "::info:", info)
+	// lib.PrintlnDebug("-----------------------------------------> Unit.I_Execute::", u.UnitId, "::TypeName:", (*(*info).([]*interface{})[0]).(*component.Component).TypeName, "::msg.Payload", msg.Payload, "::info:", info)
 	var ok bool
 
 	u.ElemOfUnit, ok = allUnitsType.Load(u.UnitId)
@@ -103,7 +103,7 @@ func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, r
 	//engine.EngineImpl{}.Execute(u.ElemOfUnit.(*component.Component), shared.EXECUTE_FOREVER)
 	//fmt.Println(">>>>>>>><<<<<<<<<<<<<>>>>>>>>>>>><<<<<<<<< Unit:", u.UnitId, "TypeName:", elementComponent.TypeName, "executing:", elementComponent.Executing)
 	if elementComponent.Executing == nil || !*elementComponent.Executing {
-		lib.PrintlnDebug("Will execute elementComponent.TypeName:", elementComponent.TypeName)
+		// lib.PrintlnDebug("Will execute elementComponent.TypeName:", elementComponent.TypeName)
 		var executeForever = true
 		elementComponent.ExecuteForever = &executeForever
 		//fmt.Println("Setará executeforever:", elementComponent.TypeName)

@@ -65,7 +65,7 @@ func (s SRHUDP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 		go s.handler(info, availableConenctionIndex)
 	}
 	// }()
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
 	return
 }
 
@@ -90,8 +90,8 @@ func (s SRHUDP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 				*reset = true
 				return
 			}
-			if isNewConnection, miopPacket := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
-				lib.PrintlnDebug("SRHUDP Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
+			if isNewConnection, _ := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
+				// lib.PrintlnDebug("SRHUDP Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
 				*reset = true
 				return
 			}
@@ -104,21 +104,21 @@ func (s SRHUDP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 		}
 	}
 
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
 	return
 }
 
 func (s SRHUDP) I_Send(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHUDP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHUDP Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
-	lib.PrintlnDebug("msg.ToAddr", msg.ToAddr)
+	// lib.PrintlnDebug("msg.ToAddr", msg.ToAddr)
 	client := srhInfo.Protocol.GetClientFromAddr(msg.ToAddr)
 	if client == nil {
 		*reset = true
 		return
 	}
-	lib.PrintlnDebug("SRHUDP Version Not adapted   >>>>> UDP => msg.ToAddr:", msg.ToAddr, "UDP Client:", client) //, "AdaptId:", client.AdaptId) // TODO dcruzb: verify impact of removing AdaptId
+	// lib.PrintlnDebug("SRHUDP Version Not adapted   >>>>> UDP => msg.ToAddr:", msg.ToAddr, "UDP Client:", client) //, "AdaptId:", client.AdaptId) // TODO dcruzb: verify impact of removing AdaptId
 	msgTemp := msg.Payload.([]byte)
 
 	err := client.Send(msgTemp)
@@ -128,12 +128,12 @@ func (s SRHUDP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 
 	// update info
 	*info = srhInfo
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
 	return
 }
 
 func (s SRHUDP) handler(info *interface{}, connectionIndex int) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHUDP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHUDP Version Not adapted")
 
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
@@ -145,7 +145,7 @@ func (s SRHUDP) handler(info *interface{}, connectionIndex int) {
 		if !*executeForever {
 			break
 		}
-		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR", "SRHUDP Version Not adapted")
+		// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR", "SRHUDP Version Not adapted")
 
 		msg, err := client.Receive()
 		if err != nil {
@@ -153,25 +153,25 @@ func (s SRHUDP) handler(info *interface{}, connectionIndex int) {
 				break
 			}
 		}
-		lib.PrintlnDebug("Message received")
+		// lib.PrintlnDebug("Message received")
 
 		if changeProtocol, miopPacket := s.isAdapt(msg); changeProtocol {
 			if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
-				lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHUDP Version Not adapted")
+				// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHUDP Version Not adapted")
 				break
 			}
 		}
 		if isNewConnection, miopPacket := s.isNewConnection(msg); isNewConnection { // TODO dcruzb: move to I_Receive
 			//newConnection = true
-			lib.PrintlnDebug("UDP Is New Connection")
+			// lib.PrintlnDebug("UDP Is New Connection")
 			miopPacket := miop.CreateReqPacket("Connect", []interface{}{miopPacket.Bd.ReqBody.Body[0], "Ok"}, miopPacket.Bd.ReqBody.Body[0].(int)) // idx is the Connection ID
 			msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
-			lib.PrintlnDebug("UDP Before send")
+			// lib.PrintlnDebug("UDP Before send")
 			err := client.Send(msgPayload)
 			if err != nil {
 				shared.ErrorHandler(shared.GetFunction(), err.Error())
 			}
-			lib.PrintlnDebug("UDP After send")
+			// lib.PrintlnDebug("UDP After send")
 			//if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
 			//	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHUDP Version Not adapted")
 			//	break
@@ -183,12 +183,12 @@ func (s SRHUDP) handler(info *interface{}, connectionIndex int) {
 			break
 		}
 		rcvMessage := messages.ReceivedMessages{Msg: msg, Conn: srhInfo.Protocol.GetClient(connectionIndex).Connection().(net.Conn), ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
-		lib.PrintlnDebug("SRHUDP Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+		// lib.PrintlnDebug("SRHUDP Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 
 		srhInfo.RcvedMessages <- rcvMessage
-		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHUDP Version Not adapted")
+		// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHUDP Version Not adapted")
 	}
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
 }
 
 func (s SRHUDP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {

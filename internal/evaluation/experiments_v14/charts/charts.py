@@ -140,7 +140,9 @@ def generate_boxplots(df, experiment, app, metric, level):
   sns.boxplot(x="protocol", y=metric_column, data=df, ax=ax, showfliers=False)
   ax.set_xlabel("Protocolo")
   ax.set_ylabel("% Memória Utilizada" if metric == "memory" else "% CPU Utilizado")
-  ax.set_title(f"{experiment.capitalize()} - {"Cliente" if app == "client" else "Servidor"} - {"Memória" if metric == "memory" else "CPU"} - {level}")
+  appString = "Cliente" if app == "client" else "Servidor"
+  metricString = "Memória" if metric == "memory" else "CPU"
+  ax.set_title(f"{experiment.capitalize()} - {appString} - {metricString} - {level}")
   plt.xticks(rotation=45)
   plt.tight_layout()
 
@@ -169,7 +171,9 @@ def generate_lineplots_by_metric(df, experiment, app, metric, level):
   sns.lineplot(x="duration", y=metric_column, data=df, hue="protocol")
   ax.set_xlabel("Duração (s)")
   ax.set_ylabel("% Memória Utilizada" if metric == "memory" else "% CPU Utilizado")
-  ax.set_title(f"{experiment.capitalize()} - {"Cliente" if app == "client" else "Servidor"} - {"Memória" if metric == "memory" else "CPU"} - {level}")
+  appString = "Cliente" if app == "client" else "Servidor"
+  metricString = "Memória" if metric == "memory" else "CPU"
+  ax.set_title(f"{experiment.capitalize()} - {appString} - {metricString} - {level}")
   plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
   plt.xticks(rotation=45)
   plt.tight_layout()
@@ -235,9 +239,9 @@ def main():
   input_directory = "../results" #20240403-AllExecutedOk"
   output_directory = "./charts"
 
-  experiments = ["Fibonacci", "SendFile"]
+  experiments = ["Fibonacci"] #, "SendFile"]
   fibonacci_levels = ["2", "11", "38"]
-  sendfile_levels = ["sm", "md", "lg"]
+  sendfile_levels = [] #"sm", "md", "lg"]
   protocols = ["UDP", "TCP", "TLS", "RPC", "QUIC", "HTTP", "HTTPS", "HTTP2", "TCPTLS", "RPCHTTP", "TCPHTTP", "TLSHTTP2", "E_RPC", "E_GRPC", "E_RMQ"]
   metrics = ["memory", "cpu"]
   apps = ["client", "server"]
@@ -252,7 +256,7 @@ def main():
             print("experiment/level/app/metric/protocol:", experiment, "/", level, "/", app, "/", metric, "/", protocol)
             for experiment_directory in os.listdir(input_directory):
               # print(experiment_directory, experiment_directory.upper())
-              if experiment in experiment_directory and "-"+protocol+"-" in experiment_directory.upper() and "-"+level in experiment_directory:
+              if experiment in experiment_directory and "-"+protocol+"-" in experiment_directory.upper() and "-"+level in experiment_directory and ((protocol in ["UDP","TCP"] and "1.14.1" in experiment_directory) or ((protocol not in ["UDP","TCP"]))):
                 ############# Read Monitor Data #############
                 file_path = get_last_log_file(os.path.join(input_directory, experiment_directory), app, "monitor")
                 if file_path is None:

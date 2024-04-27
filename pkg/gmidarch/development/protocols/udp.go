@@ -98,7 +98,7 @@ func (cl *UDPClient) Read(b []byte) (n int, err error) {
 }
 
 func (cl *UDPClient) Receive() (fullMessage []byte, err error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
 	// receive reply's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	cl.Read(size)
@@ -156,7 +156,7 @@ func (cl *UDPClient) Receive() (fullMessage []byte, err error) {
 }
 
 func (cl *UDPClient) Send(msg []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
 	addr, err := net.ResolveUDPAddr("udp", cl.Ip)
 	if err != nil {
 		return err
