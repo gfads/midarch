@@ -155,7 +155,7 @@ def generate_lineplots_by_metric(df, experiment, app, metric, level):
 
   Args:
     df: DataFrame do Pandas com os dados do experimento.
-    metric: Métrica a ser comparada ("memory" ou "cpu").
+    metric: Métrica a ser comparada ("memory", "cpu", "response_time").
     app: "client" ou "server".
     level: experiment level
 
@@ -166,13 +166,13 @@ def generate_lineplots_by_metric(df, experiment, app, metric, level):
     return
   fig, ax = plt.subplots()
   fig.set_size_inches(18, 8)
-  metric_column = "memory_usage(%)" if metric == "memory" else "cpu_usage(%)"
+  metric_column = "memory_usage(%)" if metric == "memory" else "cpu_usage(%)" if metric == "cpu" else "response_time"
   # df[["dateTime", "duration", "protocol", "memory_usage(%)", "cpu_usage(%)"]].to_csv("df.csv")
   sns.lineplot(x="duration", y=metric_column, data=df, hue="protocol")
   ax.set_xlabel("Duração (s)")
-  ax.set_ylabel("% Memória Utilizada" if metric == "memory" else "% CPU Utilizado")
+  ax.set_ylabel("% Memória Utilizada" if metric == "memory" else "% CPU Utilizado" if metric == "cpu" else "Tempo de Resposta (ms)")
   appString = "Cliente" if app == "client" else "Servidor"
-  metricString = "Memória" if metric == "memory" else "CPU"
+  metricString = "Memória" if metric == "memory" else "CPU" if metric == "cpu" else "Tempo de Resposta"
   ax.set_title(f"{experiment.capitalize()} - {appString} - {metricString} - {level}")
   plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
   plt.xticks(rotation=45)
@@ -181,9 +181,9 @@ def generate_lineplots_by_metric(df, experiment, app, metric, level):
   # plt.show()
   return fig
 
-def generate_lineplots_by_response_time(df, experiment, level):
+def generate_boxplots_by_response_time(df, experiment, level):
   """
-  Gera lineplots para a métrica especificada comparando os diferentes protocolos.
+  Gera boxplots para a métrica especificada comparando os diferentes protocolos.
 
   Args:
     df: DataFrame do Pandas com os dados do experimento.
@@ -192,7 +192,7 @@ def generate_lineplots_by_response_time(df, experiment, level):
     level: experiment level
 
   Returns:
-    Figura do Matplotlib com os lineplots.
+    Figura do Matplotlib com os boxplots.
   """
   if df.empty:
     return
@@ -200,16 +200,17 @@ def generate_lineplots_by_response_time(df, experiment, level):
   fig.set_size_inches(14, 8)
   # sns.lineplot(x="duration", y="response_time", data=df, hue="protocol", sort=False)
   sns.boxplot(x="protocol", y="response_time", data=df, ax=ax, showfliers=False)
-  ax.set_xlabel("Duração (s)")
+  ax.set_xlabel("Protocolos")
   ax.set_ylabel("Tempo de Resposta (ms)")
   # ax.set_ylim(bottom=0, top=max(df["response_time"]))
   ax.set_title(f"{experiment.capitalize()} - {level}")
 
   # Rotate legend
-  plt.legend(loc='upper right', bbox_to_anchor=(1.25, 1), ncol=1)
+  # plt.legend(loc='upper right', bbox_to_anchor=(1.25, 1), ncol=1)
   plt.xticks(rotation=45) 
   plt.tight_layout()
   
+  df.to_csv(f"{experiment}-{level}.csv", index=False)
   # plt.show()
   return fig
 
@@ -239,10 +240,11 @@ def main():
   input_directory = "../results" #20240403-AllExecutedOk"
   output_directory = "./charts"
 
-  experiments = ["Fibonacci"] #, "SendFile"]
-  fibonacci_levels = ["2", "11", "38"]
-  sendfile_levels = [] #"sm", "md", "lg"]
-  protocols = ["UDP", "TCP", "TLS", "RPC", "QUIC", "HTTP", "HTTPS", "HTTP2", "TCPTLS", "RPCHTTP", "TCPHTTP", "TLSHTTP2", "E_RPC", "E_GRPC", "E_RMQ"]
+  experiments = ["Fibonacci", "SendFile"] # 
+  fibonacci_levels = [] #"2", "11", "38"] #"40", "41"]
+  sendfile_levels = ["lg"] #"sm", "md", "lg"] #"sm", "lg",
+  # "QUIC",
+  protocols = ["TLS", "HTTP2", "TLSHTTP2", "E_RPC", "E_GRPC", "E_RMQ"] #"UDP", "TCP", "TLS", "RPC",  "HTTP", "HTTPS", "HTTP2", "TCPTLS", "RPCQUIC", "RPCHTTP", "TCPHTTP", "TLSHTTP2", "QUICHTTP2", "E_RPC", "E_GRPC", "E_RMQ"]
   metrics = ["memory", "cpu"]
   apps = ["client", "server"]
   for experiment in experiments:
@@ -256,13 +258,16 @@ def main():
             print("experiment/level/app/metric/protocol:", experiment, "/", level, "/", app, "/", metric, "/", protocol)
             for experiment_directory in os.listdir(input_directory):
               # print(experiment_directory, experiment_directory.upper())
-              if experiment in experiment_directory and "-"+protocol+"-" in experiment_directory.upper() and "-"+level in experiment_directory and ((protocol in ["UDP","TCP"] and "1.14.1" in experiment_directory) or ((protocol not in ["UDP","TCP"]))):
+              if experiment in experiment_directory and "-"+protocol+"-" in experiment_directory.upper() and "-"+level in experiment_directory: #and ((protocol in ["UDP","TCP"] and "1.14.1" in experiment_directory) or ((protocol not in ["UDP","TCP"]))):
                 ############# Read Monitor Data #############
                 file_path = get_last_log_file(os.path.join(input_directory, experiment_directory), app, "monitor")
                 if file_path is None:
                   continue
                 if not validate_file(file_path, "monitor"):
                   continue
+                
+                # if protocol in ["UDP", "TCP", "TLS"]:
+                #   print("file_path:", file_path)
                 df_experiment = read_monitor_data(file_path)
                 df_experiment["protocol"] = protocol if "off" in experiment_directory else protocol + "-120s" if "on120s" in experiment_directory else protocol + "-300s"
                 #   df_monitor = df_monitor.append(df_experiment)
@@ -298,9 +303,12 @@ def main():
           save_plots(fig, output_directory, experiment, app, metric, level, kind="lineplot")
           plt.close()
           if metric == "memory" and app == "client":
-            fig = generate_lineplots_by_response_time(df_results, experiment, level)
+            fig = generate_boxplots_by_response_time(df_results, experiment, level)
             save_plots(fig, output_directory, experiment, app, "responsetime", level, kind="boxplot")
             plt.close()
+            # fig = generate_lineplots_by_metric(df_results, experiment, app, "response_time", level)
+            # save_plots(fig, output_directory, experiment, app, "responsetime", level, kind="lineplot")
+            # plt.close()
 
 
 if __name__ == "__main__":
