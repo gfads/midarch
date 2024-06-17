@@ -8,9 +8,6 @@ import (
 	"time"
 
 	"github.com/gfads/midarch/examples/sendfiledistributed/middleware"
-	sendFileProxy "github.com/gfads/midarch/examples/sendfiledistributed/sendfileProxy"
-	"github.com/gfads/midarch/pkg/gmidarch/development/components/proxies/namingproxy"
-	"github.com/gfads/midarch/pkg/gmidarch/development/generic"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/execution/frontend"
 	<evolutive.import>
@@ -33,7 +30,7 @@ func main() {
 	// The order of Ip/hosts must the same as one in which
 	// these elements appear in the configuration
 	args := make(map[string]messages.EndPoint)
-	args["crh"] = messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
+	// args["crh"] = messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
 	args["srh"] = messages.EndPoint{Host: "0.0.0.0", Port: shared.CALCULATOR_PORT}
 
 	// Deploy configuration
@@ -42,21 +39,21 @@ func main() {
 	}})
 
 	// proxy to naming service
-	endPoint := messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
-	namingProxy := namingproxy.NewNamingproxy(endPoint)
+	// endPoint := messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
+	// namingProxy := namingproxy.NewNamingproxy(endPoint)
 
-	// Create proxy to Fibonacci
-	sendFileProxy := sendFileProxy.NewSendFileProxy(generic.ProxyConfig{
-		Host: shared.CALCULATOR_HOST,
-		Port: shared.CALCULATOR_PORT,
-	})
+	// // Create proxy to Fibonacci
+	// sendFileProxy := sendFileProxy.NewSendFileProxy(generic.ProxyConfig{
+	// 	Host: shared.CALCULATOR_HOST,
+	// 	Port: shared.CALCULATOR_PORT,
+	// })
 
-	// Register Fibonacci in Lookup
-	ok := namingProxy.Register("SendFile", sendFileProxy)
+	// // Register Fibonacci in Lookup
+	// ok := namingProxy.Register("SendFile", sendFileProxy)
 
-	if !ok {
-		shared.ErrorHandler(shared.GetFunction(), "'SendFile' already registered in the Naming Server")
-	}
+	// if !ok {
+	// 	shared.ErrorHandler(shared.GetFunction(), "'SendFile' already registered in the Naming Server")
+	// }
 
 	fmt.Printf("SendFile server is running at Port: %v \n", shared.CALCULATOR_PORT)
 

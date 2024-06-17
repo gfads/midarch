@@ -8,10 +8,10 @@ services:
         condition: none
       resources:
         limits:
-          cpus: "1"
+          cpus: "0.4"
           memory: 256M
         reservations:
-          cpus: "1"
+          cpus: "0.4"
           memory: 256M
     environment:
       CA_PATH: "/usr/src/app/examples/certs/myCA.pem"
@@ -28,10 +28,10 @@ services:
         condition: none
       resources:
         limits:
-          cpus: "1"
+          cpus: "0.4"
           memory: 256M
         reservations:
-          cpus: "1"
+          cpus: "0.4"
           memory: 256M
     environment:
       CA_PATH: "/usr/src/app/examples/certs/myCA.pem"    

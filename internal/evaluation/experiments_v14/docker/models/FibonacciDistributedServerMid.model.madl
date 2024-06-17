@@ -1,7 +1,7 @@
 Configuration FibonacciDistributedServerMid :=
   Components
       fibonacciinvoker  : FibonacciInvoker
-      marshaller2       : Jsonmarshaller
+      marshaller2       : Gobmarshaller
       srh               : SRH<protocol>
 
    Connectors
@@ -13,5 +13,5 @@ Configuration FibonacciDistributedServerMid :=
         fibonacciinvoker,t2,marshaller2
 
    Adaptability
-      None
+      <adaptability>
 EndConf

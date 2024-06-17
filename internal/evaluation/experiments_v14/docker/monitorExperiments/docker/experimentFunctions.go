@@ -143,11 +143,14 @@ func buildImages(contextPath string, outputPath string, remoteOperation RemoteOp
 	log.Println()
 	var err error
 	var protocolFactor string
+	var adaptability string
 	if transportProtocolFactor.IsEvolutive() {
 		firstProtocolFactor, _ := transportProtocolFactor.getEvolutiveProtocols()
 		protocolFactor = strings.ToUpper(firstProtocolFactor.toString())
+		adaptability = "Evolutive_Protocol"
 	} else {
 		protocolFactor = strings.ToUpper(transportProtocolFactor.toString())
+		adaptability = "None"
 	}
 
 	// Build naming server image
@@ -157,7 +160,7 @@ func buildImages(contextPath string, outputPath string, remoteOperation RemoteOp
 		if err != nil {
 			log.Println("Error while building image", imageNameNamingServer, "Error:", err)
 		}
-		err = executeCommand("docker build --no-cache -t " + imageNameNamingServer + " " + contextPath + " -f " + outputPath + "/Dockerfile.naming")
+		err = executeCommand("docker build -t " + imageNameNamingServer + " " + contextPath + " -f " + outputPath + "/Dockerfile.naming") //--no-cache
 		if err != nil {
 			log.Println("Error while building image", imageNameNamingServer, "Error:", err)
 		}
@@ -167,15 +170,15 @@ func buildImages(contextPath string, outputPath string, remoteOperation RemoteOp
 	// Only generate madl from model if the transport protocol is MidArch
 	if transportProtocolFactor.IsMidArch() {
 		if remoteOperation == Fibonacci {
-			err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/FibonacciDistributedServerMid.model.madl", shared.DIR_MADL+"/FibonacciDistributedServerMid.madl", map[string]string{"<protocol>": protocolFactor})
+			err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/FibonacciDistributedServerMid.model.madl", shared.DIR_MADL+"/FibonacciDistributedServerMid.madl", map[string]string{"<protocol>": protocolFactor, "<adaptability>": adaptability})
 		} else {
-			err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/SendFileDistributedServerMid.model.madl", shared.DIR_MADL+"/SendFileDistributedServerMid.madl", map[string]string{"<protocol>": protocolFactor})
+			err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/SendFileDistributedServerMid.model.madl", shared.DIR_MADL+"/SendFileDistributedServerMid.madl", map[string]string{"<protocol>": protocolFactor, "<adaptability>": adaptability})
 		}
 		if err != nil {
 			log.Println("Error while building image", imageNameServer, "Error:", err)
 		}
 	}
-	err = executeCommand("docker build -t " + imageNameServer + " " + contextPath + " -f " + outputPath + "/Dockerfile.server")
+	err = executeCommand("docker build -t " + imageNameServer + " " + contextPath + " -f " + outputPath + "/Dockerfile.server") //--no-cache
 	if err != nil {
 		log.Println("Error while building image", imageNameServer, "Error:", err)
 	}
@@ -184,15 +187,15 @@ func buildImages(contextPath string, outputPath string, remoteOperation RemoteOp
 	// Only generate madl from model if the transport protocol is MidArch
 	if transportProtocolFactor.IsMidArch() {
 		if remoteOperation == Fibonacci {
-			err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/FibonacciDistributedClientMid.model.madl", shared.DIR_MADL+"/FibonacciDistributedClientMid.madl", map[string]string{"<protocol>": protocolFactor})
+			err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/FibonacciDistributedClientMid.model.madl", shared.DIR_MADL+"/FibonacciDistributedClientMid.madl", map[string]string{"<protocol>": protocolFactor, "<adaptability>": adaptability})
 		} else {
-			err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/SendFileDistributedClientMid.model.madl", shared.DIR_MADL+"/SendFileDistributedClientMid.madl", map[string]string{"<protocol>": protocolFactor})
+			err = shared.GenerateFromModel(shared.DIR_EXPERIMENTS_MODELS+"/SendFileDistributedClientMid.model.madl", shared.DIR_MADL+"/SendFileDistributedClientMid.madl", map[string]string{"<protocol>": protocolFactor, "<adaptability>": adaptability})
 		}
 		if err != nil {
 			log.Println("Error while building image", imageNameClient, "Error:", err)
 		}
 	}
-	err = executeCommand("docker build -t " + imageNameClient + " " + contextPath + " -f " + outputPath + "/Dockerfile.client")
+	err = executeCommand("docker build -t " + imageNameClient + " " + contextPath + " -f " + outputPath + "/Dockerfile.client") //--no-cache
 	if err != nil {
 		log.Println("Error while building image", imageNameClient, "Error:", err)
 	}
@@ -296,7 +299,7 @@ func RunSendFileExperiment(transportProtocol TransportProtocolFactor, adaptation
 }
 
 func RunExperiment(transportProtocolFactor TransportProtocolFactor, adaptationInterval int, remoteOperation RemoteOperationFactor, sampleSize int, fiboPlace int, imageSize string) {
-	experimentVersion := "1.14.1"
+	experimentVersion := "1.14.8" // 14.4 = 80% CPU | 14.5 = 50% CPU | 14.6 = 40% CPU | 14.7 = 40% CPU + GobMarshaller | 14.8 = 40% CPU + GobMarshaller + NoBase64
 	experimentLevel := ""
 	if remoteOperation == Fibonacci {
 		experimentLevel = strconv.Itoa(fiboPlace)
@@ -361,7 +364,7 @@ func processExperiment(experimentDescription string, outputPath string, kind Tra
 		}
 	}()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 100*time.Minute)
+	ctx, cancel := context.WithTimeout(context.Background(), 240*time.Minute)
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		experimentErrors = append(experimentErrors, err)

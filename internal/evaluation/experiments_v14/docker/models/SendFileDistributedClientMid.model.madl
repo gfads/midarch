@@ -1,9 +1,8 @@
 Configuration SendFileDistributedClientMid :=
    Components
-      namingproxy       : Namingproxy
       sendfileproxy     : SendFileProxy
       requestor         : Requestor
-      marshaller        : Jsonmarshaller
+      marshaller        : Gobmarshaller
       crh               : CRH<protocol>
 
    Connectors
@@ -13,10 +12,9 @@ Configuration SendFileDistributedClientMid :=
 
    Attachments
       sendfileproxy, t1, requestor
-      namingproxy, t1, requestor
       requestor, t2, marshaller
       requestor, t3, crh
 
    Adaptability
-      None
+      <adaptability>
 EndConf

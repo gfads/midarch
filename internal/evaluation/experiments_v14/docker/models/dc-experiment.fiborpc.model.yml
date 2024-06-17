@@ -8,16 +8,16 @@ services:
         condition: none
       resources:
         limits:
-          cpus: "1"
+          cpus: "0.4"
           memory: 256M
         reservations:
-          cpus: "1"
+          cpus: "0.4"
           memory: 256M
     environment:
       CA_PATH: "/usr/src/app/examples/certs/myCA.pem"
       CRT_PATH: "/usr/src/app/examples/certs/server.pem"
       KEY_PATH: "/usr/src/app/examples/certs/server.key"       
-      TIME_TO_START_SERVER: 13
+      TIME_TO_START_SERVER: 1
       INJECTION_INTERVAL: <adaptation.interval>
 
   client:
@@ -28,14 +28,14 @@ services:
         condition: none
       resources:
         limits:
-          cpus: "1"
+          cpus: "0.4"
           memory: 256M
         reservations:
-          cpus: "1"
+          cpus: "0.4"
           memory: 256M
     environment:
       CA_PATH: "/usr/src/app/examples/certs/myCA.pem"    
       <specific.env.client>
       SAMPLE_SIZE: <sample.size>
       AVERAGE_WAITING_TIME: <average.waiting.time>
-      TIME_TO_START_CLIENT: 18
+      TIME_TO_START_CLIENT: 5

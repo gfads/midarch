@@ -12,4 +12,7 @@ COPY ./pkg/github.com ./pkg/github.com
 
 RUN go build $GOPATH/src/dockerExperiments.go
 
+RUN sysctl -w net.core.rmem_max=7500000
+RUN sysctl -w net.core.wmem_max=7500000
+
 CMD ["/go/dockerExperiments"]

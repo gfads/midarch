@@ -2,7 +2,7 @@ Configuration naming :=
     Components
          server     : Namingserver
          finvoker   : Naminginvoker
-         marshaller : Jsonmarshaller
+         marshaller : Gobmarshaller
          srh        : SRH<protocol>
 
       Connectors
