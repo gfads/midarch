@@ -1,8 +1,6 @@
 package sendFileProxy
 
 import (
-	"encoding/base64"
-
 	"github.com/gfads/midarch/pkg/gmidarch/development/generic"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 )
@@ -66,8 +64,8 @@ func (p SendFileProxy) SendFile(file []byte) bool {
 
 	//fmt.Println(shared.GetFunction(), _endPoint.Host)
 	// Encode the []byte to a base64 string
-	base64String := base64.StdEncoding.EncodeToString(file)
-	_params := []interface{}{base64String}
+	// base64String := base64.StdEncoding.EncodeToString(file)
+	_params := []interface{}{file}
 
 	// _functionalRequest := messages.FunctionalRequest{Op: "F", Params: _params}
 	_functionalRequest := messages.FunctionalRequest{Op: "U", Params: _params}

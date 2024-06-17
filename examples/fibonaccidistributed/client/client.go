@@ -33,7 +33,7 @@ func main() {
 		SAMPLE_SIZE, _ = strconv.Atoi(os.Args[2])
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(os.Args[3])
 	} else {
-		n, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("FIBONACCI_PLACE", "11"))
+		n, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("FIBONACCI_PLACE", "38"))
 		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("SAMPLE_SIZE", "10000"))
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("AVERAGE_WAITING_TIME", "60"))
 	}

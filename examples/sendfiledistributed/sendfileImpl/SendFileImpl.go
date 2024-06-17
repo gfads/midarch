@@ -17,19 +17,24 @@ func (SendFile) F(n int) int {
 	}
 }
 
-func (SendFile) Save(base64File string) bool {
-	fileBytes, err := base64.StdEncoding.DecodeString(base64File)
-	if err != nil {
-		return false
-	}
+func (SendFile) Save(fileBytes []byte) bool { //base64File string) bool {
+	// fileBytes, err := base64.StdEncoding.DecodeString(base64File)
+	// if err != nil {
+	// 	return false
+	// }
 
-	err = os.WriteFile("image.png", fileBytes, 0644)
+	err := os.WriteFile("image.png", fileBytes, 0644)
 	return err == nil
 	// return true
 }
 
 // Calculate Fibonacci Number based on RPC function signature, where r is the return of the function
 func (s SendFile) UploadRPC(base64File string, r *bool) error {
-	*r = s.Save(base64File)
+	fileBytes, err := base64.StdEncoding.DecodeString(base64File)
+	if err != nil {
+		return err
+	}
+
+	*r = s.Save(fileBytes)
 	return nil
 }

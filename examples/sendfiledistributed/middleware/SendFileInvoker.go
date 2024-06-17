@@ -26,7 +26,7 @@ func (SendFileInvoker) I_Beforeserver(id string, msg *messages.SAMessage, info *
 
 	switch req.Op {
 	case "U":
-		reply := sendFileImpl.SendFile{}.Save(req.Params[0].(string))
+		reply := sendFileImpl.SendFile{}.Save(req.Params[0].([]byte)) //.(string))
 		msg.Payload = messages.FunctionalReply{Rep: reply}
 	default:
 		shared.ErrorHandler(shared.GetFunction(), "Operation '"+req.Op+"' not present in Invoker")

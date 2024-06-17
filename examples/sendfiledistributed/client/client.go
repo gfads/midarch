@@ -10,7 +10,7 @@ import (
 	"time"
 
 	sendFileProxy "github.com/gfads/midarch/examples/sendfiledistributed/sendfileProxy"
-	"github.com/gfads/midarch/pkg/gmidarch/development/components/proxies/namingproxy"
+	"github.com/gfads/midarch/pkg/gmidarch/development/generic"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/execution/frontend"
 	"github.com/gfads/midarch/pkg/shared"
@@ -18,6 +18,15 @@ import (
 )
 
 func main() {
+	// Start profiling
+	// f, err := os.Create("client.prof")
+	// if err != nil {
+	// 	fmt.Println(err)
+	// 	return
+	// }
+	// pprof.StartCPUProfile(f)
+	// defer pprof.StopCPUProfile()
+
 	// Wait for namingserver and server to get up
 	timeToRun, _ := strconv.Atoi(shared.EnvironmentVariableValueWithDefault("TIME_TO_START_CLIENT", "13"))
 	lib.PrintlnDebug("Waiting", timeToRun, "seconds for naming server and server to get up")
@@ -46,7 +55,7 @@ func main() {
 	// The order of Ip/hosts must the same as one in which
 	// these elements appear in the configuration
 	args := make(map[string]messages.EndPoint)
-	args["crh"] = messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
+	args["crh"] = messages.EndPoint{Host: shared.CALCULATOR_HOST, Port: shared.CALCULATOR_PORT}
 
 	// Deploy configuration
 	fe.Deploy(frontend.DeployOptions{
@@ -57,15 +66,20 @@ func main() {
 		}})
 
 	// proxy to naming service
-	endPoint := messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
-	namingProxy := namingproxy.NewNamingproxy(endPoint)
+	// endPoint := messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
+	// namingProxy := namingproxy.NewNamingproxy(endPoint)
 
-	aux, ok := namingProxy.Lookup("SendFile")
-	if !ok {
-		shared.ErrorHandler(shared.GetFunction(), "Service 'SendFile' not found in Naming Service")
-	}
+	// aux, ok := namingProxy.Lookup("SendFile")
+	// if !ok {
+	// 	shared.ErrorHandler(shared.GetFunction(), "Service 'SendFile' not found in Naming Service")
+	// }
 
-	sendFile := aux.(*sendFileProxy.SendFileProxy)
+	// sendFile := aux.(*sendFileProxy.SendFileProxy)
+
+	sendFile := &sendFileProxy.SendFileProxy{}
+	proxyConfig := generic.ProxyConfig{Host: shared.CALCULATOR_HOST, Port: shared.CALCULATOR_PORT}
+	sendFile.Configure(proxyConfig)
+	time.Sleep(2 * time.Second)
 
 	fileBytes := getFile(FILE_SIZE)
 	rand.Seed(time.Now().UnixNano())

@@ -80,7 +80,7 @@ func (p FibonacciProxy) F(n int) int {
 	// Receive response from I_Out
 	response = <-ChOut
 
-	var result float64
+	var result int
 	// Try again if there is no valid response
 	if response.Payload.(messages.FunctionalReply).Rep == nil {
 		//// Send request to I_In
@@ -90,7 +90,7 @@ func (p FibonacciProxy) F(n int) int {
 		//response = <-ChOut
 		result = 0
 	} else {
-		result = response.Payload.(messages.FunctionalReply).Rep.(float64)
+		result = response.Payload.(messages.FunctionalReply).Rep.(int)
 	}
 	//fmt.Println(shared.GetFunction(), result)
 
