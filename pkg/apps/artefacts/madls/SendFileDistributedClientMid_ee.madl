@@ -1,4 +1,4 @@
-Configuration FibonacciDistributedServerMid_ee.madl := 
+Configuration SendFileDistributedClientMid_ee.madl := 
 
    Components 
       core : Core 
@@ -10,6 +10,8 @@ Configuration FibonacciDistributedServerMid_ee.madl :=
       unit1 : Unit 
       unit2 : Unit 
       unit3 : Unit 
+      unit4 : Unit 
+      unit5 : Unit 
 
     Connectors 
       t1 : Oneton 
@@ -28,6 +30,8 @@ Configuration FibonacciDistributedServerMid_ee.madl :=
       core,t1,unit1 
       core,t1,unit2 
       core,t1,unit3 
+      core,t1,unit4 
+      core,t1,unit5 
 
    Adaptability 
       NONE 

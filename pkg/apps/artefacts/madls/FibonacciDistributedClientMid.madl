@@ -2,8 +2,8 @@ Configuration FibonacciDistributedClientMid :=
    Components
       fibonacciproxy    : FibonacciProxy
       requestor         : Requestor
-      marshaller        : Jsonmarshaller
-      crh               : CRHUDP
+      marshaller        : Gobmarshaller
+      crh               : CRHTLS
 
    Connectors
       t1 : Ntoonereqrep
@@ -16,5 +16,5 @@ Configuration FibonacciDistributedClientMid :=
       requestor, t3, crh
 
    Adaptability
-      None
+      Evolutive_Protocol
 EndConf

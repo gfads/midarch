@@ -1,28 +1,17 @@
-Configuration FibonacciDistributedServerMid :=
-  Components
-      naming            : Namingproxy
-      requestor         : Requestor
+Configuration SendFileDistributedServerMid :=
+   Components
       sendfileinvoker   : SendFileInvoker
-      marshaller        : Jsonmarshaller
-      marshaller2       : Jsonmarshaller
-      crh               : CRHHTTPS
-      srh               : SRHHTTPS
+      marshaller2       : Gobmarshaller
+      srh               : SRHQUIC
 
    Connectors
       t1 : Requestreply
       t2 : Requestreply
-      t3 : Requestreply
-      t4 : Requestreply
-      t5 : Requestreply
 
    Attachments
-        naming,t1,requestor
-        requestor,t2,marshaller
-        requestor,t3,crh
-        srh,t4,sendfileinvoker
-        sendfileinvoker,t5,marshaller2
+        srh,t1,sendfileinvoker
+        sendfileinvoker,t2,marshaller2
 
    Adaptability
-      Evolutive_Protocol
-
+      None
 EndConf

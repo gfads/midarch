@@ -3,8 +3,8 @@ Configuration calculatordistributedservermid :=
       naming      : Namingproxy
       requestor   : Requestor
       cinvoker    : Calculatorinvoker
-      marshaller  : Jsonmarshaller
-      marshaller2 : Jsonmarshaller
+      marshaller  : Gobmarshaller
+      marshaller2 : Gobmarshaller
       crh         : CRHUDP
       srh         : SRHUDP
 
