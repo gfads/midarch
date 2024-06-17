@@ -240,7 +240,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 							msg := &messages.SAMessage{}
 							msg.ToAddr = client.Ip
 							//log.Println("msg.ToAddr:", msg.ToAddr)
-							msg.Payload = middleware.Jsonmarshaller{}.Marshall(miopPacket)
+							msg.Payload = middleware.Gobmarshaller{}.Marshall(miopPacket)
 							// Coordinate the protocol change
 							shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
 						}
@@ -263,7 +263,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 								msg := &messages.SAMessage{}
 								msg.ToAddr = (*client).Address()
 								// log.Println("msg.ToAddr:", msg.ToAddr)
-								msg.Payload = middleware.Jsonmarshaller{}.Marshall(miopPacket)
+								msg.Payload = middleware.Gobmarshaller{}.Marshall(miopPacket)
 								// Coordinate the protocol change
 								shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
 							}

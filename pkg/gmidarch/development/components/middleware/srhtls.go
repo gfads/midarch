@@ -27,7 +27,7 @@ func (s SRHTLS) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 
 	if srhInfo.Protocol == nil {
 		srhInfo.Protocol = &protocols.TLS{}
-		srhInfo.Protocol.StartServer(srhInfo.EndPoint.Host, srhInfo.EndPoint.Port, 2) //shared.MAX_NUMBER_OF_CONNECTIONS)
+		srhInfo.Protocol.StartServer(srhInfo.EndPoint.Host, srhInfo.EndPoint.Port, 1) //shared.MAX_NUMBER_OF_CONNECTIONS)
 	}
 
 	// // check if a listener has already been created
@@ -65,7 +65,7 @@ func (s SRHTLS) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 			go s.handler(info, availableConenctionIndex)
 		}
 	}()
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTLS Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTLS Version Not adapted")
 	return
 }
 
@@ -84,14 +84,14 @@ func (s SRHTLS) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
-			lib.PrintlnDebug("SRHTLS Version Not adapted: tempMsgReceived", tempMsgReceived)
-			lib.PrintlnDebug("SRHTLS Version Not adapted: tempMsgReceived.Conn", tempMsgReceived.Conn)
+			// lib.PrintlnDebug("SRHTLS Version Not adapted: tempMsgReceived", tempMsgReceived)
+			// lib.PrintlnDebug("SRHTLS Version Not adapted: tempMsgReceived.Conn", tempMsgReceived.Conn)
 			if tempMsgReceived.Conn == nil { // TODO dcruzb: Change to Protocol.Client
 				*reset = true
 				return
 			}
-			if isNewConnection, miopPacket := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
-				lib.PrintlnDebug("SRHTLS Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
+			if isNewConnection, _ := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
+				// lib.PrintlnDebug("SRHTLS Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
 				*reset = true
 				return
 			}
@@ -104,21 +104,21 @@ func (s SRHTLS) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 		}
 	}
 
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTLS Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTLS Version Not adapted")
 	return
 }
 
 func (s SRHTLS) I_Send(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHTLS Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHTLS Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
-	lib.PrintlnDebug("msg.ToAddr", msg.ToAddr)
+	// lib.PrintlnDebug("msg.ToAddr", msg.ToAddr)
 	client := srhInfo.Protocol.GetClientFromAddr(msg.ToAddr)
 	if client == nil {
 		*reset = true
 		return
 	}
-	lib.PrintlnDebug("SRHTLS Version Not adapted   >>>>> TLS => msg.ToAddr:", msg.ToAddr, "TLS Client:", client) //, "AdaptId:", client.AdaptId) // TODO dcruzb: verify impact of removing AdaptId
+	// lib.PrintlnDebug("SRHTLS Version Not adapted   >>>>> TLS => msg.ToAddr:", msg.ToAddr, "TLS Client:", client) //, "AdaptId:", client.AdaptId) // TODO dcruzb: verify impact of removing AdaptId
 	msgTemp := msg.Payload.([]byte)
 
 	err := client.Send(msgTemp)
@@ -128,12 +128,12 @@ func (s SRHTLS) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 
 	// update info
 	*info = srhInfo
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTLS Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTLS Version Not adapted")
 	return
 }
 
 func (s SRHTLS) handler(info *interface{}, connectionIndex int) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHTLS Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHTLS Version Not adapted")
 
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
@@ -145,7 +145,7 @@ func (s SRHTLS) handler(info *interface{}, connectionIndex int) {
 		if !*executeForever {
 			break
 		}
-		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR", "SRHTLS Version Not adapted")
+		// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR", "SRHTLS Version Not adapted")
 
 		msg, err := client.Receive()
 		if err != nil {
@@ -156,19 +156,19 @@ func (s SRHTLS) handler(info *interface{}, connectionIndex int) {
 
 		if changeProtocol, miopPacket := s.isAdapt(msg); changeProtocol {
 			if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
-				lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHTLS Version Not adapted")
+				// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHTLS Version Not adapted")
 				break
 			}
 		}
 		if isNewConnection, _ := s.isNewConnection(msg); isNewConnection { // TODO dcruzb: move to I_Receive
 			//newConnection = true
-			lib.PrintlnDebug("TLS Is New Connection")
+			// lib.PrintlnDebug("TLS Is New Connection")
 			//miopPacket := miop.CreateReqPacket("Connect", []interface{}{miopPacket.Bd.ReqBody.Body[0], "Ok"}, miopPacket.Bd.ReqBody.Body[0].(int)) // idx is the Connection ID
-			//msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+			//msgPayload := Gobmarshaller{}.Marshall(miopPacket)
 
-			lib.PrintlnDebug("TLS Before send")
+			// lib.PrintlnDebug("TLS Before send")
 			//s.send(conn, addr, msgPayload)
-			lib.PrintlnDebug("TLS After send")
+			// lib.PrintlnDebug("TLS After send")
 			//if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
 			//	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHUDP Version Not adapted")
 			//	break
@@ -180,17 +180,17 @@ func (s SRHTLS) handler(info *interface{}, connectionIndex int) {
 			break
 		}
 		rcvMessage := messages.ReceivedMessages{Msg: msg, Conn: srhInfo.Protocol.GetClient(connectionIndex).Connection().(net.Conn), ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
-		lib.PrintlnDebug("SRHTLS Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+		// lib.PrintlnDebug("SRHTLS Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 
 		srhInfo.RcvedMessages <- rcvMessage
-		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHTLS Version Not adapted")
+		// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHTLS Version Not adapted")
 	}
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTLS Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHTLS Version Not adapted")
 }
 
 func (s SRHTLS) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTLS Version Not adapted")
-	miop, err := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, err := Gobmarshaller{}.Unmarshall(msgFromServer)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err.Error())
 		return false, miop
@@ -200,7 +200,7 @@ func (s SRHTLS) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 
 func (s SRHTLS) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTLS Version Not adapted")
-	miop, err := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, err := Gobmarshaller{}.Unmarshall(msgFromServer)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err.Error())
 		return false, miop

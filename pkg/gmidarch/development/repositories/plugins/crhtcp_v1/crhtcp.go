@@ -120,7 +120,7 @@ func (c CRHTCP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
 
 		miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{miopPacket.Bd.ReqBody.Body[0], shared.AdaptId, "Ok"}, shared.AdaptId) // idx is the Connection ID
-		msgPayload := middleware.Jsonmarshaller{}.Marshall(miopPacket)
+		msgPayload := middleware.Gobmarshaller{}.Marshall(miopPacket)
 		c.send(sizeOfMsgSize, msgPayload, conn)
 
 		if miopPacket.Bd.ReqBody.Body[0] == "udp" {
@@ -182,7 +182,7 @@ func (c CRHTCP) read(conn net.Conn, size []byte) ([]byte, error) {
 
 func (c CRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version 1 adapted")
-	miop, err := middleware.Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, err := middleware.Gobmarshaller{}.Unmarshall(msgFromServer)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err.Error())
 		return false, miop

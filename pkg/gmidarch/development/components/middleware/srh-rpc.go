@@ -163,7 +163,7 @@ func (s SRHRPC) handler(info *interface{}, connectionIndex int) {
 			//newConnection = true
 			// lib.PrintlnInfo("RPC Is New Connection")
 			//miopPacket := miop.CreateReqPacket("Connect", []interface{}{miopPacket.Bd.ReqBody.Body[0], "Ok"}, miopPacket.Bd.ReqBody.Body[0].(int)) // idx is the Connection ID
-			//msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+			//msgPayload := Gobmarshaller{}.Marshall(miopPacket)
 
 			// lib.PrintlnInfo("RPC Before send")
 			//s.send(conn, addr, msgPayload)
@@ -189,7 +189,7 @@ func (s SRHRPC) handler(info *interface{}, connectionIndex int) {
 
 func (s SRHRPC) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	miop, err := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, err := Gobmarshaller{}.Unmarshall(msgFromServer)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err.Error())
 		return false, miop
@@ -199,7 +199,7 @@ func (s SRHRPC) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 
 func (s SRHRPC) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	miop, err := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, err := Gobmarshaller{}.Unmarshall(msgFromServer)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err.Error())
 		return false, miop

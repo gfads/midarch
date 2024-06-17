@@ -58,25 +58,25 @@ func VerifyAdaptationQUIC(msgFromServer []byte, sizeOfMsgSize []byte, stream qui
 
 func isAdapt(msgFromServer []byte) (bool, miop.MiopPacket, error) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	miop, err := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, err := Gobmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop, err
 }
 
 func confirmProtocolAdaptation(adaptId int, adaptToProtocol string, protocol generic.Protocol) (err error) {
 	miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{adaptToProtocol, adaptId, "Ok"}, adaptId)
-	msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+	msgPayload := Gobmarshaller{}.Marshall(miopPacket)
 	return protocol.Send(msgPayload)
 }
 
 func confirmAdaptation(adaptId int, protocol string, sizeOfMsgSize []byte, conn net.Conn, send func(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error) (err error) {
 	miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{protocol, adaptId, "Ok"}, adaptId)
-	msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+	msgPayload := Gobmarshaller{}.Marshall(miopPacket)
 	return send(sizeOfMsgSize, msgPayload, conn)
 }
 
 func confirmAdaptationQUIC(adaptId int, protocol string, sizeOfMsgSize []byte, stream quic.Stream, send func(sizeOfMsgSize []byte, msgToServer []byte, stream quic.Stream) error) (err error) {
 	miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{protocol, adaptId, "Ok"}, adaptId)
-	msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+	msgPayload := Gobmarshaller{}.Marshall(miopPacket)
 	return send(sizeOfMsgSize, msgPayload, stream)
 }
 

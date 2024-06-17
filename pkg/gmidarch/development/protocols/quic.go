@@ -171,7 +171,7 @@ type QUIC struct {
 	// Server attributes
 	ip                 string
 	port               string
-	listener           quic.Listener
+	listener           *quic.Listener
 	initialConnections int
 	clients            []*generic.Client
 	// Client attributes
@@ -232,7 +232,7 @@ func (st *QUIC) ConnectToServer(ip, port string) {
 	//localTcpAddr := c.getLocalTcpAddr()
 
 	for {
-		st.serverConnection, err = quic.DialAddr(tcpAddr.String(), lib.GetClientTLSConfig("h2"), nil)
+		st.serverConnection, err = quic.DialAddr(context.Background(), tcpAddr.String(), lib.GetClientTLSConfig("h2"), nil)
 		// lib.PrintlnInfo("Dialed", st.serverConnection)
 		if err != nil {
 			lib.PrintlnError("Dial error", st.serverConnection, err)

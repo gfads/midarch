@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/exec"
 	"strings"
@@ -98,7 +99,7 @@ func alternatePlugins(firstElem, secondElem string, interval time.Duration) {
 }
 
 func GeneratePlugin(source, pluginName, versionedPluginName string) {
-	//log.Println("Vai ler:", shared.DIR_PLUGINS_SOURCE+"/pluginBuild.model")
+	log.Println("Vai ler:", shared.DIR_PLUGINS_SOURCE+"/pluginBuild.model")
 	input, err := ioutil.ReadFile(shared.DIR_PLUGINS_SOURCE + "/pluginBuild.model")
 	if err != nil {
 		fmt.Println(err)
@@ -110,13 +111,14 @@ func GeneratePlugin(source, pluginName, versionedPluginName string) {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
 	pluginSourcePath := shared.DIR_PLUGINS_IMPORT + "/" + versionedPluginName
+	log.Println("Type and Behaviour:", pluginType)
 
-	//log.Println("pluginSourcePath:", pluginSourcePath)
+	log.Println("pluginSourcePath:", pluginSourcePath)
 	//pluginSourcePath := "adaptive/pluginTest/pluginsSrc" + "/" + pluginName
 	output := bytes.Replace(input, []byte("<pluginName>"), []byte(pluginSourcePath), -1)
 	output = bytes.Replace(output, []byte("<pluginType>"), []byte(pluginName+"."+pluginType+"{}"), -1)
 
-	//log.Println("Vai gravar:", shared.DIR_PLUGINS_SOURCE+"/pluginBuild.go")
+	log.Println(shared.DIR_PLUGINS_SOURCE + "/" + versionedPluginName + "/main/pluginBuild.go")
 	os.Mkdir(shared.DIR_PLUGINS_SOURCE+"/"+versionedPluginName+"/main", os.ModePerm)
 	if err = ioutil.WriteFile(shared.DIR_PLUGINS_SOURCE+"/"+versionedPluginName+"/main/pluginBuild.go", output, 0666); err != nil {
 		fmt.Println(err)

@@ -3,6 +3,7 @@ package middleware
 import (
 	"bytes"
 	"encoding/gob"
+
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
 	"github.com/gfads/midarch/pkg/shared"
@@ -24,9 +25,17 @@ func (g Gobmarshaller) I_Process(id string, msg *messages.SAMessage, info *inter
 		r := g.Marshall(req.Params[0])
 		msg.Payload = messages.FunctionalReply{Rep: r}
 	case "unmarshall":
-		temp := req.Params[0].([]byte)
-		r := g.Unmarshall(temp)
-		msg.Payload = messages.FunctionalReply{Rep: r}
+		if req.Params[0] == nil {
+			msg.Payload = messages.FunctionalReply{Rep: nil}
+		} else {
+			temp := req.Params[0].([]byte)
+			r, err := g.Unmarshall(temp)
+			if err != nil {
+				msg.Payload = messages.FunctionalReply{Rep: nil}
+			} else {
+				msg.Payload = messages.FunctionalReply{Rep: r}
+			}
+		}
 	default:
 		shared.ErrorHandler(shared.GetFunction(), "Operation '"+op+"' not supported by Marshaller!")
 	}
@@ -42,7 +51,8 @@ func (Gobmarshaller) Marshall(m interface{}) []byte {
 
 	return b.Bytes()
 }
-func (Gobmarshaller) Unmarshall(m []byte) interface{} {
+
+func (Gobmarshaller) Unmarshall(m []byte) (miop.MiopPacket, error) {
 	r := new(miop.MiopPacket)
 	var b bytes.Buffer
 	b.Write(m)
@@ -50,8 +60,18 @@ func (Gobmarshaller) Unmarshall(m []byte) interface{} {
 	dec := gob.NewDecoder(&b)
 	err := dec.Decode(r)
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
+		// shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return miop.MiopPacket{}, err
 	}
 
-	return *r
+	// TODO improve by avoiding the loop
+	// for i := 0; i < len(r.Bd.ReqBody.Body); i++ {
+	// 	temp := r.Bd.ReqBody.Body[i]
+	// 	if reflect.TypeOf(temp).String() == "float64" {
+	// 		x := int(temp.(float64))
+	// 		r.Bd.ReqBody.Body[i] = x
+	// 	}
+	// }
+
+	return *r, nil
 }

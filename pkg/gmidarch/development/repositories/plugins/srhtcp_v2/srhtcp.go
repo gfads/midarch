@@ -182,7 +182,7 @@ func (s SRHTCP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
 
-	//json := middleware.Jsonmarshaller{}
+	//json := middleware.Gobmarshaller{}
 	//unmarshalledMsg := json.Unmarshall(msgTemp)
 	//fmt.Println("<<<<<<<<<<<<  <<<<<<<<<<  <<<<<<<<<  SRHTCP Version 2 adapted => Msg: ", unmarshalledMsg.Bd.RepBody.OperationResult)
 	// send message
@@ -254,6 +254,6 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 
 func (s SRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	miop, _ := middleware.Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, _ := middleware.Gobmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }

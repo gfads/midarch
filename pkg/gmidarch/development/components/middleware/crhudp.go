@@ -71,7 +71,7 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		for {
 			time.Sleep(200 * time.Millisecond)
 			miopPacket := miop.CreateReqPacket("Connect", []interface{}{shared.AdaptId}, shared.AdaptId) // idx is the Connection ID
-			msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+			msgPayload := Gobmarshaller{}.Marshall(miopPacket)
 			err = crhInfo.Protocols[addr].Send(msgPayload)
 			if err != nil {
 				lib.PrintlnError("Error on send after dial", crhInfo.Conns[addr], err)
@@ -141,6 +141,6 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 }
 
 func (c CRHUDP) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket, error) {
-	miop, err := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, err := Gobmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "Connect", miop, err
 }

@@ -27,7 +27,7 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 
 	if srhInfo.Protocol == nil {
 		srhInfo.Protocol = &protocols.TCP{}
-		srhInfo.Protocol.StartServer(srhInfo.EndPoint.Host, srhInfo.EndPoint.Port, 2) //shared.MAX_NUMBER_OF_CONNECTIONS)
+		srhInfo.Protocol.StartServer(srhInfo.EndPoint.Host, srhInfo.EndPoint.Port, 1) //shared.MAX_NUMBER_OF_CONNECTIONS)
 	}
 
 	// // check if a listener has already been created
@@ -42,9 +42,9 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	// 	}
 	// }
 
-	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
+	// log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
 	connectionAvailable, availableConenctionIndex := srhInfo.Protocol.AvailableConnectionFromPool()
-	//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
+	// log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Total Clients out", len(srhInfo.Clients))
 	if !connectionAvailable {
 		//lib.PrintlnDebug("------------------------------>", shared.GetFunction(), "end", "SRHTCP Version 2 adapted - No connection available")
 		time.Sleep(1 * time.Millisecond)
@@ -52,10 +52,10 @@ func (s SRHTCP) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	}
 
 	go func() {
-		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients Index", availableConenctionIndex)
+		// log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Clients Index", availableConenctionIndex)
 
 		client := srhInfo.Protocol.WaitForConnection(availableConenctionIndex)
-		//log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Connected Client", client)
+		// log.Println(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> Connected Client", client)
 
 		// Update info
 		*info = srhInfo
@@ -165,7 +165,7 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 			//newConnection = true
 			// lib.PrintlnDebug("TCP Is New Connection")
 			//miopPacket := miop.CreateReqPacket("Connect", []interface{}{miopPacket.Bd.ReqBody.Body[0], "Ok"}, miopPacket.Bd.ReqBody.Body[0].(int)) // idx is the Connection ID
-			//msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+			//msgPayload := Gobmarshaller{}.Marshall(miopPacket)
 
 			// lib.PrintlnDebug("TCP Before send")
 			//s.send(conn, addr, msgPayload)
@@ -191,7 +191,7 @@ func (s SRHTCP) handler(info *interface{}, connectionIndex int) {
 
 func (s SRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	miop, err := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, err := Gobmarshaller{}.Unmarshall(msgFromServer)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err.Error())
 		return false, miop
@@ -201,7 +201,7 @@ func (s SRHTCP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 
 func (s SRHTCP) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	miop, err := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, err := Gobmarshaller{}.Unmarshall(msgFromServer)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err.Error())
 		return false, miop

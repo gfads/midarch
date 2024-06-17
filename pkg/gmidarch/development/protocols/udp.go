@@ -19,6 +19,7 @@ type UDPClient struct {
 	connection *net.UDPConn
 	Ip         string
 	adaptId    int
+	// lock       sync.Mutex // Lock to avoid multiple reads/writes while reading a fragmented message
 }
 
 func (cl *UDPClient) Address() string {
@@ -121,6 +122,14 @@ func (cl *UDPClient) Receive() (fullMessage []byte, err error) {
 	if err != nil {
 		return nil, err
 	}
+
+	// cl.lock.Lock()
+	// lib.PrintlnDebug("Receive locked")
+	// defer func() {
+	// 	cl.lock.Unlock()
+	// 	lib.PrintlnDebug("Receive unlocked")
+	// }()
+
 	msgSize := binary.LittleEndian.Uint32(size)
 	const maxBufferSize = shared.MAX_PACKET_SIZE
 	for {
@@ -161,6 +170,14 @@ func (cl *UDPClient) Send(msg []byte) error {
 	if err != nil {
 		return err
 	}
+
+	// cl.lock.Lock()
+	// lib.PrintlnDebug("Send locked")
+	// defer func() {
+	// 	cl.lock.Unlock()
+	// 	lib.PrintlnDebug("Send unlocked")
+	// }()
+
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msg)))
 	_, err = cl.connection.WriteTo(sizeOfMsgSize, addr)
