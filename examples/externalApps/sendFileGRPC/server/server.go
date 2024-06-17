@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/base64"
 	"log"
 	"net"
 
@@ -17,7 +18,12 @@ type SendFileServer struct {
 
 func (sfs *SendFileServer) Upload(ctx context.Context, request *sendfile.Request) (response *sendfile.Response, err error) {
 	sendFile := sendFileImpl.SendFile{}
-	response = &sendfile.Response{Saved: sendFile.Save(request.Base64File)}
+	fileBytes, err := base64.StdEncoding.DecodeString(request.Base64File)
+	if err != nil {
+		return nil, err
+	}
+
+	response = &sendfile.Response{Saved: sendFile.Save(fileBytes)}
 	return response, nil
 }
 

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
 	"log"
 	"strconv"
@@ -75,8 +76,11 @@ func main() {
 		for d := range msgs {
 			base64File := string(d.Body)
 
+			fileBytes, err := base64.StdEncoding.DecodeString(base64File)
+			failOnError(err, "Failed to publish a message")
+
 			//log.Printf(" [.] fib(%d)", n)
-			response := sendFileImpl.SendFile{}.Save(base64File)
+			response := sendFileImpl.SendFile{}.Save(fileBytes)
 
 			var responseBody string
 			if response {
