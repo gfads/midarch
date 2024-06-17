@@ -12,6 +12,6 @@ RUN go get google.golang.org/grpc
 COPY ./pkg ./pkg
 COPY ./evaluation/experiments ./evaluation/experiments
 
-RUN go build $GMIDARCHDIR/evaluation/experiments/fiboApps/fibo_gRPC/client/client.go
+RUN go build $GMIDARCHDIR/evaluation/experiments/externalApps/fibo_gRPC/client/client.go
 
 CMD ["/go/client"]

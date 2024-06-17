@@ -12,7 +12,7 @@ RUN go get google.golang.org/grpc
 COPY ./pkg ./pkg
 COPY ./evaluation/experiments ./evaluation/experiments
 
-RUN go build $GMIDARCHDIR/evaluation/experiments/fiboApps/fibo_gRPC/server/server.go
+RUN go build $GMIDARCHDIR/evaluation/experiments/externalApps/fibo_gRPC/server/server.go
 
 EXPOSE 2030
 CMD ["/go/server"]

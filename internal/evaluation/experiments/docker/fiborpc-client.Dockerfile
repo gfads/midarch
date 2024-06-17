@@ -10,6 +10,6 @@ ENV FDR4 /usr/local/fdr4/bin
 COPY ./pkg ./pkg
 COPY ./evaluation/experiments ./evaluation/experiments
 
-RUN go build $GMIDARCHDIR/evaluation/experiments/fiboApps/fiboRPC/client/client.go
+RUN go build $GMIDARCHDIR/evaluation/experiments/externalApps/fiboRPC/client/client.go
 
 CMD ["/go/client"]

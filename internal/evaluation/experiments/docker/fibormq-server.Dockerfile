@@ -12,6 +12,6 @@ RUN go get github.com/streadway/amqp
 COPY ./pkg ./pkg
 COPY ./evaluation/experiments ./evaluation/experiments
 
-RUN go build $GMIDARCHDIR/evaluation/experiments/fiboApps/fibo_rmq/server/server.go
+RUN go build $GMIDARCHDIR/evaluation/experiments/externalApps/fibo_rmq/server/server.go
 
 CMD ["/go/server"]
