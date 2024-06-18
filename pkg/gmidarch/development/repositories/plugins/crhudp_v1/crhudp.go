@@ -8,8 +8,8 @@ import (
 	"github.com/gfads/midarch/pkg/gmidarch/development/components/middleware"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
-	evolutive "github.com/gfads/midarch/pkg/injector"
 	"github.com/gfads/midarch/pkg/shared"
+	"github.com/gfads/midarch/pkg/shared/pluginUtils"
 )
 
 // @Type: CRHUDP
@@ -74,11 +74,11 @@ func (c CRHUDP) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		log.Println("Adapting, miop.Bd.ReqBody.Body:", miop.Bd.ReqBody.Body)
 		if miop.Bd.ReqBody.Body[0] == "udp" {
 			log.Println("Adapting => UDP")
-			evolutive.GeneratePlugin("crhudp_v1", "crhudp", "crhudp_v1")
+			pluginUtils.GeneratePlugin("crhudp", "crhudp_v1")
 		}
 		if miop.Bd.ReqBody.Body[0] == "tcp" {
 			log.Println("Adapting => TCP")
-			evolutive.GeneratePlugin("crhtcp_v1", "crhtcp", "crhtcp_v1")
+			pluginUtils.GeneratePlugin("crhtcp", "crhtcp_v1")
 		}
 		msgFromServer = c.read(err, conn, size)
 	}

@@ -1,11 +1,12 @@
 package adaptive
 
 import (
+	"plugin"
+	"strings"
+
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/shared"
 	"github.com/gfads/midarch/pkg/shared/pluginUtils"
-	"plugin"
-	"strings"
 )
 
 // @Type: Executor
@@ -24,7 +25,7 @@ func (Executor) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		pluginName := plan.Params[plan.Operations[0]][0]
 		//fmt.Println("Executor.I_Process::will load plugin:", pluginName)
 
-		if shared.Contains(shared.Adaptability, shared.EVOLUTIVE_PROTOCOL_ADAPTATION) { //strings.Contains(pluginName, "crh") {
+		if shared.Contains(shared.Adaptability, shared.EVOLUTIVE_PROTOCOL_ADAPTATION) {
 			//fmt.Println("EVOLUTIVE_PROTOCOL_ADAPTATION no executor:", pluginName)
 			unitCommand.Cmd = shared.REPLACE_COMPONENT
 			unitCommand.Params = plugin.Plugin{} //plg
@@ -32,9 +33,15 @@ func (Executor) I_Process(id string, msg *messages.SAMessage, info *interface{},
 			componentName, _, _ = strings.Cut(componentName, "_")
 			unitCommand.Type = shared.GetComponentTypeByNameFromRAM(componentName)
 			//shared.ErrorHandler(shared.GetFunction(), "Teste")
-		} else if shared.Contains(shared.Adaptability, shared.EVOLUTIVE_ADAPTATION) &&
-			strings.Contains(pluginName, "srh") { // TODO dcruzb: remove test condition
+		} else if shared.Contains(shared.Adaptability, shared.EVOLUTIVE_ADAPTATION) {
 			//fmt.Println("EVOLUTIVE_ADAPTATION no executor")
+			if strings.Contains(pluginName, ".go") {
+				versionedPluginName := strings.ReplaceAll(pluginName, ".go", "")
+				componentName, _, _ := strings.Cut(versionedPluginName, "_")
+				pluginUtils.GeneratePlugin(componentName, versionedPluginName)
+				pluginName = versionedPluginName + ".so"
+			}
+
 			plg := pluginUtils.LoadPlugin(pluginName)
 			//fmt.Println("Executor.I_Process::plugin loaded:", pluginName)
 			//log.Println("Executor.I_Process::Will lookup Gettype:", pluginName)
