@@ -58,7 +58,9 @@ func main() {
 	fmt.Printf("Fibonacci server is running at Port: %v \n", shared.CALCULATOR_PORT)
 
 	intervalBetweenInjections, _ := strconv.Atoi(shared.EnvironmentVariableValueWithDefault("INJECTION_INTERVAL", "120"))
-	evolutive.EvolutiveInjector{}.StartEvolutiveProtocolInjection("srhhttp2", "srhtls", time.Duration(intervalBetweenInjections)*time.Second)
+	// evolutive.EvolutiveInjector{}.StartEvolutiveProtocolInjection("srhhttp2", "srhtls", time.Duration(intervalBetweenInjections)*time.Second)
+	evolutive.EvolutiveInjector{}.Start("srhhttp2", "srhtls", time.Duration(intervalBetweenInjections)*time.Second)
+
 	//intervalBetweenInjections, _ := strconv.Atoi(shared.EnvironmentVariableValueWithDefault("INJECTION_INTERVAL", "45"))
 	//evolutive.EvolutiveInjector{}.StartEvolutiveProtocolInjection("srhtcp", "srhhttp2", time.Duration(intervalBetweenInjections)*time.Second)
 

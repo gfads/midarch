@@ -2,6 +2,7 @@ package protocols
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/tls"
 	"encoding/binary"
 	"io"
@@ -97,10 +98,32 @@ func (cl *TLSClient) Read(b []byte) (n int, err error) {
 }
 
 func (cl *TLSClient) Receive() (fullMessage []byte, err error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	// lib.PrintlnInfo("TLS - Receive msg from client")
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	_, err = cl.Read(size)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return nil, err
+	}
+	msgSize := binary.LittleEndian.Uint32(size)
+
+	var buffer bytes.Buffer
+
+	// Read from the connection and write to the buffer
+	_, err = io.CopyN(&buffer, cl.connection, int64(msgSize))
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		return nil, err
+	}
+	return buffer.Bytes(), nil
+}
+
+func (cl *TLSClient) ReceiveManualChunking() (fullMessage []byte, err error) {
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	// receive reply's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	cl.Read(size)
+	_, err = cl.Read(size)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err)
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
@@ -147,7 +170,7 @@ func (cl *TLSClient) Receive() (fullMessage []byte, err error) {
 }
 
 func (cl *TLSClient) Send(msg []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msg)))
 	_, err := cl.connection.Write(sizeOfMsgSize)
@@ -224,7 +247,7 @@ func (st *TLS) ConnectToServer(ip, port string) {
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
-	lib.PrintlnDebug("Resolved addr", tcpAddr)
+	// lib.PrintlnDebug("Resolved addr", tcpAddr)
 	//localTcpAddr := c.getLocalTcpAddr()
 
 	for {
@@ -238,11 +261,11 @@ func (st *TLS) ConnectToServer(ip, port string) {
 			break
 		}
 	}
-	lib.PrintlnDebug("Connected", st.serverConnection)
+	// lib.PrintlnDebug("Connected", st.serverConnection)
 	if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 		//lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 		shared.LocalAddr = st.serverConnection.LocalAddr().String()
-		lib.PrintlnDebug("Got local addr", st.serverConnection)
+		// lib.PrintlnDebug("Got local addr", st.serverConnection)
 	}
 }
 
@@ -306,7 +329,30 @@ func (st *TLS) WriteString(message string) {
 	}
 }
 
-func (st *TLS) Receive() ([]byte, error) {
+func (st *TLS) Receive() (fullMessage []byte, err error) {
+	// lib.PrintlnInfo("TLS - Receive msg from Server")
+
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	_, err = st.serverConnection.Read(size)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return nil, err
+	}
+	msgSize := binary.LittleEndian.Uint32(size)
+
+	var buffer bytes.Buffer
+
+	// Read from the connection and write to the buffer
+	_, err = io.CopyN(&buffer, st.serverConnection, int64(msgSize))
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		return nil, err
+	}
+	return buffer.Bytes(), nil
+}
+
+func (st *TLS) ReceiveManualChunking() ([]byte, error) {
 	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "TLS Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// receive reply's size
@@ -317,6 +363,7 @@ func (st *TLS) Receive() ([]byte, error) {
 		return nil, err
 	}
 	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "TLS read size")
+	// lib.PrintlnMessage("Size of message:", binary.LittleEndian.Uint32(sizeOfMsgSize), "max size:", shared.NUM_MAX_MESSAGE_BYTES)
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(sizeOfMsgSize), shared.NUM_MAX_MESSAGE_BYTES)
 	_, err = st.serverConnection.Read(msgFromServer)
@@ -325,12 +372,29 @@ func (st *TLS) Receive() ([]byte, error) {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "TLS read message")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "TLS read message")
 	return msgFromServer, nil
 }
 
 func (st *TLS) Send(msgToServer []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
+	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
+	_, err := st.serverConnection.Write(sizeOfMsgSize)
+	if err != nil {
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return err
+	}
+
+	// Send the message
+	_, err = st.serverConnection.Write(msgToServer)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (st *TLS) SendManualChunking(msgToServer []byte) error {
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
 	_, err := st.serverConnection.Write(sizeOfMsgSize)

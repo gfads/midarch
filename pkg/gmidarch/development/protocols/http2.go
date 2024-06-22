@@ -67,7 +67,8 @@ func (cl *HTTP2Client) Read(b []byte) (n int, err error) {
 }
 
 func (cl *HTTP2Client) Receive() (msg []byte, err error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP2 Version Not adapted")
+	//lib.PrintlnInfo("HTTP2 - Receive msg from Client")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP2 Version Not adapted")
 	msg = <-cl.msgChan
 	// lib.PrintlnInfo("HTTP2Client.Receive: msg", msg)
 	// lib.PrintlnInfo("HTTP2Client.Receive: msg as string", string(msg))
@@ -91,7 +92,7 @@ func (cl *HTTP2Client) Receive() (msg []byte, err error) {
 }
 
 func (cl *HTTP2Client) Send(msg []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP2 Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP2 Version Not adapted")
 	go func() {
 		cl.replyChan <- msg
 	}()
@@ -262,7 +263,7 @@ func (st *HTTP2) ConnectToServer(ip, port string) {
 	// Create an HTTP client with a timeout
 	http2Transport := &http2.Transport{TLSClientConfig: lib.GetClientTLSConfig("h2")}
 	st.http2Client = &http.Client{Timeout: 5 * time.Second, Transport: http2Transport}
-	lib.PrintlnDebug("Connected", st.http2Client)
+	// lib.PrintlnDebug("Connected", st.http2Client)
 	// if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 	// 	//lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 	// 	shared.LocalAddr = st.http2Client.LocalAddr().String()
@@ -291,6 +292,7 @@ func (st *HTTP2) WriteString(message string) {
 func (st *HTTP2) Receive() ([]byte, error) {
 	//lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "HTTP2.Receive")
 	msgFromServer := <-st.msgChan
+	//lib.PrintlnInfo("HTTP2 - Receive msg from Client")
 	// sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// // receive reply's size
 	// _, err := st.serverConnection.Read(sizeOfMsgSize)

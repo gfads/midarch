@@ -299,7 +299,7 @@ func RunSendFileExperiment(transportProtocol TransportProtocolFactor, adaptation
 }
 
 func RunExperiment(transportProtocolFactor TransportProtocolFactor, adaptationInterval int, remoteOperation RemoteOperationFactor, sampleSize int, fiboPlace int, imageSize string) {
-	experimentVersion := "1.14.8" // 14.4 = 80% CPU | 14.5 = 50% CPU | 14.6 = 40% CPU | 14.7 = 40% CPU + GobMarshaller | 14.8 = 40% CPU + GobMarshaller + NoBase64
+	experimentVersion := "1.14.10" // 14.4 = 80% CPU | 14.5 = 50% CPU | 14.6 = 40% CPU | 14.7 = 40% CPU + GobMarshaller | 14.8 = 40% CPU + GobMarshaller + NoBase64
 	experimentLevel := ""
 	if remoteOperation == Fibonacci {
 		experimentLevel = strconv.Itoa(fiboPlace)

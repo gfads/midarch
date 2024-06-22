@@ -66,7 +66,7 @@ func (cl *HTTPSClient) Read(b []byte) (n int, err error) {
 }
 
 func (cl *HTTPSClient) Receive() (msg []byte, err error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTPS Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTPS Version Not adapted")
 	msg = <-cl.msgChan
 	// lib.PrintlnInfo("HTTPSClient.Receive: msg", msg)
 	// lib.PrintlnInfo("HTTPSClient.Receive: msg as string", string(msg))
@@ -90,7 +90,7 @@ func (cl *HTTPSClient) Receive() (msg []byte, err error) {
 }
 
 func (cl *HTTPSClient) Send(msg []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTPS Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTPS Version Not adapted")
 	go func() {
 		cl.replyChan <- msg
 	}()
@@ -265,7 +265,7 @@ func (st *HTTPS) ConnectToServer(ip, port string) {
 			return tls.Dial(network, addr, lib.GetClientTLSConfig("http/1.1"))
 		}}
 		// st.serverConnection, err = net.DialTCP("tcp", nil, tcpAddr)
-		lib.PrintlnDebug("Dialed", st.httpsClient)
+		// lib.PrintlnDebug("Dialed", st.httpsClient)
 		// if err != nil {
 		// 	lib.PrintlnError("Dial error", st.httpsClient, err)
 		// 	time.Sleep(200 * time.Millisecond)
@@ -274,7 +274,7 @@ func (st *HTTPS) ConnectToServer(ip, port string) {
 		break // TODO dcruzb: remove for since there is no possibility of error
 		// }
 	}
-	lib.PrintlnDebug("Connected", st.httpsClient)
+	// lib.PrintlnDebug("Connected", st.httpsClient)
 	// if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 	// 	//lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 	// 	shared.LocalAddr = st.httpsClient.LocalAddr().String()
@@ -301,7 +301,7 @@ func (st *HTTPS) WriteString(message string) {
 }
 
 func (st *HTTPS) Receive() ([]byte, error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "HTTPS.Receive")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "HTTPS.Receive")
 	msgFromServer := <-st.msgChan
 	// sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// // receive reply's size
@@ -396,14 +396,14 @@ type HTTPSRequest struct {
 }
 
 func (rq HTTPSRequest) Request(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
-	lib.PrintlnDebug("Received message")
+	// lib.PrintlnDebug("Received message")
 	uriParameters := lib.GetURIParameters(r.RequestURI)
 	go func() {
 		rq.msgChan <- []byte(uriParameters["param"].(string))
 	}()
-	lib.PrintlnDebug("Forwarded message")
+	// lib.PrintlnDebug("Forwarded message")
 	replyMsg := <-rq.replyChan
-	lib.PrintlnDebug("Received reply")
+	// lib.PrintlnDebug("Received reply")
 	//*reply = w
 	w.Write(replyMsg)
 

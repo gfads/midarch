@@ -65,7 +65,7 @@ func (cl *HTTPClient) Read(b []byte) (n int, err error) {
 }
 
 func (cl *HTTPClient) Receive() (msg []byte, err error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP Version Not adapted")
 	msg = <-cl.msgChan
 	//lib.PrintlnInfo("HTTPClient.Receive: msg", msg)
 	//lib.PrintlnInfo("HTTPClient.Receive: msg as string", string(msg))
@@ -89,7 +89,7 @@ func (cl *HTTPClient) Receive() (msg []byte, err error) {
 }
 
 func (cl *HTTPClient) Send(msg []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP Version Not adapted")
 	go func() {
 		cl.replyChan <- msg
 	}()
@@ -261,7 +261,7 @@ func (st *HTTP) ConnectToServer(ip, port string) {
 		// Create an HTTP client with a timeout
 		st.httpClient = &http.Client{Timeout: 5 * time.Second}
 		// st.serverConnection, err = net.DialTCP("tcp", nil, tcpAddr)
-		lib.PrintlnDebug("Dialed", st.httpClient)
+		// lib.PrintlnDebug("Dialed", st.httpClient)
 		// if err != nil {
 		// 	lib.PrintlnError("Dial error", st.httpClient, err)
 		// 	time.Sleep(200 * time.Millisecond)
@@ -270,7 +270,7 @@ func (st *HTTP) ConnectToServer(ip, port string) {
 		break // TODO dcruzb: remove for since there is no possibility of error
 		// }
 	}
-	lib.PrintlnDebug("Connected", st.httpClient)
+	// lib.PrintlnDebug("Connected", st.httpClient)
 	// if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 	// 	//lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 	// 	shared.LocalAddr = st.httpClient.LocalAddr().String()
@@ -297,7 +297,7 @@ func (st *HTTP) WriteString(message string) {
 }
 
 func (st *HTTP) Receive() ([]byte, error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "HTTP.Receive")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "HTTP.Receive")
 	msgFromServer := <-st.msgChan
 	// sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// // receive reply's size

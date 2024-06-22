@@ -241,10 +241,10 @@ def main():
   output_directory = "./charts"
 
   experiments = ["Fibonacci", "SendFile"] # 
-  fibonacci_levels = [] #"2", "11", "38"] #"40", "41"]
-  sendfile_levels = ["lg"] #"sm", "md", "lg"] #"sm", "lg",
+  fibonacci_levels = ["2", "11", "38"] #"40", "41"]
+  sendfile_levels = ["sm", "md", "lg"]
   # "QUIC",
-  protocols = ["TLS", "HTTP2", "TLSHTTP2", "E_RPC", "E_GRPC", "E_RMQ"] #"UDP", "TCP", "TLS", "RPC",  "HTTP", "HTTPS", "HTTP2", "TCPTLS", "RPCQUIC", "RPCHTTP", "TCPHTTP", "TLSHTTP2", "QUICHTTP2", "E_RPC", "E_GRPC", "E_RMQ"]
+  protocols = ["UDP", "TCP", "TLS", "RPC",  "HTTP", "HTTPS", "HTTP2", "TCPTLS", "RPCQUIC", "RPCHTTP", "TCPHTTP", "TLSHTTP2", "QUICHTTP2", "E_RPC", "E_GRPC", "E_RMQ"]  #"TLS", "HTTP2", "TLSHTTP2", "E_RPC", "E_GRPC", "E_RMQ"
   metrics = ["memory", "cpu"]
   apps = ["client", "server"]
   for experiment in experiments:

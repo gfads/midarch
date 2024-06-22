@@ -98,40 +98,41 @@ func GeneratePlugin(pluginName, versionedPluginName string) {
 		os.Exit(1)
 	}
 
-	pluginType, _, err := shared.GetTypeAndBehaviour(shared.DIR_PLUGINS_SOURCE + "/" + versionedPluginName + "/" + pluginName + ".go")
+	pluginType, _, err := shared.GetTypeAndBehaviour(shared.DIR_PLUGINS_SOURCE + "/middleware/" + pluginName + ".go")
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
-	pluginSourcePath := shared.DIR_PLUGINS_IMPORT + "/" + versionedPluginName
+	pluginSourcePath := shared.DIR_PLUGINS_IMPORT + "/middleware" //+ versionedPluginName
 	// log.Println("Type and Behaviour:", pluginType)
 
 	// log.Println("pluginSourcePath:", pluginSourcePath)
 	//pluginSourcePath := "adaptive/pluginTest/pluginsSrc" + "/" + pluginName
 	output := bytes.Replace(input, []byte("<pluginName>"), []byte(pluginSourcePath), -1)
-	output = bytes.Replace(output, []byte("<pluginType>"), []byte(pluginName+"."+pluginType+"{}"), -1)
+	output = bytes.Replace(output, []byte("<pluginType>"), []byte("middleware."+pluginType+"{}"), -1)
 
 	// log.Println(shared.DIR_PLUGINS_SOURCE + "/" + versionedPluginName + "/main/pluginBuild.go")
-	os.Mkdir(shared.DIR_PLUGINS_SOURCE+"/"+versionedPluginName+"/main", os.ModePerm)
-	if err = ioutil.WriteFile(shared.DIR_PLUGINS_SOURCE+"/"+versionedPluginName+"/main/pluginBuild.go", output, 0666); err != nil {
+	os.Mkdir(shared.DIR_PLUGINS_SOURCE+"/middleware/main", os.ModePerm)
+	if err = ioutil.WriteFile(shared.DIR_PLUGINS_SOURCE+"/middleware/main/pluginBuild.go", output, 0666); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	generatePlugin(versionedPluginName)
+	buildPlugin(versionedPluginName)
 }
 
-func generatePlugin(plugin string) {
+func buildPlugin(plugin string) {
 	pOut := shared.DIR_PLUGINS + "/" + plugin + ".so"
 	//pIn := shared.DIR_PLUGINS_SOURCE + "/" + source + "/" + source + ".go"
-	pIn := shared.DIR_PLUGINS_SOURCE + "/" + plugin + "/main/pluginBuild.go"
+	// pIn := shared.DIR_PLUGINS_SOURCE + "/" + plugin + "/main/pluginBuild.go"
+	pIn := shared.DIR_PLUGINS_SOURCE + "/middleware/main/pluginBuild.go"
 
-	//fmt.Println("injector::evolutive.generatePlugin::will build plugin:", source)
+	//fmt.Println("injector::evolutive.buildPlugin::will build plugin:", source)
 	//fmt.Println("command:", shared.DIR_GO+"/go", "build", "-buildmode=plugin", "-o", pOut, pIn)
-	_, err := exec.Command("go", "build", "-buildmode=plugin", "-o", pOut, pIn).CombinedOutput() //"-gcflags", "all=-N -l",
+	_, err := exec.Command("go", "build", "-buildmode=plugin", "-gcflags", "all=-N -l", "-o", pOut, pIn).CombinedOutput() //"-gcflags", "all=-N -l",
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), "Something wrong in generating plugin '"+pIn+"' in \n '"+pOut+"': "+err.Error()+"\n")
 	}
-	//fmt.Println("injector::evolutive.generatePlugin::plugin built:", source)
+	//fmt.Println("injector::evolutive.buildPlugin::plugin built:", source)
 }
 
 func RemoveOldPlugins() {

@@ -99,7 +99,7 @@ func (cl *QUICClient) Read(b []byte) (n int, err error) {
 }
 
 func (cl *QUICClient) Receive() (fullMessage []byte, err error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	// receive reply's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	cl.Read(size)
@@ -149,7 +149,7 @@ func (cl *QUICClient) Receive() (fullMessage []byte, err error) {
 }
 
 func (cl *QUICClient) Send(msg []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msg)))
 	_, err := cl.stream.Write(sizeOfMsgSize)
@@ -228,7 +228,7 @@ func (st *QUIC) ConnectToServer(ip, port string) {
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
-	lib.PrintlnDebug("Resolved addr", tcpAddr)
+	// lib.PrintlnDebug("Resolved addr", tcpAddr)
 	//localTcpAddr := c.getLocalTcpAddr()
 
 	for {
@@ -247,11 +247,11 @@ func (st *QUIC) ConnectToServer(ip, port string) {
 		}
 	}
 
-	lib.PrintlnDebug("Connected", st.serverConnection)
+	// lib.PrintlnDebug("Connected", st.serverConnection)
 	if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 		//lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 		shared.LocalAddr = st.serverConnection.LocalAddr().String()
-		lib.PrintlnDebug("Got local addr", st.serverConnection)
+		// lib.PrintlnDebug("Got local addr", st.serverConnection)
 	}
 }
 
@@ -339,12 +339,12 @@ func (st *QUIC) Receive() ([]byte, error) {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "QUIC read message")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "QUIC read message")
 	return msgFromServer, nil
 }
 
 func (st *QUIC) Send(msgToServer []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
 	_, err := st.stream.Write(sizeOfMsgSize)

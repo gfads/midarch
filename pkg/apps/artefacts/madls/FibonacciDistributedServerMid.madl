@@ -13,5 +13,5 @@ Configuration FibonacciDistributedServerMid :=
         fibonacciinvoker,t2,marshaller2
 
    Adaptability
-      Evolutive_Protocol
+      Evolutive
 EndConf

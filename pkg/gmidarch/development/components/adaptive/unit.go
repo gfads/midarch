@@ -279,7 +279,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				//}
 
 				*elementComponent.ExecuteForever = false
-				for *elementComponent.Executing == true {
+				for *elementComponent.Executing {
 					// lib.PrintlnInfo("Awaiting to stop executing")
 					time.Sleep(200 * time.Millisecond)
 				}

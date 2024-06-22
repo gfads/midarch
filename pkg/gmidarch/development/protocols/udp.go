@@ -2,6 +2,7 @@ package protocols
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/binary"
 	"io"
 	"log"
@@ -99,10 +100,31 @@ func (cl *UDPClient) Read(b []byte) (n int, err error) {
 }
 
 func (cl *UDPClient) Receive() (fullMessage []byte, err error) {
-	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
-	// receive reply's size
+	// lib.PrintlnInfo("TLS - Receive msg from client")
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	cl.Read(size)
+	_, err = cl.Read(size)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return nil, err
+	}
+	msgSize := binary.LittleEndian.Uint32(size)
+
+	var buffer bytes.Buffer
+
+	// Read from the connection and write to the buffer
+	_, err = io.CopyN(&buffer, cl.connection, int64(msgSize))
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		return nil, err
+	}
+	return buffer.Bytes(), nil
+}
+
+func (cl *UDPClient) ReceiveManualChunking() (fullMessage []byte, err error) {
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	_, err = cl.Read(size)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err)
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
@@ -254,7 +276,7 @@ func (st *UDP) ConnectToServer(ip, port string) {
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
-	lib.PrintlnDebug("Resolved addr", udpAddr)
+	// lib.PrintlnDebug("Resolved addr", udpAddr)
 	//localUdpAddr := c.getLocalUdpAddr()
 
 	for {
@@ -272,7 +294,7 @@ func (st *UDP) ConnectToServer(ip, port string) {
 	if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 		//lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 		shared.LocalAddr = st.serverConnection.LocalAddr().String()
-		lib.PrintlnDebug("Got local addr", st.serverConnection)
+		// lib.PrintlnDebug("Got local addr", st.serverConnection)
 	}
 }
 
@@ -336,7 +358,30 @@ func (st *UDP) WriteString(message string) {
 	}
 }
 
-func (st *UDP) Receive() ([]byte, error) {
+func (st *UDP) Receive() (fullMessage []byte, err error) {
+	// lib.PrintlnInfo("TLS - Receive msg from Server")
+
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	_, err = st.serverConnection.Read(size)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return nil, err
+	}
+	msgSize := binary.LittleEndian.Uint32(size)
+
+	var buffer bytes.Buffer
+
+	// Read from the connection and write to the buffer
+	_, err = io.CopyN(&buffer, st.serverConnection, int64(msgSize))
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		return nil, err
+	}
+	return buffer.Bytes(), nil
+}
+
+func (st *UDP) ReceiveManualChunking() ([]byte, error) {
 	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "UDP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// receive reply's size
@@ -356,12 +401,29 @@ func (st *UDP) Receive() ([]byte, error) {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "UDP read message")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "UDP read message")
 	return msgFromServer, nil
 }
 
 func (st *UDP) Send(msgToServer []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
+	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
+	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
+	_, err := st.serverConnection.Write(sizeOfMsgSize)
+	if err != nil {
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return err
+	}
+
+	// Send the message
+	_, err = st.serverConnection.Write(msgToServer)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (st *UDP) SendManualChunking(msgToServer []byte) error {
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
 	_, err := st.serverConnection.Write(sizeOfMsgSize)

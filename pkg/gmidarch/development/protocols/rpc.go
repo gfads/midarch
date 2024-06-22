@@ -64,7 +64,7 @@ func (cl *RPCClient) Read(b []byte) (n int, err error) {
 }
 
 func (cl *RPCClient) Receive() (msg []byte, err error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
 	msg = <-cl.msgChan
 	// lib.PrintlnInfo("RPCClient.Receive: msg", msg)
 	// receive reply's size
@@ -87,7 +87,7 @@ func (cl *RPCClient) Receive() (msg []byte, err error) {
 }
 
 func (cl *RPCClient) Send(msg []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
 	go func() {
 		cl.replyChan <- msg
 	}()
@@ -260,7 +260,7 @@ func (st *RPC) ConnectToServer(ip, port string) {
 		rpcClient, err := rpc.DialHTTP("tcp", addr)
 		st.rpcClient = rpcClient
 		// st.serverConnection, err = net.DialTCP("tcp", nil, tcpAddr)
-		lib.PrintlnDebug("Dialed", st.rpcClient)
+		// lib.PrintlnDebug("Dialed", st.rpcClient)
 		if err != nil {
 			lib.PrintlnError("Dial error", st.rpcClient, err)
 			time.Sleep(200 * time.Millisecond)
@@ -269,7 +269,7 @@ func (st *RPC) ConnectToServer(ip, port string) {
 			break
 		}
 	}
-	lib.PrintlnDebug("Connected", st.rpcClient)
+	// lib.PrintlnDebug("Connected", st.rpcClient)
 	// if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 	// 	//lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 	// 	shared.LocalAddr = st.rpcClient.LocalAddr().String()
@@ -295,7 +295,7 @@ func (st *RPC) WriteString(message string) {
 }
 
 func (st *RPC) Receive() ([]byte, error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "RPC.Receive")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "RPC.Receive")
 	msgFromServer := <-st.msgChan
 	// sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// // receive reply's size

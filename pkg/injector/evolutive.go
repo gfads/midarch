@@ -76,11 +76,11 @@ func alternatePlugins(firstElem, secondElem string, interval time.Duration) {
 		switch currentPlugin {
 		case 1: // Plugin 01
 			currentPlugin = 2
-			elemNew = firstElem + "_v2"
+			elemNew = firstElem //+ "_v2"
 			pluginUtils.GeneratePlugin(firstElem, elemNew)
 		case 2: // Plugin 02
 			currentPlugin = 1
-			elemNew = secondElem + "_v1"
+			elemNew = secondElem //+ "_v1"
 			pluginUtils.GeneratePlugin(secondElem, elemNew)
 		}
 	}
