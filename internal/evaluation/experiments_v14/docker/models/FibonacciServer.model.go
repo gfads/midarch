@@ -60,7 +60,8 @@ func main() {
 	<interval.between.injections>
 	<evolutive.injection>
 	//intervalBetweenInjections, _ := strconv.Atoi(shared.EnvironmentVariableValueWithDefault("INJECTION_INTERVAL", "45"))
-	//evolutive.EvolutiveInjector{}.StartEvolutiveProtocolInjection("srhtcp", "srhhttp2", time.Duration(intervalBetweenInjections)*time.Second)
+	//evolutive.EvolutiveInjector{}.StartEvolutiveProtocolInjection("srhhttp2", "srhtls", time.Duration(intervalBetweenInjections)*time.Second)
+	//evolutive.EvolutiveInjector{}.Start("srhhttp2", "srhtls", time.Duration(intervalBetweenInjections)*time.Second)
 
 	//fmt.Scanln()
 	var wg sync.WaitGroup

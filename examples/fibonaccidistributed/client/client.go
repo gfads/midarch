@@ -87,7 +87,7 @@ func main() {
 			if r != 0 {
 				ok = true
 				//lib.PrintlnMessage(";" + strconv.Itoa(x+1) + ";" + strconv.FormatFloat(float64(duration.Nanoseconds())/1000000, 'f', -1, 64))
-				log.Printf(";ok;%d;%f\n", x+1, float64(duration.Nanoseconds())/1000000)
+				log.Printf(";ok;%d;%f;%d\n", x+1, float64(duration.Nanoseconds())/1000000, r)
 			}
 
 			// Normally distributed waiting time between calls with an average of 60 milliseconds and standard deviation of 20 milliseconds
