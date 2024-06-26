@@ -92,12 +92,10 @@ def read_results_data(file_path):
   Returns:
     DataFrame do Pandas com os dados do experimento.
   """
-  header = ["dateTime", "info", "sequential", "response_time"]
+  header = ["dateTime", "info", "sequential", "response_time", "result"]
   # print(file_path)
 
   df = pd.read_csv(file_path, delimiter=";", skiprows=101, header=None, names=header, na_values=["-"]) # 101 = 100 Warm-up requests + header
-
-
   # # Definindo a largura da coluna fixa
   # width_fixa = 19
   # # Lendo a coluna fixa com `pd.read_fwf`
@@ -137,7 +135,7 @@ def generate_boxplots(df, experiment, app, metric, level):
   fig.set_size_inches(14, 8)
   metric_column = "memory_usage(%)" if metric == "memory" else "cpu_usage(%)"
   # df[["dateTime", "duration", "protocol", "memory_usage(%)", "cpu_usage(%)"]].to_csv("df.csv")
-  sns.boxplot(x="protocol", y=metric_column, data=df, ax=ax, showfliers=False)
+  sns.boxplot(x="protocolAdaptability", y=metric_column, data=df, ax=ax, showfliers=False)
   ax.set_xlabel("Protocolo")
   ax.set_ylabel("% Memória Utilizada" if metric == "memory" else "% CPU Utilizado")
   appString = "Cliente" if app == "client" else "Servidor"
@@ -168,7 +166,7 @@ def generate_lineplots_by_metric(df, experiment, app, metric, level):
   fig.set_size_inches(18, 8)
   metric_column = "memory_usage(%)" if metric == "memory" else "cpu_usage(%)" if metric == "cpu" else "response_time"
   # df[["dateTime", "duration", "protocol", "memory_usage(%)", "cpu_usage(%)"]].to_csv("df.csv")
-  sns.lineplot(x="duration", y=metric_column, data=df, hue="protocol")
+  sns.lineplot(x="duration", y=metric_column, data=df, hue="protocolAdaptability")
   ax.set_xlabel("Duração (s)")
   ax.set_ylabel("% Memória Utilizada" if metric == "memory" else "% CPU Utilizado" if metric == "cpu" else "Tempo de Resposta (ms)")
   appString = "Cliente" if app == "client" else "Servidor"
@@ -199,7 +197,7 @@ def generate_boxplots_by_response_time(df, experiment, level):
   fig, ax = plt.subplots()
   fig.set_size_inches(14, 8)
   # sns.lineplot(x="duration", y="response_time", data=df, hue="protocol", sort=False)
-  sns.boxplot(x="protocol", y="response_time", data=df, ax=ax, showfliers=False)
+  sns.boxplot(x="protocolAdaptability", y="response_time", data=df, ax=ax, showfliers=False)
   ax.set_xlabel("Protocolos")
   ax.set_ylabel("Tempo de Resposta (ms)")
   # ax.set_ylim(bottom=0, top=max(df["response_time"]))
@@ -237,14 +235,14 @@ def main():
   """
   Função principal que gera os boxplots para os experimentos.
   """
-  input_directory = "../results" #20240403-AllExecutedOk"
+  input_directories = ["../results_14.10_WithPlugin", "../results_14.10_WithoutPlugin"]
   output_directory = "./charts"
 
   experiments = ["Fibonacci", "SendFile"] # 
   fibonacci_levels = ["2", "11", "38"] #"40", "41"]
   sendfile_levels = ["sm", "md", "lg"]
   # "QUIC",
-  protocols = ["UDP", "TCP", "TLS", "RPC",  "HTTP", "HTTPS", "HTTP2", "TCPTLS", "RPCQUIC", "RPCHTTP", "TCPHTTP", "TLSHTTP2", "QUICHTTP2", "E_RPC", "E_GRPC", "E_RMQ"]  #"TLS", "HTTP2", "TLSHTTP2", "E_RPC", "E_GRPC", "E_RMQ"
+  protocols = ["TLSHTTP2"] #["UDP", "TCP", "TLS", "RPC",  "HTTP", "HTTPS", "HTTP2", "TCPTLS", "RPCQUIC", "RPCHTTP", "TCPHTTP", "TLSHTTP2", "QUICHTTP2", "E_RPC", "E_GRPC", "E_RMQ"]  #"TLS", "HTTP2", "TLSHTTP2", "E_RPC", "E_GRPC", "E_RMQ"
   metrics = ["memory", "cpu"]
   apps = ["client", "server"]
   for experiment in experiments:
@@ -254,47 +252,58 @@ def main():
         for metric in metrics:
           df_monitor = pd.DataFrame()
           df_results = pd.DataFrame()
-          for protocol in protocols:
-            print("experiment/level/app/metric/protocol:", experiment, "/", level, "/", app, "/", metric, "/", protocol)
-            for experiment_directory in os.listdir(input_directory):
-              # print(experiment_directory, experiment_directory.upper())
-              if experiment in experiment_directory and "-"+protocol+"-" in experiment_directory.upper() and "-"+level in experiment_directory: #and ((protocol in ["UDP","TCP"] and "1.14.1" in experiment_directory) or ((protocol not in ["UDP","TCP"]))):
-                ############# Read Monitor Data #############
-                file_path = get_last_log_file(os.path.join(input_directory, experiment_directory), app, "monitor")
-                if file_path is None:
-                  continue
-                if not validate_file(file_path, "monitor"):
-                  continue
-                
-                # if protocol in ["UDP", "TCP", "TLS"]:
-                #   print("file_path:", file_path)
-                df_experiment = read_monitor_data(file_path)
-                df_experiment["protocol"] = protocol if "off" in experiment_directory else protocol + "-120s" if "on120s" in experiment_directory else protocol + "-300s"
-                #   df_monitor = df_monitor.append(df_experiment)
-                df_concat = pd.concat([df_monitor, df_experiment], ignore_index=True)
-                df_monitor = df_concat
-
-                if df_monitor.empty:
-                  continue
-
-                ############# Read Results Data #############
-                # avoid executing this block twice for the same experiment
-                if metric == "memory" and app == "client":
-                  file_path = get_last_log_file(os.path.join(input_directory, experiment_directory), app, "results")
+          for input_directory in input_directories:
+            for protocol in protocols:
+              print("directory/experiment/level/app/metric/protocol:", input_directory, "/", experiment, "/", level, "/", app, "/", metric, "/", protocol)
+              for experiment_directory in os.listdir(input_directory):
+                # print(experiment_directory, experiment_directory.upper())
+                if experiment in experiment_directory and "-"+protocol+"-" in experiment_directory.upper() and "-"+level in experiment_directory: #and ((protocol in ["UDP","TCP"] and "1.14.1" in experiment_directory) or ((protocol not in ["UDP","TCP"]))):
+                  ############# Read Monitor Data #############
+                  file_path = get_last_log_file(os.path.join(input_directory, experiment_directory), app, "monitor")
                   if file_path is None:
                     continue
-                  if not validate_file(file_path, "results"):
+                  if not validate_file(file_path, "monitor"):
                     continue
-                  df_experiment = read_results_data(file_path)
-                  df_experiment["protocol"] = protocol if "off" in experiment_directory else protocol + "-120s" if "on120s" in experiment_directory else protocol + "-300s"
-                  df_concat = pd.concat([df_results, df_experiment], ignore_index=True)
-                  df_results = df_concat
+                  
+                  # if protocol in ["UDP", "TCP", "TLS"]:
+                  #   pprotocolAdaptabilityrint("file_path:", file_path)
+                  df_experiment = read_monitor_data(file_path)
+                  protocolValue = protocol if "off" in experiment_directory else protocol + "-120s" if "on120s" in experiment_directory else protocol + "-300s"
+                  adaptabilityValue = "WithPlugin" if "WithPlugin" in input_directory else "WithoutPlugin" if "WithoutPlugin" in input_directory else ""
+                  protocolAdaptability = protocolValue
+                  if adaptabilityValue != "":
+                    protocolAdaptability += "-" + adaptabilityValue 
+                  df_experiment["protocol"] = protocolValue 
+                  df_experiment["adaptability"] = adaptabilityValue
+                  print("protocolValue:", protocolValue, " adaptabilityValue:", adaptabilityValue, "protocolAdaptability:", protocolAdaptability)
+                  df_experiment["protocolAdaptability"] = protocolAdaptability
+                  #   df_monitor = df_monitor.append(df_experiment)
+                  df_concat = pd.concat([df_monitor, df_experiment], ignore_index=True)
+                  df_monitor = df_concat
 
-                  if df_results.empty:
+                  if df_monitor.empty:
                     continue
 
-              # df["duration"] = calculate_duration(df)
-              # df = df[df["duration"] > 0]
+                  ############# Read Results Data #############
+                  # avoid executing this block twice for the same experiment
+                  if metric == "memory" and app == "client":
+                    file_path = get_last_log_file(os.path.join(input_directory, experiment_directory), app, "results")
+                    if file_path is None:
+                      continue
+                    if not validate_file(file_path, "results"):
+                      continue
+                    df_experiment = read_results_data(file_path)                    
+                    df_experiment["protocol"] = protocolValue
+                    df_experiment["adaptability"] = adaptabilityValue
+                    df_experiment["protocolAdaptability"] = protocolAdaptability
+                    df_concat = pd.concat([df_results, df_experiment], ignore_index=True)
+                    df_results = df_concat
+
+                    if df_results.empty:
+                      continue
+
+                # df["duration"] = calculate_duration(df)
+                # df = df[df["duration"] > 0]
 
           fig = generate_boxplots(df_monitor, experiment, app, metric, level)
           save_plots(fig, output_directory, experiment, app, metric, level, kind="boxplot")
