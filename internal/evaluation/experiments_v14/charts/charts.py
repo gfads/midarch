@@ -235,14 +235,14 @@ def main():
   """
   Função principal que gera os boxplots para os experimentos.
   """
-  input_directories = ["../results_14.10_WithPlugin", "../results_14.10_WithoutPlugin"]
+  input_directories = ["../results_14.10_Chunking", "../results_14.10_Stream"]
   output_directory = "./charts"
 
   experiments = ["Fibonacci", "SendFile"] # 
   fibonacci_levels = ["2", "11", "38"] #"40", "41"]
   sendfile_levels = ["sm", "md", "lg"]
   # "QUIC",
-  protocols = ["TLSHTTP2"] #["UDP", "TCP", "TLS", "RPC",  "HTTP", "HTTPS", "HTTP2", "TCPTLS", "RPCQUIC", "RPCHTTP", "TCPHTTP", "TLSHTTP2", "QUICHTTP2", "E_RPC", "E_GRPC", "E_RMQ"]  #"TLS", "HTTP2", "TLSHTTP2", "E_RPC", "E_GRPC", "E_RMQ"
+  protocols = ["TLS"] #["UDP", "TCP", "TLS", "RPC",  "HTTP", "HTTPS", "HTTP2", "TCPTLS", "RPCQUIC", "RPCHTTP", "TCPHTTP", "TLSHTTP2", "QUICHTTP2", "E_RPC", "E_GRPC", "E_RMQ"]  #"TLS", "HTTP2", "TLSHTTP2", "E_RPC", "E_GRPC", "E_RMQ"
   metrics = ["memory", "cpu"]
   apps = ["client", "server"]
   for experiment in experiments:
@@ -269,7 +269,7 @@ def main():
                   #   pprotocolAdaptabilityrint("file_path:", file_path)
                   df_experiment = read_monitor_data(file_path)
                   protocolValue = protocol if "off" in experiment_directory else protocol + "-120s" if "on120s" in experiment_directory else protocol + "-300s"
-                  adaptabilityValue = "WithPlugin" if "WithPlugin" in input_directory else "WithoutPlugin" if "WithoutPlugin" in input_directory else ""
+                  adaptabilityValue = "Chunking" if "Chunking" in input_directory else "Stream" if "Stream" in input_directory else ""
                   protocolAdaptability = protocolValue
                   if adaptabilityValue != "":
                     protocolAdaptability += "-" + adaptabilityValue 
