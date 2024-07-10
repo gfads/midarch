@@ -6,8 +6,10 @@ import (
 	"encoding/binary"
 	"io"
 	"log"
+	"math"
 	"net"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
@@ -84,12 +86,16 @@ func (cl *UDPClient) WriteString(message string) {
 
 func (cl *UDPClient) Read(b []byte) (n int, err error) {
 	n, addr, err := cl.connection.ReadFromUDP(b)
+	// lib.PrintlnInfo("Read from", addr, "n", n, "err", err)
 	if err != nil {
-		if err == io.EOF || strings.Contains(err.Error(), "use of closed network connection") {
+		if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+			lib.PrintlnError("Timeout Error: Will not kill app")
+			return n, err
+		} else if err == io.EOF || strings.Contains(err.Error(), "use of closed network connection") {
 			cl = nil
 			lib.PrintlnError("EOF Error: Will not kill app")
 			return n, err
-		} else if err != nil && err != io.EOF {
+		} else if err != io.EOF {
 			lib.PrintlnError("Error, not EOF, will kill the app")
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
 			return n, err
@@ -99,7 +105,7 @@ func (cl *UDPClient) Read(b []byte) (n int, err error) {
 	return n, nil
 }
 
-func (cl *UDPClient) Receive() (fullMessage []byte, err error) {
+func (cl *UDPClient) ReceiveStream() (fullMessage []byte, err error) {
 	// lib.PrintlnInfo("TLS - Receive msg from client")
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	_, err = cl.Read(size)
@@ -108,23 +114,24 @@ func (cl *UDPClient) Receive() (fullMessage []byte, err error) {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
-	msgSize := binary.LittleEndian.Uint32(size)
+	// msgSize := binary.LittleEndian.Uint32(size)
 
 	var buffer bytes.Buffer
-
+	// lib.PrintlnInfo("Receive(read-ini):size", size, "msgSize", msgSize)
 	// Read from the connection and write to the buffer
-	_, err = io.CopyN(&buffer, cl.connection, int64(msgSize))
+	_, err = io.Copy(&buffer, cl.connection) //, int64(msgSize))
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err)
 		return nil, err
 	}
+	// lib.PrintlnInfo("Receive(read-end)")
 	return buffer.Bytes(), nil
 }
 
-func (cl *UDPClient) ReceiveManualChunking() (fullMessage []byte, err error) {
+func (cl *UDPClient) ReceiveChunking() (fullMessage []byte, err error) { //Chunking
 	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
-	_, err = cl.Read(size)
+	cl.Read(size)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err)
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
@@ -160,19 +167,19 @@ func (cl *UDPClient) ReceiveManualChunking() (fullMessage []byte, err error) {
 			bufferSize = maxBufferSize
 		}
 		buffer := make([]byte, bufferSize, bufferSize)
-		// lib.PrintlnInfo("Received(read-ini):size", size, "len(fullMessage)", len(fullMessage), "bufferSize", bufferSize, "remaining", int(size)-len(fullMessage))
+		// lib.PrintlnInfo("Receive(read-ini):size", size, "len(fullMessage)", len(fullMessage), "bufferSize", bufferSize, "remaining", int(size)-len(fullMessage))
 
-		// lib.PrintlnInfo("Received(read):for1")
+		// lib.PrintlnInfo("Receive(read):for1")
 		n, err := cl.Read(buffer)
-		// lib.PrintlnInfo("Received(read):", buffer)
+		// lib.PrintlnInfo("Receive(read):", buffer)
 		if err != nil {
 			lib.PrintlnError("Error while reading message. Error:", err)
 			return nil, err
 		}
 
 		fullMessage = append(fullMessage, buffer[:n]...)
-		// lib.PrintlnInfo("Received(read):for2")
-		// lib.PrintlnInfo("Received(read-end):size", size, "len(fullMessage)", len(fullMessage), "bufferSize", bufferSize)
+		// lib.PrintlnInfo("Receive(read):for2")
+		// lib.PrintlnInfo("Receive(read-end):size", size, "len(fullMessage)", len(fullMessage), "bufferSize", bufferSize)
 		// Check if the message is complete (you need a way to determine this based on your protocol)
 		if len(fullMessage) >= int(msgSize) {
 			return fullMessage, nil
@@ -182,8 +189,122 @@ func (cl *UDPClient) ReceiveManualChunking() (fullMessage []byte, err error) {
 				return nil, err
 			}
 		}
+		// lib.PrintlnInfo("Receive(read):for3")
+	}
+}
+
+func (cl *UDPClient) Receive() (fullMessage []byte, err error) {
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	cl.connection.SetReadDeadline(time.Time{})
+	_, err = cl.Read(size)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return nil, err
+	}
+	// TODO dcruzb: validate if size is smaller than shared.NUM_MAX_MESSAGE_BYTES
+	// receive reply
+	//msg = make([]byte, binary.LittleEndian.Uint32(size), binary.LittleEndian.Uint32(size))
+	//err = cl.Read(msg)
+	//if err != nil {
+	//	lib.PrintlnError(shared.GetFunction(), err)
+	//	//shared.ErrorHandler(shared.GetFunction(), err.Error())
+	//	return nil, err
+	//}
+
+	addr, err := net.ResolveUDPAddr("udp", cl.Ip)
+	if err != nil {
+		return nil, err
+	}
+
+	// cl.lock.Lock()
+	// lib.PrintlnDebug("Receive locked")
+	// defer func() {
+	// 	cl.lock.Unlock()
+	// 	lib.PrintlnDebug("Receive unlocked")
+	// }()
+
+	msgSize := binary.LittleEndian.Uint32(size)
+	const seqSize = shared.SIZE_OF_MESSAGE_SIZE
+	const maxBufferSize = shared.MAX_PACKET_SIZE
+	receivedPackets := make(map[uint32][]byte)
+	packetsQuantity := int(math.Ceil(float64(msgSize) / (shared.MAX_PACKET_SIZE - 4)))
+	// fullMessageSize := int(math.Floor(float64(msgSize)/(shared.MAX_PACKET_SIZE-4))) + (int(msgSize%(shared.MAX_PACKET_SIZE-4)) - 4)
+	// expectedSeq := uint32(0)
+
+	bufferSize := int(msgSize) + seqSize // int(msgSize) - len(fullMessage)
+	if bufferSize > maxBufferSize {
+		bufferSize = maxBufferSize
+	}
+	// lib.PrintlnInfo("Receive: packetsQuantity", packetsQuantity, "bufferSize", bufferSize, "msgSize", msgSize, "len(receivedPackets)", len(receivedPackets))
+	for len(receivedPackets) < packetsQuantity {
+		buffer := make([]byte, bufferSize, bufferSize)
+
+		// lib.PrintlnInfo("Receive(will read): bufferSize", bufferSize, "len(receivedPackets)", len(receivedPackets))
+		cl.connection.SetReadDeadline(time.Now().Add(20 * time.Millisecond))
+		n, err := cl.Read(buffer)
+		// lib.PrintlnInfo("Receive(read)")
+		if err != nil {
+			// lib.PrintlnInfo("Receive(read): error", err)
+			// If the error is timeout, request missing packets
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				for seq := 0; seq < (packetsQuantity); seq++ {
+					if _, ok := receivedPackets[uint32(seq)]; !ok {
+						// Request missing packet
+						// seqBuffer := make([]byte, seqSize)
+						// copy(seqBuffer, strconv.Itoa(seq))
+						// binary.BigEndian.PutUint32(ack, string(seq))
+						cl.Send([]byte(strconv.Itoa(seq)))
+						lib.PrintlnInfo("Receive: Requesting missing packet", seq)
+					}
+				}
+				continue
+			} else {
+				lib.PrintlnError("Error while reading message. Error:", err)
+				return nil, err
+			}
+		}
+
+		seq := binary.BigEndian.Uint32(buffer[:4])
+		payload := buffer[4:n]
+
+		// lib.PrintlnInfo("Receive: seq", seq, "bufferSize", len(buffer), "payloadSize", len(payload), "n", n)
+		// lib.PrintlnInfo("Receive: seq", seq, "n", n)
+
+		if _, exists := receivedPackets[seq]; !exists {
+			receivedPackets[seq] = payload
+		}
 		// lib.PrintlnInfo("Received(read):for3")
 	}
+
+	// if len(fullMessage) >= int(msgSize) {
+	// 	return fullMessage, nil
+	// } else {
+	_, err = cl.connection.WriteTo([]byte("ack"), addr)
+	if err != nil {
+		return nil, err
+	}
+	// }
+
+	fullMessage = make([]byte, 0)
+	for seq := 0; seq < packetsQuantity; seq++ {
+		// lib.PrintlnInfo("Receive: Order packet", seq)
+		fullMessage = append(fullMessage, receivedPackets[uint32(seq)]...)
+	}
+	// lib.PrintlnInfo("Receive: fullMessageSize", len(fullMessage))
+
+	// lib.PrintlnInfo("Creating file")
+	// file, er := os.Create("received_image4.Server.txt")
+	// if er != nil {
+	// 	lib.PrintlnInfo("Error creating file:", er)
+	// }
+	// defer file.Close()
+	// lib.PrintlnInfo("Writing file")
+	// file.Write(fullMessage)
+	// lib.PrintlnInfo("File written")
+
+	return fullMessage, nil
 }
 
 func (cl *UDPClient) Send(msg []byte) error {
@@ -358,7 +479,7 @@ func (st *UDP) WriteString(message string) {
 	}
 }
 
-func (st *UDP) Receive() (fullMessage []byte, err error) {
+func (st *UDP) ReceiveStream() (fullMessage []byte, err error) {
 	// lib.PrintlnInfo("TLS - Receive msg from Server")
 
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
@@ -368,12 +489,12 @@ func (st *UDP) Receive() (fullMessage []byte, err error) {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
-	msgSize := binary.LittleEndian.Uint32(size)
+	//msgSize := binary.LittleEndian.Uint32(size)
 
 	var buffer bytes.Buffer
 
 	// Read from the connection and write to the buffer
-	_, err = io.CopyN(&buffer, st.serverConnection, int64(msgSize))
+	_, err = io.Copy(&buffer, st.serverConnection) //, int64(msgSize))
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err)
 		return nil, err
@@ -381,7 +502,7 @@ func (st *UDP) Receive() (fullMessage []byte, err error) {
 	return buffer.Bytes(), nil
 }
 
-func (st *UDP) ReceiveManualChunking() ([]byte, error) {
+func (st *UDP) Receive() ([]byte, error) {
 	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "UDP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// receive reply's size
@@ -405,7 +526,7 @@ func (st *UDP) ReceiveManualChunking() ([]byte, error) {
 	return msgFromServer, nil
 }
 
-func (st *UDP) Send(msgToServer []byte) error {
+func (st *UDP) SendStream(msgToServer []byte) error {
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
 	_, err := st.serverConnection.Write(sizeOfMsgSize)
@@ -413,16 +534,17 @@ func (st *UDP) Send(msgToServer []byte) error {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return err
 	}
-
+	// lib.PrintlnInfo("Send(read-ini):size", sizeOfMsgSize, "len msgToServer:", len(msgToServer))
 	// Send the message
 	_, err = st.serverConnection.Write(msgToServer)
 	if err != nil {
 		return err
 	}
+	// lib.PrintlnInfo("Send(read-end)")
 	return nil
 }
 
-func (st *UDP) SendManualChunking(msgToServer []byte) error {
+func (st *UDP) SendChunking(msgToServer []byte) error { //Chunking
 	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
@@ -477,6 +599,100 @@ func (st *UDP) SendManualChunking(msgToServer []byte) error {
 		}
 	}
 
+	return nil
+}
+
+func (st *UDP) Send(msgToServer []byte) error {
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
+	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
+	msgSize := len(msgToServer)
+	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(msgSize))
+	_, err := st.serverConnection.Write(sizeOfMsgSize)
+	if err != nil {
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return err
+	}
+	const maxBufferSize = shared.MAX_PACKET_SIZE
+	// const seqSize = shared.SIZE_OF_MESSAGE_SIZE
+	bufferSize := msgSize + 4 //shared.SIZE_OF_MESSAGE_SIZE
+	if bufferSize > maxBufferSize {
+		bufferSize = maxBufferSize
+	}
+	payloadSize := bufferSize - 4
+	packetsQuantity := int(math.Ceil(float64(msgSize) / (shared.MAX_PACKET_SIZE - 4)))
+
+	// send message
+	// const maxBufferSize = shared.MAX_PACKET_SIZE
+	// const seqSize = shared.SIZE_OF_MESSAGE_SIZE
+	// bufferSize := int(msgSize) + seqSize
+	// if bufferSize > maxBufferSize {
+	// 	bufferSize = maxBufferSize
+	// }
+	// payloadSize := bufferSize - 4
+	// // seq := uint32(0)
+	// packets := make(map[uint32][]byte)
+	// packetsQuantity := int(math.Ceil(float64(msgSize) / (shared.MAX_PACKET_SIZE - 4)))
+	// //ajustedMessageSize := packetsQuantity * shared.MAX_PACKET_SIZE
+
+	// lib.PrintlnInfo("msgSize", msgSize, "packetsQuantity", packetsQuantity, bufferSize)
+
+	// for seq := 0; seq < packetsQuantity; seq++ {
+	// 	packet := make([]byte, 4) //bufferSize)
+	// 	binary.BigEndian.PutUint32(packet[:4], uint32(seq))
+	// 	fromPos := seq * payloadSize
+	// 	toPos := (seq*payloadSize + payloadSize)
+	// 	if toPos > len(msgToServer) {
+	// 		toPos = len(msgToServer)
+	// 	}
+	// 	// lib.PrintlnInfo("Packet Seq", seq, "Total", packetsQuantity, "size", bufferSize, "msgSize", msgSize, "packetSize", len(packet),
+	// 	// "posIni", fromPos, "posFim", toPos)
+	// 	// copy(packet[4:], msgToServer[fromPos:toPos])
+	// 	packet = append(packet, msgToServer[fromPos:toPos]...)
+	// 	packets[uint32(seq)] = packet
+	// }
+	// packets := *CreatePackets(msgToServer)
+
+	// lib.PrintlnInfo("Sending message with", len(packets), "packets")
+	// ipAddr := &net.UDPAddr{IP: net.ParseIP(st.ip)}
+	// for seq, packet := range packets {
+	for seq := 0; seq < packetsQuantity; seq++ {
+		packet := getPacket(msgToServer, seq, payloadSize)
+		// lib.PrintlnInfo("Sending packet:", seq, " packetSize:", len(packet), "Total", packetsQuantity, "size", bufferSize, "msgSize", msgSize)
+		st.serverConnection.Write(packet)
+		time.Sleep(5 * time.Microsecond) // A small delay to avoid packet loss
+	}
+
+	for {
+		ackBuffer := make([]byte, 4)
+		// lib.PrintlnInfo("Waiting for ack")
+		st.serverConnection.SetReadDeadline(time.Now().Add(1 * time.Second))
+		n, err := st.serverConnection.Read(ackBuffer)
+		// lib.PrintlnInfo("Received ack", ackBuffer, "Trimmed String", strings.TrimSpace(string(ackBuffer)), strings.TrimSpace(string(ackBuffer[:n])))
+		if err != nil {
+			lib.PrintlnError("Error while reading message. ackBuffer: '"+strings.TrimSpace(string(ackBuffer))+"'. Error:", err)
+			return err
+		}
+
+		ack := strings.TrimSpace(string(ackBuffer[:n]))
+		if ack == "ack" {
+			break
+		}
+
+		// if n == 4 {
+		// ackSeq := binary.BigEndian.Uint32(ackBuffer[:4])
+		seqInt64, err := strconv.ParseUint(ack, 10, 32)
+		// if err != nil {
+		// fmt.Println("Error:", err)
+		// return
+		// }
+		seq := int(seqInt64)
+		// lib.PrintlnInfo("Received ack", ack, "request for packet", seq)
+		// if _, exists := packets[seq]; exists {
+		st.serverConnection.Write(getPacket(msgToServer, seq, payloadSize))
+		// lib.PrintlnInfo("Resending packet", seq)
+		// }
+		// }
+	}
 	return nil
 }
 
@@ -537,3 +753,108 @@ func (st *UDP) ResetClients() {
 // 	tmpClient.Initialize()
 // 	lib.PrintlnInfo("Initialized")
 // }
+
+func CreatePacketsOriginal(msg []byte) (packets map[uint32][]byte) {
+	const maxBufferSize = shared.MAX_PACKET_SIZE
+	// const seqSize = shared.SIZE_OF_MESSAGE_SIZE
+	msgSize := len(msg)
+	bufferSize := msgSize + 4 //shared.SIZE_OF_MESSAGE_SIZE
+	if bufferSize > maxBufferSize {
+		bufferSize = maxBufferSize
+	}
+	payloadSize := bufferSize - 4
+	// seq := uint32(0)
+	packets = make(map[uint32][]byte)
+	packetsQuantity := int(math.Ceil(float64(msgSize) / (shared.MAX_PACKET_SIZE - 4)))
+	//ajustedMessageSize := packetsQuantity * shared.MAX_PACKET_SIZE
+
+	// lib.PrintlnInfo("msgSize", msgSize, "packetsQuantity", packetsQuantity, bufferSize)
+
+	for seq := 0; seq < packetsQuantity; seq++ {
+		fromPos := seq * payloadSize
+		toPos := (seq*payloadSize + payloadSize)
+		if toPos > len(msg) {
+			toPos = len(msg)
+		}
+		currentPayloadSize := toPos - fromPos
+		packet := make([]byte, 4+currentPayloadSize) //bufferSize)
+		binary.BigEndian.PutUint32(packet[:4], uint32(seq))
+		// lib.PrintlnInfo("Packet Seq", seq, "Total", packetsQuantity, "size", bufferSize, "msgSize", msgSize, "payloadSize", payloadSize)
+		// lib.PrintlnInfo("Packet Seq", seq, "fromPos", fromPos, "toPos", toPos)
+		// lib.PrintlnInfo("Packet Seq", seq, "Total", packetsQuantity, "size", bufferSize, "msgSize", msgSize, "packetSize", len(packet),
+		// "posIni", fromPos, "posFim", toPos)
+		copy(packet[4:], msg[fromPos:toPos])
+		// packet = append(packet, msg[fromPos:toPos]...)
+		packets[uint32(seq)] = packet
+	}
+
+	return packets
+}
+
+func CreatePackets(msg []byte) (packetsR *map[uint32][]byte) {
+	const maxBufferSize = shared.MAX_PACKET_SIZE
+	// const seqSize = shared.SIZE_OF_MESSAGE_SIZE
+	msgSize := len(msg)
+	bufferSize := msgSize + 4 //shared.SIZE_OF_MESSAGE_SIZE
+	if bufferSize > maxBufferSize {
+		bufferSize = maxBufferSize
+	}
+	payloadSize := bufferSize - 4
+	// seq := uint32(0)
+	packets := make(map[uint32][]byte)
+	// packetsQuantity := int(math.Ceil(float64(msgSize) / (shared.MAX_PACKET_SIZE - 4)))
+	//ajustedMessageSize := packetsQuantity * shared.MAX_PACKET_SIZE
+
+	// lib.PrintlnInfo("msgSize", msgSize, "packetsQuantity", packetsQuantity, bufferSize)
+
+	seq := 0
+	fragmentedMessage := msg
+	for len(fragmentedMessage) > 0 { //  seq := 0; seq < packetsQuantity; seq++ {
+		fragmentSize := len(fragmentedMessage)
+		if fragmentSize > payloadSize {
+			fragmentSize = payloadSize
+		}
+		fragment := fragmentedMessage[:fragmentSize]
+		fragmentedMessage = fragmentedMessage[fragmentSize:]
+
+		// fromPos := seq * payloadSize
+		// toPos := (seq*payloadSize + payloadSize)
+		// if toPos > len(msg) {
+		// 	toPos = len(msg)
+		// }
+		// currentPayloadSize := toPos - fromPos
+		// packet := make([]byte, 4+fragmentSize) //bufferSize)
+		// binary.BigEndian.PutUint32(packet[:4], uint32(seq))
+		seqSize := make([]byte, 4)
+		binary.BigEndian.PutUint32(seqSize, uint32(seq))
+		// lib.PrintlnInfo("Packet Seq", seq, "Total", packetsQuantity, "size", bufferSize, "msgSize", msgSize, "payloadSize", payloadSize)
+		// lib.PrintlnInfo("Packet Seq", seq, "fromPos", fromPos, "toPos", toPos)
+		// lib.PrintlnInfo("Packet Seq", seq, "Total", packetsQuantity, "size", bufferSize, "msgSize", msgSize, "packetSize", len(packet),
+		// "posIni", fromPos, "posFim", toPos)
+		// copy(packet[4:], fragment) //msg[fromPos:toPos])
+		packet := append(seqSize, fragment...) //msg[fromPos:toPos]...)
+		packets[uint32(seq)] = packet
+		seq++
+	}
+
+	return &packets
+}
+
+func getPacket(msg []byte, seq int, payloadSize int) []byte {
+	fromPos := seq * payloadSize
+	toPos := (seq*payloadSize + payloadSize)
+	if toPos > len(msg) {
+		toPos = len(msg)
+	}
+	currentPayloadSize := toPos - fromPos
+	packet := make([]byte, 4+currentPayloadSize) //bufferSize)
+	binary.BigEndian.PutUint32(packet[:4], uint32(seq))
+	// lib.PrintlnInfo("Packet Seq", seq, "payloadSize", payloadSize)
+	// lib.PrintlnInfo("Packet Seq", seq, "fromPos", fromPos, "toPos", toPos)
+	// lib.PrintlnInfo("Packet Seq", seq, "Total", packetsQuantity, "size", bufferSize, "msgSize", msgSize, "packetSize", len(packet),
+	// "posIni", fromPos, "posFim", toPos)
+	copy(packet[4:], msg[fromPos:toPos])
+	// packet = append(packet, msg[fromPos:toPos]...)
+	// packets[uint32(seq)] = packet
+	return packet
+}

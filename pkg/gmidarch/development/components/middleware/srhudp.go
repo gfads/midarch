@@ -10,7 +10,6 @@ import (
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
 	"github.com/gfads/midarch/pkg/gmidarch/development/protocols"
 	"github.com/gfads/midarch/pkg/shared"
-	"github.com/gfads/midarch/pkg/shared/lib"
 )
 
 // @Type: SRHUDP
@@ -90,7 +89,9 @@ func (s SRHUDP) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 				*reset = true
 				return
 			}
-			if isNewConnection, _ := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
+			// lib.PrintlnInfo("I_Receive: Will unmarshall message")
+			unmarshalledMsg, _ := Unmarshall(tempMsgReceived.Msg)
+			if isNewConnection, _ := s.isNewConnection(unmarshalledMsg); isNewConnection { // TODO dcruzb: move to I_Receive
 				// lib.PrintlnDebug("SRHUDP Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
 				*reset = true
 				return
@@ -155,15 +156,18 @@ func (s SRHUDP) handler(info *interface{}, connectionIndex int) {
 		}
 		// lib.PrintlnDebug("Message received")
 
-		if changeProtocol, miopPacket := s.isAdapt(msg); changeProtocol {
+		// lib.PrintlnInfo("handler: Will unmarshall message")
+		unmarshalledMsg, _ := Unmarshall(msg)
+
+		if changeProtocol, miopPacket := s.isAdapt(unmarshalledMsg); changeProtocol {
 			if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
 				// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHUDP Version Not adapted")
 				break
 			}
 		}
-		if isNewConnection, miopPacket := s.isNewConnection(msg); isNewConnection { // TODO dcruzb: move to I_Receive
+		if isNewConnection, miopPacket := s.isNewConnection(unmarshalledMsg); isNewConnection { // TODO dcruzb: move to I_Receive
 			//newConnection = true
-			// lib.PrintlnDebug("UDP Is New Connection")
+			// lib.PrintlnInfo("UDP Is New Connection")
 			miopPacket := miop.CreateReqPacket("Connect", []interface{}{miopPacket.Bd.ReqBody.Body[0], "Ok"}, miopPacket.Bd.ReqBody.Body[0].(int)) // idx is the Connection ID
 			msgPayload := Gobmarshaller{}.Marshall(miopPacket)
 			// lib.PrintlnDebug("UDP Before send")
@@ -191,22 +195,12 @@ func (s SRHUDP) handler(info *interface{}, connectionIndex int) {
 	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHUDP Version Not adapted")
 }
 
-func (s SRHUDP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
+func (s SRHUDP) isAdapt(miop miop.MiopPacket) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
-	miop, err := Gobmarshaller{}.Unmarshall(msgFromServer)
-	if err != nil {
-		lib.PrintlnError(shared.GetFunction(), err.Error())
-		return false, miop
-	}
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }
 
-func (s SRHUDP) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
+func (s SRHUDP) isNewConnection(miop miop.MiopPacket) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHUDP Version Not adapted")
-	miop, err := Gobmarshaller{}.Unmarshall(msgFromServer)
-	if err != nil {
-		lib.PrintlnError(shared.GetFunction(), err.Error())
-		return false, miop
-	}
 	return miop.Bd.ReqHeader.Operation == "Connect", miop
 }

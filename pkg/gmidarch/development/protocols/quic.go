@@ -2,6 +2,7 @@ package protocols
 
 import (
 	"bufio"
+	"bytes"
 	"context"
 	"encoding/binary"
 	"io"
@@ -100,14 +101,36 @@ func (cl *QUICClient) Read(b []byte) (n int, err error) {
 
 func (cl *QUICClient) Receive() (fullMessage []byte, err error) {
 	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	// receive reply's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	cl.Read(size)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		return nil, err
+	}
+	msgSize := binary.LittleEndian.Uint32(size)
+
+	var buffer bytes.Buffer
+	// Read from the connection and write to the buffer
+	_, err = io.CopyN(&buffer, cl.stream, int64(msgSize))
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		return nil, err
+	}
+	return buffer.Bytes(), nil
+}
+
+func (cl *QUICClient) ReceiveChunking() (fullMessage []byte, err error) {
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	// receive reply's size
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	_, err = cl.Read(size)
 	if err != nil {
 		lib.PrintlnError(shared.GetFunction(), err)
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
+	msgSize := binary.LittleEndian.Uint32(size)
+
 	// TODO dcruzb: validate if size is smaller than shared.NUM_MAX_MESSAGE_BYTES
 	// receive reply
 	//msg = make([]byte, binary.LittleEndian.Uint32(size), binary.LittleEndian.Uint32(size))
@@ -118,7 +141,6 @@ func (cl *QUICClient) Receive() (fullMessage []byte, err error) {
 	//	return nil, err
 	//}
 
-	msgSize := binary.LittleEndian.Uint32(size)
 	const maxBufferSize = shared.MAX_PACKET_SIZE
 	for {
 		bufferSize := int(msgSize) - len(fullMessage)
@@ -330,6 +352,29 @@ func (st *QUIC) Receive() ([]byte, error) {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
+	msgSize := binary.LittleEndian.Uint32(sizeOfMsgSize)
+
+	var buffer bytes.Buffer
+
+	// Read from the connection and write to the buffer
+	_, err = io.CopyN(&buffer, st.stream, int64(msgSize))
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		return nil, err
+	}
+	return buffer.Bytes(), nil
+}
+
+func (st *QUIC) ReceiveChunking() ([]byte, error) {
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "QUIC Version Not adapted")
+	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	// receive reply's size
+	_, err := st.stream.Read(sizeOfMsgSize)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return nil, err
+	}
 	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "QUIC read size")
 	// receive reply
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(sizeOfMsgSize), shared.NUM_MAX_MESSAGE_BYTES)
@@ -344,6 +389,24 @@ func (st *QUIC) Receive() ([]byte, error) {
 }
 
 func (st *QUIC) Send(msgToServer []byte) error {
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
+	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
+	_, err := st.stream.Write(sizeOfMsgSize)
+	if err != nil {
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return err
+	}
+
+	// Send the message
+	_, err = st.stream.Write(msgToServer)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (st *QUIC) SendChunking(msgToServer []byte) error {
 	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))

@@ -235,14 +235,14 @@ def main():
   """
   Função principal que gera os boxplots para os experimentos.
   """
-  input_directories = ["../results_14.10_Chunking", "../results_14.10_Stream"]
+  input_directories = ["../results"] #_14.10_Chunking", "../results_14.10_Stream"]
   output_directory = "./charts"
 
   experiments = ["Fibonacci", "SendFile"] # 
   fibonacci_levels = ["2", "11", "38"] #"40", "41"]
   sendfile_levels = ["sm", "md", "lg"]
   # "QUIC",
-  protocols = ["TLS"] #["UDP", "TCP", "TLS", "RPC",  "HTTP", "HTTPS", "HTTP2", "TCPTLS", "RPCQUIC", "RPCHTTP", "TCPHTTP", "TLSHTTP2", "QUICHTTP2", "E_RPC", "E_GRPC", "E_RMQ"]  #"TLS", "HTTP2", "TLSHTTP2", "E_RPC", "E_GRPC", "E_RMQ"
+  protocols = ["UDP", "TCP", "TLS", "RPC",  "QUIC", "HTTP", "HTTPS", "HTTP2", "TCPTLS", "RPCQUIC", "RPCHTTP", "TCPHTTP", "TLSHTTP2", "QUICHTTP2", "E_RPC", "E_GRPC", "E_RMQ"]  #"TLS", "HTTP2", "TLSHTTP2", "E_RPC", "E_GRPC", "E_RMQ"
   metrics = ["memory", "cpu"]
   apps = ["client", "server"]
   for experiment in experiments:

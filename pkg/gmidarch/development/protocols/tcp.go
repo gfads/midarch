@@ -328,7 +328,30 @@ func (st *TCP) WriteString(message string) {
 	}
 }
 
-func (st *TCP) Receive() ([]byte, error) {
+func (st *TCP) Receive() (fullMessage []byte, err error) {
+	// lib.PrintlnInfo("TLS - Receive msg from Server")
+
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	_, err = st.serverConnection.Read(size)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return nil, err
+	}
+	msgSize := binary.LittleEndian.Uint32(size)
+
+	var buffer bytes.Buffer
+
+	// Read from the connection and write to the buffer
+	_, err = io.CopyN(&buffer, st.serverConnection, int64(msgSize))
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		return nil, err
+	}
+	return buffer.Bytes(), nil
+}
+
+func (st *TCP) ReceiveManualChunking() ([]byte, error) {
 	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "TCP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// receive reply's size

@@ -102,3 +102,13 @@ func prepareToAdaptTo(protocol string) (err error) {
 
 	return nil
 }
+
+func Unmarshall(msg []byte) (miop.MiopPacket, error) {
+	miop, err := Gobmarshaller{}.Unmarshall(msg)
+	// lib.PrintlnInfo("Unmarshall miopSize", len(msg)) //, "msg", msg)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err.Error())
+		return miop, err
+	}
+	return miop, nil
+}
