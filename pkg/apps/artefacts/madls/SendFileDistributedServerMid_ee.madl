@@ -1,0 +1,43 @@
+Configuration SendFileDistributedServerMid_ee.madl := 
+
+   Components 
+      core : Core 
+      evolutiveprotocol : EvolutiveProtocol 
+      monitor : Monitor 
+      analyser : Analyser 
+      planner : Planner 
+      executor : Executor 
+      unit1 : Unit 
+      unit2 : Unit 
+      unit3 : Unit 
+      unit4 : Unit 
+      unit5 : Unit 
+      unit6 : Unit 
+      unit7 : Unit 
+
+    Connectors 
+      t1 : Oneton 
+      t2 : Oneway 
+      t3 : Oneway 
+      t4 : Oneway 
+      t5 : Oneway 
+      t6 : Oneway 
+
+    Attachments 
+      evolutiveprotocol,t2,monitor 
+      monitor,t3,analyser 
+      analyser,t4,planner 
+      planner,t5,executor 
+      executor,t6,core 
+      core,t1,unit1 
+      core,t1,unit2 
+      core,t1,unit3 
+      core,t1,unit4 
+      core,t1,unit5 
+      core,t1,unit6 
+      core,t1,unit7 
+
+   Adaptability 
+      NONE 
+
+EndConf 

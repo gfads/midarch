@@ -55,18 +55,17 @@ func (c CRHRPC) I_Process(id string, msg *messages.SAMessage, info *interface{},
 
 	addr := host + ":" + port
 	var err error
-	//fmt.Println("Vai conectar", crhInfo.Conns[addr])
-	lib.PrintlnDebug("Vai conectar", crhInfo.Conns[addr])
+	lib.PrintlnDebug("Will connect", crhInfo.Conns[addr])
 	if _, ok := crhInfo.Protocols[addr]; !ok || reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name() != "RPC" { // no connection open yet
-		lib.PrintlnInfo("Try to connect", crhInfo.Protocols[addr])
+		lib.PrintlnDebug("Try to connect", crhInfo.Protocols[addr])
 		if ok {
-			lib.PrintlnInfo("ElemName", reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name())
+			lib.PrintlnDebug("ElemName", reflect.TypeOf(crhInfo.Protocols[addr]).Elem().Name())
 			crhInfo.Protocols[addr].CloseConnection()
 		}
 		crhInfo.Protocols[addr] = &protocols.RPC{}
 		crhInfo.Protocols[addr].ConnectToServer(host, port)
 	}
-	lib.PrintlnInfo("Connected", crhInfo.Protocols[addr])
+	lib.PrintlnDebug("Connected", crhInfo.Protocols[addr])
 
 	err = crhInfo.Protocols[addr].Send(msgToServer)
 	if err != nil {
@@ -75,9 +74,10 @@ func (c CRHRPC) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		crhInfo.Protocols[addr].CloseConnection()
 		crhInfo.Protocols[addr] = nil
 		delete(crhInfo.Protocols, addr)
+		// lib.SHOW_MESSAGES = append(lib.SHOW_MESSAGES, lib.DEBUG)
 		return
 	}
-	lib.PrintlnInfo("Sent message", crhInfo.Protocols[addr])
+	lib.PrintlnDebug("Sent message", crhInfo.Protocols[addr])
 
 	msgFromServer, err := crhInfo.Protocols[addr].Receive()
 	if err != nil {
@@ -88,9 +88,9 @@ func (c CRHRPC) I_Process(id string, msg *messages.SAMessage, info *interface{},
 		delete(crhInfo.Protocols, addr)
 		return
 	}
-	lib.PrintlnInfo("Received message", crhInfo.Protocols[addr])
+	lib.PrintlnDebug("Received message", crhInfo.Protocols[addr])
 	VerifyProtocolAdaptation(msgFromServer, crhInfo.Protocols[addr])
-	lib.PrintlnInfo("Adaptation Verified", crhInfo.Protocols[addr])
+	lib.PrintlnDebug("Adaptation Verified", crhInfo.Protocols[addr])
 	*msg = messages.SAMessage{Payload: msgFromServer}
 }
 

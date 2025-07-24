@@ -58,15 +58,15 @@ func (cl *RPCClient) WriteString(message string) {
 	panic("implement me")
 }
 
-func (cl *RPCClient) Read(b []byte) (err error) {
+func (cl *RPCClient) Read(b []byte) (n int, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
 func (cl *RPCClient) Receive() (msg []byte, err error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
 	msg = <-cl.msgChan
-	lib.PrintlnInfo("RPCClient.Receive: msg", msg)
+	// lib.PrintlnInfo("RPCClient.Receive: msg", msg)
 	// receive reply's size
 	// size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// cl.Read(size)
@@ -87,7 +87,7 @@ func (cl *RPCClient) Receive() (msg []byte, err error) {
 }
 
 func (cl *RPCClient) Send(msg []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHRPC Version Not adapted")
 	go func() {
 		cl.replyChan <- msg
 	}()
@@ -131,14 +131,14 @@ func (st *RPC) StartServer(ip, port string, initialConnections int) {
 	st.port = port
 	st.initialConnections = initialConnections
 
-	lib.PrintlnInfo("RPC clients len", len(st.clients))
+	// lib.PrintlnInfo("RPC clients len", len(st.clients))
 	if len(st.clients) < 1 { //st.initialConnections { TODO dcruzb : verify if there is the need to more than one client on RPC
 		client := &RPCClient{}
 		client.msgChan = make(chan []byte)
 		client.replyChan = make(chan []byte)
 		// *clientsPtr = append(clients, &client)
 		st.AddClient(client, -1)
-		lib.PrintlnInfo("RPC client created")
+		//lib.PrintlnInfo("RPC client created")
 	}
 
 	var client *RPCClient = (*st.clients[0]).(*RPCClient)
@@ -165,6 +165,7 @@ func (st *RPC) StartServer(ip, port string, initialConnections int) {
 }
 
 func (st *RPC) StopServer() {
+	st.ResetClients()
 	err := st.listener.Close()
 	if err != nil {
 		lib.PrintlnError("Error while stoping server. Details:", err)
@@ -187,11 +188,11 @@ func (st *RPC) WaitForConnection(cliIdx int) (cl *generic.Client) {
 		}
 	}()
 
-	lib.PrintlnInfo("RPC wait -> clients len", len(st.clients))
+	// lib.PrintlnInfo("RPC wait -> clients len", len(st.clients))
 	if len(st.clients) > cliIdx {
 		// (*st.clients[cliIdx]).(*RPCClient).connection = conn
 		// (*st.clients[cliIdx]).(*RPCClient).Ip = conn.RemoteAddr().String()
-		lib.PrintlnInfo("RPC wait -> client returned")
+		// lib.PrintlnInfo("RPC wait -> client returned")
 		return st.clients[cliIdx]
 	} else {
 		return nil
@@ -203,6 +204,9 @@ func (st *RPC) GetClients() (client []*generic.Client) {
 }
 
 func (st *RPC) GetClient(idx int) (client generic.Client) {
+	if len(st.clients) < idx {
+		return nil
+	}
 	return *st.clients[idx]
 }
 
@@ -237,7 +241,7 @@ func (st *RPC) ResetClients() {
 // Client Methods
 
 func (st *RPC) ConnectToServer(ip, port string) {
-	lib.PrintlnInfo("**********************************************")
+	// lib.PrintlnInfo("**********************************************")
 	if st.msgChan == nil {
 		st.msgChan = make(chan []byte)
 	}
@@ -256,7 +260,7 @@ func (st *RPC) ConnectToServer(ip, port string) {
 		rpcClient, err := rpc.DialHTTP("tcp", addr)
 		st.rpcClient = rpcClient
 		// st.serverConnection, err = net.DialTCP("tcp", nil, tcpAddr)
-		lib.PrintlnDebug("Dialed", st.rpcClient)
+		// lib.PrintlnDebug("Dialed", st.rpcClient)
 		if err != nil {
 			lib.PrintlnError("Dial error", st.rpcClient, err)
 			time.Sleep(200 * time.Millisecond)
@@ -265,7 +269,7 @@ func (st *RPC) ConnectToServer(ip, port string) {
 			break
 		}
 	}
-	lib.PrintlnDebug("Connected", st.rpcClient)
+	// lib.PrintlnDebug("Connected", st.rpcClient)
 	// if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 	// 	//lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 	// 	shared.LocalAddr = st.rpcClient.LocalAddr().String()
@@ -291,7 +295,7 @@ func (st *RPC) WriteString(message string) {
 }
 
 func (st *RPC) Receive() ([]byte, error) {
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "RPC.Receive")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "RPC.Receive")
 	msgFromServer := <-st.msgChan
 	// sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// // receive reply's size
@@ -326,7 +330,7 @@ func (st *RPC) Call(serviceMethod string, args any, reply any) (err error) {
 }
 
 func (st *RPC) Send(msgToServer []byte) error {
-	lib.PrintlnInfo("CRHRPC Version Not adapted")
+	// lib.PrintlnInfo("CRHRPC Version Not adapted")
 	//sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 
 	// The message received from the server
@@ -337,11 +341,11 @@ func (st *RPC) Send(msgToServer []byte) error {
 		return err
 	}
 
-	lib.PrintlnInfo("Got message from server")
+	// lib.PrintlnInfo("Got message from server")
 	go func() {
 		st.msgChan <- msgFromServer
 	}()
-	lib.PrintlnInfo("Put message in msgChan")
+	// lib.PrintlnInfo("Put message in msgChan")
 	return nil
 
 	// binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
@@ -366,13 +370,13 @@ type RPCRequest struct {
 }
 
 func (rq RPCRequest) Request(request []byte, reply *[]byte) error {
-	lib.PrintlnInfo("Received message")
+	// lib.PrintlnInfo("Received message")
 	go func() {
 		rq.msgChan <- request
 	}()
-	lib.PrintlnInfo("Forwarded message")
+	// lib.PrintlnInfo("Forwarded message")
 	replyMsg := <-rq.replyChan
-	lib.PrintlnInfo("Received reply")
+	// lib.PrintlnInfo("Received reply")
 	*reply = replyMsg
 	return nil
 }

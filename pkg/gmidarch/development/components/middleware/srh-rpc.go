@@ -29,7 +29,7 @@ func (s SRHRPC) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 	if srhInfo.Protocol == nil {
 		srhInfo.Protocol = &protocols.RPC{}
 		srhInfo.Protocol.StartServer(srhInfo.EndPoint.Host, srhInfo.EndPoint.Port, 2) //shared.MAX_NUMBER_OF_CONNECTIONS)
-		lib.PrintlnInfo("SRHRPC Server Started")
+		//lib.PrintlnInfo("SRHRPC Server Started")
 	}
 
 	// // check if a listener has already been created
@@ -55,10 +55,10 @@ func (s SRHRPC) I_Accept(id string, msg *messages.SAMessage, info *interface{}, 
 
 	// RPC is already executed concurrently, dont need go func
 	// go func() {
-	lib.PrintlnInfo("SRHRPC Clients Index", availableConenctionIndex)
+	// lib.PrintlnInfo("SRHRPC Clients Index", availableConenctionIndex)
 
 	client := srhInfo.Protocol.WaitForConnection(availableConenctionIndex)
-	lib.PrintlnInfo("SRHRPC Client", client)
+	// lib.PrintlnInfo("SRHRPC Client", client)
 
 	// Update info
 	*info = srhInfo
@@ -87,13 +87,13 @@ func (s SRHRPC) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 			// Update info
 			*info = srhInfo
 			msg.Payload = tempMsgReceived.Msg
-			lib.PrintlnInfo("SRHRPC Version Not adapted: tempMsgReceived", tempMsgReceived)
-			if isNewConnection, miopPacket := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
-				lib.PrintlnInfo("SRHRPC Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
+			// lib.PrintlnInfo("SRHRPC Version Not adapted: tempMsgReceived", tempMsgReceived)
+			if isNewConnection, _ := s.isNewConnection(tempMsgReceived.Msg); isNewConnection { // TODO dcruzb: move to I_Receive
+				// lib.PrintlnInfo("SRHRPC Version Not adapted: tempMsgReceived >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>", miopPacket)
 				*reset = true
 				return
 			}
-			lib.PrintlnInfo("SRHRPC tempMsgReceived.ToAddress", tempMsgReceived.ToAddress)
+			// lib.PrintlnInfo("SRHRPC tempMsgReceived.ToAddress", tempMsgReceived.ToAddress)
 			msg.ToAddr = tempMsgReceived.ToAddress //Chn.RemoteAddr().String()
 		}
 	default:
@@ -103,7 +103,7 @@ func (s SRHRPC) I_Receive(id string, msg *messages.SAMessage, info *interface{},
 		}
 	}
 
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "end", "SRHRPC Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHRPC Version Not adapted")
 	return
 }
 
@@ -111,13 +111,13 @@ func (s SRHRPC) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHRPC Version Not adapted")
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
-	lib.PrintlnInfo("msg.ToAddr", msg.ToAddr)
+	lib.PrintlnDebug("msg.ToAddr", msg.ToAddr)
 	client := srhInfo.Protocol.GetClientFromAddr(msg.ToAddr)
 	if client == nil {
 		*reset = true
 		return
 	}
-	lib.PrintlnInfo("SRHRPC Version Not adapted   >>>>> RPC => msg.ToAddr:", msg.ToAddr, "RPC Client:", client) //, "AdaptId:", client.AdaptId) // TODO dcruzb: verify impact of removing AdaptId
+	lib.PrintlnDebug("SRHRPC Version Not adapted   >>>>> RPC => msg.ToAddr:", msg.ToAddr, "RPC Client:", client) //, "AdaptId:", client.AdaptId) // TODO dcruzb: verify impact of removing AdaptId
 	msgTemp := msg.Payload.([]byte)
 
 	err := client.Send(msgTemp)
@@ -127,12 +127,12 @@ func (s SRHRPC) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 
 	// update info
 	*info = srhInfo
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "end", "SRHRPC Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHRPC Version Not adapted")
 	return
 }
 
 func (s SRHRPC) handler(info *interface{}, connectionIndex int) {
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "SRHRPC Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "SRHRPC Version Not adapted")
 
 	infoTemp := *info
 	srhInfo := infoTemp.(*messages.SRHInfo)
@@ -144,7 +144,7 @@ func (s SRHRPC) handler(info *interface{}, connectionIndex int) {
 		if !*executeForever {
 			break
 		}
-		lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "FOR", "SRHRPC Version Not adapted")
+		// lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "FOR", "SRHRPC Version Not adapted")
 
 		msg, err := client.Receive()
 		if err != nil {
@@ -152,22 +152,22 @@ func (s SRHRPC) handler(info *interface{}, connectionIndex int) {
 				break
 			}
 		}
-		lib.PrintlnInfo("SRHRPC got message")
+		// lib.PrintlnInfo("SRHRPC got message")
 		if changeProtocol, miopPacket := s.isAdapt(msg); changeProtocol {
 			if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
-				lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHRPC Version Not adapted")
+				// lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHRPC Version Not adapted")
 				break
 			}
 		}
 		if isNewConnection, _ := s.isNewConnection(msg); isNewConnection { // TODO dcruzb: move to I_Receive
 			//newConnection = true
-			lib.PrintlnInfo("RPC Is New Connection")
+			// lib.PrintlnInfo("RPC Is New Connection")
 			//miopPacket := miop.CreateReqPacket("Connect", []interface{}{miopPacket.Bd.ReqBody.Body[0], "Ok"}, miopPacket.Bd.ReqBody.Body[0].(int)) // idx is the Connection ID
-			//msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+			//msgPayload := Gobmarshaller{}.Marshall(miopPacket)
 
-			lib.PrintlnInfo("RPC Before send")
+			// lib.PrintlnInfo("RPC Before send")
 			//s.send(conn, addr, msgPayload)
-			lib.PrintlnInfo("RPC After send")
+			// lib.PrintlnInfo("RPC After send")
 			//if miopPacket.Bd.ReqBody.Body[2] == "Ok" {
 			//	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "Received Ok to Adapt", "SRHUDP Version Not adapted")
 			//	break
@@ -175,25 +175,34 @@ func (s SRHRPC) handler(info *interface{}, connectionIndex int) {
 			continue
 		}
 
-		rcvMessage := messages.ReceivedMessages{Msg: msg, Conn: nil, ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
-		lib.PrintlnInfo("SRHRPC Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
 		if !*executeForever {
 			break
 		}
+		rcvMessage := messages.ReceivedMessages{Msg: msg, Conn: nil, ToAddress: srhInfo.Protocol.GetClient(connectionIndex).Address()}
+		// lib.PrintlnInfo("SRHRPC Version Not adapted: handler >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>> received message")
+
 		srhInfo.RcvedMessages <- rcvMessage
-		lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHRPC Version Not adapted")
+		lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "FOR end", "SRHRPC Version Not adapted")
 	}
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "end", "SRHRPC Version Not adapted")
+	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "end", "SRHRPC Version Not adapted")
 }
 
 func (s SRHRPC) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, err := Gobmarshaller{}.Unmarshall(msgFromServer)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err.Error())
+		return false, miop
+	}
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }
 
 func (s SRHRPC) isNewConnection(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, err := Gobmarshaller{}.Unmarshall(msgFromServer)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err.Error())
+		return false, miop
+	}
 	return miop.Bd.ReqHeader.Operation == "Connect", miop
 }

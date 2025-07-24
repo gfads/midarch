@@ -4,7 +4,7 @@ Configuration calculatordistributedclientmid :=
       namingproxy      : Namingproxy
       calculatorproxy  : Calculatorproxy
       requestor        : Requestor
-      marshaller       : Jsonmarshaller
+      marshaller       : Gobmarshaller
       crh              : CRHUDP
 
    Connectors

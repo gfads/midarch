@@ -12,7 +12,10 @@ import (
 )
 
 func VerifyProtocolAdaptation(msgFromServer []byte, protocol generic.Protocol) (err error) {
-	if changeProtocol, miopPacket := isAdapt(msgFromServer); changeProtocol {
+	if changeProtocol, miopPacket, err := isAdapt(msgFromServer); changeProtocol {
+		if err != nil {
+			return err
+		}
 		lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
 		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
 		adaptToProtocol := miopPacket.Bd.ReqBody.Body[0].(string)
@@ -24,7 +27,10 @@ func VerifyProtocolAdaptation(msgFromServer []byte, protocol generic.Protocol) (
 }
 
 func VerifyAdaptation(msgFromServer []byte, sizeOfMsgSize []byte, conn net.Conn, send func(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error) (err error) {
-	if changeProtocol, miopPacket := isAdapt(msgFromServer); changeProtocol {
+	if changeProtocol, miopPacket, err := isAdapt(msgFromServer); changeProtocol {
+		if err != nil {
+			return err
+		}
 		lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
 		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
 		protocol := miopPacket.Bd.ReqBody.Body[0].(string)
@@ -36,7 +42,10 @@ func VerifyAdaptation(msgFromServer []byte, sizeOfMsgSize []byte, conn net.Conn,
 }
 
 func VerifyAdaptationQUIC(msgFromServer []byte, sizeOfMsgSize []byte, stream quic.Stream, send func(sizeOfMsgSize []byte, msgToServer []byte, stream quic.Stream) error) (err error) {
-	if changeProtocol, miopPacket := isAdapt(msgFromServer); changeProtocol {
+	if changeProtocol, miopPacket, err := isAdapt(msgFromServer); changeProtocol {
+		if err != nil {
+			return err
+		}
 		lib.PrintlnDebug("Adapting, miopPacket.Bd.ReqBody.Body:", miopPacket.Bd.ReqBody.Body)
 		shared.AdaptId = miopPacket.Bd.ReqBody.Body[1].(int)
 		protocol := miopPacket.Bd.ReqBody.Body[0].(string)
@@ -47,27 +56,27 @@ func VerifyAdaptationQUIC(msgFromServer []byte, sizeOfMsgSize []byte, stream qui
 	return nil
 }
 
-func isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
+func isAdapt(msgFromServer []byte) (bool, miop.MiopPacket, error) {
 	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	miop := Jsonmarshaller{}.Unmarshall(msgFromServer)
-	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
+	miop, err := Gobmarshaller{}.Unmarshall(msgFromServer)
+	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop, err
 }
 
 func confirmProtocolAdaptation(adaptId int, adaptToProtocol string, protocol generic.Protocol) (err error) {
 	miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{adaptToProtocol, adaptId, "Ok"}, adaptId)
-	msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+	msgPayload := Gobmarshaller{}.Marshall(miopPacket)
 	return protocol.Send(msgPayload)
 }
 
 func confirmAdaptation(adaptId int, protocol string, sizeOfMsgSize []byte, conn net.Conn, send func(sizeOfMsgSize []byte, msgToServer []byte, conn net.Conn) error) (err error) {
 	miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{protocol, adaptId, "Ok"}, adaptId)
-	msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+	msgPayload := Gobmarshaller{}.Marshall(miopPacket)
 	return send(sizeOfMsgSize, msgPayload, conn)
 }
 
 func confirmAdaptationQUIC(adaptId int, protocol string, sizeOfMsgSize []byte, stream quic.Stream, send func(sizeOfMsgSize []byte, msgToServer []byte, stream quic.Stream) error) (err error) {
 	miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{protocol, adaptId, "Ok"}, adaptId)
-	msgPayload := Jsonmarshaller{}.Marshall(miopPacket)
+	msgPayload := Gobmarshaller{}.Marshall(miopPacket)
 	return send(sizeOfMsgSize, msgPayload, stream)
 }
 
@@ -92,4 +101,14 @@ func prepareToAdaptTo(protocol string) (err error) {
 	}
 
 	return nil
+}
+
+func Unmarshall(msg []byte) (miop.MiopPacket, error) {
+	miop, err := Gobmarshaller{}.Unmarshall(msg)
+	// lib.PrintlnInfo("Unmarshall miopSize", len(msg)) //, "msg", msg)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err.Error())
+		return miop, err
+	}
+	return miop, nil
 }

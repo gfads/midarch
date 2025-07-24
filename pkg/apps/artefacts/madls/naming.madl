@@ -2,8 +2,8 @@ Configuration naming :=
     Components
          server     : Namingserver
          finvoker   : Naminginvoker
-         marshaller : Jsonmarshaller
-         srh        : SRHQUIC
+         marshaller : Gobmarshaller
+         srh        : SRHUDP
 
       Connectors
          t1 : Requestreply

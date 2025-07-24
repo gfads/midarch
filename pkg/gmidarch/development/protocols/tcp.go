@@ -2,6 +2,7 @@ package protocols
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/binary"
 	"io"
 	"log"
@@ -79,24 +80,46 @@ func (cl *TCPClient) WriteString(message string) {
 	}
 }
 
-func (cl *TCPClient) Read(b []byte) (err error) {
-	_, err = cl.connection.Read(b)
+func (cl *TCPClient) Read(b []byte) (n int, err error) {
+	n, err = cl.connection.Read(b)
 	if err != nil {
 		if err == io.EOF || strings.Contains(err.Error(), "use of closed network connection") {
 			cl = nil
 			lib.PrintlnError("EOF Error: Will not kill app")
-			return err
+			return n, err
 		} else if err != nil && err != io.EOF {
 			lib.PrintlnError("Error, not EOF, will kill the app")
 			shared.ErrorHandler(shared.GetFunction(), err.Error())
-			return err
+			return n, err
 		}
 	}
-	return nil
+	return n, nil
 }
 
-func (cl *TCPClient) Receive() (msg []byte, err error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+func (cl *TCPClient) Receive() (fullMessage []byte, err error) {
+	// receive reply's size
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	_, err = cl.Read(size)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return nil, err
+	}
+	msgSize := binary.LittleEndian.Uint32(size)
+
+	var buffer bytes.Buffer
+
+	// Read from the connection and write to the buffer
+	_, err = io.CopyN(&buffer, cl.connection, int64(msgSize))
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		return nil, err
+	}
+	return buffer.Bytes(), nil
+}
+
+func (cl *TCPClient) ReceiveManualChunking() (fullMessage []byte, err error) {
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	// receive reply's size
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	cl.Read(size)
@@ -105,19 +128,48 @@ func (cl *TCPClient) Receive() (msg []byte, err error) {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
+	// TODO dcruzb: validate if size is smaller than shared.NUM_MAX_MESSAGE_BYTES
 	// receive reply
-	msg = make([]byte, binary.LittleEndian.Uint32(size), shared.NUM_MAX_MESSAGE_BYTES)
-	err = cl.Read(msg)
-	if err != nil {
-		lib.PrintlnError(shared.GetFunction(), err)
-		//shared.ErrorHandler(shared.GetFunction(), err.Error())
-		return nil, err
+	//msg = make([]byte, binary.LittleEndian.Uint32(size), binary.LittleEndian.Uint32(size))
+	//err = cl.Read(msg)
+	//if err != nil {
+	//	lib.PrintlnError(shared.GetFunction(), err)
+	//	//shared.ErrorHandler(shared.GetFunction(), err.Error())
+	//	return nil, err
+	//}
+
+	msgSize := binary.LittleEndian.Uint32(size)
+	const maxBufferSize = shared.MAX_PACKET_SIZE
+	for {
+		bufferSize := int(msgSize) - len(fullMessage)
+		if bufferSize > maxBufferSize {
+			bufferSize = maxBufferSize
+		}
+		buffer := make([]byte, bufferSize, bufferSize)
+		// lib.PrintlnInfo("Received(read-ini):size", size, "len(fullMessage)", len(fullMessage), "bufferSize", bufferSize, "remaining", int(size)-len(fullMessage))
+
+		// lib.PrintlnInfo("Received(read):for1")
+		n, err := cl.Read(buffer)
+		// lib.PrintlnInfo("Received(read):", buffer)
+
+		if err != nil {
+			lib.PrintlnError("Error while reading message. Error:", err)
+			return nil, err
+		}
+
+		fullMessage = append(fullMessage, buffer[:n]...)
+		// lib.PrintlnInfo("Received(read):for2")
+		// lib.PrintlnInfo("Received(read-end):size", size, "len(fullMessage)", len(fullMessage), "bufferSize", bufferSize)
+		// Check if the message is complete (you need a way to determine this based on your protocol)
+		if len(fullMessage) >= int(msgSize) {
+			return fullMessage, nil
+		}
+		// lib.PrintlnInfo("Received(read):for3")
 	}
-	return msg, nil
 }
 
 func (cl *TCPClient) Send(msg []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msg)))
 	_, err := cl.connection.Write(sizeOfMsgSize)
@@ -194,12 +246,12 @@ func (st *TCP) ConnectToServer(ip, port string) {
 	if err != nil {
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
-	lib.PrintlnDebug("Resolved addr", tcpAddr)
+	// lib.PrintlnDebug("Resolved addr", tcpAddr)
 	//localTcpAddr := c.getLocalTcpAddr()
 
 	for {
 		st.serverConnection, err = net.DialTCP("tcp", nil, tcpAddr)
-		lib.PrintlnInfo("Dialed", st.serverConnection)
+		// lib.PrintlnInfo("Dialed", st.serverConnection)
 		if err != nil {
 			lib.PrintlnError("Dial error", st.serverConnection, err)
 			time.Sleep(200 * time.Millisecond)
@@ -208,17 +260,17 @@ func (st *TCP) ConnectToServer(ip, port string) {
 			break
 		}
 	}
-	lib.PrintlnDebug("Connected", st.serverConnection)
+	// lib.PrintlnDebug("Connected", st.serverConnection)
 	if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 		//lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 		shared.LocalAddr = st.serverConnection.LocalAddr().String()
-		lib.PrintlnDebug("Got local addr", st.serverConnection)
+		// lib.PrintlnDebug("Got local addr", st.serverConnection)
 	}
 }
 
 func (st *TCP) WaitForConnection(cliIdx int) (cl *generic.Client) { // TODO if cliIdx >= inicitalConnections => need to append to the slice
 	// aceita conexões na porta
-	lib.PrintlnInfo("Before accept")
+	// lib.PrintlnInfo("Before accept")
 	conn, err := st.listener.Accept()
 	if err != nil {
 		if strings.Contains(err.Error(), "use of closed network connection") {
@@ -226,7 +278,7 @@ func (st *TCP) WaitForConnection(cliIdx int) (cl *generic.Client) { // TODO if c
 		}
 		shared.ErrorHandler(shared.GetFunction(), "Error while waiting for connection: "+err.Error())
 	}
-	lib.PrintlnInfo("After accept (cliIdx", cliIdx, ")")
+	// lib.PrintlnInfo("After accept (cliIdx", cliIdx, ")")
 	if len(st.clients) > cliIdx {
 		(*st.clients[cliIdx]).(*TCPClient).connection = conn
 		(*st.clients[cliIdx]).(*TCPClient).Ip = conn.RemoteAddr().String()
@@ -276,8 +328,31 @@ func (st *TCP) WriteString(message string) {
 	}
 }
 
-func (st *TCP) Receive() ([]byte, error) {
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "TCP Version Not adapted")
+func (st *TCP) Receive() (fullMessage []byte, err error) {
+	// lib.PrintlnInfo("TLS - Receive msg from Server")
+
+	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
+	_, err = st.serverConnection.Read(size)
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return nil, err
+	}
+	msgSize := binary.LittleEndian.Uint32(size)
+
+	var buffer bytes.Buffer
+
+	// Read from the connection and write to the buffer
+	_, err = io.CopyN(&buffer, st.serverConnection, int64(msgSize))
+	if err != nil {
+		lib.PrintlnError(shared.GetFunction(), err)
+		return nil, err
+	}
+	return buffer.Bytes(), nil
+}
+
+func (st *TCP) ReceiveManualChunking() ([]byte, error) {
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "TCP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// receive reply's size
 	_, err := st.serverConnection.Read(sizeOfMsgSize)
@@ -286,8 +361,10 @@ func (st *TCP) Receive() ([]byte, error) {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "TCP read size")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "TCP read size")
 	// receive reply
+	// lib.PrintlnInfo("Size of message:", binary.LittleEndian.Uint32(sizeOfMsgSize))
+	// lib.PrintlnInfo("Max message size:", shared.NUM_MAX_MESSAGE_BYTES)
 	msgFromServer := make([]byte, binary.LittleEndian.Uint32(sizeOfMsgSize), shared.NUM_MAX_MESSAGE_BYTES)
 	_, err = st.serverConnection.Read(msgFromServer)
 	if err != nil {
@@ -295,12 +372,29 @@ func (st *TCP) Receive() ([]byte, error) {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return nil, err
 	}
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "TCP read message")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "TCP read message")
 	return msgFromServer, nil
 }
 
 func (st *TCP) Send(msgToServer []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
+	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
+	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
+	_, err := st.serverConnection.Write(sizeOfMsgSize)
+	if err != nil {
+		//shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return err
+	}
+
+	// Send the message
+	_, err = st.serverConnection.Write(msgToServer)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (st *TCP) SendManualChunking(msgToServer []byte) error {
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
 	sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 	binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
 	_, err := st.serverConnection.Write(sizeOfMsgSize)
@@ -310,11 +404,33 @@ func (st *TCP) Send(msgToServer []byte) error {
 	}
 
 	// send message
-	_, err = st.serverConnection.Write(msgToServer)
-	if err != nil {
-		//shared.ErrorHandler(shared.GetFunction(), err.Error())
-		return err
+	const maxPacketSize = shared.MAX_PACKET_SIZE
+	// send message
+	fragmentedMessage := msgToServer
+	for {
+		fragmentSize := len(fragmentedMessage)
+		if fragmentSize > maxPacketSize {
+			fragmentSize = maxPacketSize
+		}
+		fragment := fragmentedMessage[:fragmentSize]
+		// lib.PrintlnInfo("Send: fragment:", fragment)
+		// lib.PrintlnInfo("Send(read-ini):size", len(msgToServer), "len(fragmentedMessage)-remaining:", len(fragmentedMessage), "maxPacketSize", maxPacketSize)
+		_, err = st.serverConnection.Write(fragment)
+		if err != nil {
+			//fmt.Println("Erro no envio do sizeOfMsgSize(", sizeOfMsgSize, ") Connection:", reflect.TypeOf(crhInfo.Conns[addr]).Elem().Name())
+			//shared.ErrorHandler(shared.GetFunction(), err.Error())
+			lib.PrintlnError("Error while writing fragment to server, error:", err)
+			return err
+		}
+
+		fragmentedMessage = fragmentedMessage[fragmentSize:]
+		if len(fragmentedMessage) > 0 {
+			// time.Sleep(1 * time.Millisecond) // uncomment when using with debug enabled to avoid message loss
+		} else {
+			break
+		}
 	}
+
 	return nil
 }
 

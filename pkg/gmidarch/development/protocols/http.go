@@ -1,12 +1,12 @@
 package protocols
 
 import (
+	"bytes"
 	"fmt"
 	"io"
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 
@@ -59,16 +59,16 @@ func (cl *HTTPClient) WriteString(message string) {
 	panic("implement me")
 }
 
-func (cl *HTTPClient) Read(b []byte) (err error) {
+func (cl *HTTPClient) Read(b []byte) (n int, err error) {
 	//TODO implement me
 	panic("implement me")
 }
 
 func (cl *HTTPClient) Receive() (msg []byte, err error) {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP Version Not adapted")
 	msg = <-cl.msgChan
-	lib.PrintlnInfo("HTTPClient.Receive: msg", msg)
-	lib.PrintlnInfo("HTTPClient.Receive: msg as string", string(msg))
+	//lib.PrintlnInfo("HTTPClient.Receive: msg", msg)
+	//lib.PrintlnInfo("HTTPClient.Receive: msg as string", string(msg))
 	// receive reply's size
 	// size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// cl.Read(size)
@@ -89,7 +89,7 @@ func (cl *HTTPClient) Receive() (msg []byte, err error) {
 }
 
 func (cl *HTTPClient) Send(msg []byte) error {
-	lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP Version Not adapted")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "CRHHTTP Version Not adapted")
 	go func() {
 		cl.replyChan <- msg
 	}()
@@ -133,14 +133,14 @@ func (st *HTTP) StartServer(ip, port string, initialConnections int) {
 	st.port = port
 	st.initialConnections = initialConnections
 
-	lib.PrintlnInfo("HTTP clients len", len(st.clients))
+	//lib.PrintlnInfo("HTTP clients len", len(st.clients))
 	if len(st.clients) < 1 { //st.initialConnections { TODO dcruzb : verify if there is the need to more than one client on HTTP
 		client := &HTTPClient{}
 		client.msgChan = make(chan []byte)
 		client.replyChan = make(chan []byte)
 		// *clientsPtr = append(clients, &client)
 		st.AddClient(client, -1)
-		lib.PrintlnInfo("HTTP client created")
+		//lib.PrintlnInfo("HTTP client created")
 	}
 
 	var client *HTTPClient = (*st.clients[0]).(*HTTPClient)
@@ -192,11 +192,11 @@ func (st *HTTP) WaitForConnection(cliIdx int) (cl *generic.Client) {
 		}
 	}()
 
-	lib.PrintlnInfo("HTTP wait -> clients len", len(st.clients))
+	//lib.PrintlnInfo("HTTP wait -> clients len", len(st.clients))
 	if len(st.clients) > cliIdx {
 		// (*st.clients[cliIdx]).(*HTTPClient).connection = conn
 		// (*st.clients[cliIdx]).(*HTTPClient).Ip = conn.RemoteAddr().String()
-		lib.PrintlnInfo("HTTP wait -> client returned")
+		//lib.PrintlnInfo("HTTP wait -> client returned")
 		return st.clients[cliIdx]
 	} else {
 		return nil
@@ -242,7 +242,7 @@ func (st *HTTP) ResetClients() {
 // Client Methods
 
 func (st *HTTP) ConnectToServer(ip, port string) {
-	lib.PrintlnInfo("**********************************************")
+	//lib.PrintlnInfo("**********************************************")
 	if st.msgChan == nil {
 		st.msgChan = make(chan []byte)
 	}
@@ -261,7 +261,7 @@ func (st *HTTP) ConnectToServer(ip, port string) {
 		// Create an HTTP client with a timeout
 		st.httpClient = &http.Client{Timeout: 5 * time.Second}
 		// st.serverConnection, err = net.DialTCP("tcp", nil, tcpAddr)
-		lib.PrintlnDebug("Dialed", st.httpClient)
+		// lib.PrintlnDebug("Dialed", st.httpClient)
 		// if err != nil {
 		// 	lib.PrintlnError("Dial error", st.httpClient, err)
 		// 	time.Sleep(200 * time.Millisecond)
@@ -270,7 +270,7 @@ func (st *HTTP) ConnectToServer(ip, port string) {
 		break // TODO dcruzb: remove for since there is no possibility of error
 		// }
 	}
-	lib.PrintlnDebug("Connected", st.httpClient)
+	// lib.PrintlnDebug("Connected", st.httpClient)
 	// if addr != shared.NAMING_HOST+":"+shared.NAMING_PORT && shared.LocalAddr == "" {
 	// 	//lib.PrintlnDebug("crhInfo.Conns[addr].LocalAddr().String()", crhInfo.Conns[addr].LocalAddr().String())
 	// 	shared.LocalAddr = st.httpClient.LocalAddr().String()
@@ -297,7 +297,7 @@ func (st *HTTP) WriteString(message string) {
 }
 
 func (st *HTTP) Receive() ([]byte, error) {
-	lib.PrintlnInfo("----------------------------------------->", shared.GetFunction(), "HTTP.Receive")
+	// lib.PrintlnDebug("----------------------------------------->", shared.GetFunction(), "HTTP.Receive")
 	msgFromServer := <-st.msgChan
 	// sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	// // receive reply's size
@@ -332,14 +332,17 @@ func (st *HTTP) Receive() ([]byte, error) {
 // }
 
 func (st *HTTP) Send(msgToServer []byte) error {
-	lib.PrintlnInfo("CRHHTTP Version Not adapted")
+	//lib.PrintlnInfo("CRHHTTP Version Not adapted")
 	//sizeOfMsgSize := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE) // TODO dcruzb: create attribute to avoid doing this everytime
 
 	addr := st.ip + ":" + st.port
 
 	// The message received from the server
 	var msgFromServer []byte // := make([]byte, binary.LittleEndian.Uint32(sizeOfMsgSize), shared.NUM_MAX_MESSAGE_BYTES)
-	response, err := st.httpClient.Get("http://" + addr + "?param=" + url.PathEscape(string(msgToServer)))
+	//response, err := st.httpClient.Get("http://" + addr + "?param=" + url.PathEscape(string(msgToServer)))
+	req, err := http.NewRequest("GET", "http://"+addr, bytes.NewReader(msgToServer))
+	// req.Header.Set("Accept-Encoding", "gzip")
+	response, err := st.httpClient.Do(req)
 	if err != nil {
 		//shared.ErrorHandler(shared.GetFunction(), err.Error())
 		return err
@@ -358,11 +361,11 @@ func (st *HTTP) Send(msgToServer []byte) error {
 
 	msgFromServer = bodyBytes
 
-	lib.PrintlnInfo("Got message from server" + string(msgFromServer))
+	//lib.PrintlnInfo("Got message from server" + string(msgFromServer))
 	go func() {
 		st.msgChan <- msgFromServer
 	}()
-	lib.PrintlnInfo("Put message in msgChan")
+	//lib.PrintlnInfo("Put message in msgChan")
 	return nil
 
 	// binary.LittleEndian.PutUint32(sizeOfMsgSize, uint32(len(msgToServer)))
@@ -388,14 +391,14 @@ type HTTPRequest struct {
 }
 
 func (rq HTTPRequest) Request(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
-	lib.PrintlnInfo("Received message")
+	//lib.PrintlnInfo("Received message")
 	uriParameters := lib.GetURIParameters(r.RequestURI)
 	go func() {
 		rq.msgChan <- []byte(uriParameters["param"].(string))
 	}()
-	lib.PrintlnInfo("Forwarded message")
+	//lib.PrintlnInfo("Forwarded message")
 	replyMsg := <-rq.replyChan
-	lib.PrintlnInfo("Received reply")
+	//lib.PrintlnInfo("Received reply")
 	//*reply = w
 	w.Write(replyMsg)
 
@@ -403,15 +406,20 @@ func (rq HTTPRequest) Request(w http.ResponseWriter, r *http.Request) { //reques
 }
 
 func (rq HTTPRequest) ServeHTTP(w http.ResponseWriter, r *http.Request) { //request []byte, reply *[]byte) error {
-	lib.PrintlnInfo("Received message. URI:", r.RequestURI)
-	uriParameters := lib.GetURIParameters(r.RequestURI)
-	lib.PrintlnInfo("Received message:", uriParameters["param"].(string))
+	//lib.PrintlnInfo("Received message. URI:", r.RequestURI)
+	//uriParameters := lib.GetURIParameters(r.RequestURI)
+	//lib.PrintlnInfo("Received message:", uriParameters["param"].(string))
+	//go func() {
+	//	rq.msgChan <- []byte(uriParameters["param"].(string))
+	//}()
+	msg, _ := io.ReadAll(r.Body)
+	r.Body.Close()
 	go func() {
-		rq.msgChan <- []byte(uriParameters["param"].(string))
+		rq.msgChan <- msg //[]byte(uriParameters["param"].(string))
 	}()
-	lib.PrintlnInfo("Forwarded message")
+	//lib.PrintlnInfo("Forwarded message")
 	replyMsg := <-rq.replyChan
-	lib.PrintlnInfo("Received reply")
+	//lib.PrintlnInfo("Received reply")
 	//*reply = w
 	w.Write(replyMsg)
 

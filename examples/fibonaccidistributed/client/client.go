@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"math"
 	"math/rand"
 	"os"
@@ -9,7 +10,7 @@ import (
 	"time"
 
 	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciProxy"
-	"github.com/gfads/midarch/pkg/gmidarch/development/components/proxies/namingproxy"
+	"github.com/gfads/midarch/pkg/gmidarch/development/generic"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/execution/frontend"
 	"github.com/gfads/midarch/pkg/shared"
@@ -18,7 +19,9 @@ import (
 
 func main() {
 	// Wait for namingserver and server to get up
-	time.Sleep(13 * time.Second)
+	timeToRun, _ := strconv.Atoi(shared.EnvironmentVariableValueWithDefault("TIME_TO_START_CLIENT", "13"))
+	lib.PrintlnDebug("Waiting", timeToRun, "seconds for naming server and server to get up")
+	time.Sleep(time.Duration(timeToRun) * time.Second)
 
 	// Example setting environment variable MIDARCH_BUSINESS_COMPONENTS_PATH on code, may be set on system environment variables too
 	os.Setenv("MIDARCH_BUSINESS_COMPONENTS_PATH",
@@ -31,10 +34,10 @@ func main() {
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(os.Args[3])
 	} else {
 		n, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("FIBONACCI_PLACE", "11"))
-		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("SAMPLE_SIZE", "100"))
+		SAMPLE_SIZE, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("SAMPLE_SIZE", "10000"))
 		AVERAGE_WAITING_TIME, _ = strconv.Atoi(shared.EnvironmentVariableValueWithDefault("AVERAGE_WAITING_TIME", "60"))
 	}
-	fmt.Println("FIBONACCI_PLACE / SAMPLE_SIZE / AVERAGE_WAITING_TIME:", n, "/", SAMPLE_SIZE, "/", AVERAGE_WAITING_TIME)
+	fmt.Println("dateTime;info;sequential;response_time") //"FIBONACCI_PLACE / SAMPLE_SIZE / AVERAGE_WAITING_TIME:", n, "/", SAMPLE_SIZE, "/", AVERAGE_WAITING_TIME)
 
 	fe := frontend.NewFrontend()
 
@@ -42,7 +45,7 @@ func main() {
 	// The order of Ip/hosts must the same as one in which
 	// these elements appear in the configuration
 	args := make(map[string]messages.EndPoint)
-	args["crh"] = messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
+	args["crh"] = messages.EndPoint{Host: shared.CALCULATOR_HOST, Port: shared.CALCULATOR_PORT}
 
 	// Deploy configuration
 	fe.Deploy(frontend.DeployOptions{
@@ -52,24 +55,30 @@ func main() {
 			"FibonacciProxy": &fibonacciProxy.FibonacciProxy{},
 		}})
 
-	// proxy to naming service
-	endPoint := messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
-	namingProxy := namingproxy.NewNamingproxy(endPoint)
+	// // proxy to naming service
+	// endPoint := messages.EndPoint{Host: shared.NAMING_HOST, Port: shared.NAMING_PORT}
+	// namingProxy := namingproxy.NewNamingproxy(endPoint)
 
-	aux, ok := namingProxy.Lookup("Fibonacci")
-	if !ok {
-		shared.ErrorHandler(shared.GetFunction(), "Service 'Fibonacci' not found in Naming Service")
-	}
+	// aux, ok := namingProxy.Lookup("Fibonacci")
+	// if !ok {
+	// 	shared.ErrorHandler(shared.GetFunction(), "Service 'Fibonacci' not found in Naming Service")
+	// }
 
-	fibonacci := aux.(*fibonacciProxy.FibonacciProxy)
+	// fibonacci := aux.(*fibonacciProxy.FibonacciProxy)
+
+	fibonacci := &fibonacciProxy.FibonacciProxy{}
+	proxyConfig := generic.ProxyConfig{Host: shared.CALCULATOR_HOST, Port: shared.CALCULATOR_PORT}
+	fibonacci.Configure(proxyConfig)
+	time.Sleep(2 * time.Second)
 
 	rand.Seed(time.Now().UnixNano())
 	for x := 0; x < SAMPLE_SIZE; x++ {
 		ok := false
 		for !ok {
 			t1 := time.Now()
-			//fmt.Println("Result:", fibonacci.F(n))
+			// fmt.Println("Before call Fibonacci F(n):", n)
 			r := fibonacci.F(n)
+			// fmt.Println("After call Fibonacci F(n):", n, "Result:", r)
 			//time.Sleep(200 * time.Millisecond)
 
 			t2 := time.Now()
@@ -77,7 +86,8 @@ func main() {
 			duration := t2.Sub(t1)
 			if r != 0 {
 				ok = true
-				lib.PrintlnMessage(x+1, float64(duration.Nanoseconds())/1000000)
+				//lib.PrintlnMessage(";" + strconv.Itoa(x+1) + ";" + strconv.FormatFloat(float64(duration.Nanoseconds())/1000000, 'f', -1, 64))
+				log.Printf(";ok;%d;%f;%d\n", x+1, float64(duration.Nanoseconds())/1000000, r)
 			}
 
 			// Normally distributed waiting time between calls with an average of 60 milliseconds and standard deviation of 20 milliseconds

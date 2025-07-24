@@ -66,7 +66,7 @@ func Println(messageLevel DebugLevel, message ...interface{}) {
 			switch messageLevel {
 			case INFO:
 				var logs []interface{}
-				logs = append(logs, "- \"", file+":"+strconv.Itoa(line), "- INFO -")
+				logs = append(logs, ";\"", file+":"+strconv.Itoa(line), "- INFO -")
 				logs = append(logs, message...)
 				logs = append(logs, "\"")
 				log.Println(logs...)
@@ -78,7 +78,7 @@ func Println(messageLevel DebugLevel, message ...interface{}) {
 			case MESSAGE:
 				log.Println(message...)
 			case ERROR:
-				log.Println("- \"", file+":"+strconv.Itoa(line), "***** ERROR *****", message, "\"")
+				log.Println(";\"", file+":"+strconv.Itoa(line), "***** ERROR *****", message, "\"")
 			}
 		}
 	}
@@ -150,11 +150,11 @@ func GetURIParameters(uri string) (parameters map[string]interface{}) {
 
 func GetServerTLSConfig(proto string) *tls.Config {
 	if shared.CRT_PATH == "" {
-		log.Fatal("SRHSsl:: Error:: Environment variable 'CRT_PATH' not configured\n")
+		log.Fatal("TLS:: Error:: Environment variable 'CRT_PATH' not configured\n")
 	}
 
 	if shared.KEY_PATH == "" {
-		log.Fatal("SRHSsl:: Error:: Environment variable 'KEY_PATH' not configured\n")
+		log.Fatal("TLS:: Error:: Environment variable 'KEY_PATH' not configured\n")
 	}
 
 	cert, err := tls.LoadX509KeyPair(shared.CRT_PATH, shared.KEY_PATH)

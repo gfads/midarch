@@ -11,7 +11,6 @@ Configuration FibonacciDistributedClientMid_ee.madl :=
       unit2 : Unit 
       unit3 : Unit 
       unit4 : Unit 
-      unit5 : Unit 
 
     Connectors 
       t1 : Oneton 
@@ -31,7 +30,6 @@ Configuration FibonacciDistributedClientMid_ee.madl :=
       core,t1,unit2 
       core,t1,unit3 
       core,t1,unit4 
-      core,t1,unit5 
 
    Adaptability 
       NONE 

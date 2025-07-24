@@ -33,7 +33,6 @@ func (FibonacciInvoker) I_Beforeserver(id string, msg *messages.SAMessage, info 
 
 		reply := fibonacciImpl.Fibonacci{}.F(req.Params[0].(int))
 		msg.Payload = messages.FunctionalReply{Rep: reply}
-
 	default:
 		shared.ErrorHandler(shared.GetFunction(), "Operation '"+req.Op+"' not present in Invoker")
 	}

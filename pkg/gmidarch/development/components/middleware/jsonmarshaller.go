@@ -2,10 +2,11 @@ package middleware
 
 import (
 	"encoding/json"
+	"reflect"
+
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages/miop"
 	"github.com/gfads/midarch/pkg/shared"
-	"reflect"
 )
 
 // @Type: Jsonmarshaller
@@ -25,8 +26,12 @@ func (j Jsonmarshaller) I_Process(id string, msg *messages.SAMessage, info *inte
 			msg.Payload = messages.FunctionalReply{Rep: nil}
 		} else {
 			temp := req.Params[0].([]byte)
-			r := j.Unmarshall(temp)
-			msg.Payload = messages.FunctionalReply{Rep: r}
+			r, err := j.Unmarshall(temp)
+			if err != nil {
+				msg.Payload = messages.FunctionalReply{Rep: nil}
+			} else {
+				msg.Payload = messages.FunctionalReply{Rep: r}
+			}
 		}
 	default:
 		shared.ErrorHandler(shared.GetFunction(), "Marshaller:: Operation '"+op+"' not supported!")
@@ -43,12 +48,16 @@ func (Jsonmarshaller) Marshall(m miop.MiopPacket) []byte {
 	return r
 }
 
-func (Jsonmarshaller) Unmarshall(m []byte) miop.MiopPacket {
+func (Jsonmarshaller) Unmarshall(m []byte) (miop.MiopPacket, error) {
 	r := miop.MiopPacket{}
 
+	// lib.PrintlnInfo("Unmarshall", string(m))
 	err := json.Unmarshal(m, &r)
+	// lib.PrintlnInfo("Unmarshalled", string(m))
 	if err != nil {
-		shared.ErrorHandler(shared.GetFunction(), err.Error())
+		// lib.PrintlnError(err.Error(), r, m)
+		// shared.ErrorHandler(shared.GetFunction(), err.Error())
+		return miop.MiopPacket{}, err
 	}
 
 	// TODO improve by avoiding the loop
@@ -59,5 +68,5 @@ func (Jsonmarshaller) Unmarshall(m []byte) miop.MiopPacket {
 			r.Bd.ReqBody.Body[i] = x
 		}
 	}
-	return r
+	return r, nil
 }

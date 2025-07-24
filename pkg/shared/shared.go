@@ -43,6 +43,8 @@ var DIR_PLUGINS_IMPORT = "github.com/gfads/midarch/pkg/gmidarch/development/repo
 var CA_PATH = EnvironmentVariableValue("CA_PATH")
 var CRT_PATH = EnvironmentVariableValue("CRT_PATH")
 var KEY_PATH = EnvironmentVariableValue("KEY_PATH")
+var DIR_EXPERIMENTS_MODELS = DIR_BASE + "/internal/evaluation/experiments_v14/docker/models"
+var DIR_EXPERIMENTS_RESULTS = DIR_BASE + "/internal/evaluation/experiments_v14/results"
 var AdaptId = -1
 var LocalAddr = ""
 var ArchitecturalComponentTypes = map[string]interface{}{}
@@ -72,15 +74,16 @@ const TERR = "TerR"
 
 // Network setups
 const NAMING_PORT = "1313"
-const NAMING_HOST = "localhost"     // "namingserver" //
-const CALCULATOR_HOST = "localhost" //"server"   //
+const NAMING_HOST = "naming"     //"localhost"     //
+const CALCULATOR_HOST = "server" //"localhost" //
 const CALCULATOR_PORT = "1314"
 const FIBONACCI_PORT = "1315"
 const QUEUEING_PORT = "1316"
 const MAX_NUMBER_OF_CONNECTIONS = 10
 const SIZE_OF_MESSAGE_SIZE = 4
-const NUM_MAX_MESSAGE_BYTES int = 1024
+const NUM_MAX_MESSAGE_BYTES int = 16777216  // 16MB
 const MAX_NUMBER_OF_RECEIVED_MESSAGES = 300 // messages received and not processed by srh
+const MAX_PACKET_SIZE = 65400               // 65507 MTU - headers => 65400                // Maximum packet size - 65535 Maximum Transmission Unit (MTU) is the maximum size of the data transfer limit set by hardware in a network. The packet size should never exceed MTU
 
 const ATTEMPTS_TO_OPEN_A_PLUGIN = 1000
 

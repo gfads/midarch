@@ -1,0 +1,56 @@
+version: "3.3"
+services:
+  rmq:
+    image: rabbitmq:3.8.14-alpine
+    hostname: 'rmq'
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          cpus: "0.4"
+          memory: 1024M
+        reservations:
+          cpus: "0.4"
+          memory: 1024M
+
+  server:
+    image: <image.server>
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          cpus: "0.4"
+          memory: 256M
+        reservations:
+          cpus: "0.4"
+          memory: 256M
+    environment:
+      CA_PATH: "/usr/src/app/examples/certs/myCA.pem"
+      CRT_PATH: "/usr/src/app/examples/certs/server.pem"
+      KEY_PATH: "/usr/src/app/examples/certs/server.key"       
+      TIME_TO_START_SERVER: 20
+      INJECTION_INTERVAL: <adaptation.interval>
+
+  client:
+    image: <image.client>
+    deploy:
+      replicas: 1
+      restart_policy:
+        condition: none
+      resources:
+        limits:
+          cpus: "0.4"
+          memory: 256M
+        reservations:
+          cpus: "0.4"
+          memory: 256M
+    environment:
+      CA_PATH: "/usr/src/app/examples/certs/myCA.pem"    
+      <specific.env.client>
+      SAMPLE_SIZE: <sample.size>
+      AVERAGE_WAITING_TIME: <average.waiting.time>
+      TIME_TO_START_CLIENT: 25

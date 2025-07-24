@@ -1,0 +1,20 @@
+Configuration FibonacciDistributedClientMid :=
+   Components
+      fibonacciproxy    : FibonacciProxy
+      requestor         : Requestor
+      marshaller        : Gobmarshaller
+      crh               : CRH<protocol>
+
+   Connectors
+      t1 : Ntoonereqrep
+      t2 : Requestreply
+      t3 : Requestreply
+
+   Attachments
+      fibonacciproxy, t1, requestor
+      requestor, t2, marshaller
+      requestor, t3, crh
+
+   Adaptability
+      <adaptability>
+EndConf

@@ -1,0 +1,17 @@
+Configuration SendFileDistributedServerMid :=
+   Components
+      sendfileinvoker   : SendFileInvoker
+      marshaller2       : Gobmarshaller
+      srh               : SRHQUIC
+
+   Connectors
+      t1 : Requestreply
+      t2 : Requestreply
+
+   Attachments
+        srh,t1,sendfileinvoker
+        sendfileinvoker,t2,marshaller2
+
+   Adaptability
+      None
+EndConf

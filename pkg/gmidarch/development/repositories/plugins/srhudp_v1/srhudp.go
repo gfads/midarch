@@ -192,7 +192,7 @@ func (s SRHUDP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 	size := make([]byte, shared.SIZE_OF_MESSAGE_SIZE, shared.SIZE_OF_MESSAGE_SIZE)
 	binary.LittleEndian.PutUint32(size, uint32(len(msgTemp)))
 
-	//miop := middleware.Jsonmarshaller{}.Unmarshall(msgTemp)
+	//miop := middleware.Gobmarshaller{}.Unmarshall(msgTemp)
 	//return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 	//fmt.Println("SRHUDP_v1 Client:", client.Ip, client.Connection, client.UDPConnection, "Connection is:", conn, "msg.ToAddr is:", msg.ToAddr, "msgTemp is:", miop.Bd.ReqHeader.Operation, miop.Bd.RepBody)
 	_, err := conn.WriteTo(size, &net.UDPAddr{IP: ip, Port: port})
@@ -200,7 +200,7 @@ func (s SRHUDP) I_Send(id string, msg *messages.SAMessage, info *interface{}, re
 		shared.ErrorHandler(shared.GetFunction(), err.Error())
 	}
 
-	//json := middleware.Jsonmarshaller{}
+	//json := middleware.Gobmarshaller{}
 	//unmarshalledMsg := json.Unmarshall(msgTemp)
 	//fmt.Println("<<<<<<<<<<<<  <<<<<<<<<<  <<<<<<<<<  SRHUDP Version 1 adapted => Msg: ", unmarshalledMsg.Bd.RepBody.OperationResult)
 	// send message
@@ -276,6 +276,6 @@ func (s *SRHUDP) handler(info *interface{}, connectionIndex int) {
 
 func (s SRHUDP) isAdapt(msgFromServer []byte) (bool, miop.MiopPacket) {
 	//log.Println("----------------------------------------->", shared.GetFunction(), "CRHTCP Version Not adapted")
-	miop := middleware.Jsonmarshaller{}.Unmarshall(msgFromServer)
+	miop, _ := middleware.Gobmarshaller{}.Unmarshall(msgFromServer)
 	return miop.Bd.ReqHeader.Operation == "ChangeProtocol", miop
 }

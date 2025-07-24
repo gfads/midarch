@@ -1,0 +1,20 @@
+Configuration SendFileDistributedClientMid :=
+   Components
+      sendfileproxy     : SendFileProxy
+      requestor         : Requestor
+      marshaller        : Gobmarshaller
+      crh               : CRHQUIC
+
+   Connectors
+      t1 : Ntoonereqrep
+      t2 : Requestreply
+      t3 : Requestreply
+
+   Attachments
+      sendfileproxy, t1, requestor
+      requestor, t2, marshaller
+      requestor, t3, crh
+
+   Adaptability
+      None
+EndConf

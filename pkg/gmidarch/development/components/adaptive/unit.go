@@ -73,7 +73,7 @@ func (u Unit) I_Initialiseunit(id string, msg *messages.SAMessage, info *interfa
 
 // msg *messages.SAMessage, info [] *interface{}, r *bool
 func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, reset *bool) {
-	lib.PrintlnDebug("-----------------------------------------> Unit.I_Execute::", u.UnitId, "::TypeName:", (*(*info).([]*interface{})[0]).(*component.Component).TypeName, "::msg.Payload", msg.Payload, "::info:", info)
+	// lib.PrintlnDebug("-----------------------------------------> Unit.I_Execute::", u.UnitId, "::TypeName:", (*(*info).([]*interface{})[0]).(*component.Component).TypeName, "::msg.Payload", msg.Payload, "::info:", info)
 	var ok bool
 
 	u.ElemOfUnit, ok = allUnitsType.Load(u.UnitId)
@@ -103,7 +103,7 @@ func (u Unit) I_Execute(id string, msg *messages.SAMessage, info *interface{}, r
 	//engine.EngineImpl{}.Execute(u.ElemOfUnit.(*component.Component), shared.EXECUTE_FOREVER)
 	//fmt.Println(">>>>>>>><<<<<<<<<<<<<>>>>>>>>>>>><<<<<<<<< Unit:", u.UnitId, "TypeName:", elementComponent.TypeName, "executing:", elementComponent.Executing)
 	if elementComponent.Executing == nil || !*elementComponent.Executing {
-		lib.PrintlnDebug("Will execute elementComponent.TypeName:", elementComponent.TypeName)
+		// lib.PrintlnDebug("Will execute elementComponent.TypeName:", elementComponent.TypeName)
 		var executeForever = true
 		elementComponent.ExecuteForever = &executeForever
 		//fmt.Println("Setará executeforever:", elementComponent.TypeName)
@@ -134,12 +134,12 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 
 	if cmd.Cmd != "" && cmd.Cmd != "Nothing" {
 		elementComponent := (*(*info).([]*interface{})[0]).(*component.Component)
-		lib.PrintlnInfo("--------------Unit.I_Adaptunit::", u.UnitId, ":: Adapt ---->", elementComponent.TypeName)
+		// lib.PrintlnInfo("--------------Unit.I_Adaptunit::", u.UnitId, ":: Adapt ---->", elementComponent.TypeName)
 		unitElemType := elementComponent.TypeName //reflect.TypeOf(u.ElemOfUnit).Name()
 		cmdElemType := reflect.ValueOf(cmd.Type).Elem().Type().Name()
 		//log.Println("")
 		//log.Println("")
-		lib.PrintlnInfo("--------------Unit.I_Adaptunit::", u.UnitId, ":: Adapt to ---->", cmdElemType)
+		// lib.PrintlnInfo("--------------Unit.I_Adaptunit::", u.UnitId, ":: Adapt to ---->", cmdElemType)
 		//log.Println("")
 		//log.Println("")
 
@@ -155,7 +155,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				//allUnitsType.LoadOrStore(u.UnitId, cmd.Type)
 				//g := u.changeSelector(cmd.Selector)
 				//allUnitsGraph.LoadOrStore(u.UnitId, g)
-				lib.PrintlnInfo("--------------Unit.I_Adaptunit::unitElemType(from)", unitElemType, ":: cmdElemType(to)", cmdElemType)
+				// lib.PrintlnInfo("--------------Unit.I_Adaptunit::unitElemType(from)", unitElemType, ":: cmdElemType(to)", cmdElemType)
 				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type", cmd.Type)
 				//fmt.Println("Unit.I_Adaptunit::", u.UnitId, "::Unit.Type is", reflect.TypeOf(cmd.Type))
 
@@ -163,49 +163,55 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				var adaptTo string
 				if strings.Contains(cmdElemType, "TCP") {
 					adaptTo = "tcp"
+					// lib.PrintlnInfo("****** Adapt to TCP")
 				} else if strings.Contains(cmdElemType, "UDP") {
 					adaptTo = "udp"
+					// lib.PrintlnInfo("****** Adapt to UDP")
 				} else if strings.Contains(cmdElemType, "TLS") {
 					adaptTo = "tls"
+					// lib.PrintlnInfo("****** Adapt to TLS")
 				} else if strings.Contains(cmdElemType, "QUIC") {
 					adaptTo = "quic"
-					lib.PrintlnInfo("****** Adapt to QUIC")
+					// lib.PrintlnInfo("****** Adapt to QUIC")
 				} else if strings.Contains(cmdElemType, "RPC") {
 					adaptTo = "rpc"
-					lib.PrintlnInfo("****** Adapt to RPC")
+					// lib.PrintlnInfo("****** Adapt to RPC")
 				} else if strings.Contains(cmdElemType, "HTTP2") {
 					adaptTo = "http2"
-					lib.PrintlnInfo("****** Adapt to HTTP2")
+					// lib.PrintlnInfo("****** Adapt to HTTP2")
 				} else if strings.Contains(cmdElemType, "HTTPS") {
 					adaptTo = "https"
-					lib.PrintlnInfo("****** Adapt to HTTPS")
+					// lib.PrintlnInfo("****** Adapt to HTTPS")
 				} else if strings.Contains(cmdElemType, "HTTP") {
 					adaptTo = "http"
-					lib.PrintlnInfo("****** Adapt to HTTP")
+					// lib.PrintlnInfo("****** Adapt to HTTP")
 				}
 
 				var adaptFrom string
 				if strings.Contains(unitElemType, "TCP") {
 					adaptFrom = "tcp"
+					// lib.PrintlnInfo("****** Adapt from TCP")
 				} else if strings.Contains(unitElemType, "UDP") {
 					adaptFrom = "udp"
+					// lib.PrintlnInfo("****** Adapt from UDP")
 				} else if strings.Contains(unitElemType, "TLS") {
 					adaptFrom = "tls"
+					// lib.PrintlnInfo("****** Adapt from TLS")
 				} else if strings.Contains(unitElemType, "QUIC") {
 					adaptFrom = "quic"
-					lib.PrintlnInfo("****** Adapt from QUIC")
+					// lib.PrintlnInfo("****** Adapt from QUIC")
 				} else if strings.Contains(unitElemType, "RPC") {
 					adaptFrom = "rpc"
-					lib.PrintlnInfo("****** Adapt from RPC")
+					// lib.PrintlnInfo("****** Adapt from RPC")
 				} else if strings.Contains(unitElemType, "HTTP2") {
 					adaptFrom = "http2"
-					lib.PrintlnInfo("****** Adapt from HTTP2")
+					// lib.PrintlnInfo("****** Adapt from HTTP2")
 				} else if strings.Contains(unitElemType, "HTTPS") {
 					adaptFrom = "https"
-					lib.PrintlnInfo("****** Adapt from HTTPS")
+					// lib.PrintlnInfo("****** Adapt from HTTPS")
 				} else if strings.Contains(unitElemType, "HTTP") {
 					adaptFrom = "http"
-					lib.PrintlnInfo("****** Adapt from HTTP")
+					// lib.PrintlnInfo("****** Adapt from HTTP")
 				}
 
 				isSRH := strings.Contains(cmdElemType, "SRH")
@@ -216,13 +222,14 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 
 					infoTemp := elementComponent.Info
 					srhInfo := infoTemp.(*messages.SRHInfo)
-					for idx, client := range srhInfo.Clients {
+					for idx, client := range srhInfo.Clients { // TODO dcruzb: probably no protocol use srhInfo.Clients anymore. Verify and remove
 						//fmt.Println("Vai adaptar")
 						// if Client from Connection Pool have a client connected
 						if client.Ip != "" {
 							//fmt.Println("Vai adaptar: IP:", client.Ip)
 							if (adaptFrom == "udp" && client.UDPConnection == nil) ||
 								(adaptFrom == "tcp" && client.Connection == nil) ||
+								(adaptFrom == "tls" && client.Connection == nil) ||
 								(adaptFrom == "quic" && client.QUICStream == nil) {
 								//fmt.Println("Vai adaptar: pulou sem conexão")
 								continue
@@ -233,30 +240,30 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 							msg := &messages.SAMessage{}
 							msg.ToAddr = client.Ip
 							//log.Println("msg.ToAddr:", msg.ToAddr)
-							msg.Payload = middleware.Jsonmarshaller{}.Marshall(miopPacket)
+							msg.Payload = middleware.Gobmarshaller{}.Marshall(miopPacket)
 							// Coordinate the protocol change
 							shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
 						}
 					}
 					if srhInfo.Protocol != nil {
 						for idx, client := range srhInfo.Protocol.GetClients() {
-							fmt.Println("Vai adaptar IP:", (*client).Address())
+							// fmt.Println("Vai adaptar IP:", (*client).Address())
 							// if Client from Connection Pool have a client connected
 							if adaptFrom == "rpc" || adaptFrom == "http" || adaptFrom == "https" || adaptFrom == "http2" || (*client).Address() != "" {
-								fmt.Println("Vai adaptar: IP:", (*client).Address())
+								// fmt.Println("Vai adaptar: IP:", (*client).Address())
 								// if (adaptFrom == "udp" && client.UDPConnection == nil) ||
 								// 	(adaptFrom == "tcp" && client.Connection == nil) ||
 								// 	(adaptFrom == "quic" && client.QUICStream == nil) {
 								// 	//fmt.Println("Vai adaptar: pulou sem conexão")
 								// 	continue
 								// }
-								//fmt.Println("Vai adaptar: entrou AdaptId:", client.AdaptId)
+								// fmt.Println("Vai adaptar: entrou AdaptId:", (*client).AdaptId())
 								(*client).SetAdaptId(idx)
 								miopPacket := miop.CreateReqPacket("ChangeProtocol", []interface{}{adaptTo, (*client).AdaptId()}, (*client).AdaptId()) // idx is the Connection ID
 								msg := &messages.SAMessage{}
 								msg.ToAddr = (*client).Address()
-								//log.Println("msg.ToAddr:", msg.ToAddr)
-								msg.Payload = middleware.Jsonmarshaller{}.Marshall(miopPacket)
+								// log.Println("msg.ToAddr:", msg.ToAddr)
+								msg.Payload = middleware.Gobmarshaller{}.Marshall(miopPacket)
 								// Coordinate the protocol change
 								shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Send", msg, &elementComponent.Info, &reset)
 							}
@@ -272,14 +279,14 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				//}
 
 				*elementComponent.ExecuteForever = false
-				for *elementComponent.Executing == true {
-					lib.PrintlnInfo("Awaiting to stop executing")
+				for *elementComponent.Executing {
+					// lib.PrintlnInfo("Awaiting to stop executing")
 					time.Sleep(200 * time.Millisecond)
 				}
-				lib.PrintlnInfo("Execution stopped")
-				lib.PrintlnInfo("****** elementComponent.TypeName:", elementComponent.TypeName)
-				lib.PrintlnInfo("****** cmdElemType:", cmdElemType)
-				lib.PrintlnInfo("****** adaptTo:", adaptTo)
+				// lib.PrintlnInfo("Execution stopped")
+				// lib.PrintlnInfo("****** elementComponent.TypeName:", elementComponent.TypeName)
+				// lib.PrintlnInfo("****** cmdElemType:", cmdElemType)
+				lib.PrintlnInfo("****** adapt From:", adaptFrom, "=> To:", adaptTo)
 				//time.Sleep(6 * time.Second)
 				elementComponent.Type = cmd.Type
 				elementComponent.TypeName = cmdElemType
@@ -287,7 +294,7 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 				if isCRH {
 					//time.Sleep(2000 * time.Millisecond)
 					//fmt.Println("Unit.I_Adaptunit:: 2 seconds passed", u.UnitId) //, "::info:", elementComponent)
-					lib.PrintlnInfo("Will close CRH connections")
+					// lib.PrintlnInfo("Will close CRH connections")
 					infoTemp := elementComponent.Info
 					crhInfo := infoTemp.(messages.CRHInfo)
 					for idx, protocol := range crhInfo.Protocols {
@@ -309,22 +316,22 @@ func (u Unit) I_Adaptunit(id string, msg *messages.SAMessage, info *interface{},
 						stream.Close()
 					}
 					// }
-					lib.PrintlnInfo("CRH connections closed")
+					// lib.PrintlnInfo("CRH connections closed")
 					//shared.MyInvoke(elementComponent.Type, elementComponent.Id, "I_Process", msg, &elementComponent.Info, reset)
 				} else if isSRH {
 					infoTemp := elementComponent.Info
 					srhInfo := infoTemp.(*messages.SRHInfo)
 					for len(srhInfo.Clients) > 0 {
-						lib.PrintlnInfo("Will initialize:", srhInfo.Clients[len(srhInfo.Clients)-1].Ip)
+						// lib.PrintlnInfo("Will initialize:", srhInfo.Clients[len(srhInfo.Clients)-1].Ip)
 						tmpClient := srhInfo.Clients[len(srhInfo.Clients)-1]
 						srhInfo.Clients = messages.Remove(srhInfo.Clients, len(srhInfo.Clients)-1)
 						tmpClient.Initialize()
-						lib.PrintlnInfo("Initialized")
+						// lib.PrintlnInfo("Initialized")
 					}
 					if srhInfo.Protocol != nil {
-						lib.PrintlnInfo("Will stop server")
+						// lib.PrintlnInfo("Will stop server")
 						srhInfo.Protocol.StopServer()
-						lib.PrintlnInfo("Server stoped")
+						// lib.PrintlnInfo("Server stoped")
 						srhInfo.Protocol = nil
 					}
 				}

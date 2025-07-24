@@ -5,6 +5,7 @@ import (
 
 	"github.com/gfads/midarch/examples/calculatordistributed/externalcomponents"
 	"github.com/gfads/midarch/examples/fibonaccidistributed/fibonacciProxy"
+	sendFileProxy "github.com/gfads/midarch/examples/sendfiledistributed/sendfileProxy"
 	"github.com/gfads/midarch/pkg/gmidarch/development/generic"
 	"github.com/gfads/midarch/pkg/gmidarch/development/messages"
 	"github.com/gfads/midarch/pkg/shared"
@@ -15,7 +16,9 @@ import (
 var ProxiesRepo = map[string]generic.Proxy{ // Update for each new proxy
 	reflect.TypeOf(Namingproxy{}).Name():                        &Namingproxy{},
 	reflect.TypeOf(externalcomponents.Calculatorproxy{}).Name(): &externalcomponents.Calculatorproxy{},
-	reflect.TypeOf(fibonacciProxy.FibonacciProxy{}).Name():      &fibonacciProxy.FibonacciProxy{}}
+	reflect.TypeOf(fibonacciProxy.FibonacciProxy{}).Name():      &fibonacciProxy.FibonacciProxy{},
+	reflect.TypeOf(sendFileProxy.SendFileProxy{}).Name():        &sendFileProxy.SendFileProxy{},
+}
 
 // Internal channels
 var ChOut, ChIn chan messages.SAMessage
@@ -59,6 +62,7 @@ func (Namingproxy) Register(_p1 string, _p2 interface{}) bool {
 	port := aux.FieldByName("Port").String()
 	host := aux.FieldByName("Host").String()
 	aor := messages.AOR{Host: host, Port: port, Id: 123456, ProxyName: reflect.TypeOf(_p2).Name()} // TODO
+	// log.Println("NamingProxy::Register::AOR: ", aor)
 	_params := []interface{}{_p1, aor}
 
 	_functionalRequest := messages.FunctionalRequest{Op: "Register", Params: _params}
@@ -91,6 +95,7 @@ func (p Namingproxy) Lookup(_p1 string) (generic.Proxy, bool) {
 	aor := response.Payload.(messages.FunctionalReply).Rep.(map[string]interface{})
 	host := aor["host"].(string)
 	port := aor["port"].(string)
+	// log.Println("NamingProxy::Lookup::AOR: ", aor)
 	proxy := ProxiesRepo[aor["proxy"].(string)] // TODO dcruzb: Remove ProxiesRepo and ask for the Proxy in params,
 	if proxy == nil {
 		shared.ErrorHandler(shared.GetFunction(), "Proxy("+aor["proxy"].(string)+") not found!!")
